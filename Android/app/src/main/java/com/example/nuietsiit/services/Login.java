@@ -50,6 +50,7 @@ public class Login extends AppCompatActivity {
                 if (usuario.equals("") || correo.equals("") || password.equals("")) {
                     Toast.makeText(Login.this, "Por favor, rellena todos los datos", Toast.LENGTH_LONG).show();
                 } else {
+                    System.out.println(BD.introducirDatos(usuario, correo, password));
                     if (!BD.comprobarSiExisteCorreo(correo)) {
                         Toast.makeText(Login.this, "Usuario incorrecto", Toast.LENGTH_LONG).show();
                     } else if (!BD.comprobarSiExisteUsuario(correo, password)) {
@@ -57,6 +58,10 @@ public class Login extends AppCompatActivity {
                     } else {
                         // Iniciar sesión y pasar a la pantalla principal
                         Intent intent = new Intent(Login.this, MenuPrincipal.class);
+
+                        // Pasamos datos a siguiente pantalla
+                        intent.putExtra("CORREO", correo);
+                        intent.putExtra("USUARIO", usuario);
                         startActivity(intent);
                     }
                 }

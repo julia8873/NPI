@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        android:gravity="bottom|center_horizontal">
+        android:gravity="bottom|center_horizontal"
+        android:background="#FFFFFF">
 
         <!-- Logo con margen superior para empujar todo hacia abajo -->
 

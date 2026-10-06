@@ -43,7 +43,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // si -1 -> error
         return resultado != -1;
-
     }
 
     // comprobar si existe el correo, solo uno por usuario

@@ -1,6 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center_horizontal"
+    android:background="#FFFFFF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:alignmentMode="alignMargins"
+        android:columnOrderPreserved="false"
+        android:layout_marginTop="20dp">
+
+    <!-- Mensaje de bienvenida -->
+        <TextView
+            android:id="@+id/tvBienvenida"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="¡Bienvenido!"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="15dp" />
+
+        <ImageView
+            android:id="@+id/ivLogoo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/logo" />
+
+    </GridLayout>
+
+    <Button
+        android:id="@+id/btnNoticias"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="40dp"
+        app:backgroundTint="@null"
+        android:background="@drawable/boton_redondeado"
+        android:text="Noticias" />
+
+    <!-- Contenedor con 2 columnas -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="3"
+        android:alignmentMode="alignMargins"
+        android:columnOrderPreserved="false"
+        android:layout_marginTop="30dp">
+
+        <Button
+            android:id="@+id/btnMapa"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Mapa" />
+
+        <Button
+            android:id="@+id/btnActividades"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Actividades" />
+
+        <Button
+            android:id="@+id/btnAsignaturas"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Asignaturas" />
+
+        <Button
+            android:id="@+id/btnProfesorado"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Profesorado" />
+
+        <Button
+            android:id="@+id/btnSecretaria"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Secretaría" />
+
+        <Button
+            android:id="@+id/btnComedores"
+            android:layout_width="0dp"
+            android:layout_height="110dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/boton_redondeado"
+            android:text="Comedores" />
+
+    </GridLayout>
+
+</LinearLayout>
