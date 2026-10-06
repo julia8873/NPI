@@ -1,0 +1,17 @@
+# Archivos de entorno y configuraciones locales
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+
+# Carpetas de compilación
+/build/
+*/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Archivos de claves (por seguridad nunca se suben)
+*.jks
+*.keystore
