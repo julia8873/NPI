@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".services.MenuPrincipal" />
+        <activity android:name=".services.SignUp" />
         <activity android:name=".services.Noticias" />
         <activity android:name=".services.Mapa" />
         <activity android:name=".services.Actividades" />

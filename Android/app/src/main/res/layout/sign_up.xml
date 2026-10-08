@@ -5,70 +5,76 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="24dp"
-        android:gravity="bottom|center_horizontal"
         android:background="#FFFFFF">
 
         <!-- Logo con margen superior para empujar todo hacia abajo -->
 
         <ImageView
             android:id="@+id/ivLogo"
-            android:layout_width="240dp"
-            android:layout_height="240dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="50dp"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="70dp"
             android:contentDescription="Logo de la aplicación"
             android:src="@drawable/logo" />
 
-        <EditText
-            android:id="@+id/etNombre"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nombre"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#CCCCCC"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="12dp" />
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
 
-        <EditText
-            android:id="@+id/etCorreo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Correo"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#CCCCCC"
-            android:inputType="textEmailAddress"
-            android:layout_marginBottom="12dp" />
+            <EditText
+                android:id="@+id/etNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre"
+                android:textColor="#000000"
+                android:textColorHint="#CCCCCC"
+                android:inputType="textEmailAddress"
+                android:layout_marginBottom="12dp" />
 
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Contraseña"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#CCCCCC"
-            android:inputType="textPassword"
-            android:layout_marginBottom="40dp" />
+            <EditText
+                android:id="@+id/etCorreo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Correo"
+                android:textColor="#000000"
+                android:textColorHint="#CCCCCC"
+                android:inputType="textEmailAddress"
+                android:layout_marginBottom="12dp" />
 
-        <!-- Botón con bordes redondeados -->
-        <Button
-            android:id="@+id/btnCrearCuenta"
-            android:layout_width="wrap_content"
-            android:paddingStart="70dp"
-            android:paddingEnd="70dp"
-            android:layout_height="50dp"
-            android:text="Crear cuenta"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/boton_redondeado"
-            app:backgroundTint="@null"
-            android:layout_marginBottom="30dp" />
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Contraseña"
+                android:textColor="#000000"
+                android:textColorHint="#CCCCCC"
+                android:inputType="textPassword"
+                android:layout_marginBottom="40dp" />
 
-
-    </LinearLayout>
+            <!-- Botón con bordes redondeados -->
+            <Button
+                android:id="@+id/btnCrearCuenta"
+                android:layout_width="wrap_content"
+                android:paddingStart="70dp"
+                android:paddingEnd="70dp"
+                android:layout_height="50dp"
+                android:text="Crear cuenta"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="@drawable/boton_redondeado"
+                app:backgroundTint="@null"
+                android:layout_marginBottom="220dp" />
+        </LinearLayout>
+    </RelativeLayout>
 </ScrollView>

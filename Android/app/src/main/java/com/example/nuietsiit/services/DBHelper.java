@@ -63,6 +63,10 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    // comprobar si los datos introducidos son correctos
+    // Obtener todos los usuarios registrados
+    public Cursor obtenerTodosLosUsuarios() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT correoUsuario, nombreUsuario FROM usuarios", null);
+    }
 
 }

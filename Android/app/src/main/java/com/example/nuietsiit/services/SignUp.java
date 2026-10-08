@@ -1,7 +1,9 @@
 package com.example.nuietsiit.services;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,7 +53,7 @@ public class SignUp extends AppCompatActivity {
                     if (BD.comprobarSiExisteCorreo(correo)) {
                         Toast.makeText(SignUp.this, "Ya existe una cuenta asociado a este correo", Toast.LENGTH_LONG).show();
                     } else {
-                        BD.introducirDatos(nombre, correo, password);
+                        BD.introducirDatos(correo, nombre, password);
 
                         // Iniciar sesión y pasar a la pantalla principal
                         Intent intent = new Intent(SignUp.this, MenuPrincipal.class);
