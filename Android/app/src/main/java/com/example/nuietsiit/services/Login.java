@@ -15,8 +15,8 @@ import com.example.nuietsiit.R;
 public class Login extends AppCompatActivity {
 
     // Declaración de los componentes de la interfaz de usuario
-    EditText etUsuario, etCorreo, etPassword;
-    Button btnLogin;
+    EditText etCorreo, etPassword;
+    Button btnLogin, btnSignUp;
 
 
     // Instancia de la clase Helper para gestionar la base de datos SQLite
@@ -31,7 +31,6 @@ public class Login extends AppCompatActivity {
         BD = new DBHelper(this);
 
         // Vinculación de las variables de Java con los elementos del archivo de diseño XML
-        etUsuario = findViewById(R.id.etUsuario);
         etCorreo = findViewById(R.id.etCorreo);
         etPassword = findViewById(R.id.etPassword);
 
@@ -40,17 +39,15 @@ public class Login extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String usuario, correo, password;
+                String correo, password;
 
                 // Obtención del texto introducido por el usuario
-                usuario = etUsuario.getText().toString();
                 correo = etCorreo.getText().toString();
                 password = etPassword.getText().toString();
 
-                if (usuario.equals("") || correo.equals("") || password.equals("")) {
+                if (correo.equals("") || password.equals("")) {
                     Toast.makeText(Login.this, "Por favor, rellena todos los datos", Toast.LENGTH_LONG).show();
                 } else {
-                    System.out.println(BD.introducirDatos(usuario, correo, password));
                     if (!BD.comprobarSiExisteCorreo(correo)) {
                         Toast.makeText(Login.this, "Usuario incorrecto", Toast.LENGTH_LONG).show();
                     } else if (!BD.comprobarSiExisteUsuario(correo, password)) {
@@ -61,7 +58,6 @@ public class Login extends AppCompatActivity {
 
                         // Pasamos datos a siguiente pantalla
                         intent.putExtra("CORREO", correo);
-                        intent.putExtra("USUARIO", usuario);
                         startActivity(intent);
                     }
                 }
@@ -69,5 +65,16 @@ public class Login extends AppCompatActivity {
 
         });
 
+        // Configuración del evento de clic para el botón de inicio de sesión
+        btnSignUp = findViewById(R.id.btnSignUp);
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Pasamos a la pantalla de crear cuenta
+                Intent intent = new Intent(Login.this, SignUp.class);
+                startActivity(intent);
+            }
+
+        });
     }
 }
