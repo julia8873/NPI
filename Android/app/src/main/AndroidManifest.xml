@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NUIETSIIT">
         <activity
-            android:name=".services.Login"
+            android:name=".activities.auth.Login"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -21,15 +21,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".services.MenuPrincipal" />
-        <activity android:name=".services.SignUp" />
-        <activity android:name=".services.Noticias" />
-        <activity android:name=".services.Mapa" />
-        <activity android:name=".services.Actividades" />
-        <activity android:name=".services.Asignaturas" />
-        <activity android:name=".services.Profesorado" />
-        <activity android:name=".services.Secretaria" />
-        <activity android:name=".services.Comedores" />
+        <activity android:name=".activities.main.MenuPrincipal" />
+        <activity android:name=".activities.auth.SignUp" />
+        <activity android:name=".activities.main.AjustesCuenta" />
+        <activity android:name=".activities.secciones.Noticias" />
+        <activity android:name=".activities.secciones.Mapa" />
+        <activity android:name=".activities.secciones.Actividades" />
+        <activity android:name=".activities.secciones.Asignaturas" />
+        <activity android:name=".activities.secciones.Profesorado" />
+        <activity android:name=".activities.secciones.Secretaria" />
+        <activity android:name=".activities.secciones.Comedores" />
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.example.nuietsiit.services;
+package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
 import android.content.Context;

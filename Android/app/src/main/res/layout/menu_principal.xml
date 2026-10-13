@@ -1,123 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center_horizontal"
-    android:background="#FFFFFF">
+    android:fillViewport="true">
 
-
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
-        android:alignmentMode="alignMargins"
-        android:columnOrderPreserved="false"
-        android:layout_marginTop="20dp">
+        android:background="#FFFFFF"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <!-- Mensaje de bienvenida -->
-        <TextView
-            android:id="@+id/tvBienvenida"
-            android:layout_width="wrap_content"
+        <!-- Cabecera: Texto de Bienvenida e Icono -->
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:text="¡Bienvenido!"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="15dp" />
+            android:layout_marginTop="20dp"
+            android:paddingHorizontal="8dp">
 
-        <ImageView
-            android:id="@+id/ivLogoo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/logo" />
+            <TextView
+                android:id="@+id/tvBienvenida"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/ivIcono"
+                android:text="¡Bienvenido!"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-    </GridLayout>
+            <ImageView
+                android:id="@+id/ivIcono"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:contentDescription="Icono de perfil"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:src="@drawable/icono" />
+        </RelativeLayout>
 
-    <Button
-        android:id="@+id/btnNoticias"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="40dp"
-        app:backgroundTint="@null"
-        android:background="@drawable/boton_redondeado"
-        android:text="Noticias" />
+        <!-- Contenedor del slide de Noticias -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="40dp">
 
-    <!-- Contenedor con 2 columnas -->
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="2"
-        android:rowCount="3"
-        android:alignmentMode="alignMargins"
-        android:columnOrderPreserved="false"
-        android:layout_marginTop="30dp">
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpNoticias"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-        <Button
-            android:id="@+id/btnMapa"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Mapa" />
+        </FrameLayout>
 
-        <Button
-            android:id="@+id/btnActividades"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Actividades" />
+        <!-- Cuadrícula con las 6 secciones principales -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:alignmentMode="alignMargins"
+            android:columnCount="2"
+            android:columnOrderPreserved="false"
+            android:rowCount="3">
 
-        <Button
-            android:id="@+id/btnAsignaturas"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Asignaturas" />
+            <Button
+                android:id="@+id/btnMapa"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Mapa"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
 
-        <Button
-            android:id="@+id/btnProfesorado"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Profesorado" />
+            <Button
+                android:id="@+id/btnActividades"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Actividades"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
 
-        <Button
-            android:id="@+id/btnSecretaria"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Secretaría" />
+            <Button
+                android:id="@+id/btnAsignaturas"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Asignaturas"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
 
-        <Button
-            android:id="@+id/btnComedores"
-            android:layout_width="0dp"
-            android:layout_height="110dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:backgroundTint="@null"
-            android:background="@drawable/boton_redondeado"
-            android:text="Comedores" />
+            <Button
+                android:id="@+id/btnProfesorado"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Profesorado"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
 
-    </GridLayout>
+            <Button
+                android:id="@+id/btnSecretaria"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Secretaría"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
 
-</LinearLayout>
+            <Button
+                android:id="@+id/btnComedores"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Comedores"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
+
+        </GridLayout>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Icono de cuenta -->
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginBottom="70dp"
+            android:contentDescription="Icono cuenta"
+            android:src="@drawable/icono" />
+
+        <!-- Espaciador flexible -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Campo de entrada: Cambiar Nombre -->
+        <EditText
+            android:id="@+id/etNombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="12dp"
+            android:hint="Cambiar Nombre"
+            android:inputType="textPersonName|textCapWords"
+            android:textColor="#000000"
+            android:textColorHint="#CCCCCC" />
+
+        <!-- Campo de entrada: Cambiar Contraseña -->
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="40dp"
+            android:hint="Cambiar Contraseña"
+            android:inputType="textPassword"
+            android:textColor="#000000"
+            android:textColorHint="#CCCCCC" />
+
+        <!-- Botón: Guardar cambios -->
+        <Button
+            android:id="@+id/btnGuardarCambios"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="90dp"
+            android:background="@drawable/boton_redondeado"
+            android:paddingHorizontal="58dp"
+            android:text="Guardar cambios"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Botón: Cerrar sesión -->
+        <Button
+            android:id="@+id/btnLogOut"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="100dp"
+            android:background="@drawable/boton_redondeado"
+            android:paddingHorizontal="70dp"
+            android:text="Cerrar sesión"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+    </LinearLayout>
+</ScrollView>
