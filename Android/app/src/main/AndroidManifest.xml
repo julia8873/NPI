@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NUIETSIIT">
         <activity
-            android:name=".activities.auth.Login"
+            android:name=".activities.main.MenuPrincipal"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.main.MenuPrincipal" />
+        <activity android:name=".activities.auth.Login" />
         <activity android:name=".activities.auth.SignUp" />
         <activity android:name=".activities.main.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
