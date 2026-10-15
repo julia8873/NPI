@@ -9,7 +9,6 @@ import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
-import com.example.nuietsiit.util.TextoUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,25 +30,15 @@ public class SecretariaDB {
         this.dbHelper = dbHelper;
     }
 
-    // categoria null = todas; texto null/vacío = sin filtro de texto.
-    // Cada palabra del texto (normalizado, sin tildes) debe aparecer en textoBusqueda.
-    public List<Tramite> getTramites(String categoria, String texto) {
-        StringBuilder where = new StringBuilder("1=1");
-        List<String> args = new ArrayList<>();
-        if (categoria != null) {
-            where.append(" AND categoria = ?");
-            args.add(categoria);
-        }
-        for (String palabra : TextoUtil.normalizar(texto).split("\\s+")) {
-            if (palabra.isEmpty()) continue;
-            where.append(" AND textoBusqueda LIKE ?");
-            args.add("%" + palabra + "%");
-        }
+    // categoria null = todas. El filtro de texto se hace en Java con BuscadorTolerante
+    public List<Tramite> getTramites(String categoria) {
+        String where = categoria != null ? " WHERE categoria = ?" : "";
+        String[] args = categoria != null ? new String[]{categoria} : new String[0];
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<Tramite> tramites = new ArrayList<>();
-        try (Cursor c = db.rawQuery("SELECT * FROM PROCEDIMIENTO WHERE " + where +
-                " ORDER BY nombreProcedimiento", args.toArray(new String[0]))) {
+        try (Cursor c = db.rawQuery("SELECT * FROM PROCEDIMIENTO" + where +
+                " ORDER BY nombreProcedimiento", args)) {
             while (c.moveToNext()) tramites.add(leerTramite(c));
         }
         return tramites;
