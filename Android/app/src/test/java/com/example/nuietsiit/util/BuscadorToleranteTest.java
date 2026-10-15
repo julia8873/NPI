@@ -62,6 +62,16 @@ public class BuscadorToleranteTest {
     }
 
     @Test
+    public void primerasLetrasYaFiltran() {
+        // con 1–2 letras salen solo los que tienen una palabra que empieza así
+        BuscadorTolerante.Busqueda<String[]> b = buscar("ma");
+        assertEquals(2, b.elementos.size());
+        assertNull(b.mostrandoPara);
+        assertEquals("Beca de colaboración", primero("be"));
+        assertEquals(1, buscar("be").elementos.size());
+    }
+
+    @Test
     public void sinonimosDePalabrasClave() {
         assertEquals("Reconocimiento y transferencia de créditos", primero("convalidar"));
         assertEquals("Cambio de grupo", primero("permuta"));
@@ -107,5 +117,9 @@ public class BuscadorToleranteTest {
                 BuscadorTolerante.clavefonetica("conbalidasion"));
         assertEquals(BuscadorTolerante.clavefonetica("queso"), BuscadorTolerante.clavefonetica("keso"));
         assertEquals(BuscadorTolerante.clavefonetica("hola"), BuscadorTolerante.clavefonetica("ola"));
+        // "gue/gui" es g suave, "ge/gi" suena a j
+        assertEquals("gion", BuscadorTolerante.clavefonetica("guion"));
+        assertEquals(BuscadorTolerante.clavefonetica("jion"), BuscadorTolerante.clavefonetica("gion"));
+        assertTrue(!BuscadorTolerante.clavefonetica("guion").equals(BuscadorTolerante.clavefonetica("jion")));
     }
 }

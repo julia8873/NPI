@@ -87,8 +87,9 @@ public final class BuscadorTolerante {
                 .replace("z", "s")
                 .replace("v", "b")
                 .replace("w", "b")
-                .replaceAll("gu(?=[ei])", "g")
+                .replaceAll("gu(?=[ei])", "Ğ")   // "gue/gui" = g suave: marcador para que no pase a j
                 .replaceAll("g(?=[ei])", "j")
+                .replace("Ğ", "g")
                 .replace("x", "ks");
     }
 
@@ -120,11 +121,12 @@ public final class BuscadorTolerante {
         return d[a.length()][b.length()];
     }
 
-    // 3 exacta · 2 prefijo (>=3 letras) · 1 aproximada; los dos primeros también sobre la clave fonética
+    // 3 exacta · 2 prefijo · 1 aproximada; los dos primeros también sobre la clave fonética (prefijo fonético >=3 letras)
+    // El prefijo literal vale con cualquier longitud para que al empezar a escribir ("ma") ya salgan resultados.
     // devuelve {puntos, exacta(0/1)}
     private static int[] puntuarPalabra(Palabra q, Palabra d) {
         if (q.raw.equals(d.raw)) return new int[]{3, 1};
-        if (q.raw.length() >= 3 && d.raw.startsWith(q.raw)) return new int[]{2, 1};
+        if (d.raw.startsWith(q.raw)) return new int[]{2, 1};
         if (q.clave.equals(d.clave)) return new int[]{3, 0};
         if (q.clave.length() >= 3 && d.clave.startsWith(q.clave)) return new int[]{2, 0};
         if (distancia(q.clave, d.clave) <= toleranciaDistancia(q.clave.length())) return new int[]{1, 0};
@@ -151,11 +153,12 @@ public final class BuscadorTolerante {
         for (Palabra q : consulta) {
             int[] n = mejor(q, enNombre);
             int[] t = mejor(q, enTexto);
-            int[] elegido = n[0] * 2 >= t[0] ? new int[]{n[0] * 2, n[1]} : t; // x2 si está en el nombre
-            if (elegido[0] > 0) {
-                puntos += elegido[0];
+            int p = Math.max(n[0] * 2, t[0]); // x2 si está en el nombre
+            if (p > 0) {
+                puntos += p;
                 coincidentes++;
-                exactas += elegido[1];
+                // exacta si coincide literalmente en el nombre o en el texto, aunque puntúe más la otra
+                if ((n[0] > 0 && n[1] == 1) || (t[0] > 0 && t[1] == 1)) exactas++;
             }
         }
         return new Puntuacion(puntos, coincidentes, exactas);
@@ -172,8 +175,7 @@ public final class BuscadorTolerante {
 
     // Sustituye cada palabra sin coincidencia exacta por la más cercana del vocabulario (distancia <= tolerancia + extra
     // sobre la clave fonética). null si no cambia nada.
-    static String sugerir(List<String> consulta, Set<String> vocabulario, int extra) {
-        List<Palabra> vocab = comoPalabras(new ArrayList<>(vocabulario));
+    private static String sugerir(List<String> consulta, List<Palabra> vocab, int extra) {
         List<String> resultado = new ArrayList<>();
         boolean cambia = false;
         for (String q : consulta) {
@@ -207,18 +209,20 @@ public final class BuscadorTolerante {
         private final List<T> elementos;
         private final List<List<Palabra>> nombres = new ArrayList<>();
         private final List<List<Palabra>> textos = new ArrayList<>();
-        private final Set<String> vocabulario = new LinkedHashSet<>();
+        private final List<Palabra> vocabulario; // palabras distintas, para las sugerencias
 
         Indice(List<T> elementos, Function<T, String> nombre, Function<T, String> texto) {
             this.elementos = elementos;
+            Set<String> distintas = new LinkedHashSet<>();
             for (T e : elementos) {
                 List<String> pn = palabras(nombre.apply(e));
                 List<String> pt = palabras(texto.apply(e));
-                vocabulario.addAll(pn);
-                vocabulario.addAll(pt);
+                distintas.addAll(pn);
+                distintas.addAll(pt);
                 nombres.add(comoPalabras(pn));
                 textos.add(comoPalabras(pt));
             }
+            vocabulario = comoPalabras(new ArrayList<>(distintas));
         }
 
         /**

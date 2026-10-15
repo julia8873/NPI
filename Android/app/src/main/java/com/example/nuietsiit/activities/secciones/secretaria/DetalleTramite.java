@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -53,11 +54,12 @@ public class DetalleTramite extends AppCompatActivity {
         mostrarChipPlazo(tramite);
         mostrarDocumentos(documentos);
 
-        // TODO tarea 5: abrir PasosTramite; tarea 6: CitaPrevia (con el motivo ya elegido); tarea 7: SolicitudTramite
+        // TODO tarea 6: CitaPrevia (con el motivo ya elegido); tarea 7: SolicitudTramite
         Button btnPasos = findViewById(R.id.btnPasos);
         btnPasos.setText("Ver pasos (" + pasos.size() + ")");
         btnPasos.setEnabled(!pasos.isEmpty());
-        btnPasos.setOnClickListener(v -> proximamente());
+        btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
+                .putExtra("idProcedimiento", tramite.id)));
         findViewById(R.id.btnPedirCita).setOnClickListener(v -> proximamente());
 
         Button btnSolicitar = findViewById(R.id.btnSolicitar);
