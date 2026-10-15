@@ -264,13 +264,20 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.execSQL(
             "CREATE TABLE LIBRO (" +
-            "  idLibro              INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "  titulo               TEXT NOT NULL," +
-            "  autores              TEXT NOT NULL," +
-            "  isbn                 TEXT NOT NULL UNIQUE," +
-            "  enlaceCatalogo       TEXT," +
-            "  disponibleBiblioteca INTEGER NOT NULL CHECK (disponibleBiblioteca IN (0,1))," +
-            "  ubicacionBiblioteca  TEXT" +
+            "  idLibro               INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  titulo                TEXT NOT NULL," +
+            "  autores               TEXT NOT NULL," +
+            "  isbn                  TEXT NOT NULL UNIQUE," +   // ISBN-13 sin guiones
+            "  editorial             TEXT," +
+            "  anioPublicacion       INTEGER," +
+            "  edicion               TEXT," +
+            "  enlaceCatalogo        TEXT," +
+            "  ejemplaresTotales     INTEGER NOT NULL CHECK (ejemplaresTotales >= 0)," +
+            "  ejemplaresDisponibles INTEGER NOT NULL CHECK (ejemplaresDisponibles BETWEEN 0 AND ejemplaresTotales)," +
+            "  signatura             TEXT," +
+            "  ubicacion             TEXT," +
+            "  portada               TEXT," +                   // nombre de drawable
+            "  textoBusqueda         TEXT NOT NULL" +            // título+autores+editorial normalizados
             ")"
         );
 
@@ -477,12 +484,15 @@ public class DBHelper extends SQLiteOpenHelper {
             "  idProcedimiento     INTEGER PRIMARY KEY AUTOINCREMENT," +
             "  nombreProcedimiento TEXT NOT NULL," +
             "  categoria           TEXT NOT NULL CHECK (categoria IN " +
-            "    ('matricula','titulos','reconocimiento_creditos','convocatorias','otro'))," +
+            "    ('matricula','titulos','reconocimiento_creditos','convocatorias','certificados','otro'))," +
             "  descripcion         TEXT NOT NULL," +
             "  requisitos          TEXT," +
             "  plazosInfo          TEXT," +
-            "  enlaceSolicitud     TEXT," +
-            "  enlaceCita          TEXT" +
+            "  plazoInicio         TEXT," +                     // ISO yyyy-MM-dd
+            "  plazoFin            TEXT," +
+            "  solicitudOnline     INTEGER NOT NULL DEFAULT 1," + // 0 = solo presencial (con cita previa)
+            "  palabrasClave       TEXT," +                     // sinónimos (búsqueda por texto y por voz)
+            "  textoBusqueda       TEXT NOT NULL" +             // nombre+palabrasClave+descripción normalizados
             ")"
         );
 
@@ -490,18 +500,60 @@ public class DBHelper extends SQLiteOpenHelper {
             "CREATE TABLE PROCEDIMIENTO_PASO (" +
             "  idProcedimiento INTEGER NOT NULL," +
             "  orden           INTEGER NOT NULL," +
+            "  tituloPaso      TEXT NOT NULL," +
             "  descripcionPaso TEXT NOT NULL," +
             "  PRIMARY KEY (idProcedimiento, orden)," +
             "  FOREIGN KEY (idProcedimiento) REFERENCES PROCEDIMIENTO(idProcedimiento)" +
             ")"
         );
 
+        // documentos que el usuario tiene que fotografiar al solicitar
         db.execSQL(
             "CREATE TABLE PROCEDIMIENTO_DOCUMENTO (" +
             "  idDocumento     INTEGER PRIMARY KEY AUTOINCREMENT," +
             "  idProcedimiento INTEGER NOT NULL," +
             "  nombreDocumento TEXT NOT NULL," +
-            "  url             TEXT NOT NULL," +
+            "  descripcion     TEXT," +
+            "  obligatorio     INTEGER NOT NULL DEFAULT 1," +
+            "  FOREIGN KEY (idProcedimiento) REFERENCES PROCEDIMIENTO(idProcedimiento)" +
+            ")"
+        );
+
+        // estado (Enviada / En revisión / Resuelta) se deriva de fechaEnvio; código = "SOL-" + id
+        db.execSQL(
+            "CREATE TABLE SOLICITUD (" +
+            "  idSolicitud     INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  correoUsuario   TEXT NOT NULL," +
+            "  idProcedimiento INTEGER NOT NULL," +
+            "  fechaEnvio      TEXT NOT NULL," +                // ISO yyyy-MM-ddTHH:mm:ss
+            "  observaciones   TEXT," +
+            "  rutaFirma       TEXT," +                         // PNG en getFilesDir()/secretaria/
+            "  FOREIGN KEY (correoUsuario)   REFERENCES ESTUDIANTE(correoEstudiante)," +
+            "  FOREIGN KEY (idProcedimiento) REFERENCES PROCEDIMIENTO(idProcedimiento)" +
+            ")"
+        );
+
+        db.execSQL(
+            "CREATE TABLE SOLICITUD_DOCUMENTO (" +
+            "  idSolicitud INTEGER NOT NULL," +
+            "  idDocumento INTEGER NOT NULL," +
+            "  rutaFoto    TEXT NOT NULL," +
+            "  PRIMARY KEY (idSolicitud, idDocumento)," +
+            "  FOREIGN KEY (idSolicitud) REFERENCES SOLICITUD(idSolicitud)," +
+            "  FOREIGN KEY (idDocumento) REFERENCES PROCEDIMIENTO_DOCUMENTO(idDocumento)" +
+            ")"
+        );
+
+        // código = "CITA-" + id
+        db.execSQL(
+            "CREATE TABLE CITA (" +
+            "  idCita          INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  correoUsuario   TEXT NOT NULL," +
+            "  idProcedimiento INTEGER," +                      // NULL = consulta general
+            "  fecha           TEXT NOT NULL," +                // ISO yyyy-MM-dd
+            "  hora            TEXT NOT NULL," +                // HH:mm
+            "  estado          TEXT NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa','cancelada'))," +
+            "  FOREIGN KEY (correoUsuario)   REFERENCES ESTUDIANTE(correoEstudiante)," +
             "  FOREIGN KEY (idProcedimiento) REFERENCES PROCEDIMIENTO(idProcedimiento)" +
             ")"
         );
@@ -551,6 +603,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS ANUNCIO_ASIGNATURA");
         db.execSQL("DROP TABLE IF EXISTS ANUNCIO_GENERAL");
+        db.execSQL("DROP TABLE IF EXISTS CITA");
+        db.execSQL("DROP TABLE IF EXISTS SOLICITUD_DOCUMENTO");
+        db.execSQL("DROP TABLE IF EXISTS SOLICITUD");
         db.execSQL("DROP TABLE IF EXISTS PROCEDIMIENTO_DOCUMENTO");
         db.execSQL("DROP TABLE IF EXISTS PROCEDIMIENTO_PASO");
         db.execSQL("DROP TABLE IF EXISTS PROCEDIMIENTO");

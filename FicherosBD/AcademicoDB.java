@@ -235,17 +235,31 @@ public class AcademicoDB {
     // --------------------------------------------------------------
 
     //Inserta un libro. Devuelve el id generado o -1 si falla.
+    // isbn = ISBN-13 sin guiones. editorial, anioPublicacion, edicion, enlaceCatalogo,
+    // signatura, ubicacion y portada pueden ser null.
     public long insertarLibro(String titulo, String autores, String isbn,
-                              String enlaceCatalogo, boolean disponibleBiblioteca,
-                              String ubicacionBiblioteca) {
+                              String editorial, Integer anioPublicacion, String edicion,
+                              String enlaceCatalogo, int ejemplaresTotales,
+                              int ejemplaresDisponibles, String signatura,
+                              String ubicacion, String portada) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("titulo", titulo);
         cv.put("autores", autores);
         cv.put("isbn", isbn);
-        cv.put("enlaceCatalogo", enlaceCatalogo);              // puede ser null
-        cv.put("disponibleBiblioteca", disponibleBiblioteca ? 1 : 0);
-        cv.put("ubicacionBiblioteca", ubicacionBiblioteca);    // puede ser null
+        cv.put("editorial", editorial);
+        cv.put("anioPublicacion", anioPublicacion);
+        cv.put("edicion", edicion);
+        cv.put("enlaceCatalogo", enlaceCatalogo);
+        cv.put("ejemplaresTotales", ejemplaresTotales);
+        cv.put("ejemplaresDisponibles", ejemplaresDisponibles);
+        cv.put("signatura", signatura);
+        cv.put("ubicacion", ubicacion);
+        cv.put("portada", portada);
+        // minúsculas sin tildes para buscar con LIKE
+        String texto = titulo + " " + autores + " " + (editorial == null ? "" : editorial) + " " + isbn;
+        cv.put("textoBusqueda", java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase());
         return db.insert("LIBRO", null, cv);
     }
 

@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 
 public class DBHelper extends SQLiteOpenHelper {
     private static final String NOMBRE_BD = "bd_registro.db";
-    private static final int VERSION_BD = 1;
+    private static final int VERSION_BD = 2;
 
     // constructor
     public DBHelper(@Nullable Context context) {
@@ -22,12 +22,22 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table usuarios(correoUsuario TEXT primary key, nombreUsuario TEXT, contrasenia TEXT)");
 
+        TablasBiblioteca.crear(db);
+        TablasBiblioteca.poblar(db);
+        TablasSecretaria.crear(db);
+        TablasSecretaria.poblar(db);
     }
 
-    // cada vez que se actualice la versión de la BD, se ejecuta
+    // cada vez que se actualice la versión de la BD, se ejecuta.
+    // Se conserva usuarios (no se pierden las cuentas); el resto se recrea con sus datos de ejemplo.
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("drop table if exists usuarios");
+        TablasBiblioteca.borrar(db);
+        TablasSecretaria.borrar(db);
+        TablasBiblioteca.crear(db);
+        TablasBiblioteca.poblar(db);
+        TablasSecretaria.crear(db);
+        TablasSecretaria.poblar(db);
     }
 
     public boolean introducirDatos(String correoUsuario, String nombreUsuario, String contrasenia){
