@@ -31,6 +31,7 @@
         <activity android:name=".activities.secciones.Profesorado" />
         <activity android:name=".activities.secciones.Secretaria" />
         <activity android:name=".activities.secciones.Comedores" />
+        <activity android:name=".activities.secciones.Biblioteca" />
     </application>
 
 </manifest>

@@ -59,7 +59,7 @@
 
         </FrameLayout>
 
-        <!-- Cuadrícula con las 6 secciones principales -->
+        <!-- Cuadrícula con las 7 secciones principales -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
             android:alignmentMode="alignMargins"
             android:columnCount="2"
             android:columnOrderPreserved="false"
-            android:rowCount="3">
+            android:rowCount="4">
 
             <Button
                 android:id="@+id/btnMapa"
@@ -132,6 +132,17 @@
                 android:layout_columnWeight="1"
                 android:background="@drawable/boton_redondeado"
                 android:text="Comedores"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnBiblioteca"
+                android:layout_width="0dp"
+                android:layout_height="110dp"
+                android:layout_margin="8dp"
+                android:layout_columnWeight="1"
+                android:background="@drawable/boton_redondeado"
+                android:text="Biblioteca"
                 android:textColor="#FFFFFF"
                 app:backgroundTint="@null" />
 

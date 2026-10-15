@@ -20,6 +20,7 @@ import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.auth.SignUp;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
+import com.example.nuietsiit.activities.secciones.Biblioteca;
 import com.example.nuietsiit.activities.secciones.Comedores;
 import com.example.nuietsiit.activities.secciones.Mapa;
 import com.example.nuietsiit.activities.secciones.Profesorado;
@@ -34,7 +35,7 @@ public class MenuPrincipal extends AppCompatActivity {
     // Componentes de la interfaz de usuario
     private TextView tvBienvenida;
     private ImageView ivIcono;
-    private Button btnMapa, btnActividades, btnAsignaturas, btnProfesorado, btnSecretaria, btnComedores;
+    private Button btnMapa, btnActividades, btnAsignaturas, btnProfesorado, btnSecretaria, btnComedores, btnBiblioteca;
 
     // Componentes para el slider de noticias
     private ViewPager2 vpNoticias;
@@ -120,6 +121,7 @@ public class MenuPrincipal extends AppCompatActivity {
         btnProfesorado = findViewById(R.id.btnProfesorado);
         btnSecretaria = findViewById(R.id.btnSecretaria);
         btnComedores = findViewById(R.id.btnComedores);
+        btnBiblioteca = findViewById(R.id.btnBiblioteca);
 
         btnMapa.setOnClickListener(view -> {
             Intent intent = new Intent(MenuPrincipal.this, Mapa.class);
@@ -148,6 +150,11 @@ public class MenuPrincipal extends AppCompatActivity {
         });
         btnComedores.setOnClickListener(view -> {
             Intent intent = new Intent(MenuPrincipal.this, Comedores.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnBiblioteca.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Biblioteca.class);
             intent.putExtra("CORREO", correoUsuario);
             startActivity(intent);
         });
