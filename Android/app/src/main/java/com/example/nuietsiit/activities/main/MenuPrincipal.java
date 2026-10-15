@@ -16,6 +16,8 @@ import androidx.viewpager2.widget.ViewPager2;
 
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.auth.SignUp;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Comedores;
@@ -99,9 +101,16 @@ public class MenuPrincipal extends AppCompatActivity {
     private void inicializarBotonesNavegacion() {
         // Clic en la foto/icono de perfil para ir a Ajustes
         ivIcono.setOnClickListener(v -> {
-            Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
-            intent.putExtra("CORREO", correoUsuario);
-            startActivity(intent);
+            if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                // Vamos a página de inicio de sesión
+                Intent intent = new Intent(MenuPrincipal.this, Login.class);
+                startActivity(intent);
+            } else {
+                // Vamos a ajustes de usuario
+                Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
+                intent.putExtra("CORREO", correoUsuario);
+                startActivity(intent);
+            }
         });
 
         // Botones de secciones principales
@@ -112,12 +121,37 @@ public class MenuPrincipal extends AppCompatActivity {
         btnSecretaria = findViewById(R.id.btnSecretaria);
         btnComedores = findViewById(R.id.btnComedores);
 
-        btnMapa.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Mapa.class)));
-        btnActividades.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Actividades.class)));
-        btnAsignaturas.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Asignaturas.class)));
-        btnProfesorado.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Profesorado.class)));
-        btnSecretaria.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Secretaria.class)));
-        btnComedores.setOnClickListener(v -> startActivity(new Intent(MenuPrincipal.this, Comedores.class)));
+        btnMapa.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Mapa.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnActividades.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Actividades.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnAsignaturas.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Asignaturas.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnProfesorado.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Profesorado.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnSecretaria.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Secretaria.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+        btnComedores.setOnClickListener(view -> {
+            Intent intent = new Intent(MenuPrincipal.this, Comedores.class);
+            intent.putExtra("CORREO", correoUsuario);
+            startActivity(intent);
+        });
+
     }
 
     /**
