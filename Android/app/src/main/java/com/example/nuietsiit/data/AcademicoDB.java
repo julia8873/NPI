@@ -1,4 +1,4 @@
-package com.example.pruebanpi;
+package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
