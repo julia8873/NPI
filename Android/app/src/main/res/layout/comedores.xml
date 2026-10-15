@@ -52,10 +52,7 @@
             android:layout_height="450dp"
             android:layout_marginTop="30dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:layout_bottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:cardElevation="8dp">
 
         <!-- Contenedor interno para superponer texto sobre la imagen -->
             <androidx.constraintlayout.widget.ConstraintLayout

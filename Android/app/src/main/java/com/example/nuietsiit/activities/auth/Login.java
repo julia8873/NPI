@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 
 public class Login extends AppCompatActivity {
 
@@ -20,7 +21,7 @@ public class Login extends AppCompatActivity {
     private Button btnLogin, btnSignUp;
 
     // Instancia del Helper para gestionar la base de datos SQLite
-    private DBHelper BD;
+    private UsuariosDB BD;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,7 +29,7 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.login);
 
         // Inicialización de la base de datos
-        BD = new DBHelper(this);
+        BD = new UsuariosDB(this);
 
         // Vinculación de los componentes Java con las vistas del XML
         etCorreo = findViewById(R.id.etCorreo);
@@ -62,9 +63,9 @@ public class Login extends AppCompatActivity {
         }
 
         // Comprobaciones contra la base de datos local
-        if (!BD.comprobarSiExisteCorreo(correo)) {
+        if (!BD.existeEstudiante(correo)) {
             Toast.makeText(Login.this, "Usuario incorrecto", Toast.LENGTH_LONG).show();
-        } else if (!BD.comprobarSiExisteUsuario(correo, password)) {
+        } else if (!BD.autenticarEstudiante(correo, password)) {
             Toast.makeText(Login.this, "Contraseña incorrecta", Toast.LENGTH_LONG).show();
         } else {
             // Inicio de sesión exitoso: Navegación al Menú Principal

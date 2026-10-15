@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 
 public class Comedores extends AppCompatActivity {

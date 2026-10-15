@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
-import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 
 public class SignUp extends AppCompatActivity {
 
@@ -20,7 +20,7 @@ public class SignUp extends AppCompatActivity {
     private Button btnCrearCuenta;
 
     // Instancia del Helper para la gestión de la base de datos SQLite
-    DBHelper BD;
+    UsuariosDB BD;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class SignUp extends AppCompatActivity {
         setContentView(R.layout.sign_up);
 
         // Inicialización del Helper de la base de datos
-        BD = new DBHelper(this);
+        BD = new UsuariosDB(this);
 
         // Vinculación de los componentes Java con las vistas del XML
         etNombre = findViewById(R.id.etNombre);
@@ -57,21 +57,25 @@ public class SignUp extends AppCompatActivity {
         }
 
         // Comprobación de existencia del correo en la base de datos
-        if (BD.comprobarSiExisteCorreo(correo)) {
+        if (BD.existeEstudiante(correo)) {
             Toast.makeText(SignUp.this, "Ya existe una cuenta asociada a este correo", Toast.LENGTH_LONG).show();
         } else {
             // Inserción del nuevo usuario
-            BD.introducirDatos(correo, nombre, password);
+            boolean creado = BD.insertarEstudiante(correo, nombre, password);
 
-            Toast.makeText(SignUp.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
+            if (creado) {
+                Toast.makeText(SignUp.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
 
-            // Navegación directa al Menú Principal
-            Intent intent = new Intent(SignUp.this, MenuPrincipal.class);
-            intent.putExtra("CORREO", correo);
-            startActivity(intent);
+                // Navegación directa al Menú Principal
+                Intent intent = new Intent(SignUp.this, MenuPrincipal.class);
+                intent.putExtra("CORREO", correo);
+                startActivity(intent);
 
-            // Finaliza la pantalla de registro para evitar volver a ella pulsando el botón "Atrás"
-            finish();
+                // Finaliza la pantalla de registro para evitar volver a ella pulsando el botón "Atrás"
+                finish();
+            } else {
+                Toast.makeText(SignUp.this, "Error al crear la cuenta", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

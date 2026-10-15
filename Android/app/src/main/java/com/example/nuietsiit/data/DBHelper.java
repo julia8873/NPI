@@ -373,28 +373,7 @@ public class DBHelper extends SQLiteOpenHelper {
             "  idPlato     INTEGER PRIMARY KEY AUTOINCREMENT," +
             "  nombrePlato TEXT NOT NULL," +
             "  descripcion TEXT," +
-            "  fotoUrl     TEXT," +
-            "  kcal        INTEGER NOT NULL," +
-            "  proteinasG  REAL NOT NULL," +
-            "  hidratosG   REAL NOT NULL," +
-            "  grasasG     REAL NOT NULL" +
-            ")"
-        );
-
-        db.execSQL(
-            "CREATE TABLE ALERGENO (" +
-            "  idAlergeno     INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "  nombreAlergeno TEXT NOT NULL" +
-            ")"
-        );
-
-        db.execSQL(
-            "CREATE TABLE PLATO_ALERGENO (" +
-            "  idPlato    INTEGER NOT NULL," +
-            "  idAlergeno INTEGER NOT NULL," +
-            "  PRIMARY KEY (idPlato, idAlergeno)," +
-            "  FOREIGN KEY (idPlato)    REFERENCES PLATO(idPlato)," +
-            "  FOREIGN KEY (idAlergeno) REFERENCES ALERGENO(idAlergeno)" +
+            "  fotoUrl     TEXT" +
             ")"
         );
 

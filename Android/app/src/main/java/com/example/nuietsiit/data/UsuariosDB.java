@@ -1,6 +1,7 @@
 package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -16,24 +17,32 @@ public class UsuariosDB {
         this.dbHelper = dbHelper;
     }
 
+    // constructor con Context
+    public UsuariosDB(Context context) {
+        this(new DBHelper(context));
+    }
+
     // --------------------------------------------------------------
     // ESTUDIANTE
     // --------------------------------------------------------------
 
-    // Inserta un nuevo estudiante.
-    // Devuelve true si se ha insertado correctamente.
-    public boolean insertarEstudiante(String correo, String nombre, String contraseniaHash,
-                                      String enlaceCalendario, int idGrado,
-                                      String codigoIdioma, String tokenNotificacion) {
+    // Inserta un nuevo estudiante con valores por defecto para grado (1) e idioma ('es')
+    public boolean insertarEstudiante(String correo, String nombre, String contraseniaHash) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        // Asegurar que existan en la BD para respetar las claves foráneas
+        db.execSQL("INSERT OR IGNORE INTO IDIOMA (codigoIdioma, nombreIdioma) VALUES ('es', 'Español')");
+        db.execSQL("INSERT OR IGNORE INTO GRADO (idGrado, nombreGrado) VALUES (1, 'Grado en Ingeniería Informática')");
+
         ContentValues cv = new ContentValues();
         cv.put("correoEstudiante", correo.toLowerCase());
         cv.put("nombreEstudiante", nombre);
         cv.put("contraseniaHash", contraseniaHash);
-        cv.put("enlaceCalendarioGoogle", enlaceCalendario); // puede ser null
-        cv.put("idGrado", idGrado);
-        cv.put("codigoIdioma", codigoIdioma);
-        cv.put("tokenNotificacion", tokenNotificacion);     // puede ser null
+        cv.put("enlaceCalendarioGoogle", (String) null);
+        cv.put("idGrado", 1);
+        cv.put("codigoIdioma", "es");
+        cv.put("tokenNotificacion", (String) null);
+
         long resultado = db.insert("ESTUDIANTE", null, cv);
         return resultado != -1;
     }
@@ -83,6 +92,59 @@ public class UsuariosDB {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("codigoIdioma", codigoIdioma);
+        int filas = db.update("ESTUDIANTE", cv,
+                "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
+    // Actualiza el grado de un estudiante.
+    public boolean actualizarGradoEstudiante(String correo, int idGrado) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("idGrado", idGrado);
+        int filas = db.update("ESTUDIANTE", cv,
+                "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
+    // Actualiza el enlace al calendario de Google de un estudiante.
+    public boolean actualizarCalendarioEstudiante(String correo, String enlaceCalendario) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("enlaceCalendarioGoogle", enlaceCalendario);
+        int filas = db.update("ESTUDIANTE", cv,
+                "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
+    // Actualiza el nombre y/o contraseña de un estudiante (Ajustes de cuenta).
+    public boolean actualizarDatosUsuario(String correo, String nuevoNombre, String nuevaPassword) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        if (nuevoNombre != null && !nuevoNombre.isEmpty()) {
+            cv.put("nombreEstudiante", nuevoNombre);
+        }
+        if (nuevaPassword != null && !nuevaPassword.isEmpty()) {
+            cv.put("contraseniaHash", nuevaPassword);
+        }
+        if (cv.size() == 0) return false;
+        int filas = db.update("ESTUDIANTE", cv,
+                "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
+    // Actualiza todos los ajustes disponibles de un estudiante.
+    public boolean actualizarAjustesEstudiante(String correo, String nuevoNombre, String nuevaPassword,
+                                              Integer nuevoIdGrado, String nuevoCodigoIdioma,
+                                              String nuevoCalendario) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        if (nuevoNombre != null && !nuevoNombre.isEmpty()) cv.put("nombreEstudiante", nuevoNombre);
+        if (nuevaPassword != null && !nuevaPassword.isEmpty()) cv.put("contraseniaHash", nuevaPassword);
+        if (nuevoIdGrado != null) cv.put("idGrado", nuevoIdGrado);
+        if (nuevoCodigoIdioma != null && !nuevoCodigoIdioma.isEmpty()) cv.put("codigoIdioma", nuevoCodigoIdioma);
+        if (nuevoCalendario != null) cv.put("enlaceCalendarioGoogle", nuevoCalendario);
+        if (cv.size() == 0) return false;
         int filas = db.update("ESTUDIANTE", cv,
                 "correoEstudiante = ?", new String[]{correo.toLowerCase()});
         return filas > 0;
