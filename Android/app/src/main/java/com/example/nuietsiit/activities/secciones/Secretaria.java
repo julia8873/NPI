@@ -54,7 +54,7 @@ public class Secretaria extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         correoUsuario = getIntent().getStringExtra("CORREO");
-        secretariaDB = new SecretariaDB(new DBHelper(this));
+        secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
         if (savedInstanceState != null) {
             categoriaSeleccionada = savedInstanceState.getString(ESTADO_CATEGORIA);
         }

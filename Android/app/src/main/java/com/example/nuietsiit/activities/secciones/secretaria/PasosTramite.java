@@ -47,7 +47,7 @@ public class PasosTramite extends AppCompatActivity {
         setSupportActionBar(barra);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        SecretariaDB db = new SecretariaDB(new DBHelper(this));
+        SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
         Tramite tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
         List<Paso> pasos = tramite != null ? db.getPasos(tramite.id) : null;
         if (pasos == null || pasos.isEmpty()) {

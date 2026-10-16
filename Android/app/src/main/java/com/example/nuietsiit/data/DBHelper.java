@@ -589,6 +589,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Inserción de datos iniciales
         insertarDatosInicialesComedores(db);
+
+        // Datos de ejemplo de Biblioteca y Secretaría
+        TablasBiblioteca.poblar(db);
+        TablasSecretaria.poblar(db);
     }
 
     private void insertarDatosInicialesComedores(SQLiteDatabase db) {

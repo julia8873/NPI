@@ -37,7 +37,7 @@ public class DetalleTramite extends AppCompatActivity {
         getSupportActionBar().setTitle("Trámite");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        SecretariaDB db = new SecretariaDB(new DBHelper(this));
+        SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
         Tramite tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
         if (tramite == null) {
             Toast.makeText(this, "Trámite no encontrado", Toast.LENGTH_SHORT).show();
