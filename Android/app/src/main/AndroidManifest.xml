@@ -30,6 +30,10 @@
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />
         <activity android:name=".activities.secciones.Secretaria" />
+        <activity android:name=".activities.secciones.secretaria.DetalleTramite" />
+        <activity
+            android:name=".activities.secciones.secretaria.PasosTramite"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
     </application>

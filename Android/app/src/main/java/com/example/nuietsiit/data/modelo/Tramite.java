@@ -6,6 +6,15 @@ import java.time.LocalDate;
  * Trámite de secretaría (tabla PROCEDIMIENTO).
  */
 public class Tramite {
+    // {clave en BD, etiqueta}: fuente única para los chips de la lista y las etiquetas
+    public static final String[][] CATEGORIAS = {
+            {"matricula", "Matrícula"},
+            {"titulos", "Títulos"},
+            {"reconocimiento_creditos", "Reconocimiento de créditos"},
+            {"convocatorias", "Convocatorias"},
+            {"certificados", "Certificados"},
+            {"otro", "Otros"}};
+
     public final int id;
     public final String nombre;
     public final String categoria;       // 'matricula'|'titulos'|'reconocimiento_creditos'|'convocatorias'|'certificados'|'otro'
@@ -30,6 +39,18 @@ public class Tramite {
         this.plazoFin = plazoFin;
         this.solicitudOnline = solicitudOnline;
         this.palabrasClave = palabrasClave;
+    }
+
+    // texto sobre el que busca BuscadorTolerante (equivale a la columna textoBusqueda)
+    public String textoBusqueda() {
+        return nombre + " " + (palabrasClave != null ? palabrasClave : "") + " " + (descripcion != null ? descripcion : "");
+    }
+
+    public String etiquetaCategoria() {
+        for (String[] c : CATEGORIAS) {
+            if (c[0].equals(categoria)) return c[1];
+        }
+        return "Otros";
     }
 
     public boolean tienePlazo() {
