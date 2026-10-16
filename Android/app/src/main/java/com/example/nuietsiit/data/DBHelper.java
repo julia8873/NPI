@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 
 /**
- * DBHelper central: crea y actualiza todas las tablas de la base de datos.
+ * DBHelper: crea y actualiza todas las tablas de la base de datos.
  * Cada módulo tiene su propio fichero auxiliar con las funciones de acceso a datos.
  */
 public class DBHelper extends SQLiteOpenHelper {
