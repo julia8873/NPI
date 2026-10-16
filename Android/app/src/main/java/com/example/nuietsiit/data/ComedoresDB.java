@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.nuietsiit.data.modelo.Comedor;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Acceso a datos del módulo de Comedores:
  * COMEDOR, COMEDOR_HORARIO, TARIFA_COMEDOR,
@@ -46,6 +51,25 @@ public class ComedoresDB {
     public Cursor listarComedores() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         return db.rawQuery("SELECT * FROM COMEDOR ORDER BY nombreComedor", null);
+    }
+
+    // Devuelve todos los comedores como una lista de objetos Comedor
+    public List<Comedor> obtenerListaComedores() {
+        List<Comedor> lista = new ArrayList<>();
+        try (Cursor c = listarComedores()) {
+            if (c != null && c.moveToFirst()) {
+                do {
+                    int id = c.getInt(c.getColumnIndexOrThrow("idComedor"));
+                    String nombre = c.getString(c.getColumnIndexOrThrow("nombreComedor"));
+                    String direccion = c.getString(c.getColumnIndexOrThrow("direccion"));
+                    double lat = c.getDouble(c.getColumnIndexOrThrow("latitud"));
+                    double lon = c.getDouble(c.getColumnIndexOrThrow("longitud"));
+                    Integer idEdificio = c.isNull(c.getColumnIndexOrThrow("idEdificio")) ? null : c.getInt(c.getColumnIndexOrThrow("idEdificio"));
+                    lista.add(new Comedor(id, nombre, idEdificio, direccion, lat, lon));
+                } while (c.moveToNext());
+            }
+        }
+        return lista;
     }
 
     // Obtiene un comedor por id.

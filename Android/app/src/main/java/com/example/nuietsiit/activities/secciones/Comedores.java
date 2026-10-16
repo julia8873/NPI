@@ -1,22 +1,333 @@
 package com.example.nuietsiit.activities.secciones;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.data.ComedoresDB;
+import com.example.nuietsiit.data.modelo.Comedor;
+import com.example.nuietsiit.util.DetectorInclinacionFrontal;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 public class Comedores extends AppCompatActivity {
 
+    // Componentes de la interfaz
+    private TextView tvMensajeComedorCercano;
+    private TextView tvUbicacionActual;
     private TextView tvDia, tvPrimerPlato, tvSegundoPlato, tvPostre, tvHorario, tvPrecio;
-    private DBHelper BD;
+    private ImageView ivIcono;
+    private LinearLayout llListaComedores;
+
+    // Base de datos, ubicación y sensor de inclinación
+    private ComedoresDB comedoresDB;
+    private LocationManager locationManager;
+    private DetectorInclinacionFrontal detectorInclinacion;
+    private List<Comedor> listaComedores;
+    private Comedor comedorSeleccionado;
+
+    // Lanzador para solicitar permisos de ubicación en tiempo de ejecución
+    private final ActivityResultLauncher<String[]> locationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                Boolean fineGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
+                Boolean coarseGranted = result.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false);
+
+                if ((fineGranted != null && fineGranted) || (coarseGranted != null && coarseGranted)) {
+                    obtenerUbicacionYProcesar();
+                } else {
+                    tvUbicacionActual.setText("📍 Permiso no concedido. (ETSIIT como referencia)");
+                    // Ubicación por defecto de referencia (Campus ETSIIT)
+                    aplicarUbicacionReferencia(37.197050, -3.624260, "Referencia (ETSIIT)");
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.comedores);
-        BD = DBHelper.getInstance(this);
+
+        // Inicializar base de datos y servicios
+        comedoresDB = new ComedoresDB(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // Archivos XML
+        tvMensajeComedorCercano = findViewById(R.id.tvMensajeComedoreCercano);
+        tvUbicacionActual = findViewById(R.id.tvUbicacionActual);
+        tvDia = findViewById(R.id.tvDia);
+        tvPrimerPlato = findViewById(R.id.tvPrimerPlato);
+        tvSegundoPlato = findViewById(R.id.tvSegundoPlato);
+        tvPostre = findViewById(R.id.tvPostre);
+        tvHorario = findViewById(R.id.tvHorario);
+        tvPrecio = findViewById(R.id.tvPrecio);
+        ivIcono = findViewById(R.id.ivIcono);
+        llListaComedores = findViewById(R.id.llListaComedores);
+
+        // Configurar navegación a ajustes desde el icono de perfil
+        ivIcono.setOnClickListener(v -> {
+            Intent intent = new Intent(Comedores.this, AjustesCuenta.class);
+            startActivity(intent);
+        });
+
+        // Configurar detector de movimiento/inclinación hacia adelante
+        detectorInclinacion = new DetectorInclinacionFrontal(this, () -> {
+            // Pequeña vibración al tumbar el móvil hacia adelante
+            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            Toast.makeText(Comedores.this, "📱 Movimiento detectado: actualizando ubicación...", Toast.LENGTH_SHORT).show();
+            obtenerUbicacionYProcesar();
+        });
+
+        // Cargar lista de comedores desde SQLite
+        listaComedores = comedoresDB.obtenerListaComedores();
+
+        // Solicitar permisos o iniciar localización inicial
+        verificarPermisosYLocalizar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (detectorInclinacion != null) {
+            detectorInclinacion.iniciar();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (detectorInclinacion != null) {
+            detectorInclinacion.parar();
+        }
+    }
+
+    /**
+     * Comprueba permisos de ubicación e inicia la obtención de coordenadas.
+     */
+    private void verificarPermisosYLocalizar() {
+        // fine es ubicación muy precisa y coarse ubicación aproximada
+        // A partir de Android 12, se pregunta si quieres dar tu ubicación precisa o aproximada
+        boolean fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+
+        if (fine || coarse) {
+            obtenerUbicacionYProcesar();
+        } else {
+            // Solicitar permisos al usuario
+            locationPermissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+        }
+    }
+
+    /**
+     * Obtiene la ubicación actual del dispositivo
+     */
+    private void obtenerUbicacionYProcesar() {
+        if (locationManager == null) return;
+
+        Location ultimaUbicacion = null;
+        try {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                ultimaUbicacion = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+            if (ultimaUbicacion == null && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                ultimaUbicacion = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            if (ultimaUbicacion == null && locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+                ultimaUbicacion = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+
+            // Solicitar posición
+            solicitarPosicionActual();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+
+        if (ultimaUbicacion != null) {
+            procesarUbicacionUsuario(ultimaUbicacion);
+        } else {
+            tvUbicacionActual.setText("📍 Esperando GPS... (Tumba el móvil hacia adelante para recalcular)");
+            aplicarUbicacionReferencia(37.197050, -3.624260, "Referencia provisional (ETSIIT)");
+        }
+    }
+
+    /**
+     * Devuelve la posición actual del móvil
+     */
+    private void solicitarPosicionActual() {
+        if (locationManager == null) return;
+
+        try {
+            String proveedor = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                    ? LocationManager.GPS_PROVIDER
+                    : (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ? LocationManager.NETWORK_PROVIDER : null);
+
+            if (proveedor == null) return;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                locationManager.getCurrentLocation(proveedor, null, ContextCompat.getMainExecutor(this), location -> {
+                    if (location != null) {
+                        procesarUbicacionUsuario(location);
+                    }
+                });
+            } else {
+                locationManager.requestSingleUpdate(proveedor, new LocationListener() {
+                    @Override
+                    public void onLocationChanged(@NonNull Location location) {
+                        procesarUbicacionUsuario(location);
+                    }
+
+                    @Override
+                    public void onProviderEnabled(@NonNull String provider) {}
+
+                    @Override
+                    public void onProviderDisabled(@NonNull String provider) {}
+                }, getMainLooper());
+            }
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Calcula la distancia a cada comedor con Location.distanceBetween y ordena la lista de más cercano a más lejano.
+     */
+    private void procesarUbicacionUsuario(@NonNull Location location) {
+        double userLat = location.getLatitude();
+        double userLon = location.getLongitude();
+
+        tvUbicacionActual.setText(String.format(Locale.getDefault(),
+                "📍 Lat: %.4f, Lon: %.4f (Inclina hacia adelante para recalcular)", userLat, userLon));
+
+        calcularDistanciasYOrdenar(userLat, userLon);
+    }
+
+    /**
+     * En caso de no tener señal GPS inmediata o permisos denegados.
+     */
+    private void aplicarUbicacionReferencia(double refLat, double refLon, String descripcion) {
+        tvUbicacionActual.setText("📍 " + descripcion);
+        calcularDistanciasYOrdenar(refLat, refLon);
+    }
+
+    /**
+     * Aplica Location.distanceBetween y ordena la lista de menor a mayor distancia.
+     */
+    private void calcularDistanciasYOrdenar(double origenLat, double origenLon) {
+        if (listaComedores == null || listaComedores.isEmpty()) {
+            listaComedores = comedoresDB.obtenerListaComedores();
+        }
+
+        float[] resultadoMetros = new float[1];
+        for (Comedor c : listaComedores) {
+            Location.distanceBetween(origenLat, origenLon, c.getLatitud(), c.getLongitud(), resultadoMetros);
+            c.setDistanciaMetros(resultadoMetros[0]);
+        }
+
+        // Ordenar en orden ascendente (el más cercano primero)
+        Collections.sort(listaComedores, Comparator.comparingDouble(Comedor::getDistanciaMetros));
+
+        if (!listaComedores.isEmpty()) {
+            // Seleccionar automáticamente el más cercano
+            comedorSeleccionado = listaComedores.get(0);
+            mostrarComedorPrincipal(comedorSeleccionado);
+        }
+
+        // Rellenar la lista inferior con todos los comedores ordenados
+        mostrarListaComedoresOrdenados();
+    }
+
+    /**
+     * Actualiza la tarjeta principal superior con los datos del comedor seleccionado (o el más cercano).
+     */
+    private void mostrarComedorPrincipal(Comedor comedor) {
+        boolean esElMasCercano = !listaComedores.isEmpty() && listaComedores.get(0).getIdComedor() == comedor.getIdComedor();
+        if (esElMasCercano) {
+            tvMensajeComedorCercano.setText("¡Tu comedor más cercano!\n" + comedor.getNombreComedor());
+        } else {
+            tvMensajeComedorCercano.setText("Comedor seleccionado:\n" + comedor.getNombreComedor());
+        }
+
+        tvDia.setText(comedor.getNombreComedor());
+        tvPrimerPlato.setText("Primer plato: A consultar");
+        tvSegundoPlato.setText("Segundo plato: A consultar");
+        tvPostre.setText("Postre: Fruta o Yogur");
+        tvHorario.setText("Horario: 13:00 - 16:00");
+        tvPrecio.setText("Precio: 4 € (estudiante)");
+    }
+
+    /**
+     * Muestra visualmente las tarjetas de todos los comedores en orden de cercanía.
+     */
+    private void mostrarListaComedoresOrdenados() {
+        llListaComedores.removeAllViews();
+
+        for (int i = 0; i < listaComedores.size(); i++) {
+            Comedor comedor = listaComedores.get(i);
+
+            View itemView = getLayoutInflater().inflate(R.layout.item_comedor_cercania, llListaComedores, false);
+            TextView tvNombre = itemView.findViewById(R.id.tvNombreComedorItem);
+            TextView tvDireccion = itemView.findViewById(R.id.tvDireccionComedorItem);
+            TextView tvDistancia = itemView.findViewById(R.id.tvDistanciaComedorItem);
+
+            StringBuilder textoNombre = new StringBuilder();
+            textoNombre.append(i + 1).append(". ").append(comedor.getNombreComedor());
+
+            if (i == 0) {
+                textoNombre.append(" (Más cercano)");
+            }
+
+            // Seleccionar comedor
+            if (comedorSeleccionado != null && comedor.getIdComedor() == comedorSeleccionado.getIdComedor()) {
+                textoNombre.append(" ⭐");
+            }
+
+            tvNombre.setText(textoNombre.toString());
+            tvDireccion.setText(comedor.getDireccion());
+            tvDistancia.setText(comedor.getDistanciaFormateada());
+
+            // Al pulsar sobre cualquier comedor de la lista, se selecciona y actualiza la tarjeta superior
+            itemView.setOnClickListener(v -> {
+                comedorSeleccionado = comedor;
+                mostrarComedorPrincipal(comedor);
+                mostrarListaComedoresOrdenados();
+                Toast.makeText(Comedores.this, "Mostrando: " + comedor.getNombreComedor(), Toast.LENGTH_SHORT).show();
+            });
+
+            llListaComedores.addView(itemView);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (detectorInclinacion != null) {
+            detectorInclinacion.parar();
+        }
     }
 }

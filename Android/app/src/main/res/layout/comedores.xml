@@ -45,7 +45,23 @@
                 android:src="@drawable/icono" />
         </RelativeLayout>
 
-        <!-- Tarjeta centrada (el cuadro del menú) -->
+        <!-- Ubicación actual del usuario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:paddingHorizontal="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvUbicacionActual"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 Tu ubicación: Obteniendo posición..."
+                android:textColor="#555555"
+                android:textSize="13sp" />
+        </LinearLayout>
         <androidx.cardview.widget.CardView
             android:id="@+id/cardMenu"
             android:layout_width="320dp"
@@ -158,11 +174,21 @@
             android:id="@+id/tvOtrosComedores"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="25dp"
             android:layout_gravity="left"
-            android:text="Otros comedores:"
+            android:text="Comedores ordenados por cercanía:"
             android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <!-- Lista de comedores ordenados por distancia -->
+        <LinearLayout
+            android:id="@+id/llListaComedores"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="30dp"
+            android:orientation="vertical" />
 
     </LinearLayout>
 </ScrollView>
