@@ -17,5 +17,6 @@ public class Comedores extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.comedores);
+        BD = DBHelper.getInstance(this);
     }
 }

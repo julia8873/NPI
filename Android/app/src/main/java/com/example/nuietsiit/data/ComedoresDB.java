@@ -1,13 +1,14 @@
 package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
  * Acceso a datos del módulo de Comedores:
  * COMEDOR, COMEDOR_HORARIO, TARIFA_COMEDOR,
- * PLATO, ALERGENO, PLATO_ALERGENO, MENU, MENU_PLATO
+ * PLATO, MENU, MENU_PLATO
  */
 public class ComedoresDB {
 
@@ -15,6 +16,10 @@ public class ComedoresDB {
 
     public ComedoresDB(DBHelper dbHelper) {
         this.dbHelper = dbHelper;
+    }
+
+    public ComedoresDB(Context context) {
+        this(DBHelper.getInstance(context));
     }
 
     // --------------------------------------------------------------
@@ -113,17 +118,12 @@ public class ComedoresDB {
      * Inserta un plato.
      * descripcion y fotoUrl pueden ser null.
      */
-    public long insertarPlato(String nombrePlato, String descripcion, String fotoUrl,
-                              int kcal, double proteinasG, double hidratosG, double grasasG) {
+    public long insertarPlato(String nombrePlato, String descripcion, String fotoUrl) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("nombrePlato", nombrePlato);
         cv.put("descripcion", descripcion); // puede ser null
         cv.put("fotoUrl", fotoUrl);         // puede ser null
-        cv.put("kcal", kcal);
-        cv.put("proteinasG", proteinasG);
-        cv.put("hidratosG", hidratosG);
-        cv.put("grasasG", grasasG);
         return db.insert("PLATO", null, cv);
     }
 
@@ -131,49 +131,6 @@ public class ComedoresDB {
     public Cursor obtenerPlato(int idPlato) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         return db.rawQuery("SELECT * FROM PLATO WHERE idPlato = ?",
-                new String[]{String.valueOf(idPlato)});
-    }
-
-    // --------------------------------------------------------------
-    // ALERGENO
-    // --------------------------------------------------------------
-
-    // Inserta un alérgeno.
-    // Devuelve el id generado o -1 si ha fallado.
-    public long insertarAlergeno(String nombreAlergeno) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("nombreAlergeno", nombreAlergeno);
-        return db.insert("ALERGENO", null, cv);
-    }
-
-    // Lista todos los alérgenos ordenados por nombre.
-    public Cursor listarAlergenos() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM ALERGENO ORDER BY nombreAlergeno", null);
-    }
-
-    // --------------------------------------------------------------
-    // PLATO_ALERGENO
-    // --------------------------------------------------------------
-
-    // Asocia un alérgeno a un plato.
-    public boolean insertarPlatoAlergeno(int idPlato, int idAlergeno) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("idPlato", idPlato);
-        cv.put("idAlergeno", idAlergeno);
-        long resultado = db.insert("PLATO_ALERGENO", null, cv);
-        return resultado != -1;
-    }
-
-    // Devuelve los alérgenos de un plato ordenados por nombre.
-    public Cursor listarAlergenosDe(int idPlato) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        return db.rawQuery(
-                "SELECT A.* FROM ALERGENO A " +
-                "JOIN PLATO_ALERGENO PA ON A.idAlergeno = PA.idAlergeno " +
-                "WHERE PA.idPlato = ? ORDER BY A.nombreAlergeno",
                 new String[]{String.valueOf(idPlato)});
     }
 
@@ -219,8 +176,7 @@ public class ComedoresDB {
     }
 
     /**
-     * Devuelve los platos de un menú con todos sus datos nutricionales
-     * y sus alérgenos concatenados.
+     * Devuelve los platos de un menú agrupados por su categoría (primero, segundo, postre).
      * Útil para mostrar el menú del día completo.
      */
     public Cursor listarPlatosDeMenu(int idMenu) {

@@ -19,7 +19,7 @@ public class UsuariosDB {
 
     // constructor con Context
     public UsuariosDB(Context context) {
-        this(new DBHelper(context));
+        this(DBHelper.getInstance(context));
     }
 
     // --------------------------------------------------------------

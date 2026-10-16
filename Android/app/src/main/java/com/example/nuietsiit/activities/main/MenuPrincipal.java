@@ -53,7 +53,7 @@ public class MenuPrincipal extends AppCompatActivity {
         setContentView(R.layout.menu_principal);
 
         // Inicializar base de datos
-        BD = new DBHelper(this);
+        BD = DBHelper.getInstance(this);
 
         // Inicializar vistas
         tvBienvenida = findViewById(R.id.tvBienvenida);

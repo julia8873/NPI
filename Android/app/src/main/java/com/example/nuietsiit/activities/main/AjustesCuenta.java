@@ -31,7 +31,7 @@ public class AjustesCuenta  extends AppCompatActivity {
         setContentView(R.layout.ajustes_cuenta);
 
         // Inicialización de la base de datos
-        BD = new DBHelper(this);
+        BD = DBHelper.getInstance(this);
 
         // Obtención del correo pasado desde la pantalla anterior (MenuPrincipal)
         if (getIntent() != null && getIntent().hasExtra("CORREO")) {

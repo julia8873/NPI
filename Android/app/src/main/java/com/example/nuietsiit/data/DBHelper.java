@@ -13,7 +13,17 @@ import androidx.annotation.Nullable;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 1;
+    private static final int VERSION_BD = 2;
+
+    private static DBHelper instance;
+
+    public static synchronized DBHelper getInstance(Context context) {
+        if (instance == null && context != null) {
+            instance = new DBHelper(context.getApplicationContext());
+            instance.getWritableDatabase(); // Mantiene la conexión de la BD abierta
+        }
+        return instance;
+    }
 
     // constructor
     public DBHelper(@Nullable Context context) {
@@ -576,6 +586,37 @@ public class DBHelper extends SQLiteOpenHelper {
             "  FOREIGN KEY (idEspacioNuevo)   REFERENCES ESPACIO(idEspacio)" +
             ")"
         );
+
+        // Inserción de datos iniciales
+        insertarDatosInicialesComedores(db);
+    }
+
+    private void insertarDatosInicialesComedores(SQLiteDatabase db) {
+        // IDIOMA y GRADO por defecto
+        db.execSQL("INSERT OR IGNORE INTO IDIOMA (codigoIdioma, nombreIdioma) VALUES ('es', 'Español'), ('en', 'English')");
+        db.execSQL("INSERT OR IGNORE INTO GRADO (idGrado, nombreGrado) VALUES (1, 'Grado en Ingeniería Informática'), (2, 'Doble Grado en Ingeniería Informática y Matemáticas'), (3, 'Grado en Telecomunicación')");
+
+        // 4 Comedores UGR con coordenadas exactas en Google Maps
+        db.execSQL("INSERT OR IGNORE INTO COMEDOR (idComedor, nombreComedor, direccion, latitud, longitud) " +
+            "VALUES (1, 'Comedor ETSIIT', 'Calle Periodista Daniel Saucedo Aranda, s/n, 18014 Granada', 37.197050, -3.624260)");
+        db.execSQL("INSERT OR IGNORE INTO COMEDOR (idComedor, nombreComedor, direccion, latitud, longitud) " +
+            "VALUES (2, 'Comedor Bellas Artes', 'Calle Periodista Eugenio Sellés, s/n, 18014 Granada', 37.195930, -3.626770)");
+        db.execSQL("INSERT OR IGNORE INTO COMEDOR (idComedor, nombreComedor, direccion, latitud, longitud) " +
+            "VALUES (3, 'Comedor Fuentenueva (Ciencias)', 'Calle Severo Ochoa, s/n, 18071 Granada', 37.183010, -3.605510)");
+        db.execSQL("INSERT OR IGNORE INTO COMEDOR (idComedor, nombreComedor, direccion, latitud, longitud) " +
+            "VALUES (4, 'Comedor Cartuja', 'Calle Profesor Vicente Callao, 3, 18011 Granada', 37.191920, -3.599510)");
+
+        // de lunes a viernes, 13:00 - 16:00 y (4 euros/estudiante)
+        for (int id = 1; id <= 4; id++) {
+            for (int dia = 1; dia <= 5; dia++) {
+                db.execSQL("INSERT OR IGNORE INTO COMEDOR_HORARIO (idComedor, diaSemana, horaApertura, horaCierre) " +
+                    "VALUES (" + id + ", " + dia + ", '13:00', '16:00')");
+            }
+            db.execSQL("INSERT OR IGNORE INTO TARIFA_COMEDOR (idComedor, tipoUsuario, modalidad, precio) " +
+                "VALUES (" + id + ", 'estudiante', 'en_comedor', 350)");
+            db.execSQL("INSERT OR IGNORE INTO TARIFA_COMEDOR (idComedor, tipoUsuario, modalidad, precio) " +
+                "VALUES (" + id + ", 'estudiante', 'para_llevar', 400)");
+        }
     }
 
     @Override
