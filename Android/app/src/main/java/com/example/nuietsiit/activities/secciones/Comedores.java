@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,30 +26,42 @@ import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
-import com.example.nuietsiit.data.ComedoresDB;
-import com.example.nuietsiit.data.modelo.Comedor;
+import com.example.nuietsiit.data.Comedores.ComedoresDB;
+import com.example.nuietsiit.data.Comedores.Comedor;
+import com.example.nuietsiit.data.Comedores.MenuInfo;
+import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.DetectorInclinacionFrontal;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Actividad encargada de gestionar la sección de Comedores universitarios.
+ * Permite calcular la distancia desde la ubicación actual del usuario, ordenar los comedores por cercanía,
+ * consultar menús, horarios y precios desde SQLite para el día seleccionado, y navegar entre días
+ * mediante botones o sensores de inclinación lateral (con restricción de no permitir fechas pasadas).
+ */
 public class Comedores extends AppCompatActivity {
 
-    // Componentes de la interfaz
+    // Componentes de la interfaz de usuario
     private TextView tvMensajeComedorCercano;
     private TextView tvUbicacionActual;
     private TextView tvDia, tvPrimerPlato, tvSegundoPlato, tvPostre, tvHorario, tvPrecio;
     private ImageView ivIcono;
     private LinearLayout llListaComedores;
 
-    // Base de datos, ubicación y sensor de inclinación
+    // Servicios de datos, geolocalización y sensores
     private ComedoresDB comedoresDB;
     private LocationManager locationManager;
-    private DetectorInclinacionFrontal detectorInclinacion;
-    private List<Comedor> listaComedores;
-    private Comedor comedorSeleccionado;
+    private DetectorInclinacionFrontal detectorInclinacion; // Sensor para tumbar el móvil hacia adelante (actualizar GPS)
+    private DetectorInclinacion detectorInclinacionDias;     // Sensor para inclinar a derecha/izquierda (cambiar de día)
+    private Calendar calendarioSeleccionado;                 // Fecha actualmente seleccionada para el menú
+    private List<Comedor> listaComedores;                    // Lista de comedores ordenados por distancia
+    private Comedor comedorSeleccionado;                     // Comedor actualmente seleccionado en la tarjeta principal
 
     // Lanzador para solicitar permisos de ubicación en tiempo de ejecución
     private final ActivityResultLauncher<String[]> locationPermissionLauncher =
@@ -69,11 +83,12 @@ public class Comedores extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.comedores);
 
-        // Inicializar base de datos y servicios
+        // Inicializar base de datos SQLite, servicios de ubicación y fecha actual
         comedoresDB = new ComedoresDB(this);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        calendarioSeleccionado = Calendar.getInstance();
 
-        // Archivos XML
+        // Enlazar vistas del layout XML
         tvMensajeComedorCercano = findViewById(R.id.tvMensajeComedoreCercano);
         tvUbicacionActual = findViewById(R.id.tvUbicacionActual);
         tvDia = findViewById(R.id.tvDia);
@@ -85,24 +100,47 @@ public class Comedores extends AppCompatActivity {
         ivIcono = findViewById(R.id.ivIcono);
         llListaComedores = findViewById(R.id.llListaComedores);
 
-        // Configurar navegación a ajustes desde el icono de perfil
+        // Botones de navegación entre días (dentro del contenedor de la tarjeta)
+        Button btnAnterior = findViewById(R.id.btnDiaAnterior);
+        Button btnSiguiente = findViewById(R.id.btnDiaSiguiente);
+
+        btnAnterior.setOnClickListener(v -> {
+            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            retrocederDia();
+        });
+
+        btnSiguiente.setOnClickListener(v -> {
+            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            avanzarDia();
+        });
+
+        // Configurar navegación a la pantalla de ajustes de cuenta desde el icono de perfil
         ivIcono.setOnClickListener(v -> {
             Intent intent = new Intent(Comedores.this, AjustesCuenta.class);
             startActivity(intent);
         });
 
-        // Configurar detector de movimiento/inclinación hacia adelante
+        // Detector de inclinación hacia adelante: recalcula la ubicación GPS al tumbar el móvil
         detectorInclinacion = new DetectorInclinacionFrontal(this, () -> {
-            // Pequeña vibración al tumbar el móvil hacia adelante
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             Toast.makeText(Comedores.this, "📱 Movimiento detectado: actualizando ubicación...", Toast.LENGTH_SHORT).show();
             obtenerUbicacionYProcesar();
         });
 
-        // Cargar lista de comedores desde SQLite
+        // Detector de inclinación lateral: derecha = día siguiente, izquierda = día anterior
+        detectorInclinacionDias = new DetectorInclinacion(this, direccion -> {
+            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            if (direccion == DetectorInclinacion.DERECHA) {
+                avanzarDia();
+            } else if (direccion == DetectorInclinacion.IZQUIERDA) {
+                retrocederDia();
+            }
+        });
+
+        // Cargar lista de comedores desde la base de datos
         listaComedores = comedoresDB.obtenerListaComedores();
 
-        // Solicitar permisos o iniciar localización inicial
+        // Verificar permisos de ubicación e iniciar geolocalización
         verificarPermisosYLocalizar();
     }
 
@@ -112,6 +150,9 @@ public class Comedores extends AppCompatActivity {
         if (detectorInclinacion != null) {
             detectorInclinacion.iniciar();
         }
+        if (detectorInclinacionDias != null) {
+            detectorInclinacionDias.iniciar();
+        }
     }
 
     @Override
@@ -120,10 +161,13 @@ public class Comedores extends AppCompatActivity {
         if (detectorInclinacion != null) {
             detectorInclinacion.parar();
         }
+        if (detectorInclinacionDias != null) {
+            detectorInclinacionDias.parar();
+        }
     }
 
     /**
-     * Comprueba permisos de ubicación e inicia la obtención de coordenadas.
+     * Comprueba los permisos de ubicación (Fina/Aproximada) y procede a localizar.
      */
     private void verificarPermisosYLocalizar() {
         // fine es ubicación muy precisa y coarse ubicación aproximada
@@ -145,7 +189,7 @@ public class Comedores extends AppCompatActivity {
     }
 
     /**
-     * Obtiene la ubicación actual del dispositivo
+     * Obtiene la última ubicación conocida del dispositivo por GPS o red.
      */
     private void obtenerUbicacionYProcesar() {
         if (locationManager == null) return;
@@ -177,7 +221,7 @@ public class Comedores extends AppCompatActivity {
     }
 
     /**
-     * Devuelve la posición actual del móvil
+     * Solicita una actualización de posición actual al proveedor disponible.
      */
     private void solicitarPosicionActual() {
         if (locationManager == null) return;
@@ -263,7 +307,8 @@ public class Comedores extends AppCompatActivity {
     }
 
     /**
-     * Actualiza la tarjeta principal superior con los datos del comedor seleccionado (o el más cercano).
+     * Actualiza la tarjeta principal superior con los datos del comedor seleccionado y la fecha actual/seleccionada.
+     * Consulta la base de datos para obtener el menú, horario y precio correspondientes.
      */
     private void mostrarComedorPrincipal(Comedor comedor) {
         boolean esElMasCercano = !listaComedores.isEmpty() && listaComedores.get(0).getIdComedor() == comedor.getIdComedor();
@@ -273,16 +318,105 @@ public class Comedores extends AppCompatActivity {
             tvMensajeComedorCercano.setText("Comedor seleccionado:\n" + comedor.getNombreComedor());
         }
 
-        tvDia.setText(comedor.getNombreComedor());
-        tvPrimerPlato.setText("Primer plato: A consultar");
-        tvSegundoPlato.setText("Segundo plato: A consultar");
-        tvPostre.setText("Postre: Fruta o Yogur");
-        tvHorario.setText("Horario: 13:00 - 16:00");
-        tvPrecio.setText("Precio: 4 € (estudiante)");
+        if (calendarioSeleccionado == null) {
+            calendarioSeleccionado = Calendar.getInstance();
+        }
+
+        // Mostrar la fecha formateada en la etiqueta del día (ej: "Lunes, 26 de Mayo")
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d 'de' MMMM", Locale.forLanguageTag("es"));
+        String diaActual = sdf.format(calendarioSeleccionado.getTime());
+        if (!diaActual.isEmpty()) {
+            diaActual = diaActual.substring(0, 1).toUpperCase() + diaActual.substring(1);
+        }
+        tvDia.setText(diaActual);
+
+        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String fechaStr = sdfDb.format(calendarioSeleccionado.getTime());
+
+        // Consultar base de datos para obtener el menú, horario y precio para la fecha seleccionada
+        MenuInfo menuInfo = comedoresDB.obtenerMenuParaComedorYFecha(comedor.getIdComedor(), fechaStr);
+        String horario = comedoresDB.obtenerHorarioParaFecha(comedor.getIdComedor(), calendarioSeleccionado);
+        String precio = comedoresDB.obtenerPrecioEstudiante(comedor.getIdComedor());
+
+        tvPrimerPlato.setText("Primer plato: " + menuInfo.getPrimerPlato());
+        tvSegundoPlato.setText("Segundo plato: " + menuInfo.getSegundoPlato());
+        tvPostre.setText("Postre: " + menuInfo.getPostre());
+        tvHorario.setText(horario);
+        tvPrecio.setText(precio);
+
+        // Asignar iconos pequeños al lado de primer plato, segundo plato y postre
+        int iconSize = (int) (getResources().getDisplayMetrics().density * 24);
+
+        Drawable dPrimero = ContextCompat.getDrawable(this, R.drawable.primer_plato);
+        if (dPrimero != null) {
+            dPrimero.setBounds(0, 0, iconSize, iconSize);
+            tvPrimerPlato.setCompoundDrawablesRelative(dPrimero, null, null, null);
+            tvPrimerPlato.setCompoundDrawablePadding(12);
+        }
+
+        Drawable dSegundo = ContextCompat.getDrawable(this, R.drawable.segundo_plato);
+        if (dSegundo != null) {
+            dSegundo.setBounds(0, 0, iconSize, iconSize);
+            tvSegundoPlato.setCompoundDrawablesRelative(dSegundo, null, null, null);
+            tvSegundoPlato.setCompoundDrawablePadding(12);
+        }
+
+        Drawable dPostre = ContextCompat.getDrawable(this, R.drawable.postre);
+        if (dPostre != null) {
+            dPostre.setBounds(0, 0, iconSize, iconSize);
+            tvPostre.setCompoundDrawablesRelative(dPostre, null, null, null);
+            tvPostre.setCompoundDrawablePadding(12);
+        }
     }
 
     /**
-     * Muestra visualmente las tarjetas de todos los comedores en orden de cercanía.
+     * Avanza un día en el calendario seleccionado y actualiza la tarjeta.
+     */
+    private void avanzarDia() {
+        if (calendarioSeleccionado != null) {
+            calendarioSeleccionado.add(Calendar.DAY_OF_YEAR, 1);
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
+            }
+            Toast.makeText(this, "📅 Día siguiente", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Retrocede un día en el calendario seleccionado, validando que no sea anterior a hoy.
+     */
+    private void retrocederDia() {
+        if (calendarioSeleccionado != null) {
+            Calendar hoy = Calendar.getInstance();
+            limpiarHora(hoy);
+            Calendar temp = (Calendar) calendarioSeleccionado.clone();
+            limpiarHora(temp);
+
+            temp.add(Calendar.DAY_OF_YEAR, -1);
+            if (temp.before(hoy)) {
+                Toast.makeText(this, "⚠️ No se permite ir a un día anterior al actual.", Toast.LENGTH_SHORT).show();
+            } else {
+                calendarioSeleccionado.add(Calendar.DAY_OF_YEAR, -1);
+                if (comedorSeleccionado != null) {
+                    mostrarComedorPrincipal(comedorSeleccionado);
+                }
+                Toast.makeText(this, "📅 Día anterior", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Normaliza un objeto Calendar eliminando horas, minutos y segundos para comparar solo fechas.
+     */
+    private void limpiarHora(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+    }
+
+    /**
+     * Muestra la lista inferior con todos los comedores ordenados por distancia.
      */
     private void mostrarListaComedoresOrdenados() {
         llListaComedores.removeAllViews();

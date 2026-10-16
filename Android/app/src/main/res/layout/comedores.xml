@@ -62,18 +62,19 @@
                 android:textColor="#555555"
                 android:textSize="13sp" />
         </LinearLayout>
+
+        <!-- Carta menú -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardMenu"
-            android:layout_width="320dp"
-            android:layout_height="450dp"
+            android:layout_width="340dp"
+            android:layout_height="440dp"
             android:layout_marginTop="30dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="8dp">
 
-        <!-- Contenedor interno para superponer texto sobre la imagen -->
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="450dp">
+                android:layout_height="wrap_content">
 
                 <!-- Imagen de fondo (restringida solo al cuadro) -->
                 <ImageView
@@ -92,8 +93,7 @@
                 <!-- Textos del menú del día -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|top"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -102,9 +102,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
+                        android:layout_gravity="center"
                         android:text="Día"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
 
                     <!-- Primer Plato con icono a la izquierda -->
@@ -112,63 +114,107 @@
                         android:id="@+id/tvPrimerPlato"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="40dp"
+                        android:layout_marginTop="60dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginEnd="40dp"
                         android:gravity="center_vertical"
                         android:text="Primer plato"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp" />
+                        android:textSize="15sp" />
 
                     <!-- Segundo Plato con icono a la izquierda -->
                     <TextView
                         android:id="@+id/tvSegundoPlato"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="35dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginEnd="40dp"
                         android:gravity="center_vertical"
                         android:text="Segundo plato"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp" />
+                        android:textSize="15sp" />
 
                     <!-- Postre con icono a la izquierda -->
                     <TextView
                         android:id="@+id/tvPostre"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="35dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_marginEnd="40dp"
                         android:gravity="center_vertical"
                         android:text="Postre"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp" />
+                        android:textSize="15sp" />
 
                     <!-- Horario -->
                     <TextView
                         android:id="@+id/tvHorario"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="35dp"
-                        android:layout_gravity="left"
-                        android:layout_marginLeft="30dp"
+                        android:layout_marginTop="40dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginRight="20dp"
                         android:text="Horario"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp" />
+                        android:textSize="16sp" />
 
                     <!-- Precio -->
                     <TextView
                         android:id="@+id/tvPrecio"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="35dp"
-                        android:layout_gravity="left"
-                        android:layout_marginLeft="30dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginLeft="40dp"
+                        android:layout_marginRight="20dp"
                         android:text="Precio"
+                        android:fontFamily="serif"
                         android:textColor="@android:color/white"
-                        android:textSize="20sp" />
+                        android:textSize="16sp" />
+
 
                 </LinearLayout>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
 
         </androidx.cardview.widget.CardView>
+
+        <!-- Botones debajo del precio pero dentro del contenedor para cambiar de día -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp">
+
+            <Button
+                android:id="@+id/btnDiaAnterior"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:backgroundTint="#FF8C42"
+                android:text="◀ Día Ant."
+                android:textColor="@android:color/white"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnDiaSiguiente"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:backgroundTint="#FF8C42"
+                android:text="Día Sig. ▶"
+                android:textColor="@android:color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvOtrosComedores"

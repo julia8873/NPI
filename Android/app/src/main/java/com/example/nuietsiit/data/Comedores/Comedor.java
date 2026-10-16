@@ -1,15 +1,19 @@
-package com.example.nuietsiit.data.modelo;
+package com.example.nuietsiit.data.Comedores;
 
 import java.util.Locale;
 
+/**
+ * Modelo que representa un comedor universitario (UGR) con sus datos de ubicación,
+ * coordenadas y cálculo de distancia respecto a la posición actual del usuario.
+ */
 public class Comedor {
 
-    private int idComedor;
-    private String nombreComedor;
-    private Integer idEdificio;
-    private String direccion;
-    private double latitud;
-    private double longitud;
+    private final int idComedor;
+    private final String nombreComedor;
+    private final Integer idEdificio;
+    private final String direccion;
+    private final double latitud;
+    private final double longitud;
     private float distanciaMetros;
 
     public Comedor(int idComedor, String nombreComedor, Integer idEdificio,
@@ -20,7 +24,7 @@ public class Comedor {
         this.direccion = direccion;
         this.latitud = latitud;
         this.longitud = longitud;
-        this.distanciaMetros = -1f;
+        this.distanciaMetros = -1f; // Por defecto sin calcular
     }
 
     public int getIdComedor() {
@@ -55,6 +59,9 @@ public class Comedor {
         this.distanciaMetros = distanciaMetros;
     }
 
+    /**
+     * Devuelve la distancia formateada en metros (< 1km) o en kilómetros (>= 1km).
+     */
     public String getDistanciaFormateada() {
         if (distanciaMetros < 0) {
             return "Distancia desconocida";
