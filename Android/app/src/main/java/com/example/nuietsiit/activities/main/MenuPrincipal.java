@@ -22,9 +22,11 @@ import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Biblioteca;
 import com.example.nuietsiit.activities.secciones.Comedores;
 import com.example.nuietsiit.activities.secciones.Mapa;
+import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.activities.secciones.Profesorado;
 import com.example.nuietsiit.activities.secciones.Secretaria;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.util.Notificador;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +76,9 @@ public class MenuPrincipal extends AppCompatActivity {
 
         // Vinculación y configuración de eventos de navegación
         inicializarBotonesNavegacion();
+
+        // Notificaciones del sistema: avisos urgentes y actividades de hoy/mañana (Miguel)
+        Notificador.revisarAvisos(this, correoUsuario);
     }
 
     /**
@@ -181,6 +186,12 @@ public class MenuPrincipal extends AppCompatActivity {
                         ViewGroup.LayoutParams.MATCH_PARENT
                 ));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                // Al pulsar una noticia del carrusel se abre la pantalla de Noticias (Miguel)
+                imageView.setOnClickListener(v -> {
+                    Intent intent = new Intent(MenuPrincipal.this, Noticias.class);
+                    intent.putExtra("CORREO", correoUsuario);
+                    startActivity(intent);
+                });
                 return new RecyclerView.ViewHolder(imageView) {};
             }
 
@@ -218,6 +229,14 @@ public class MenuPrincipal extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Si acepta el permiso de notificaciones, se revisan los avisos (Miguel)
+        Notificador.alResponderPermiso(this, requestCode, grantResults, correoUsuario);
+    }
 
     @Override
     protected void onPause() {

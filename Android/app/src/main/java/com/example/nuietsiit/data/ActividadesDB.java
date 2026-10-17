@@ -4,6 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.nuietsiit.data.modelo.Actividad;
+import com.example.nuietsiit.util.FechasUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Acceso a datos del módulo de Actividades:
  * ACTIVIDAD, CURSO_ABIERTAUGR, INSCRIPCION_ACTIVIDAD, COMUNIDAD_CHAT
@@ -177,5 +183,70 @@ public class ActividadesDB {
                 "WHERE idGrado = ? OR idGrado IS NULL " +
                 "ORDER BY nombreComunidad",
                 new String[]{String.valueOf(idGrado)});
+    }
+
+    // --------------------------------------------------------------
+    // PANTALLA DE ACTIVIDADES (Miguel)
+    // --------------------------------------------------------------
+
+    /**
+     * Devuelve las actividades desde hoy, con los datos del curso AbiertaUGR (si lo es),
+     * el lugar, cuántas personas hay apuntadas y si correoEstudiante está apuntado.
+     */
+    public List<Actividad> listarActividadesConDetalles(String correoEstudiante, String fechaHoyISO) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String correo = correoEstudiante != null ? correoEstudiante.toLowerCase() : "";
+        List<Actividad> lista = new ArrayList<>();
+        try (Cursor c = db.rawQuery(
+                "SELECT A.*, C.creditos, C.plazoInicioInscripcion, C.plazoFinInscripcion, " +
+                "       C.plazasTotales, E.nombreEspacio, " +
+                "       (SELECT COUNT(*) FROM INSCRIPCION_ACTIVIDAD I " +
+                "         WHERE I.idActividad = A.idActividad) AS inscritos, " +
+                "       EXISTS (SELECT 1 FROM INSCRIPCION_ACTIVIDAD I " +
+                "         WHERE I.idActividad = A.idActividad AND I.correoEstudiante = ?) AS inscrito " +
+                "FROM ACTIVIDAD A " +
+                "LEFT JOIN CURSO_ABIERTAUGR C ON A.idActividad = C.idActividad " +
+                "LEFT JOIN ESPACIO E ON A.idEspacio = E.idEspacio " +
+                "WHERE A.fechaInicio >= ? " +
+                "ORDER BY A.fechaInicio",
+                new String[]{correo, fechaHoyISO})) {
+            while (c.moveToNext()) {
+                lista.add(leerActividad(c));
+            }
+        }
+        return lista;
+    }
+
+    /** Desapunta a un estudiante de una actividad. */
+    public boolean borrarInscripcion(String correoEstudiante, int idActividad) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        return db.delete("INSCRIPCION_ACTIVIDAD",
+                "correoEstudiante = ? AND idActividad = ?",
+                new String[]{correoEstudiante.toLowerCase(), String.valueOf(idActividad)}) > 0;
+    }
+
+    // Convierte la fila actual del cursor en un objeto Actividad
+    private Actividad leerActividad(Cursor c) {
+        Actividad a = new Actividad();
+        a.id = c.getInt(c.getColumnIndexOrThrow("idActividad"));
+        a.titulo = c.getString(c.getColumnIndexOrThrow("titulo"));
+        a.descripcion = c.getString(c.getColumnIndexOrThrow("descripcion"));
+        a.tipo = c.getString(c.getColumnIndexOrThrow("tipoActividad"));
+        a.inicio = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("fechaInicio")));
+        a.fin = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("fechaFin")));
+        a.enlace = c.getString(c.getColumnIndexOrThrow("enlaceInfo"));
+        a.lugar = c.getString(c.getColumnIndexOrThrow("nombreEspacio"));
+
+        int iCreditos = c.getColumnIndexOrThrow("creditos");
+        if (!c.isNull(iCreditos)) {
+            a.creditos = c.getDouble(iCreditos);
+            a.plazoInicio = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("plazoInicioInscripcion"))).toLocalDate();
+            a.plazoFin = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("plazoFinInscripcion"))).toLocalDate();
+            int iPlazas = c.getColumnIndexOrThrow("plazasTotales");
+            a.plazasTotales = c.isNull(iPlazas) ? null : c.getInt(iPlazas);
+        }
+        a.inscritos = c.getInt(c.getColumnIndexOrThrow("inscritos"));
+        a.inscrito = c.getInt(c.getColumnIndexOrThrow("inscrito")) == 1;
+        return a;
     }
 }

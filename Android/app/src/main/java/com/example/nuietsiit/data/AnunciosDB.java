@@ -4,6 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.nuietsiit.data.modelo.Anuncio;
+import com.example.nuietsiit.util.FechasUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Acceso a datos del módulo de Anuncios:
  * ANUNCIO_GENERAL, ANUNCIO_ASIGNATURA
@@ -141,5 +147,32 @@ public class AnunciosDB {
                 "WHERE idSesion = ? AND fechaAfectada = ? " +
                 "  AND tipoAviso IN ('cambio_aula','clase_anulada')",
                 new String[]{String.valueOf(idSesion), fechaAfectada});
+    }
+
+    // --------------------------------------------------------------
+    // PANTALLA DE NOTICIAS (Miguel)
+    // --------------------------------------------------------------
+
+    /**
+     * Anuncios generales no caducados como objetos Anuncio,
+     * ordenados por prioridad (alta primero) y fecha.
+     */
+    public List<Anuncio> obtenerAnunciosGenerales(String fechaActualISO) {
+        List<Anuncio> lista = new ArrayList<>();
+        try (Cursor c = listarTodosAnunciosGenerales(fechaActualISO)) {
+            while (c.moveToNext()) {
+                Anuncio a = new Anuncio();
+                a.id = c.getInt(c.getColumnIndexOrThrow("idAnuncioGeneral"));
+                a.titulo = c.getString(c.getColumnIndexOrThrow("titulo"));
+                a.contenido = c.getString(c.getColumnIndexOrThrow("contenido"));
+                a.categoria = c.getString(c.getColumnIndexOrThrow("categoria"));
+                a.prioridad = c.getString(c.getColumnIndexOrThrow("prioridad"));
+                a.publicacion = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("fechaPublicacion")));
+                a.caducidad = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("fechaCaducidad")));
+                a.enlace = c.getString(c.getColumnIndexOrThrow("enlace"));
+                lista.add(a);
+            }
+        }
+        return lista;
     }
 }
