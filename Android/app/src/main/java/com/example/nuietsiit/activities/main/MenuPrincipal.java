@@ -16,6 +16,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.auth.AjustesCuenta;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
@@ -25,6 +26,7 @@ import com.example.nuietsiit.activities.secciones.Mapa;
 import com.example.nuietsiit.activities.secciones.Profesorado;
 import com.example.nuietsiit.activities.secciones.Secretaria;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +83,8 @@ public class MenuPrincipal extends AppCompatActivity {
      */
     private void mostrarBienvenida() {
         if (correoUsuario != null && !correoUsuario.isEmpty()) {
-            // Si la BD no devuelve nada o no existe, se muestra el correo por defecto.
-            // String nombreUsuario = BD.obtenerNombrePorCorreo(correoUsuario);
-            // TERMINAR
-            String nombreUsuario = null;
+            UsuariosDB usuariosDB = new UsuariosDB(BD);
+            String nombreUsuario = usuariosDB.obtenerNombreUsuario(correoUsuario);
             if (nombreUsuario != null && !nombreUsuario.isEmpty()) {
                 tvBienvenida.setText("¡Bienvenido " + nombreUsuario + "!");
             } else {
@@ -99,14 +99,14 @@ public class MenuPrincipal extends AppCompatActivity {
      * Asigna las vistas y listeners a todos los botones del menú.
      */
     private void inicializarBotonesNavegacion() {
-        // Clic en la foto/icono de perfil para ir a Ajustes
+        // Clic en la foto/icono de perfil
         ivIcono.setOnClickListener(v -> {
-            if (correoUsuario != null && !correoUsuario.isEmpty()) {
-                // Vamos a página de inicio de sesión
+            if (correoUsuario == null || correoUsuario.isEmpty()) {
+                // Si no ha iniciado sesión / no registrado -> llevar a Login
                 Intent intent = new Intent(MenuPrincipal.this, Login.class);
                 startActivity(intent);
             } else {
-                // Vamos a ajustes de usuario
+                // Si ya ha iniciado sesión -> llevar a Ajustes de cuenta
                 Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
                 intent.putExtra("CORREO", correoUsuario);
                 startActivity(intent);

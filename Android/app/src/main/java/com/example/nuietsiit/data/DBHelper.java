@@ -73,8 +73,8 @@ public class DBHelper extends SQLiteOpenHelper {
             "  nombreEstudiante       TEXT NOT NULL," +
             "  contraseniaHash        TEXT NOT NULL," +
             "  enlaceCalendarioGoogle TEXT," +
-            "  idGrado                INTEGER NOT NULL," +
-            "  codigoIdioma           TEXT NOT NULL," +
+            "  idGrado                INTEGER," +
+            "  codigoIdioma           TEXT," +
             "  tokenNotificacion      TEXT," +
             "  FOREIGN KEY (idGrado)      REFERENCES GRADO(idGrado)," +
             "  FOREIGN KEY (codigoIdioma) REFERENCES IDIOMA(codigoIdioma)" +
@@ -598,7 +598,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private void insertarDatosInicialesComedores(SQLiteDatabase db) {
         // IDIOMA y GRADO por defecto
         db.execSQL("INSERT OR IGNORE INTO IDIOMA (codigoIdioma, nombreIdioma) VALUES ('es', 'Español'), ('en', 'English')");
-        db.execSQL("INSERT OR IGNORE INTO GRADO (idGrado, nombreGrado) VALUES (1, 'Grado en Ingeniería Informática'), (2, 'Doble Grado en Ingeniería Informática y Matemáticas'), (3, 'Grado en Telecomunicación')");
+        db.execSQL("INSERT OR IGNORE INTO GRADO (idGrado, nombreGrado) VALUES (0, '-- Ninguno --'), (1, 'Grado en Ingeniería Informática'), (2, 'Doble Grado en Ingeniería Informática y Matemáticas'), (3, 'Grado en Telecomunicación')");
 
         // 4 Comedores UGR con coordenadas exactas en Google Maps
         db.execSQL("INSERT OR IGNORE INTO COMEDOR (idComedor, nombreComedor, direccion, latitud, longitud) " +

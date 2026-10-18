@@ -4,6 +4,9 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Acceso a datos del módulo de Idiomas:
  * IDIOMA, TRADUCCION
@@ -34,10 +37,52 @@ public class IdiomasDB {
         return resultado != -1;
     }
 
-    /** Lista todos los idiomas disponibles. */
-    public Cursor listarIdiomas() {
+    /** Lista todos los códigos de los idiomas disponibles. */
+    public List<String> listarCodigoIdiomas() {
+        List<String> listaIdiomas = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM IDIOMA ORDER BY nombreIdioma", null);
+
+        Cursor cursor = db.rawQuery("SELECT codigoIdioma FROM IDIOMA ORDER BY nombreIdioma", null);
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    int indexCodigo = cursor.getColumnIndexOrThrow("codigoIdioma");
+                    do {
+                        String codigo = cursor.getString(indexCodigo);
+                        listaIdiomas.add(codigo);
+                    } while (cursor.moveToNext());
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return listaIdiomas;
+    }
+
+    /** Lista todos los nombres de los idiomas disponibles. */
+    public List<String> listarIdiomas() {
+        List<String> listaIdiomas = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT nombreIdioma FROM IDIOMA ORDER BY nombreIdioma", null);
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    int indexNombre = cursor.getColumnIndexOrThrow("nombreIdioma");
+                    do {
+                        String nombre = cursor.getString(indexNombre);
+                        listaIdiomas.add(nombre);
+                    } while (cursor.moveToNext());
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return listaIdiomas;
     }
 
     // --------------------------------------------------------------

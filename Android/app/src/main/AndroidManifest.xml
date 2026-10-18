@@ -24,9 +24,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.auth.Login" />
-        <activity android:name=".activities.auth.SignUp" />
-        <activity android:name=".activities.main.AjustesCuenta" />
+        <activity
+            android:name=".activities.auth.Login"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activities.auth.SignUp"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".activities.auth.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
         <activity android:name=".activities.secciones.Mapa" />
         <activity android:name=".activities.secciones.Actividades" />

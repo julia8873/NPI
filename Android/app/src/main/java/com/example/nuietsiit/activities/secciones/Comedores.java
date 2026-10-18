@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.auth.AjustesCuenta;
 import com.example.nuietsiit.data.Comedores.ComedoresDB;
 import com.example.nuietsiit.data.Comedores.Comedor;
 import com.example.nuietsiit.data.Comedores.MenuInfo;

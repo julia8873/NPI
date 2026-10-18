@@ -1,85 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="#FFFFFF"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- Logo principal de la aplicación -->
-        <ImageView
-            android:id="@+id/ivLogo"
-            android:layout_width="180dp"
-            android:layout_height="180dp"
-            android:layout_marginTop="100dp"
-            android:layout_marginBottom="20dp"
-            android:contentDescription="Logo de la aplicación"
-            android:src="@drawable/logo" />
-
-        <!-- Espaciador flexible -->
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <!-- Campo de entrada: Nombre -->
-        <EditText
-            android:id="@+id/etNombre"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nombre"
-            android:textColor="#000000"
-            android:textColorHint="#CCCCCC"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginBottom="12dp" />
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Campo de entrada: Correo electrónico -->
-        <EditText
-            android:id="@+id/etCorreo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Correo"
-            android:textColor="#000000"
-            android:textColorHint="#CCCCCC"
-            android:inputType="textEmailAddress"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginBottom="12dp" />
+            <!-- Icono de usuario -->
+            <ImageView
+                android:id="@+id/ivIcono"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginBottom="24dp"
+                android:src="@drawable/icono" />
 
-        <!-- Campo de entrada: Contraseña -->
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Contraseña"
-            android:textColor="#000000"
-            android:textColorHint="#CCCCCC"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginBottom="40dp" />
+            <!-- Etiqueta: Nombre -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="4dp"
+                android:text="Nombre"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-        <!-- Botón de Registro (Crear cuenta) -->
-        <Button
-            android:id="@+id/btnCrearCuenta"
-            android:layout_width="wrap_content"
-            android:paddingStart="70dp"
-            android:paddingEnd="70dp"
-            android:layout_height="50dp"
-            android:text="Crear cuenta"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/boton_redondeado"
-            app:backgroundTint="@null"
-            android:layout_marginBottom="240dp" />
+            <!-- Campo de entrada: Nombre -->
+            <EditText
+                android:id="@+id/etNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/cuadro_introducir_datos"
+                android:textColor="#000000" />
 
-    </LinearLayout>
+            <!-- Etiqueta: Correo electrónico -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="4dp"
+                android:text="Correo electrónico"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Campo de entrada: Correo electrónico -->
+            <EditText
+                android:id="@+id/etCorreo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/cuadro_introducir_datos"
+                android:inputType="textEmailAddress"
+                android:textColor="#000000" />
+
+            <!-- Etiqueta: Contraseña -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="4dp"
+                android:text="Contraseña"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <!-- Campo de entrada: Contraseña -->
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/cuadro_introducir_datos"
+                android:inputType="textPassword"
+                android:textColor="#000000" />
+
+            <!-- Botón de Registro -->
+            <Button
+                android:id="@+id/btnCrearCuenta"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:background="@drawable/boton_redondeado"
+                android:paddingStart="70dp"
+                android:paddingEnd="70dp"
+                android:text="Crear cuenta"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@null" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>
