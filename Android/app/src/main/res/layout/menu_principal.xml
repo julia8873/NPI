@@ -59,94 +59,140 @@
 
         </FrameLayout>
 
-        <!-- Cuadrícula con las 7 secciones principales -->
-        <GridLayout
+        <!-- Botón grande de la sección actual -->
+        <Button
+            android:id="@+id/btnSeccionGrande"
+            android:layout_width="match_parent"
+            android:layout_height="270dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/boton_redondeado"
+            android:text="Mapa"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Flechas de navegación abajo para cambiar de sección con sus etiquetas -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:alignmentMode="alignMargins"
-            android:columnCount="2"
-            android:columnOrderPreserved="false"
-            android:rowCount="4">
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp">
 
-            <Button
-                android:id="@+id/btnMapa"
+            <!-- Botón y etiqueta Anterior -->
+            <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Mapa"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical|end"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnActividades"
+                <TextView
+                    android:id="@+id/tvAnteriorNombre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="Anterior"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnAnteriorSeccion"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/boton_redondeado"
+                    android:text="◀"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null" />
+            </LinearLayout>
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="wrap_content" />
+
+            <!-- Botón y etiqueta Siguiente -->
+            <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Actividades"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_vertical|start"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btnAsignaturas"
-                android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Asignaturas"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+                <Button
+                    android:id="@+id/btnSiguienteSeccion"
+                    android:layout_width="60dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/boton_redondeado"
+                    android:text="▶"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null" />
 
-            <Button
-                android:id="@+id/btnProfesorado"
-                android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Profesorado"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+                <TextView
+                    android:id="@+id/tvSiguienteNombre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="Siguiente"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btnSecretaria"
-                android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Secretaría"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+        <!-- Modo manos libres -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#FFF1E6"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
-            <Button
-                android:id="@+id/btnComedores"
-                android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Comedores"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnBiblioteca"
-                android:layout_width="0dp"
-                android:layout_height="110dp"
-                android:layout_margin="8dp"
-                android:layout_columnWeight="1"
-                android:background="@drawable/boton_redondeado"
-                android:text="Biblioteca"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-        </GridLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Modo manos libres"
+                        android:textColor="#000000"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvManosLibres"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Inclina el móvil hacia la derecha o izquierda para ver más secciones!"
+                        android:textColor="#555555"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>
