@@ -28,6 +28,7 @@ import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.activities.secciones.Profesorado;
 import com.example.nuietsiit.activities.secciones.Secretaria;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.Notificador;
 
 import java.util.ArrayList;
@@ -110,15 +111,15 @@ public class MenuPrincipal extends AppCompatActivity {
     private void inicializarBotonesNavegacion() {
         // Clic en la foto/icono de perfil
         ivIcono.setOnClickListener(v -> {
-            if (correoUsuario != null && !correoUsuario.isEmpty()) { //Nota: Creo que estaba la lógica al revés, he intercambiado bloques if y else
-                // Usuario LOGUEADO: Vamos a la pantalla de Ajustes de Cuenta
-                Intent intentAjustes = new Intent(MenuPrincipal.this, AjustesCuenta.class);
-                intentAjustes.putExtra("CORREO", correoUsuario);
-                startActivity(intentAjustes);
+            if (correoUsuario == null || correoUsuario.isEmpty()) {
+                // Si no ha iniciado sesión / no registrado -> llevar a Login
+                Intent intent = new Intent(MenuPrincipal.this, Login.class);
+                startActivity(intent);
             } else {
-                // Modo INVITADO: Vamos a la pantalla de Login para que inicie sesión
-                Intent intentLogin = new Intent(MenuPrincipal.this, Login.class);
-                startActivity(intentLogin);
+                // Si ya ha iniciado sesión -> llevar a Ajustes de cuenta
+                Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
+                intent.putExtra("CORREO", correoUsuario);
+                startActivity(intent);
             }
         });
 

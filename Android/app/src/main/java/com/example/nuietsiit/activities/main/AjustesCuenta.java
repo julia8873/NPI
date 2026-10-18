@@ -1,87 +1,211 @@
 package com.example.nuietsiit.activities.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.IdiomasDB;
+import com.example.nuietsiit.data.UsuariosDB;
+
+import java.util.List;
 
 public class AjustesCuenta  extends AppCompatActivity {
 
-    // Declaración de los componentes de la interfaz de usuario
     private EditText etNombre, etPassword;
+    private AutoCompleteTextView etGrado, etIdioma;
     private Button btnLogOut, btnGuardarCambios;
 
-    // Instancia del Helper para la gestión de la base de datos SQLite
-    DBHelper BD;
-
-    // Variable para almacenar el correo del usuario actual
+    private DBHelper BD;
     private String correoUsuario;
+
+    private Integer idGradoSeleccionado = null;
+    private String codigoIdiomaSeleccionado = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ajustes_cuenta);
 
-        // Inicialización de la base de datos
         BD = DBHelper.getInstance(this);
 
-        // Obtención del correo pasado desde la pantalla anterior (MenuPrincipal)
         if (getIntent() != null && getIntent().hasExtra("CORREO")) {
             correoUsuario = getIntent().getStringExtra("CORREO");
         }
 
-        // Vinculación de las variables Java con los elementos XML
         etNombre = findViewById(R.id.etNombre);
         etPassword = findViewById(R.id.etPassword);
+        etGrado = findViewById(R.id.etGrado);
+        etIdioma = findViewById(R.id.etIdioma);
         btnGuardarCambios = findViewById(R.id.btnGuardarCambios);
         btnLogOut = findViewById(R.id.btnLogOut);
 
-        // Evento para guardar los datos actualizados
-        btnGuardarCambios.setOnClickListener(view -> guardarCambios());
+        // 1. Cargar datos del usuario
+        cargarDatosUsuario();
 
-        // Evento para cerrar la sesión
+        // 2. Configurar los desplegables pasando la información inicial
+        configurarDesplegables();
+
+        btnGuardarCambios.setOnClickListener(view -> guardarCambios());
         btnLogOut.setOnClickListener(view -> cerrarSesion());
     }
 
-    /**
-     * Valida y actualiza los datos del usuario en la base de datos.
-     */
+    private void cargarDatosUsuario() {
+        if (correoUsuario == null || correoUsuario.isEmpty()) return;
+
+        UsuariosDB usuariosDB = new UsuariosDB(BD);
+
+        // Cargar textos actuales
+        etNombre.setText(usuariosDB.obtenerNombreUsuario(correoUsuario));
+
+        String gradoActual = usuariosDB.obtenerGradoUsuario(correoUsuario);
+        String idiomaActual = usuariosDB.obtenerIdiomaUsuario(correoUsuario);
+
+        etGrado.setText(gradoActual, false);
+        etIdioma.setText(idiomaActual, false);
+    }
+
+    private void configurarDesplegables() {
+        // --- GRADOS ---
+        UsuariosDB usuariosDB = new UsuariosDB(BD);
+        List<String> nombresGrados = usuariosDB.listarGrados();
+        List<Integer> idsGrados = usuariosDB.listarIdGrados();
+
+        ArrayAdapter<String> adaptadorGrados = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                nombresGrados
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    textView.setTextColor(Color.BLACK); // Color del campo cuando está cerrado
+                }
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    textView.setTextColor(Color.BLACK); // Color de la lista de opciones
+                }
+                return view;
+            }
+        };
+
+        etGrado.setAdapter(adaptadorGrados);
+        etGrado.setDropDownBackgroundDrawable(new ColorDrawable(Color.WHITE));
+        etGrado.setKeyListener(null);
+        etGrado.setOnClickListener(v -> etGrado.showDropDown());
+        etGrado.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) etGrado.showDropDown();
+        });
+        etGrado.setOnItemClickListener((parent, view, position, id) -> {
+            String gradoSeleccionado = (String) parent.getItemAtPosition(position);
+            int index = nombresGrados.indexOf(gradoSeleccionado);
+            if (index != -1 && index < idsGrados.size()) {
+                idGradoSeleccionado = idsGrados.get(index);
+            }
+        });
+
+        // --- IDIOMAS ---
+        IdiomasDB idiomasDB = new IdiomasDB(BD);
+        List<String> nombresIdiomas = idiomasDB.listarIdiomas();
+        List<String> codigosIdiomas = idiomasDB.listarCodigoIdiomas();
+
+        ArrayAdapter<String> adaptadorIdiomas = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                nombresIdiomas
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    textView.setTextColor(Color.BLACK); // Color del campo cuando está cerrado
+                }
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (textView != null) {
+                    textView.setTextColor(Color.BLACK); // Color de la lista de opciones
+                }
+                return view;
+            }
+        };
+
+        etIdioma.setAdapter(adaptadorIdiomas);
+        etIdioma.setDropDownBackgroundDrawable(new ColorDrawable(Color.WHITE));
+        etIdioma.setKeyListener(null);
+        etIdioma.setOnClickListener(v -> etIdioma.showDropDown());
+        etIdioma.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) etIdioma.showDropDown();
+        });
+        etIdioma.setOnItemClickListener((parent, view, position, id) -> {
+            String idiomaSeleccionado = (String) parent.getItemAtPosition(position);
+            int index = nombresIdiomas.indexOf(idiomaSeleccionado);
+            if (index != -1 && index < codigosIdiomas.size()) {
+                codigoIdiomaSeleccionado = codigosIdiomas.get(index);
+            }
+        });
+    }
+
     private void guardarCambios() {
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevaPassword = etPassword.getText().toString().trim();
 
-        // Validar que no estén vacíos ambos campos
-        if (nuevoNombre.isEmpty() && nuevaPassword.isEmpty()) {
-            Toast.makeText(AjustesCuenta.this, "Por favor, ingresa al menos un dato a cambiar", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // Comprobar que tenemos la referencia del usuario
         if (correoUsuario == null || correoUsuario.isEmpty()) {
             Toast.makeText(AjustesCuenta.this, "Error al identificar el usuario actual", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Actualizar datos en la base de datos
-        // TERMINAR
-        // boolean actualizado = BD.actualizarDatosUsuario(correoUsuario, nuevoNombre, nuevaPassword);
-        boolean actualizado = false;
+        if (nuevoNombre.isEmpty()) {
+            Toast.makeText(AjustesCuenta.this, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        UsuariosDB usuariosDB = new UsuariosDB(BD);
+        boolean actualizado = usuariosDB.actualizarAjustesEstudiante(
+                correoUsuario,
+                nuevoNombre,
+                nuevaPassword,
+                idGradoSeleccionado,
+                codigoIdiomaSeleccionado,
+                null
+        );
 
         if (actualizado) {
             Toast.makeText(AjustesCuenta.this, "Datos actualizados correctamente", Toast.LENGTH_SHORT).show();
-            // Limpiar los campos tras guardar
-            etNombre.setText("");
             etPassword.setText("");
         } else {
-            Toast.makeText(AjustesCuenta.this, "Error al actualizar los datos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(AjustesCuenta.this, "No se realizaron cambios o error al actualizar", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -89,11 +213,14 @@ public class AjustesCuenta  extends AppCompatActivity {
      * Cierra la sesión del usuario y limpia la pila de navegación hacia la pantalla de Login.
      */
     private void cerrarSesion() {
-        Intent intent = new Intent(AjustesCuenta.this, Login.class);
+        // Limpiar SharedPreferences para eliminar la sesión activa
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.apply();
 
-        // Limpia el historial de actividades para que el usuario no pueda regresar con el botón "Atrás"
+        Intent intent = new Intent(AjustesCuenta.this, MenuPrincipal.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
         startActivity(intent);
         finish();
     }

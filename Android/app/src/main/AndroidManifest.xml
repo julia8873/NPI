@@ -32,7 +32,7 @@
         <activity
             android:name=".activities.auth.SignUp"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".activities.auth.AjustesCuenta" />
+        <activity android:name=".activities.main.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
         <activity android:name=".activities.secciones.Mapa" />
         <activity android:name=".activities.secciones.Actividades" />
