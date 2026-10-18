@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -89,7 +90,13 @@ public class AjustesCuenta  extends AppCompatActivity {
      * Cierra la sesión del usuario y limpia la pila de navegación hacia la pantalla de Login.
      */
     private void cerrarSesion() {
-        Intent intent = new Intent(AjustesCuenta.this, Login.class);
+        // Limpia los datos guardados en SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(AjustesCuenta.this, MenuPrincipal.class);
 
         // Limpia el historial de actividades para que el usuario no pueda regresar con el botón "Atrás"
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

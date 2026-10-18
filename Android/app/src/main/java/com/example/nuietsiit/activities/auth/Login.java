@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -68,6 +69,12 @@ public class Login extends AppCompatActivity {
         } else if (!BD.autenticarEstudiante(correo, password)) {
             Toast.makeText(Login.this, "Contraseña incorrecta", Toast.LENGTH_LONG).show();
         } else {
+            // Guardamos el correo en SharedPreferences
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("CORREO", correo);
+            editor.apply();
+
             // Inicio de sesión exitoso: Navegación al Menú Principal
             Intent intent = new Intent(Login.this, MenuPrincipal.class);
             intent.putExtra("CORREO", correo);

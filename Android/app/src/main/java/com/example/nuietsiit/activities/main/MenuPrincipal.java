@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +18,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Biblioteca;
@@ -62,6 +64,10 @@ public class MenuPrincipal extends AppCompatActivity {
         ivIcono = findViewById(R.id.ivIcono);
         vpNoticias = findViewById(R.id.vpNoticias);
 
+        // Leer sesión de SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        correoUsuario = prefs.getString("CORREO", null); // Si no hay nadie logueado, será null (invitado)
+
         // Obtención de datos pasados mediante Intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CORREO")) {
@@ -106,15 +112,15 @@ public class MenuPrincipal extends AppCompatActivity {
     private void inicializarBotonesNavegacion() {
         // Clic en la foto/icono de perfil para ir a Ajustes
         ivIcono.setOnClickListener(v -> {
-            if (correoUsuario != null && !correoUsuario.isEmpty()) {
-                // Vamos a página de inicio de sesión
-                Intent intent = new Intent(MenuPrincipal.this, Login.class);
-                startActivity(intent);
+            if (correoUsuario != null && !correoUsuario.isEmpty()) { //Nota: Creo que estaba la lógica al revés, he intercambiado bloques if y else
+                // Usuario LOGUEADO: Vamos a la pantalla de Ajustes de Cuenta
+                Intent intentAjustes = new Intent(MenuPrincipal.this, AjustesCuenta.class);
+                intentAjustes.putExtra("CORREO", correoUsuario);
+                startActivity(intentAjustes);
             } else {
-                // Vamos a ajustes de usuario
-                Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
-                intent.putExtra("CORREO", correoUsuario);
-                startActivity(intent);
+                // Modo INVITADO: Vamos a la pantalla de Login para que inicie sesión
+                Intent intentLogin = new Intent(MenuPrincipal.this, Login.class);
+                startActivity(intentLogin);
             }
         });
 

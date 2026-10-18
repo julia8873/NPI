@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.auth;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,9 +67,18 @@ public class SignUp extends AppCompatActivity {
             if (creado) {
                 Toast.makeText(SignUp.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
 
+                // Guardamos el correo en SharedPreferences para iniciar sesión automáticamente
+                SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("CORREO", correo);
+                editor.apply();
+
                 // Navegación directa al Menú Principal
                 Intent intent = new Intent(SignUp.this, MenuPrincipal.class);
                 intent.putExtra("CORREO", correo);
+
+                // Limpiamos el historial para que no pueda volver atrás al registro
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
 
                 // Finaliza la pantalla de registro para evitar volver a ella pulsando el botón "Atrás"
