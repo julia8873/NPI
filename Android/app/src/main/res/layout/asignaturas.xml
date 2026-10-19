@@ -1,117 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="#FFFFFF"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <LinearLayout
+    <!-- Cabecera -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_marginTop="20dp"
+        android:paddingHorizontal="8dp">
 
-        <!-- Cabecera -->
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvAsignaturas"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingHorizontal="8dp">
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/ivIcono"
+            android:text="Asignaturas"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvAsignaturas"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/ivIcono"
-                android:text="Asignaturas"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:contentDescription="Icono de perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:src="@drawable/icono" />
+    </RelativeLayout>
 
-            <ImageView
-                android:id="@+id/ivIcono"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:clickable="true"
-                android:contentDescription="Icono de perfil"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/icono" />
-        </RelativeLayout>
+    <!-- Recuadro expansible para el horario/estado del usuario -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardHorario"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#F5F5F5">
 
-        <!-- Recuadro para el horario/estado del usuario -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardHorario"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_marginTop="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#F5F5F5">
+            android:layout_height="match_parent"
+            android:padding="16dp">
 
-            <FrameLayout
+            <!-- 1. VISTA SIN SESIÓN INICIADA -->
+            <LinearLayout
+                android:id="@+id/layoutLoggedOut"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="16dp">
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="visible">
 
-                <!-- 1. VISTA SIN SESIÓN INICIADA -->
-                <LinearLayout
-                    android:id="@+id/layoutLoggedOut"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    android:visibility="visible">
+                    android:text="No has iniciado sesión aún.\nPara ver tu horario accede con tus credenciales."
+                    android:textColor="#666666"
+                    android:textSize="15sp"
+                    android:layout_marginHorizontal="16dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="Para ver tus asignaturas e inicio de clases, inicia sesión."
-                        android:textColor="#666666"
-                        android:textSize="15sp" />
+                <Button
+                    android:id="@+id/btnLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Iniciar sesión" />
+            </LinearLayout>
 
-                    <Button
-                        android:id="@+id/btnLogin"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Iniciar sesión" />
-                </LinearLayout>
+            <!-- 2. VISTA CON SESIÓN INICIADA (Horario Semanal) -->
+            <LinearLayout
+                android:id="@+id/layoutLoggedIn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-                <!-- 2. VISTA CON SESIÓN INICIADA (Horario / Asignaturas) -->
-                <LinearLayout
-                    android:id="@+id/layoutLoggedIn"
+                <TextView
+                    android:id="@+id/tvUserWelcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tu horario semanal:"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- Doble Scroll para la cuadrícula -->
+                <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:visibility="gone">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/tvUserWelcome"
+                    <HorizontalScrollView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tu horario de hoy:"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <!-- Aquí irá la lista o grid con tus asignaturas/horario -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvHorario"
-                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
+                        android:fillViewport="true">
 
-            </FrameLayout>
-        </androidx.cardview.widget.CardView>
+                        <!-- La tabla que llenaremos desde la BD -->
+                        <TableLayout
+                            android:id="@+id/tablaHorario"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:stretchColumns="*">
+                        </TableLayout>
 
-    </LinearLayout>
-</ScrollView>
+                    </HorizontalScrollView>
+                </ScrollView>
+            </LinearLayout>
+
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- EL BOTÓN PARA LA RUETA INTERACTIVA -->
+    <Button
+        android:id="@+id/btnVerMasAsignaturas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
+        android:padding="16dp"
+        android:text="¿Quieres ver más asignaturas?"
+        android:textSize="16sp"
+        app:cornerRadius="24dp" />
+
+</LinearLayout>
