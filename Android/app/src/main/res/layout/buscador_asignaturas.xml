@@ -46,7 +46,7 @@
         android:drawablePadding="8dp"
         android:layout_marginBottom="16dp"/>
 
-    <!-- CONTENEDOR 1: Lista de Grados (Ahora con Scroll) -->
+    <!-- CONTENEDOR 1: Lista de Grados (Con Scroll) -->
     <ScrollView
         android:id="@+id/scrollGrados"
         android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <!-- Las tarjetas dinámicas irán aquí -->
+                <!-- Las tarjetas dinámicas se insertan aquí desde Java -->
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
@@ -86,7 +86,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:visibility="gone">
 
         <TextView
@@ -98,27 +98,22 @@
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginBottom="8dp"
-            android:textColor="#FF9800"/> <!-- Cambiado al naranja que querías -->
+            android:textColor="#FF9800"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Desliza para elegir el curso"
             android:textSize="14sp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:textColor="#666666"/>
 
-        <FrameLayout
-            android:id="@+id/contenedorRuleta"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:background="#F5F5F5">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="(La ruleta se dibujará aquí)"/>
-        </FrameLayout>
+        <!-- Ruleta Mágica personalizada -->
+        <com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView
+            android:id="@+id/ruletaCursosView"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_gravity="center" />
     </LinearLayout>
 
 </LinearLayout>

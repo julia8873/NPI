@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class BuscadorAsignaturas extends AppCompatActivity {
     private LinearLayout contenedorBotonesGrados;
     private TextView tvTituloGradoSeleccionado;
     private TextView btnVolver;
+    private RuletaCursosView ruletaCursosView;
 
     private DBHelper BD;
 
@@ -34,17 +36,24 @@ public class BuscadorAsignaturas extends AppCompatActivity {
 
         BD = DBHelper.getInstance(this);
 
-        // Referencias
+        // Referencias de UI
         scrollGrados = findViewById(R.id.scrollGrados);
         layoutRuletaCursos = findViewById(R.id.layoutRuletaCursos);
         contenedorBotonesGrados = findViewById(R.id.contenedorBotonesGrados);
         tvTituloGradoSeleccionado = findViewById(R.id.tvTituloGradoSeleccionado);
         btnVolver = findViewById(R.id.btnVolver);
+        ruletaCursosView = findViewById(R.id.ruletaCursosView);
 
-        // Configurar el botón "Volver" de arriba
+        // Escuchador para cuando el usuario pulsa el botón "IR" del centro de la ruleta
+        ruletaCursosView.setOnCursoSelectedListener(curso -> {
+            // Por ahora mostramos una notificación temporal de confirmación
+            Toast.makeText(this, "Curso " + curso + "º seleccionado", Toast.LENGTH_SHORT).show();
+        });
+
+        // Configurar botón "Volver" de arriba
         btnVolver.setOnClickListener(v -> manejarRetroceso());
 
-        // Configurar el botón/gesto de "Atrás" físico del móvil (Forma moderna y segura)
+        // Configurar gesto/botón físico de atrác
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -57,11 +66,9 @@ public class BuscadorAsignaturas extends AppCompatActivity {
 
     private void manejarRetroceso() {
         if (layoutRuletaCursos.getVisibility() == View.VISIBLE) {
-            // Si estamos en la ruleta, volvemos a la lista de grados
             layoutRuletaCursos.setVisibility(View.GONE);
             scrollGrados.setVisibility(View.VISIBLE);
         } else {
-            // Si ya estamos en los grados, cerramos la ventana y volvemos al horario
             finish();
         }
     }
@@ -75,7 +82,6 @@ public class BuscadorAsignaturas extends AppCompatActivity {
                 int idGrado = cursor.getInt(0);
                 String nombreGrado = cursor.getString(1);
 
-                // Crear tarjeta dinámica para cada grado
                 View tarjeta = crearTarjetaGrado(idGrado, nombreGrado);
                 contenedorBotonesGrados.addView(tarjeta);
 
@@ -84,54 +90,43 @@ public class BuscadorAsignaturas extends AppCompatActivity {
         cursor.close();
     }
 
-    /**
-     - Crea un bloque visual que contiene el botón naranja y una imagen debajo.
-     */
     private View crearTarjetaGrado(int idGrado, String nombreGrado) {
-        // Contenedor de la tarjeta
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
 
-        // Espaciado entre tarjetas
         LinearLayout.LayoutParams paramsTarjeta = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        paramsTarjeta.setMargins(0, 0, 0, 80); // Gran margen inferior para separarlos bien
+        paramsTarjeta.setMargins(0, 0, 0, 80);
         tarjeta.setLayoutParams(paramsTarjeta);
 
-        // 1. El botón Naranja
         Button btnGrado = new Button(this);
         btnGrado.setText(nombreGrado);
         btnGrado.setAllCaps(false);
         btnGrado.setTextSize(16f);
-        btnGrado.setBackgroundColor(Color.parseColor("#FF9800")); // Naranja principal
+        btnGrado.setBackgroundColor(Color.parseColor("#FF9800"));
         btnGrado.setTextColor(Color.WHITE);
 
-        // 2. La imagen de portada
         ImageView ivPortada = new ImageView(this);
         LinearLayout.LayoutParams paramsImg = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                450 // Altura fija de la imagen para rellenar espacio
+                450
         );
         ivPortada.setLayoutParams(paramsImg);
         ivPortada.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        // Lógica de imágenes dinámicas: busca "portada_grado_1", "portada_grado_2", etc.
         int idRecursoImg = getResources().getIdentifier("portada_grado_" + idGrado, "drawable", getPackageName());
         if (idRecursoImg != 0) {
             ivPortada.setImageResource(idRecursoImg);
         } else {
-            // Si no hay imagen en la carpeta res/drawable, ponemos una por defecto
             ivPortada.setImageResource(android.R.drawable.ic_menu_gallery);
             ivPortada.setBackgroundColor(Color.parseColor("#EEEEEE"));
         }
 
-        // Añadir elementos a la tarjeta
         tarjeta.addView(btnGrado);
         tarjeta.addView(ivPortada);
 
-        // Hacer que toda la tarjeta reaccione al click
         View.OnClickListener clickListener = v -> prepararRuletaParaGrado(idGrado, nombreGrado);
         btnGrado.setOnClickListener(clickListener);
         ivPortada.setOnClickListener(clickListener);
@@ -143,5 +138,37 @@ public class BuscadorAsignaturas extends AppCompatActivity {
         scrollGrados.setVisibility(View.GONE);
         layoutRuletaCursos.setVisibility(View.VISIBLE);
         tvTituloGradoSeleccionado.setText(nombreGrado);
+
+        // Le pasamos también el nombre del grado para el respaldo inteligente
+        int numCursos = obtenerNumCursosGrado(idGrado, nombreGrado);
+        ruletaCursosView.setNumCursos(numCursos);
+    }
+
+    /**
+     * Consulta la BD para obtener el curso máximo. Si no hay datos aún,
+     * aplica un respaldo inteligente según el nombre del grado.
+     */
+    private int obtenerNumCursosGrado(int idGrado, String nombreGrado) {
+        SQLiteDatabase db = BD.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT MAX(curso) FROM ASIGNATURA_GRADO WHERE idGrado = ?",
+                new String[]{String.valueOf(idGrado)}
+        );
+
+        // Fallback inteligente: si es un doble grado, por defecto son 5 cursos
+        int numCursosFallback = 4;
+        if (nombreGrado != null && (nombreGrado.toLowerCase().contains("doble") || nombreGrado.toLowerCase().contains("dgiim"))) {
+            numCursosFallback = 5;
+        }
+
+        int numCursos = numCursosFallback;
+        if (cursor.moveToFirst()) {
+            int maxCurso = cursor.getInt(0);
+            if (maxCurso > 0) { // Si ya hay asignaturas reales en la BD, usamos ese dato
+                numCursos = maxCurso;
+            }
+        }
+        cursor.close();
+        return numCursos;
     }
 }
