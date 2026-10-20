@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
 import com.example.nuietsiit.data.DBHelper;
 
 import java.util.HashMap;
@@ -78,9 +79,8 @@ public class Asignaturas extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> startActivity(new Intent(Asignaturas.this, Login.class)));
 
         btnVerMasAsignaturas.setOnClickListener(v -> {
-            // Aquí navegaremos al buscador de asignaturas (Fase 3)
-            // Intent intent = new Intent(Asignaturas.this, BuscadorAsignaturasActivity.class);
-            // startActivity(intent);
+            Intent intent = new Intent(Asignaturas.this, BuscadorAsignaturas.class);
+            startActivity(intent);
         });
     }
 
