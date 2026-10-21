@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 4; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat
+    private static final int VERSION_BD = 6; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas
 
     private static DBHelper instance;
 
@@ -596,6 +596,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Datos de ejemplo de Actividades y Noticias (anuncios)
         TablasActividades.poblar(db);
+
+        // Datos de ejemplo de Asignaturas y Horarios
+        TablasAcademico.poblar(db);
     }
 
     private void insertarDatosInicialesComedores(SQLiteDatabase db) {
