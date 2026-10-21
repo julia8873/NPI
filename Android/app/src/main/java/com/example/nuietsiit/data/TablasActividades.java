@@ -33,6 +33,7 @@ public final class TablasActividades {
 
         poblarActividades(db);
         poblarAnuncios(db);
+        poblarComunidades(db);
     }
 
     // -------------------------------------------------
@@ -144,12 +145,49 @@ public final class TablasActividades {
     }
 
     // -------------------------------------------------
+    //                  COMUNIDADES DE CHAT
+    // -------------------------------------------------
+    // Los enlaces no se abren: la app enseña una vista previa simulada del grupo.
+    // idGrado: null = para todos, 1 = Informática, 2 = Doble Inf+Mat, 3 = Teleco
+    private static void poblarComunidades(SQLiteDatabase db) {
+        comunidad(db, "Informática · Delegación", "whatsapp",
+                "Avisos de los delegados, asambleas y dudas del grado.", 1);
+        comunidad(db, "Informática 2º curso", "whatsapp",
+                "Grupo de clase: horarios, prácticas y quedadas para estudiar.", 1);
+        comunidad(db, "Club de programación competitiva", "discord",
+                "Entrenamientos semanales y equipos para concursos de programación.", 1);
+        comunidad(db, "Doble Grado Inf+Mat", "whatsapp",
+                "Grupo de estudiantes del doble grado.", 2);
+        comunidad(db, "Teleco · Delegación", "whatsapp",
+                "Avisos y dudas de Telecomunicación.", 3);
+        comunidad(db, "Apuntes y exámenes ETSIIT", "telegram",
+                "Canal para compartir apuntes y exámenes de años anteriores.", null);
+        comunidad(db, "ETSIIT Avisos", "telegram",
+                "Canal no oficial con los avisos importantes de la escuela.", null);
+        comunidad(db, "ETSIIT Gaming & Hackathons", "discord",
+                "Torneos de videojuegos, CTF, hackathons y quedadas.", null);
+    }
+
+    // -------------------------------------------------
     //                  AUXILIARES
     // -------------------------------------------------
 
     // fecha dentro de 'dias' días a la hora indicada
     private static LocalDateTime en(LocalDate hoy, int dias, int hora, int minuto) {
         return hoy.plusDays(dias).atTime(hora, minuto);
+    }
+
+    private static void comunidad(SQLiteDatabase db, String nombre, String plataforma,
+                                  String descripcion, Integer idGrado) {
+        ContentValues cv = new ContentValues();
+        cv.put("nombreComunidad", nombre);
+        cv.put("plataforma", plataforma);
+        // enlace de ejemplo (obligatorio en la tabla, pero no se abre)
+        cv.put("enlaceAcceso", "https://ejemplo.etsiit/" + plataforma + "/"
+                + nombre.toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+        cv.put("descripcion", descripcion);
+        if (idGrado != null) cv.put("idGrado", idGrado); else cv.putNull("idGrado");
+        db.insert("COMUNIDAD_CHAT", null, cv);
     }
 
     private static long actividad(SQLiteDatabase db, String titulo, String descripcion, String tipo,

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.nuietsiit.data.modelo.Actividad;
+import com.example.nuietsiit.data.modelo.Comunidad;
 import com.example.nuietsiit.util.FechasUtil;
 
 import java.util.ArrayList;
@@ -212,6 +213,37 @@ public class ActividadesDB {
                 new String[]{correo, fechaHoyISO})) {
             while (c.moveToNext()) {
                 lista.add(leerActividad(c));
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * Comunidades de chat como objetos Comunidad.
+     * Con grado: las de ese grado primero y luego las generales.
+     * Sin grado (null o 0 = "Ninguno"): todas.
+     */
+    public List<Comunidad> obtenerComunidades(Integer idGrado) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = (idGrado == null || idGrado == 0)
+                ? db.rawQuery("SELECT * FROM COMUNIDAD_CHAT " +
+                        "ORDER BY idGrado IS NULL, nombreComunidad", null)
+                : db.rawQuery("SELECT * FROM COMUNIDAD_CHAT " +
+                        "WHERE idGrado = ? OR idGrado IS NULL " +
+                        "ORDER BY idGrado IS NULL, nombreComunidad",
+                        new String[]{String.valueOf(idGrado)});
+        List<Comunidad> lista = new ArrayList<>();
+        try (Cursor cursor = c) {
+            while (cursor.moveToNext()) {
+                Comunidad com = new Comunidad();
+                com.id = cursor.getInt(cursor.getColumnIndexOrThrow("idComunidad"));
+                com.nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombreComunidad"));
+                com.plataforma = cursor.getString(cursor.getColumnIndexOrThrow("plataforma"));
+                com.enlace = cursor.getString(cursor.getColumnIndexOrThrow("enlaceAcceso"));
+                com.descripcion = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
+                int iGrado = cursor.getColumnIndexOrThrow("idGrado");
+                com.idGrado = cursor.isNull(iGrado) ? null : cursor.getInt(iGrado);
+                lista.add(com);
             }
         }
         return lista;

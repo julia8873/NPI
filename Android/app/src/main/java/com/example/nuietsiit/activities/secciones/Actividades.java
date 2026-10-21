@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.actividades.ActividadAdapter;
+import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.TablasActividades;
@@ -85,6 +86,10 @@ public class Actividades extends AppCompatActivity {
 
         raiz = findViewById(android.R.id.content);
         etBuscar = findViewById(R.id.etBuscar);
+
+        // Botón de comunidades de chat (grupos de WhatsApp/Telegram/Discord simulados)
+        findViewById(R.id.btnComunidades).setOnClickListener(
+                v -> HojaComunidades.mostrar(this, correoUsuario));
         chipsTipos = findViewById(R.id.chipsTipos);
         tvMostrandoPara = findViewById(R.id.tvMostrandoPara);
         tvVacio = findViewById(R.id.tvVacio);

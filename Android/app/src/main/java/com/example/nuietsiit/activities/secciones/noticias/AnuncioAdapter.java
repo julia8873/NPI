@@ -29,7 +29,6 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
 
     private List<Anuncio> anuncios = new ArrayList<>();
     private final OnAnuncioClick listener;
-    private int posicionDestacada = -1; // se anima una vez (al llegar con el gesto de la mano)
 
     public AnuncioAdapter(OnAnuncioClick listener) {
         this.listener = listener;
@@ -42,20 +41,6 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
 
     public Anuncio get(int posicion) {
         return anuncios.get(posicion);
-    }
-
-    /** Posición del primer anuncio sin leer de la lista visible, o -1 si no hay. */
-    public int primeraNoLeida() {
-        for (int i = 0; i < anuncios.size(); i++) {
-            if (!anuncios.get(i).leido) return i;
-        }
-        return -1;
-    }
-
-    /** Hace un pequeño "latido" en la tarjeta de esa posición. */
-    public void destacar(int posicion) {
-        posicionDestacada = posicion;
-        notifyItemChanged(posicion);
     }
 
     @NonNull
@@ -86,13 +71,6 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         h.itemView.setAlpha(a.leido ? 0.7f : 1f);
 
         h.itemView.setOnClickListener(v -> listener.alPulsar(a));
-
-        if (posicion == posicionDestacada) {
-            posicionDestacada = -1;
-            h.itemView.animate().scaleX(1.05f).scaleY(1.05f).setDuration(150)
-                    .withEndAction(() -> h.itemView.animate().scaleX(1f).scaleY(1f).setDuration(150).start())
-                    .start();
-        }
     }
 
     @Override
