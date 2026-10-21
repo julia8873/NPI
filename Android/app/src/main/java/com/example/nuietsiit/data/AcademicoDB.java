@@ -55,6 +55,29 @@ public class AcademicoDB {
                 new String[]{String.valueOf(idGrado)});
     }
 
+    // Busca asignaturas cuyo nombre contenga el texto introducido (Buscador rápido)
+    public Cursor buscarAsignaturasPorNombre(String textoBusqueda) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT A.codigoAsignatura, A.nombreAsignatura, AG.curso, G.nombreGrado " +
+                "FROM ASIGNATURA A " +
+                "JOIN ASIGNATURA_GRADO AG ON A.codigoAsignatura = AG.codigoAsignatura " +
+                "JOIN GRADO G ON AG.idGrado = G.idGrado " +
+                "WHERE A.nombreAsignatura LIKE ? " +
+                "ORDER BY A.nombreAsignatura ASC";
+        return db.rawQuery(query, new String[]{"%" + textoBusqueda + "%"});
+    }
+
+    // Obtiene las asignaturas filtradas exactamente por la ruleta (Grado + Curso)
+    public Cursor obtenerAsignaturasPorGradoYCurso(int idGrado, int curso) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT A.codigoAsignatura, A.nombreAsignatura, A.creditosECTS, AG.tipo " +
+                "FROM ASIGNATURA A " +
+                "JOIN ASIGNATURA_GRADO AG ON A.codigoAsignatura = AG.codigoAsignatura " +
+                "WHERE AG.idGrado = ? AND AG.curso = ? " +
+                "ORDER BY A.nombreAsignatura ASC";
+        return db.rawQuery(query, new String[]{String.valueOf(idGrado), String.valueOf(curso)});
+    }
+
     // --------------------------------------------------------------
     // ASIGNATURA_GRADO
     // --------------------------------------------------------------

@@ -21,6 +21,7 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
+import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
 
 import java.util.HashMap;
@@ -38,15 +39,25 @@ public class Asignaturas extends AppCompatActivity {
     private String correoUsuario;
     private DBHelper BD;
 
+    // --- NUEVA CLASE AUXILIAR ---
+    // Nos permite guardar el texto formateado y el código de la asignatura juntos
+    private static class CeldaHorarioInfo {
+        String textoMostrar;
+        String codigoAsignatura;
+
+        CeldaHorarioInfo(String textoMostrar, String codigoAsignatura) {
+            this.textoMostrar = textoMostrar;
+            this.codigoAsignatura = codigoAsignatura;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.asignaturas);
 
-        // Inicializar Base de Datos
         BD = DBHelper.getInstance(this);
 
-        // Referencias a las vistas
         ivIcono = findViewById(R.id.ivIcono);
         layoutLoggedOut = findViewById(R.id.layoutLoggedOut);
         layoutLoggedIn = findViewById(R.id.layoutLoggedIn);
@@ -54,14 +65,10 @@ public class Asignaturas extends AppCompatActivity {
         btnVerMasAsignaturas = findViewById(R.id.btnVerMasAsignaturas);
         tablaHorario = findViewById(R.id.tablaHorario);
 
-        // Leer sesión
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
         correoUsuario = prefs.getString("CORREO", null);
 
-        // Actualizar interfaz
         actualizarVistaSesion();
-
-        // Configurar botones
         configurarBotones();
     }
 
@@ -96,23 +103,24 @@ public class Asignaturas extends AppCompatActivity {
     }
 
     private void cargarHorarioEstudiante() {
-        tablaHorario.removeAllViews(); // Limpiar tabla
+        tablaHorario.removeAllViews();
 
-        // 1. Obtener las clases
-        Map<String, String> clasesHorario = obtenerClasesDesdeBD();
+        // 1. Obtener las clases con su info completa (texto + código)
+        Map<String, CeldaHorarioInfo> clasesHorario = obtenerClasesDesdeBD();
 
-        // 2. Crear cabecera (Días de la semana)
+        // 2. Crear cabecera
         String[] dias = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
         TableRow rowCabecera = new TableRow(this);
         rowCabecera.setBackgroundColor(Color.parseColor("#E0E0E0"));
 
         for (String dia : dias) {
-            TextView tv = crearCelda(dia, true, dia.equals("Hora"));
+            // Cabeceras: no son clicables, por lo que pasamos null en codigoAsignatura
+            TextView tv = crearCelda(dia, true, dia.equals("Hora"), null);
             rowCabecera.addView(tv);
         }
         tablaHorario.addView(rowCabecera);
 
-        // 3. Crear las filas de horas (De 8:30 a 21:30, franjas de 1 hora)
+        // 3. Crear las filas de horas
         String[] horasInicio = {
                 "08:30", "09:30", "10:30", "11:30", "12:30", "13:30",
                 "14:30", "15:30", "16:30", "17:30", "18:30", "19:30", "20:30"
@@ -124,84 +132,63 @@ public class Asignaturas extends AppCompatActivity {
 
         for (int i = 0; i < horasInicio.length; i++) {
             TableRow row = new TableRow(this);
-            // Añadir un poco más de margen superior/inferior para que la fila "respire" y ocupe más alto
             row.setPadding(0, 12, 0, 12);
 
-            // Primera celda: La franja horaria completa (ej: 08:30\n09:30)
+            // Franja horaria (Tampoco es clicable)
             String franja = horasInicio[i] + "\n" + horasFin[i];
-            row.addView(crearCelda(franja, true, true));
+            row.addView(crearCelda(franja, true, true, null));
 
             // Celdas de los días
             for (int dia = 1; dia <= 5; dia++) {
                 String claveBusqueda = dia + "_" + horasInicio[i];
-                String infoClase = clasesHorario.getOrDefault(claveBusqueda, "---");
-                row.addView(crearCelda(infoClase, false, false));
+                CeldaHorarioInfo info = clasesHorario.get(claveBusqueda);
+
+                if (info != null) {
+                    // Hay clase: le pasamos el texto y el código para que sea clicable
+                    row.addView(crearCelda(info.textoMostrar, false, false, info.codigoAsignatura));
+                } else {
+                    // Hueco libre
+                    row.addView(crearCelda("---", false, false, null));
+                }
             }
             tablaHorario.addView(row);
         }
     }
 
     /**
-     - Método auxiliar modificado para dar más anchura a las celdas
-     */
-    private TextView crearCelda(String texto, boolean esCabecera, boolean esColumnaHora) {
-        TextView tv = new TextView(this);
-        tv.setText(texto);
-        tv.setGravity(Gravity.CENTER);
-
-        // Aumentar el padding interno de cada celda
-        tv.setPadding(24, 24, 24, 24);
-
-        // Definir la anchura: la columna de horas es más estrecha que las de los días
-        if (esColumnaHora) {
-            tv.setMinWidth(150); // Ancho mínimo en píxeles para las horas
-        } else {
-            tv.setMinWidth(300); // Ancho mínimo mayor para que quepan los nombres de asignaturas
-        }
-
-        if (esCabecera) {
-            tv.setTypeface(null, Typeface.BOLD);
-            tv.setTextColor(Color.BLACK);
-        } else {
-            tv.setTextColor(Color.DKGRAY);
-            tv.setBackgroundResource(android.R.drawable.editbox_background_normal);
-        }
-        return tv;
-    }
-
-    /**
      - Consulta cruzada a la BD para obtener el horario del estudiante actual.
+     - MODIFICADA: Añadido el grupo a la condición JOIN y se extrae el código.
      */
-    private Map<String, String> obtenerClasesDesdeBD() {
-        Map<String, String> mapaClases = new HashMap<>();
+    private Map<String, CeldaHorarioInfo> obtenerClasesDesdeBD() {
+        Map<String, CeldaHorarioInfo> mapaClases = new HashMap<>();
         SQLiteDatabase db = BD.getReadableDatabase();
 
-        // Consulta: Obtener Asignatura, Día y HoraInicio de las asignaturas en las que está matriculado
-        String query = "SELECT A.nombreAsignatura, S.diaSemana, S.horaInicio, S.grupo, S.tipoSesion " +
+        String query = "SELECT A.codigoAsignatura, A.nombreAsignatura, S.diaSemana, S.horaInicio, S.grupo, S.tipoSesion " +
                 "FROM MATRICULA M " +
                 "INNER JOIN ASIGNATURA A ON M.codigoAsignatura = A.codigoAsignatura " +
                 "INNER JOIN SESION_CLASE S ON M.codigoAsignatura = S.codigoAsignatura " +
+                "AND M.grupo = S.grupo " + // ¡CRÍTICO! Para que no salgan las horas de otros grupos
                 "WHERE M.correoEstudiante = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{correoUsuario});
 
         if (cursor.moveToFirst()) {
             do {
-                String nombreAsignatura = cursor.getString(0);
-                int diaSemana = cursor.getInt(1);
-                String horaInicio = cursor.getString(2); // Asume formato "HH:mm" ej "08:30"
-                String grupo = cursor.getString(3);
-                String tipo = cursor.getString(4); // "teoria" o "practicas"
+                String codigoAsignatura = cursor.getString(0);
+                String nombreAsignatura = cursor.getString(1);
+                int diaSemana = cursor.getInt(2);
+                String horaInicio = cursor.getString(3);
+                String grupo = cursor.getString(4);
+                String tipo = cursor.getString(5);
 
-                // Abreviar el nombre para que quepa mejor (puedes ajustar esto)
                 String nombreAbreviado = nombreAsignatura.length() > 15
                         ? nombreAsignatura.substring(0, 15) + "..."
                         : nombreAsignatura;
 
                 String contenidoCelda = nombreAbreviado + "\n(" + tipo + " " + grupo + ")";
-
                 String clave = diaSemana + "_" + horaInicio;
-                mapaClases.put(clave, contenidoCelda);
+
+                mapaClases.put(clave, new CeldaHorarioInfo(contenidoCelda, codigoAsignatura));
 
             } while (cursor.moveToNext());
         }
@@ -210,20 +197,38 @@ public class Asignaturas extends AppCompatActivity {
     }
 
     /**
-     - Método auxiliar para crear las celdas de texto de la tabla.
+     - Crea la celda. Si codigoAsignatura NO es nulo, la hace clicable y lanza el Intent.
      */
-    private TextView crearCelda(String texto, boolean esCabecera) {
+    private TextView crearCelda(String texto, boolean esCabecera, boolean esColumnaHora, String codigoAsignatura) {
         TextView tv = new TextView(this);
         tv.setText(texto);
-        tv.setPadding(16, 16, 16, 16);
         tv.setGravity(Gravity.CENTER);
+        tv.setPadding(24, 24, 24, 24);
+
+        if (esColumnaHora) {
+            tv.setMinWidth(150);
+        } else {
+            tv.setMinWidth(300);
+        }
 
         if (esCabecera) {
             tv.setTypeface(null, Typeface.BOLD);
             tv.setTextColor(Color.BLACK);
         } else {
             tv.setTextColor(Color.DKGRAY);
-            tv.setBackgroundResource(android.R.drawable.editbox_background_normal); // Añade un borde ligero
+            // Si la celda tiene una asignatura (no es "---"), la resaltamos visualmente un poco
+            if (codigoAsignatura != null) {
+                tv.setBackgroundColor(Color.parseColor("#FFF3E0")); // Naranja muy clarito
+
+                // Hacerla clicable
+                tv.setOnClickListener(v -> {
+                    Intent intent = new Intent(Asignaturas.this, DetalleAsignatura.class);
+                    intent.putExtra("CODIGO_ASIGNATURA", codigoAsignatura);
+                    startActivity(intent);
+                });
+            } else {
+                tv.setBackgroundResource(android.R.drawable.editbox_background_normal);
+            }
         }
         return tv;
     }
