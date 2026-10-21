@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,13 +18,11 @@ import com.example.nuietsiit.data.AnunciosDB;
 import com.example.nuietsiit.data.AnunciosLeidos;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Anuncio;
-import com.example.nuietsiit.util.DetectorProximidad;
 import com.example.nuietsiit.util.FechasUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -36,10 +33,8 @@ import java.util.Set;
  * Pantalla de Noticias: anuncios generales ordenados por prioridad y fecha.
  * - Los urgentes salen arriba con borde rojo.
  * - Se recuerda qué avisos has leído.
- * - SENSOR: con el "modo manos libres", pasar la mano por encima del móvil
- *   (sensor de proximidad) abre el siguiente aviso sin leer.
  */
-public class Noticias extends AppCompatActivity implements DetectorProximidad.OnPasarMano {
+public class Noticias extends AppCompatActivity {
 
     private static final String FILTRO_NO_LEIDOS = "__noleidos";
     private static final int ROJO = 0xFFD32F2F;
@@ -52,9 +47,7 @@ public class Noticias extends AppCompatActivity implements DetectorProximidad.On
     private View raiz;
     private RecyclerView rv;
     private AnuncioAdapter adaptador;
-    private TextView tvSinLeer, tvMarcarTodo, tvVacio, tvMano;
-    private MaterialSwitch swManosLibres;
-    private DetectorProximidad detector;
+    private TextView tvSinLeer, tvMarcarTodo, tvVacio;
     private BottomSheetDialog hojaAbierta;
 
     @Override
@@ -73,8 +66,6 @@ public class Noticias extends AppCompatActivity implements DetectorProximidad.On
         tvSinLeer = findViewById(R.id.tvSinLeer);
         tvMarcarTodo = findViewById(R.id.tvMarcarTodo);
         tvVacio = findViewById(R.id.tvVacio);
-        tvMano = findViewById(R.id.tvMano);
-        swManosLibres = findViewById(R.id.swManosLibres);
 
         adaptador = new AnuncioAdapter(this::mostrarDetalle);
         rv = findViewById(R.id.rvAnuncios);
@@ -90,32 +81,7 @@ public class Noticias extends AppCompatActivity implements DetectorProximidad.On
             cargarAnuncios();
         });
 
-        // Sensor de proximidad
-        detector = new DetectorProximidad(this, this);
-        if (detector.disponible()) {
-            swManosLibres.setChecked(true);
-            swManosLibres.setOnCheckedChangeListener((boton, activado) -> {
-                if (activado) detector.iniciar(); else detector.parar();
-            });
-        } else {
-            swManosLibres.setChecked(false);
-            swManosLibres.setEnabled(false);
-            ((TextView) findViewById(R.id.tvManosLibres)).setText("Este móvil no tiene sensor de proximidad");
-        }
-
         cargarAnuncios();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (swManosLibres.isChecked()) detector.iniciar();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        detector.parar(); // ahorra batería al salir de la pantalla
     }
 
     // -------------------------------------------------
@@ -232,30 +198,6 @@ public class Noticias extends AppCompatActivity implements DetectorProximidad.On
             adaptador.notifyDataSetChanged();
             actualizarContador();
         }
-    }
-
-    // -------------------------------------------------
-    //              SENSOR DE PROXIMIDAD
-    // -------------------------------------------------
-
-    /** Se llama cuando se pasa la mano por encima del móvil. */
-    @Override
-    public void alPasarMano() {
-        // feedback: vibración corta y la manita "salta"
-        rv.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        tvMano.animate().rotationBy(30f).setDuration(120)
-                .withEndAction(() -> tvMano.animate().rotationBy(-30f).setDuration(120).start())
-                .start();
-
-        int pos = adaptador.primeraNoLeida();
-        if (pos < 0) {
-            if (hojaAbierta != null && hojaAbierta.isShowing()) hojaAbierta.dismiss();
-            Snackbar.make(raiz, "🎉 ¡No te queda nada por leer!", Snackbar.LENGTH_SHORT).show();
-            return;
-        }
-        rv.smoothScrollToPosition(pos);
-        adaptador.destacar(pos);
-        mostrarDetalle(adaptador.get(pos));
     }
 
     @Override
