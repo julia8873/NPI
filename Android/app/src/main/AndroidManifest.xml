@@ -53,6 +53,17 @@
         <activity android:name=".activities.secciones.secretaria.MisGestiones" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
+
+        <!-- Secretaría: la app de cámara guarda la foto del documento en getFilesDir()/secretaria/ -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/rutas_archivos" />
+        </provider>
     </application>
 
 </manifest>

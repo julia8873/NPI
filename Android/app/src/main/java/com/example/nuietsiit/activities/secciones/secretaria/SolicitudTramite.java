@@ -3,9 +3,14 @@ package com.example.nuietsiit.activities.secciones.secretaria;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -14,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,10 +27,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
@@ -42,16 +55,23 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Asistente de 4 pasos para solicitar un trámite: datos → documentos → firma → resumen y envío
- * (mantener pulsado 1,5 s). Al enviar guarda la SOLICITUD y abre su justificante.
+ * Asistente de 4 pasos para solicitar un trámite: datos → documentos (foto con la cámara o archivo
+ * del almacenamiento) → firma → resumen y envío (mantener pulsado 1,5 s). Al enviar guarda la
+ * SOLICITUD y abre su justificante. Al rotar se conservan el paso, los documentos y la firma.
  */
 public class SolicitudTramite extends AppCompatActivity {
 
     private static final String[] TITULOS = {"Tus datos", "Documentos", "Firma", "Resumen"};
     private static final long DURACION_MANTENER = 1500;
+    private static final long TAMANO_MAXIMO_ARCHIVO = 10 * 1024 * 1024; // 10 MB
 
     private SecretariaDB db;
     private Tramite tramite;
@@ -62,10 +82,20 @@ public class SolicitudTramite extends AppCompatActivity {
     private boolean firmaConHuella; // true = firmada con la huella en vez de a mano
     private ValueAnimator animEnviar;
     private boolean enviando;       // evita dos envíos si el anillo se completa dos veces
+    // idDocumento → ruta del archivo copiado en getFilesDir()/secretaria/
+    private final Map<Integer, String> archivos = new HashMap<>();
+    private DocumentoSolicitudAdapter adaptadorDocumentos;
+    // documento para el que se ha abierto la cámara / el selector (la app puede morir mientras)
+    private int idDocumentoPendiente = -1;
+    private String rutaFotoPendiente;
+    private ActivityResultLauncher<String> lanzadorPermisoCamara;
+    private ActivityResultLauncher<Uri> lanzadorFoto;
+    private ActivityResultLauncher<String[]> lanzadorArchivo;
+    private AlertDialog dialogoDocumento;
 
     private View[] vistasPaso;
     private LinearProgressIndicator progreso;
-    private TextView tvPaso, tvErrorFirma, tvResumen, tvAyudaEnviar;
+    private TextView tvPaso, tvErrorDocumentos, tvErrorFirma, tvResumen, tvAyudaEnviar;
     private EditText etObservaciones;
     private LienzoFirma lienzoFirma;
     private ImageView ivFirma;
@@ -109,8 +139,12 @@ public class SolicitudTramite extends AppCompatActivity {
         ((TextView) findViewById(R.id.etCorreo)).setText(correoUsuario);
         etObservaciones = findViewById(R.id.etObservaciones);
 
-        // 2. Documentos (de momento solo la lista; la cámara llega en la tarea 7b)
-        ((TextView) findViewById(R.id.tvDocumentos)).setText(textoDocumentos());
+        // 2. Documentos: foto con la cámara o archivo del almacenamiento
+        ((TextView) findViewById(R.id.tvDocumentos)).setText(documentos.isEmpty()
+                ? "Este trámite no necesita documentos."
+                : "Haz una foto de cada documento o súbelo desde el móvil (imagen o PDF).");
+        tvErrorDocumentos = findViewById(R.id.tvErrorDocumentos);
+        configurarDocumentos();
 
         // 3. Firma
         lienzoFirma = findViewById(R.id.lienzoFirma);
@@ -137,7 +171,8 @@ public class SolicitudTramite extends AppCompatActivity {
             }
         });
 
-        mostrarPaso(0);
+        if (savedInstanceState != null) restaurar(savedInstanceState);
+        mostrarPaso(savedInstanceState != null ? savedInstanceState.getInt("paso") : 0);
     }
 
     private void mostrarPaso(int nuevo) {
@@ -156,6 +191,15 @@ public class SolicitudTramite extends AppCompatActivity {
 
     // valida el paso actual antes de avanzar
     private void siguiente() {
+        if (paso == 1) {
+            List<String> faltan = documentosQueFaltan();
+            if (!faltan.isEmpty()) {
+                tvErrorDocumentos.setText("Falta: " + String.join(", ", faltan));
+                tvErrorDocumentos.setVisibility(View.VISIBLE);
+                tvErrorDocumentos.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                return;
+            }
+        }
         if (paso == 2) {
             if (!lienzoFirma.tieneFirma()) {
                 tvErrorFirma.setVisibility(View.VISIBLE);
@@ -168,10 +212,23 @@ public class SolicitudTramite extends AppCompatActivity {
         mostrarPaso(paso + 1);
     }
 
-    private String textoDocumentos() {
-        if (documentos.isEmpty()) return "Este trámite no necesita documentos.";
-        StringBuilder sb = new StringBuilder("Documentos que tendrás que aportar:\n");
-        for (Documento d : documentos) sb.append("\n").append(d.textoLista());
+    private List<String> documentosQueFaltan() {
+        List<String> faltan = new ArrayList<>();
+        for (Documento d : documentos) {
+            if (d.obligatorio && !archivos.containsKey(d.id)) faltan.add(d.nombre);
+        }
+        return faltan;
+    }
+
+    private String textoDocumentosResumen() {
+        if (documentos.isEmpty()) return "no hacen falta";
+        StringBuilder sb = new StringBuilder();
+        for (Documento d : documentos) {
+            String ruta = archivos.get(d.id);
+            sb.append("\n   ").append(ruta == null ? "— " : "✓ ").append(d.nombre);
+            if (ruta == null) sb.append(" (no añadido)");
+            else if (DocumentoSolicitudAdapter.esPdf(ruta)) sb.append(" (PDF)");
+        }
         return sb.toString();
     }
 
@@ -181,7 +238,7 @@ public class SolicitudTramite extends AppCompatActivity {
                 + "\nNombre: " + nombreUsuario
                 + "\nCorreo: " + correoUsuario
                 + "\nObservaciones: " + (obs != null ? obs : "ninguna")
-                + "\nDocumentos: " + (documentos.isEmpty() ? "no hacen falta" : "próximamente")
+                + "\nDocumentos: " + textoDocumentosResumen()
                 + "\nFirma:" + (firmaConHuella ? " ✓ con huella digital" : ""));
         ivFirma.setVisibility(firmaConHuella ? View.GONE : View.VISIBLE);
         ivFirma.setImageBitmap(firma);
@@ -192,6 +249,148 @@ public class SolicitudTramite extends AppCompatActivity {
     private String observaciones() {
         String obs = etObservaciones.getText().toString().trim();
         return obs.isEmpty() ? null : obs;
+    }
+
+    // ---------- Documentos: cámara o almacenamiento ----------
+
+    private void configurarDocumentos() {
+        lanzadorPermisoCamara = registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
+            if (concedido) abrirCamara(idDocumentoPendiente);
+            else Toast.makeText(this, "Sin permiso de cámara: puedes subir el documento como archivo",
+                    Toast.LENGTH_LONG).show();
+        });
+        lanzadorFoto = registerForActivityResult(new ActivityResultContracts.TakePicture(), hecha -> {
+            if (rutaFotoPendiente == null) return;
+            File foto = new File(rutaFotoPendiente);
+            // algunas cámaras devuelven OK sin escribir nada
+            if (Boolean.TRUE.equals(hecha) && foto.length() > 0) ponerArchivo(idDocumentoPendiente, foto.getAbsolutePath());
+            else foto.delete();
+            rutaFotoPendiente = null;
+        });
+        lanzadorArchivo = registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+            if (uri != null) copiarArchivo(idDocumentoPendiente, uri);
+        });
+
+        RecyclerView rv = findViewById(R.id.rvDocumentos);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        adaptadorDocumentos = new DocumentoSolicitudAdapter(documentos, archivos, new DocumentoSolicitudAdapter.Acciones() {
+            @Override
+            public void hacerFoto(Documento d) {
+                SolicitudTramite.this.hacerFoto(d.id);
+            }
+
+            @Override
+            public void subirArchivo(Documento d) {
+                elegirArchivo(d.id);
+            }
+
+            @Override
+            public void opciones(Documento d) {
+                dialogoDocumento = new MaterialAlertDialogBuilder(SolicitudTramite.this)
+                        .setTitle(d.nombre)
+                        .setItems(new String[]{"📷 Hacer otra foto", "📁 Elegir otro archivo", "🗑 Quitar"}, (dlg, i) -> {
+                            if (i == 0) SolicitudTramite.this.hacerFoto(d.id);
+                            else if (i == 1) elegirArchivo(d.id);
+                            else quitarArchivo(d.id);
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+            }
+        });
+        rv.setAdapter(adaptadorDocumentos);
+    }
+
+    // la librería del escáner QR declara CAMERA en el manifest, así que hay que pedirlo para usar la cámara
+    private void hacerFoto(int idDocumento) {
+        idDocumentoPendiente = idDocumento;
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            abrirCamara(idDocumento);
+        } else {
+            lanzadorPermisoCamara.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    // la app de cámara escribe la foto directamente en nuestra carpeta a través del FileProvider
+    private void abrirCamara(int idDocumento) {
+        File carpeta = carpetaSecretaria();
+        if (carpeta == null) {
+            Toast.makeText(this, "No se ha podido preparar la foto", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File foto = new File(carpeta, "doc_" + idDocumento + "_" + System.currentTimeMillis() + ".jpg");
+        idDocumentoPendiente = idDocumento;
+        rutaFotoPendiente = foto.getAbsolutePath();
+        try {
+            lanzadorFoto.launch(FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", foto));
+        } catch (ActivityNotFoundException e) {
+            rutaFotoPendiente = null;
+            Toast.makeText(this, "No hay ninguna app de cámara: sube el documento como archivo",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void elegirArchivo(int idDocumento) {
+        idDocumentoPendiente = idDocumento;
+        try {
+            lanzadorArchivo.launch(new String[]{"image/*", "application/pdf"});
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "No hay ninguna app para elegir archivos", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // copia el archivo elegido a nuestra carpeta: el permiso sobre la Uri no dura para siempre
+    private void copiarArchivo(int idDocumento, Uri uri) {
+        File carpeta = carpetaSecretaria();
+        String tipo = getContentResolver().getType(uri);
+        String extension = tipo != null ? MimeTypeMap.getSingleton().getExtensionFromMimeType(tipo) : null;
+        if (carpeta == null || tipo == null || (!tipo.startsWith("image/") && !tipo.equals("application/pdf"))) {
+            Toast.makeText(this, "Elige una imagen o un PDF", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File copia = new File(carpeta, "doc_" + idDocumento + "_" + System.currentTimeMillis()
+                + "." + (extension != null ? extension : "jpg"));
+        try (InputStream entrada = getContentResolver().openInputStream(uri);
+             OutputStream salida = new FileOutputStream(copia)) {
+            if (entrada == null) throw new IOException();
+            byte[] bufer = new byte[8192];
+            long total = 0;
+            int leidos;
+            while ((leidos = entrada.read(bufer)) != -1) {
+                total += leidos;
+                if (total > TAMANO_MAXIMO_ARCHIVO) {
+                    salida.close();
+                    copia.delete();
+                    Toast.makeText(this, "El archivo es demasiado grande (máximo 10 MB)", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                salida.write(bufer, 0, leidos);
+            }
+        } catch (IOException | SecurityException e) {
+            copia.delete();
+            Toast.makeText(this, "No se ha podido leer el archivo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ponerArchivo(idDocumento, copia.getAbsolutePath());
+    }
+
+    // sustituye (y borra) el archivo anterior del documento
+    private void ponerArchivo(int idDocumento, String ruta) {
+        String anterior = archivos.put(idDocumento, ruta);
+        if (anterior != null) new File(anterior).delete();
+        adaptadorDocumentos.archivoCambiado(idDocumento);
+        if (documentosQueFaltan().isEmpty()) tvErrorDocumentos.setVisibility(View.GONE);
+    }
+
+    private void quitarArchivo(int idDocumento) {
+        String ruta = archivos.remove(idDocumento);
+        if (ruta != null) new File(ruta).delete();
+        adaptadorDocumentos.archivoCambiado(idDocumento);
+    }
+
+    // getFilesDir()/secretaria/ (privado de la app, sin permisos). null si no se puede crear
+    private File carpetaSecretaria() {
+        File carpeta = new File(getFilesDir(), "secretaria");
+        return carpeta.isDirectory() || carpeta.mkdirs() ? carpeta : null;
     }
 
     // ---------- Firma con huella (alternativa a firmar a mano) ----------
@@ -327,7 +526,7 @@ public class SolicitudTramite extends AppCompatActivity {
             }
         }
         long idSolicitud = db.insertarSolicitud(correoUsuario, tramite.id, observaciones(),
-                rutaFirma != null ? rutaFirma.getAbsolutePath() : null, null);
+                rutaFirma != null ? rutaFirma.getAbsolutePath() : null, archivos);
         if (idSolicitud == -1) {
             if (rutaFirma != null) rutaFirma.delete();
             fallo("No se ha podido enviar la solicitud");
@@ -345,17 +544,21 @@ public class SolicitudTramite extends AppCompatActivity {
         Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
 
-    // PNG en getFilesDir()/secretaria/ (privado de la app, sin permisos). null si falla
+    // PNG en getFilesDir()/secretaria/. null si falla
     private File guardarFirma() {
-        File carpeta = new File(getFilesDir(), "secretaria");
-        if (!carpeta.isDirectory() && !carpeta.mkdirs()) return null;
+        File carpeta = carpetaSecretaria();
+        if (carpeta == null) return null;
         File archivo = new File(carpeta, "firma_" + System.currentTimeMillis() + ".png");
+        return guardarPng(firma, archivo) ? archivo : null;
+    }
+
+    private static boolean guardarPng(Bitmap bitmap, File archivo) {
         try (FileOutputStream salida = new FileOutputStream(archivo)) {
-            if (!firma.compress(Bitmap.CompressFormat.PNG, 100, salida)) throw new IOException();
-            return archivo;
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, salida)) throw new IOException();
+            return true;
         } catch (IOException e) {
             archivo.delete();
-            return null;
+            return false;
         }
     }
 
@@ -365,6 +568,52 @@ public class SolicitudTramite extends AppCompatActivity {
         InputMethodManager imm = getSystemService(InputMethodManager.class);
         if (imm != null) imm.hideSoftInputFromWindow(foco.getWindowToken(), 0);
         foco.clearFocus();
+    }
+
+    // ---------- Rotación (y que Android cierre la app mientras está abierta la cámara) ----------
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle estado) {
+        super.onSaveInstanceState(estado); // las observaciones y los trazos del lienzo se guardan solos
+        estado.putInt("paso", paso);
+        estado.putBoolean("firmaConHuella", firmaConHuella);
+        ArrayList<Integer> ids = new ArrayList<>(archivos.keySet());
+        ArrayList<String> rutas = new ArrayList<>();
+        for (int id : ids) rutas.add(archivos.get(id));
+        estado.putIntegerArrayList("idsDocumentos", ids);
+        estado.putStringArrayList("rutasDocumentos", rutas);
+        estado.putInt("idDocumentoPendiente", idDocumentoPendiente);
+        estado.putString("rutaFotoPendiente", rutaFotoPendiente);
+        // el Bitmap de la firma es demasiado grande para el Bundle: va a un PNG en la caché
+        File archivoFirma = new File(getCacheDir(), "firma_en_curso.png");
+        if (firma != null && guardarPng(firma, archivoFirma)) {
+            estado.putString("rutaFirmaEnCurso", archivoFirma.getAbsolutePath());
+        }
+    }
+
+    private void restaurar(Bundle estado) {
+        firmaConHuella = estado.getBoolean("firmaConHuella");
+        ArrayList<Integer> ids = estado.getIntegerArrayList("idsDocumentos");
+        ArrayList<String> rutas = estado.getStringArrayList("rutasDocumentos");
+        for (int i = 0; ids != null && rutas != null && i < ids.size(); i++) {
+            if (new File(rutas.get(i)).exists()) archivos.put(ids.get(i), rutas.get(i));
+        }
+        adaptadorDocumentos.notifyDataSetChanged();
+        idDocumentoPendiente = estado.getInt("idDocumentoPendiente", -1);
+        rutaFotoPendiente = estado.getString("rutaFotoPendiente");
+        String rutaFirma = estado.getString("rutaFirmaEnCurso");
+        if (rutaFirma != null) firma = BitmapFactory.decodeFile(rutaFirma);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dialogoDocumento != null) dialogoDocumento.dismiss();
+        // salir sin enviar: los archivos copiados ya no sirven para nada
+        if (isFinishing() && !enviando) {
+            for (String ruta : archivos.values()) new File(ruta).delete();
+            if (rutaFotoPendiente != null) new File(rutaFotoPendiente).delete();
+        }
     }
 
     @Override

@@ -111,33 +111,39 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- 2. Documentos (la cámara llega en la tarea 7b) -->
-        <ScrollView
+        <!-- 2. Documentos: una foto por documento -->
+        <LinearLayout
             android:id="@+id/pasoDocumentos"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
             android:visibility="gone">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tvDocumentos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:textColor="#000000" />
 
-                <TextView
-                    android:id="@+id/tvDocumentos"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="#000000" />
+            <TextView
+                android:id="@+id/tvErrorDocumentos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#D32F2F"
+                android:visibility="gone" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="📷 Próximamente podrás hacer una foto de cada documento desde aquí."
-                    android:textColor="#555555" />
-            </LinearLayout>
-        </ScrollView>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDocumentos"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingBottom="8dp" />
+        </LinearLayout>
 
         <!-- 3. Firma -->
         <LinearLayout
