@@ -17,15 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.GeneradorQR;
+import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 
-import java.time.LocalDateTime;
 
 /**
  * Justificante para enseñar en ventanilla: código, resumen y QR grande.
@@ -52,8 +51,7 @@ public class Justificante extends AppCompatActivity {
         getSupportActionBar().setTitle("Justificante");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String correoUsuario = getIntent().getStringExtra("CORREO");
-        if (correoUsuario == null || correoUsuario.isEmpty()) correoUsuario = TablasActividades.CORREO_INVITADO;
+        String correoUsuario = SesionUtil.correo(getIntent());
 
         // solo se enseñan justificantes del usuario que los pide
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
@@ -90,11 +88,9 @@ public class Justificante extends AppCompatActivity {
     }
 
     private void mostrarSolicitud(Solicitud solicitud) {
-        LocalDateTime envio = LocalDateTime.parse(solicitud.fechaEnvio);
         ((TextView) findViewById(R.id.tvCodigo)).setText(solicitud.codigo());
         ((TextView) findViewById(R.id.tvMotivo)).setText(solicitud.nombreTramite);
-        ((TextView) findViewById(R.id.tvFecha)).setText(
-                "Enviada el " + FechasUtil.diaLargo(envio) + " a las " + FechasUtil.hora(envio));
+        ((TextView) findViewById(R.id.tvFecha)).setText(solicitud.textoEnvio());
         findViewById(R.id.tvHora).setVisibility(View.GONE);
 
         String estado = solicitud.estado();

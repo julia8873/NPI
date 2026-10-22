@@ -59,10 +59,11 @@ public class PasosTramite extends AppCompatActivity {
         getSupportActionBar().setTitle(tramite.nombre);
         numPasos = pasos.size();
 
-        // TODO tarea 7: "Solicitar ahora" abre SolicitudTramite
         String textoFinal = tramite.sePuedeSolicitar() ? "Solicitar ahora" : "Pedir cita";
         View.OnClickListener accionFinal = tramite.sePuedeSolicitar()
-                ? v -> Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show()
+                ? v -> startActivity(new Intent(this, SolicitudTramite.class)
+                        .putExtra("idProcedimiento", tramite.id)
+                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
                 : v -> startActivity(new Intent(this, CitaPrevia.class)
                         .putExtra("idProcedimiento", tramite.id)
                         .putExtra("CORREO", getIntent().getStringExtra("CORREO")));

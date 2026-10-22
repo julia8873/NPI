@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.FechasUtil;
+import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -77,8 +77,7 @@ public class CitaPrevia extends AppCompatActivity {
         getSupportActionBar().setTitle("Pedir cita");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        correoUsuario = getIntent().getStringExtra("CORREO");
-        if (correoUsuario == null || correoUsuario.isEmpty()) correoUsuario = TablasActividades.CORREO_INVITADO;
+        correoUsuario = SesionUtil.correo(getIntent());
         db = new SecretariaDB(DBHelper.getInstance(this));
 
         actvMotivo = findViewById(R.id.actvMotivo);
@@ -281,6 +280,13 @@ public class CitaPrevia extends AppCompatActivity {
     // "jueves 22 de octubre a las 10:30"
     private static String textoFechaHora(LocalDateTime fechaHora) {
         return FechasUtil.diaLargo(fechaHora) + " a las " + FechasUtil.hora(fechaHora);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // al rotar, cerrarlo evita que la ventana se quede colgada (WindowLeaked)
+        if (dialogoConfirmar != null) dialogoConfirmar.dismiss();
+        super.onDestroy();
     }
 
     @Override

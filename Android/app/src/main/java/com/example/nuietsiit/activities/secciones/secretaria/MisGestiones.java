@@ -23,9 +23,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
+import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -61,8 +61,7 @@ public class MisGestiones extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         db = new SecretariaDB(DBHelper.getInstance(this));
-        correoUsuario = getIntent().getStringExtra("CORREO");
-        if (correoUsuario == null || correoUsuario.isEmpty()) correoUsuario = TablasActividades.CORREO_INVITADO;
+        correoUsuario = SesionUtil.correo(getIntent());
 
         citasAdapter = new GestionAdapter(this::abrirJustificante);
         solicitudesAdapter = new GestionAdapter(this::abrirJustificante);
@@ -129,6 +128,13 @@ public class MisGestiones extends AppCompatActivity {
 
     private void cancelarCita(int posicion, View vista) {
         GestionAdapter.Gestion g = citasAdapter.get(posicion);
+        // la lista pudo quedarse abierta hasta pasada la hora de la cita
+        Cita cita = db.getCita(g.id);
+        if (cita == null || !cita.esFutura()) {
+            Toast.makeText(this, "Esta cita ya ha pasado y no se puede cancelar", Toast.LENGTH_SHORT).show();
+            cargarCitas();
+            return;
+        }
         if (!db.cancelarCita(g.id)) {
             citasAdapter.notifyItemChanged(posicion); // vuelve a su sitio
             return;

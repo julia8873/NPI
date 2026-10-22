@@ -20,9 +20,9 @@ import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
 import com.example.nuietsiit.activities.secciones.secretaria.TramiteAdapter;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.BuscadorTolerante;
+import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -55,8 +55,7 @@ public class Secretaria extends AppCompatActivity {
         getSupportActionBar().setTitle("Secretaría");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        correoUsuario = getIntent().getStringExtra("CORREO");
-        if (correoUsuario == null || correoUsuario.isEmpty()) correoUsuario = TablasActividades.CORREO_INVITADO;
+        correoUsuario = SesionUtil.correo(getIntent());
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
         if (savedInstanceState != null) {
             categoriaSeleccionada = savedInstanceState.getString(ESTADO_CATEGORIA);

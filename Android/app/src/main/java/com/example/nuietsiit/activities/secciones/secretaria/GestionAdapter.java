@@ -15,7 +15,6 @@ import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.util.FechasUtil;
 import com.google.android.material.chip.Chip;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +51,8 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         }
 
         public static Gestion deSolicitud(Solicitud s) {
-            LocalDateTime envio = LocalDateTime.parse(s.fechaEnvio);
-            String detalle = "Enviada el " + FechasUtil.diaLargo(envio) + " a las " + FechasUtil.hora(envio);
             String estado = s.estado();
-            return new Gestion(false, s.id, false, s.codigo(), s.nombreTramite, detalle,
+            return new Gestion(false, s.id, false, s.codigo(), s.nombreTramite, s.textoEnvio(),
                     estado, Solicitud.colorEstado(estado));
         }
     }
