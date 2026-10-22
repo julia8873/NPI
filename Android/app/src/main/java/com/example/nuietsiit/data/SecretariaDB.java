@@ -134,6 +134,17 @@ public class SecretariaDB {
         }
     }
 
+    // rutas de todas las firmas y documentos de solicitudes enviadas (para borrar los que sobran)
+    public Set<String> getRutasArchivosSolicitudes() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Set<String> rutas = new HashSet<>();
+        try (Cursor c = db.rawQuery("SELECT rutaFirma FROM SOLICITUD WHERE rutaFirma IS NOT NULL "
+                + "UNION SELECT rutaFoto FROM SOLICITUD_DOCUMENTO", null)) {
+            while (c.moveToNext()) rutas.add(c.getString(0));
+        }
+        return rutas;
+    }
+
     // -------------------------------------------------
     //              CITAS
     // -------------------------------------------------

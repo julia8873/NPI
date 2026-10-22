@@ -1,5 +1,7 @@
 package com.example.nuietsiit.data.modelo;
 
+import com.example.nuietsiit.util.FechasUtil;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -19,7 +21,7 @@ public class Solicitud {
     public final String nombreTramite;
     public final String fechaEnvio;    // ISO yyyy-MM-ddTHH:mm:ss
     public final String observaciones; // puede ser null
-    public final String rutaFirma;     // puede ser null
+    public final String rutaFirma;     // null = firmada con la huella digital
 
     public Solicitud(int id, String correoUsuario, int idProcedimiento, String nombreTramite,
                      String fechaEnvio, String observaciones, String rutaFirma) {
@@ -37,11 +39,26 @@ public class Solicitud {
         return String.format(Locale.ROOT, "SOL-%04d", id);
     }
 
+    // "Enviada el jueves 22 de octubre a las 10:30" (Mis gestiones y Justificante)
+    public String textoEnvio() {
+        LocalDateTime envio = LocalDateTime.parse(fechaEnvio);
+        return "Enviada el " + FechasUtil.diaLargo(envio) + " a las " + FechasUtil.hora(envio);
+    }
+
     // < 2 min Enviada, < 10 min En revisión, después Resuelta
     public String estado() {
         long minutos = Duration.between(LocalDateTime.parse(fechaEnvio), LocalDateTime.now()).toMinutes();
         if (minutos < 2) return ENVIADA;
         if (minutos < 10) return EN_REVISION;
         return RESUELTA;
+    }
+
+    // color del chip/texto de estado (Mis gestiones y Justificante)
+    public static int colorEstado(String estado) {
+        switch (estado) {
+            case ENVIADA: return 0xFF1976D2;
+            case EN_REVISION: return 0xFFF9A825;
+            default: return 0xFF388E3C; // Resuelta
+        }
     }
 }

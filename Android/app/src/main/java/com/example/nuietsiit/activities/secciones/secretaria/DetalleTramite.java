@@ -54,25 +54,26 @@ public class DetalleTramite extends AppCompatActivity {
         mostrarChipPlazo(tramite);
         mostrarDocumentos(documentos);
 
-        // TODO tarea 6: CitaPrevia (con el motivo ya elegido); tarea 7: SolicitudTramite
+        String correoUsuario = getIntent().getStringExtra("CORREO");
         Button btnPasos = findViewById(R.id.btnPasos);
         btnPasos.setText("Ver pasos (" + pasos.size() + ")");
         btnPasos.setEnabled(!pasos.isEmpty());
         btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
-                .putExtra("idProcedimiento", tramite.id)));
-        findViewById(R.id.btnPedirCita).setOnClickListener(v -> proximamente());
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario)));
+        findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(new Intent(this, CitaPrevia.class)
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario)));
 
         Button btnSolicitar = findViewById(R.id.btnSolicitar);
         btnSolicitar.setEnabled(tramite.sePuedeSolicitar());
-        btnSolicitar.setOnClickListener(v -> proximamente());
+        btnSolicitar.setOnClickListener(v -> startActivity(new Intent(this, SolicitudTramite.class)
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario)));
         String motivo = motivoNoSolicitable(tramite);
         TextView tvMotivo = findViewById(R.id.tvMotivoSolicitar);
         tvMotivo.setVisibility(motivo != null ? View.VISIBLE : View.GONE);
         tvMotivo.setText(motivo);
-    }
-
-    private void proximamente() {
-        Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
     }
 
     // oculta título y texto si el campo es opcional y no existe
@@ -104,11 +105,9 @@ public class DetalleTramite extends AppCompatActivity {
         }
         for (Documento d : documentos) {
             TextView tv = new TextView(this);
-            StringBuilder sb = new StringBuilder("• ").append(d.nombre);
-            sb.append(d.obligatorio ? " (obligatorio)" : " (opcional)");
-            if (d.descripcion != null && !d.descripcion.isEmpty()) sb.append("\n   ").append(d.descripcion);
-            tv.setText(sb);
-            tv.setPadding(0, 4, 0, 4);
+            tv.setText(d.textoLista());
+            int margen = Math.round(4 * getResources().getDisplayMetrics().density); // 4dp
+            tv.setPadding(0, margen, 0, margen);
             lista.addView(tv);
         }
     }

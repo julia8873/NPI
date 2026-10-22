@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -58,11 +59,16 @@ public class PasosTramite extends AppCompatActivity {
         getSupportActionBar().setTitle(tramite.nombre);
         numPasos = pasos.size();
 
-        // TODO tarea 7: abrir SolicitudTramite; tarea 6: CitaPrevia con el motivo ya elegido
         String textoFinal = tramite.sePuedeSolicitar() ? "Solicitar ahora" : "Pedir cita";
+        View.OnClickListener accionFinal = tramite.sePuedeSolicitar()
+                ? v -> startActivity(new Intent(this, SolicitudTramite.class)
+                        .putExtra("idProcedimiento", tramite.id)
+                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
+                : v -> startActivity(new Intent(this, CitaPrevia.class)
+                        .putExtra("idProcedimiento", tramite.id)
+                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
         vpPasos = findViewById(R.id.vpPasos);
-        vpPasos.setAdapter(new PasoAdapter(pasos, textoFinal,
-                v -> Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show()));
+        vpPasos.setAdapter(new PasoAdapter(pasos, textoFinal, accionFinal));
 
         llPuntos = findViewById(R.id.llPuntos);
         crearPuntos();

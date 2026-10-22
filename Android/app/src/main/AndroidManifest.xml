@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Notificaciones de avisos urgentes y actividades (Miguel) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -45,8 +47,23 @@
         <activity
             android:name=".activities.secciones.secretaria.PasosTramite"
             android:screenOrientation="portrait" />
+        <activity android:name=".activities.secciones.secretaria.SolicitudTramite" />
+        <activity android:name=".activities.secciones.secretaria.CitaPrevia" />
+        <activity android:name=".activities.secciones.secretaria.Justificante" />
+        <activity android:name=".activities.secciones.secretaria.MisGestiones" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
+
+        <!-- Secretaría: la app de cámara guarda la foto del documento en getFilesDir()/secretaria/ -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/rutas_archivos" />
+        </provider>
     </application>
 
 </manifest>

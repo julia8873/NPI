@@ -15,4 +15,12 @@ public class Documento {
         this.descripcion = descripcion;
         this.obligatorio = obligatorio;
     }
+
+    // "• DNI (obligatorio)" + descripción sangrada debajo (DetalleTramite y SolicitudTramite)
+    public String textoLista() {
+        StringBuilder sb = new StringBuilder("• ").append(nombre);
+        sb.append(obligatorio ? " (obligatorio)" : " (opcional)");
+        if (descripcion != null && !descripcion.isEmpty()) sb.append("\n   ").append(descripcion);
+        return sb.toString();
+    }
 }
