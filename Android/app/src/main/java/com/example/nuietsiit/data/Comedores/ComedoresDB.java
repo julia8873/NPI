@@ -168,16 +168,32 @@ public class ComedoresDB {
     // --------------------------------------------------------------
 
     /**
+     * Comprueba si el comedor está cerrado en la fecha dada (fin de semana o sin horario).
+     */
+    public boolean esDiaCerrado(int idComedor, Calendar calendar) {
+        int calDay = calendar.get(Calendar.DAY_OF_WEEK);
+        if (calDay == Calendar.SATURDAY || calDay == Calendar.SUNDAY) {
+            return true;
+        }
+        int diaSemana = calDay - Calendar.MONDAY + 1;
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor c = db.rawQuery(
+                "SELECT 1 FROM COMEDOR_HORARIO WHERE idComedor = ? AND diaSemana = ?",
+                new String[]{String.valueOf(idComedor), String.valueOf(diaSemana)})) {
+            return !c.moveToFirst();
+        }
+    }
+
+    /**
      * Obtiene el horario de apertura y cierre para un comedor en una fecha dada.
      */
     public String obtenerHorarioParaFecha(int idComedor, Calendar calendar) {
         int calDay = calendar.get(Calendar.DAY_OF_WEEK);
-        int diaSemana;
-        if (calDay == Calendar.SUNDAY) {
-            diaSemana = 7;
-        } else {
-            diaSemana = calDay - Calendar.MONDAY + 1;
+        if (calDay == Calendar.SATURDAY || calDay == Calendar.SUNDAY) {
+            return "Horario: Cerrado (Fin de semana)";
         }
+        int diaSemana = calDay - Calendar.MONDAY + 1;
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         try (Cursor c = db.rawQuery(
@@ -189,7 +205,7 @@ public class ComedoresDB {
                 return "Horario: " + apertura + " - " + cierre;
             }
         }
-        return "Horario: 13:00 - 16:00 (Cerrado / Festivo)";
+        return "Horario: Cerrado / Festivo";
     }
 
     /**

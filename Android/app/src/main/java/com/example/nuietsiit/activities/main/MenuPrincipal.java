@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -150,6 +153,7 @@ public class MenuPrincipal extends AppCompatActivity {
         if (btnSeccionGrande != null) {
             btnSeccionGrande.setText(nombresSecciones[indiceSeccionActual]);
         }
+
         if (tvAnteriorNombre != null) {
             int indexAnterior = (indiceSeccionActual - 1 + nombresSecciones.length) % nombresSecciones.length;
             tvAnteriorNombre.setText(nombresSecciones[indexAnterior]);

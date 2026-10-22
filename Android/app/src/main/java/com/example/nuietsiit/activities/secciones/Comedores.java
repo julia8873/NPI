@@ -10,7 +10,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -136,6 +138,42 @@ public class Comedores extends AppCompatActivity {
                 retrocederDia();
             }
         });
+
+        // Detector de gestos táctiles (swipe / deslizar) sobre la tarjeta del menú
+        View cardMenu = findViewById(R.id.cardMenu);
+        GestureDetector gestureDetectorMenu = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 40;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 40;
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                if (e1 == null || e2 == null) return false;
+                float diffX = e2.getX() - e1.getX();
+                float diffY = e2.getY() - e1.getY();
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                        if (diffX > 0) {
+                            retrocederDia(); // Deslizar hacia la derecha -> Día anterior
+                        } else {
+                            avanzarDia(); // Deslizar hacia la izquierda -> Día siguiente
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        if (cardMenu != null) {
+            cardMenu.setOnTouchListener((v, event) -> {
+                boolean handled = gestureDetectorMenu.onTouchEvent(event);
+                if (event.getAction() == MotionEvent.ACTION_UP && !handled) {
+                    v.performClick();
+                }
+                return true;
+            });
+        }
 
         // Cargar lista de comedores desde la base de datos
         listaComedores = comedoresDB.obtenerListaComedores();
@@ -333,39 +371,58 @@ public class Comedores extends AppCompatActivity {
         SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String fechaStr = sdfDb.format(calendarioSeleccionado.getTime());
 
-        // Consultar base de datos para obtener el menú, horario y precio para la fecha seleccionada
-        MenuInfo menuInfo = comedoresDB.obtenerMenuParaComedorYFecha(comedor.getIdComedor(), fechaStr);
+        // Consultar base de datos para obtener horario, precio y estado de apertura
+        boolean esCerrado = comedoresDB.esDiaCerrado(comedor.getIdComedor(), calendarioSeleccionado);
         String horario = comedoresDB.obtenerHorarioParaFecha(comedor.getIdComedor(), calendarioSeleccionado);
         String precio = comedoresDB.obtenerPrecioEstudiante(comedor.getIdComedor());
 
-        tvPrimerPlato.setText("Primer plato: " + menuInfo.getPrimerPlato());
-        tvSegundoPlato.setText("Segundo plato: " + menuInfo.getSegundoPlato());
-        tvPostre.setText("Postre: " + menuInfo.getPostre());
-        tvHorario.setText(horario);
-        tvPrecio.setText(precio);
+        if (esCerrado) {
+            // Si el comedor está cerrado o es festivo/fin de semana, NO mostrar platos
+            tvPrimerPlato.setVisibility(View.VISIBLE);
+            tvPrimerPlato.setText("🚫 Comedor cerrado este día\n(Sin servicio de menú)");
+            tvPrimerPlato.setCompoundDrawablesRelative(null, null, null, null);
 
-        // Asignar iconos pequeños al lado de primer plato, segundo plato y postre
-        int iconSize = (int) (getResources().getDisplayMetrics().density * 24);
+            tvSegundoPlato.setVisibility(View.GONE);
+            tvPostre.setVisibility(View.GONE);
 
-        Drawable dPrimero = ContextCompat.getDrawable(this, R.drawable.primer_plato);
-        if (dPrimero != null) {
-            dPrimero.setBounds(0, 0, iconSize, iconSize);
-            tvPrimerPlato.setCompoundDrawablesRelative(dPrimero, null, null, null);
-            tvPrimerPlato.setCompoundDrawablePadding(12);
-        }
+            tvHorario.setText(horario);
+            tvPrecio.setText("Precio: --");
+        } else {
+            // Si está abierto, obtener menú y mostrar platos con sus respectivos iconos
+            MenuInfo menuInfo = comedoresDB.obtenerMenuParaComedorYFecha(comedor.getIdComedor(), fechaStr);
 
-        Drawable dSegundo = ContextCompat.getDrawable(this, R.drawable.segundo_plato);
-        if (dSegundo != null) {
-            dSegundo.setBounds(0, 0, iconSize, iconSize);
-            tvSegundoPlato.setCompoundDrawablesRelative(dSegundo, null, null, null);
-            tvSegundoPlato.setCompoundDrawablePadding(12);
-        }
+            tvPrimerPlato.setVisibility(View.VISIBLE);
+            tvSegundoPlato.setVisibility(View.VISIBLE);
+            tvPostre.setVisibility(View.VISIBLE);
 
-        Drawable dPostre = ContextCompat.getDrawable(this, R.drawable.postre);
-        if (dPostre != null) {
-            dPostre.setBounds(0, 0, iconSize, iconSize);
-            tvPostre.setCompoundDrawablesRelative(dPostre, null, null, null);
-            tvPostre.setCompoundDrawablePadding(12);
+            tvPrimerPlato.setText("Primer plato: " + menuInfo.getPrimerPlato());
+            tvSegundoPlato.setText("Segundo plato: " + menuInfo.getSegundoPlato());
+            tvPostre.setText("Postre: " + menuInfo.getPostre());
+            tvHorario.setText(horario);
+            tvPrecio.setText(precio);
+
+            int iconSize = (int) (getResources().getDisplayMetrics().density * 24);
+
+            Drawable dPrimero = ContextCompat.getDrawable(this, R.drawable.primer_plato);
+            if (dPrimero != null) {
+                dPrimero.setBounds(0, 0, iconSize, iconSize);
+                tvPrimerPlato.setCompoundDrawablesRelative(dPrimero, null, null, null);
+                tvPrimerPlato.setCompoundDrawablePadding(12);
+            }
+
+            Drawable dSegundo = ContextCompat.getDrawable(this, R.drawable.segundo_plato);
+            if (dSegundo != null) {
+                dSegundo.setBounds(0, 0, iconSize, iconSize);
+                tvSegundoPlato.setCompoundDrawablesRelative(dSegundo, null, null, null);
+                tvSegundoPlato.setCompoundDrawablePadding(12);
+            }
+
+            Drawable dPostre = ContextCompat.getDrawable(this, R.drawable.postre);
+            if (dPostre != null) {
+                dPostre.setBounds(0, 0, iconSize, iconSize);
+                tvPostre.setCompoundDrawablesRelative(dPostre, null, null, null);
+                tvPostre.setCompoundDrawablePadding(12);
+            }
         }
     }
 
@@ -378,7 +435,6 @@ public class Comedores extends AppCompatActivity {
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
-            Toast.makeText(this, "📅 Día siguiente", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -400,7 +456,6 @@ public class Comedores extends AppCompatActivity {
                 if (comedorSeleccionado != null) {
                     mostrarComedorPrincipal(comedorSeleccionado);
                 }
-                Toast.makeText(this, "📅 Día anterior", Toast.LENGTH_SHORT).show();
             }
         }
     }

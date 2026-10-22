@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.example.nuietsiit.data.Comedores.TablasComedores;
+
 /**
  * DBHelper: crea y actualiza todas las tablas de la base de datos.
  * Cada módulo tiene su propio fichero auxiliar con las funciones de acceso a datos.
@@ -13,7 +15,7 @@ import androidx.annotation.Nullable;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 6; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas
+    private static final int VERSION_BD = 7; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores
 
     private static DBHelper instance;
 
@@ -597,6 +599,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         // Inserción de datos iniciales
         insertarDatosInicialesComedores(db);
+        TablasComedores.poblar(db);
 
         // Datos de ejemplo de Biblioteca y Secretaría
         TablasBiblioteca.poblar(db);
