@@ -45,6 +45,9 @@
         <activity
             android:name=".activities.secciones.secretaria.PasosTramite"
             android:screenOrientation="portrait" />
+        <activity android:name=".activities.secciones.secretaria.CitaPrevia" />
+        <activity android:name=".activities.secciones.secretaria.Justificante" />
+        <activity android:name=".activities.secciones.secretaria.MisGestiones" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
     </application>

@@ -44,4 +44,13 @@ public class Solicitud {
         if (minutos < 10) return EN_REVISION;
         return RESUELTA;
     }
+
+    // color del chip/texto de estado (Mis gestiones y Justificante)
+    public static int colorEstado(String estado) {
+        switch (estado) {
+            case ENVIADA: return 0xFF1976D2;
+            case EN_REVISION: return 0xFFF9A825;
+            default: return 0xFF388E3C; // Resuelta
+        }
+    }
 }

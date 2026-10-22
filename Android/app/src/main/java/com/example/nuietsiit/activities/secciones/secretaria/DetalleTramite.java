@@ -54,13 +54,17 @@ public class DetalleTramite extends AppCompatActivity {
         mostrarChipPlazo(tramite);
         mostrarDocumentos(documentos);
 
-        // TODO tarea 6: CitaPrevia (con el motivo ya elegido); tarea 7: SolicitudTramite
+        String correoUsuario = getIntent().getStringExtra("CORREO");
+        // TODO tarea 7: SolicitudTramite
         Button btnPasos = findViewById(R.id.btnPasos);
         btnPasos.setText("Ver pasos (" + pasos.size() + ")");
         btnPasos.setEnabled(!pasos.isEmpty());
         btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
-                .putExtra("idProcedimiento", tramite.id)));
-        findViewById(R.id.btnPedirCita).setOnClickListener(v -> proximamente());
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario)));
+        findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(new Intent(this, CitaPrevia.class)
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario)));
 
         Button btnSolicitar = findViewById(R.id.btnSolicitar);
         btnSolicitar.setEnabled(tramite.sePuedeSolicitar());
@@ -108,7 +112,8 @@ public class DetalleTramite extends AppCompatActivity {
             sb.append(d.obligatorio ? " (obligatorio)" : " (opcional)");
             if (d.descripcion != null && !d.descripcion.isEmpty()) sb.append("\n   ").append(d.descripcion);
             tv.setText(sb);
-            tv.setPadding(0, 4, 0, 4);
+            int margen = Math.round(4 * getResources().getDisplayMetrics().density); // 4dp
+            tv.setPadding(0, margen, 0, margen);
             lista.addView(tv);
         }
     }

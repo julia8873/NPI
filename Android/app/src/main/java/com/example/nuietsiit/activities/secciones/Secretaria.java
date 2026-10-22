@@ -8,17 +8,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
 import com.example.nuietsiit.activities.secciones.secretaria.DetalleTramite;
+import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
 import com.example.nuietsiit.activities.secciones.secretaria.TramiteAdapter;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
+import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.BuscadorTolerante;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -54,6 +56,7 @@ public class Secretaria extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         correoUsuario = getIntent().getStringExtra("CORREO");
+        if (correoUsuario == null || correoUsuario.isEmpty()) correoUsuario = TablasActividades.CORREO_INVITADO;
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
         if (savedInstanceState != null) {
             categoriaSeleccionada = savedInstanceState.getString(ESTADO_CATEGORIA);
@@ -80,11 +83,10 @@ public class Secretaria extends AppCompatActivity {
         });
         chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
 
-        // TODO tarea 6: abrir CitaPrevia y MisGestiones
-        findViewById(R.id.btnPedirCita).setOnClickListener(
-                v -> Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show());
-        btnMisGestiones.setOnClickListener(
-                v -> Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(
+                new Intent(this, CitaPrevia.class).putExtra("CORREO", correoUsuario)));
+        btnMisGestiones.setOnClickListener(v -> startActivity(
+                new Intent(this, MisGestiones.class).putExtra("CORREO", correoUsuario)));
 
         cargarCategoria();
     }
@@ -152,7 +154,7 @@ public class Secretaria extends AppCompatActivity {
     }
 
     private void actualizarContadorGestiones() {
-        int n = correoUsuario != null ? secretariaDB.contarCitasActivas(correoUsuario) : 0;
+        int n = secretariaDB.contarCitasActivas(correoUsuario);
         btnMisGestiones.setText(n > 0 ? "📂 Mis gestiones (" + n + ")" : "📂 Mis gestiones");
     }
 
