@@ -14,7 +14,11 @@ public final class SesionUtil {
 
     // correo del extra "CORREO"; sin sesión (null o vacío) = usuario invitado
     public static String correo(Intent intent) {
-        String correo = intent.getStringExtra("CORREO");
+        return correo(intent.getStringExtra("CORREO"));
+    }
+
+    // null o vacío = usuario invitado
+    public static String correo(String correo) {
         return correo == null || correo.isEmpty() ? TablasActividades.CORREO_INVITADO : correo;
     }
 }
