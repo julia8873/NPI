@@ -371,6 +371,62 @@ public class UsuariosDB {
         return db.rawQuery("SELECT * FROM GRADO WHERE idGrado = ?",
                 new String[]{String.valueOf(idGrado)});
     }
+
+    // --------------------------------------------------------------
+    // FAVORITOS
+    // --------------------------------------------------------------
+
+    public boolean esFavorito(String correo, String seccion) {
+        if (correo == null || correo.isEmpty()) return false;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor c = db.rawQuery(
+                "SELECT 1 FROM FAVORITO WHERE correoEstudiante = ? AND nombreSeccion = ?",
+                new String[]{correo.toLowerCase(), seccion})) {
+            return c != null && c.moveToFirst();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean marcarFavorito(String correo, String seccion, boolean favorito) {
+        if (correo == null || correo.isEmpty()) return false;
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        try {
+            if (favorito) {
+                ContentValues cv = new ContentValues();
+                cv.put("correoEstudiante", correo.toLowerCase());
+                cv.put("nombreSeccion", seccion);
+                long res = db.insertWithOnConflict("FAVORITO", null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+                return res != -1;
+            } else {
+                int filas = db.delete("FAVORITO", "correoEstudiante = ? AND nombreSeccion = ?",
+                        new String[]{correo.toLowerCase(), seccion});
+                return filas > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<String> obtenerFavoritos(String correo) {
+        List<String> lista = new ArrayList<>();
+        if (correo == null || correo.isEmpty()) return lista;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor c = db.rawQuery(
+                "SELECT nombreSeccion FROM FAVORITO WHERE correoEstudiante = ? ORDER BY nombreSeccion",
+                new String[]{correo.toLowerCase()})) {
+            if (c != null && c.moveToFirst()) {
+                do {
+                    lista.add(c.getString(c.getColumnIndexOrThrow("nombreSeccion")));
+                } while (c.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
 }
 
 //

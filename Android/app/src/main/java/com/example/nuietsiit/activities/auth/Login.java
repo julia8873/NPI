@@ -78,6 +78,7 @@ public class Login extends AppCompatActivity {
             // Inicio de sesión exitoso: Navegación al Menú Principal
             Intent intent = new Intent(Login.this, MenuPrincipal.class);
             intent.putExtra("CORREO", correo);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
 
             // Finaliza Login para evitar regresar a esta pantalla al pulsar el botón "Atrás"

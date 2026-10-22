@@ -3,16 +3,22 @@ package com.example.nuietsiit.activities.main;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +28,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
-import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Biblioteca;
@@ -35,6 +40,7 @@ import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.Notificador;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +50,8 @@ public class MenuPrincipal extends AppCompatActivity {
     // Componentes de la interfaz de usuario
     private TextView tvBienvenida, tvAnteriorNombre, tvSiguienteNombre;
     private ImageView ivIcono;
-    private Button btnSeccionGrande, btnAnteriorSeccion, btnSiguienteSeccion;
+    private Button btnSeccionGrande;
+    private ImageButton btnAnteriorSeccion, btnSiguienteSeccion;
     private DetectorInclinacion detectorInclinacion;
     private int indiceSeccionActual = 0;
     private boolean fueDeslizamiento = false;
@@ -96,6 +103,7 @@ public class MenuPrincipal extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CORREO")) {
             correoUsuario = intent.getStringExtra("CORREO");
+            prefs.edit().putString("CORREO", correoUsuario).apply();
         }
 
         // Cargar y mostrar la bienvenida con el nombre del usuario
@@ -174,6 +182,8 @@ public class MenuPrincipal extends AppCompatActivity {
         btnSeccionGrande = findViewById(R.id.btnSeccionGrande);
         btnAnteriorSeccion = findViewById(R.id.btnAnteriorSeccion);
         btnSiguienteSeccion = findViewById(R.id.btnSiguienteSeccion);
+        View layoutAnterior = findViewById(R.id.layoutAnterior);
+        View layoutSiguiente = findViewById(R.id.layoutSiguiente);
 
         actualizarBotonSeccion();
 
@@ -186,6 +196,20 @@ public class MenuPrincipal extends AppCompatActivity {
             v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             siguienteSeccion();
         });
+
+        if (layoutAnterior != null) {
+            layoutAnterior.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                anteriorSeccion();
+            });
+        }
+
+        if (layoutSiguiente != null) {
+            layoutSiguiente.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                siguienteSeccion();
+            });
+        }
 
         // Detector de gestos táctiles (swipe / deslizar) sobre el botón grande
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {

@@ -587,6 +587,14 @@ public class DBHelper extends SQLiteOpenHelper {
             ")"
         );
 
+        db.execSQL(
+            "CREATE TABLE FAVORITO (" +
+            "  correoEstudiante TEXT NOT NULL," +
+            "  nombreSeccion    TEXT NOT NULL," +
+            "  PRIMARY KEY (correoEstudiante, nombreSeccion)" +
+            ")"
+        );
+
         // Inserción de datos iniciales
         insertarDatosInicialesComedores(db);
 
@@ -631,6 +639,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS FAVORITO");
         db.execSQL("DROP TABLE IF EXISTS ANUNCIO_ASIGNATURA");
         db.execSQL("DROP TABLE IF EXISTS ANUNCIO_GENERAL");
         db.execSQL("DROP TABLE IF EXISTS CITA");

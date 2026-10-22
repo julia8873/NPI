@@ -3,13 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F8F9FA"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="20dp">
 
@@ -26,7 +25,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/ivIcono"
                 android:text="¡Bienvenido!"
                 android:textColor="#000000"
                 android:textSize="20sp"
@@ -45,154 +43,245 @@
                 android:src="@drawable/icono" />
         </RelativeLayout>
 
-        <!-- Contenedor del slide de Noticias -->
-        <FrameLayout
+        <!-- 1. NOTICIAS ARRIBA -->
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="40dp">
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="8dp"
+            android:text="Noticias"
+            android:textColor="#1A1A1A"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeWidth="0dp">
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/vpNoticias"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+        </com.google.android.material.card.MaterialCardView>
 
-        </FrameLayout>
-
-        <!-- Botón grande de la sección actual -->
-        <Button
-            android:id="@+id/btnSeccionGrande"
+        <!-- 2. SECCIÓN DESTACADA (Hero Card) -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="270dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="35dp"
-            android:background="@drawable/boton_redondeado"
-            android:text="Mapa"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:layout_height="210dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="#FF8C42"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="6dp"
+            app:strokeWidth="0dp">
 
-        <!-- Flechas de navegación abajo para cambiar de sección con sus etiquetas -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SECCIÓN DESTACADA"
+                    android:textColor="#FFF0E5"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.1"
+                    android:textStyle="bold" />
+
+                <!-- Botón grande / Tarjeta interactiva de sección -->
+                <Button
+
+                    android:id="@+id/btnSeccionGrande"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:gravity="center"
+                    android:text="Mapa"
+                    android:textColor="#FFFFFF"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:text="Desliza o usa las flechas ⇄"
+                    android:textColor="#FFF0E5"
+                    android:textSize="11sp" />
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 3. CONTROLES DE NAVEGACIÓN (Flechas y Nombres bien visibles) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="24dp"
             android:gravity="center"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
+            android:paddingHorizontal="4dp">
 
             <!-- Botón y etiqueta Anterior -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_vertical|end"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvAnteriorNombre"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="Anterior"
-                    android:textColor="#333333"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btnAnteriorSeccion"
-                    android:layout_width="60dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/boton_redondeado"
-                    android:text="◀"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@null" />
-            </LinearLayout>
-
-            <Space
-                android:layout_width="16dp"
-                android:layout_height="wrap_content" />
-
-            <!-- Botón y etiqueta Siguiente -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical|start"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnSiguienteSeccion"
-                    android:layout_width="60dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/boton_redondeado"
-                    android:text="▶"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@null" />
-
-                <TextView
-                    android:id="@+id/tvSiguienteNombre"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="Siguiente"
-                    android:textColor="#333333"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Modo manos libres -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="#FFF1E6"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="12dp">
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/layoutAnterior"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Modo manos libres"
-                        android:textColor="#000000"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
+                    <ImageButton
+                        android:id="@+id/btnAnteriorSeccion"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/boton_redondeado"
+                        android:src="@drawable/ic_chevron_left"
+                        android:contentDescription="Sección anterior"
+                        android:scaleType="centerInside"
+                        app:tint="#FFFFFF" />
 
-                    <TextView
-                        android:id="@+id/tvManosLibres"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Inclina el móvil hacia la derecha o izquierda para ver más secciones!"
-                        android:textColor="#555555"
-                        android:textSize="12sp" />
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Anterior"
+                            android:textColor="#888888"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvAnteriorNombre"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Biblioteca"
+                            android:textColor="#1A1A1A"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Botón y etiqueta Siguiente -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutSiguiente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:gravity="end"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Siguiente"
+                            android:textColor="#888888"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSiguienteNombre"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Actividades"
+                            android:textColor="#1A1A1A"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btnSiguienteSeccion"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/boton_redondeado"
+                        android:src="@drawable/ic_chevron_right"
+                        android:contentDescription="Siguiente sección"
+                        android:scaleType="centerInside"
+                        app:tint="#FFFFFF" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- 4. PÁGINAS FAVORITAS -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="8dp"
+            android:text="⭐ Mis páginas favoritas"
+            android:textColor="#1A1A1A"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSinFavoritos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="16dp"
+            android:text="No tienes páginas favoritas. ¡Añade las que quieras pulsando el icono de estrella en la sección destacada!"
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/llFavoritosContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical" />
 
     </LinearLayout>
 </ScrollView>
