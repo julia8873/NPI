@@ -53,8 +53,9 @@ public class DocumentoSolicitudAdapter extends RecyclerView.Adapter<DocumentoSol
         this.acciones = acciones;
     }
 
-    // llamar tras cambiar el archivo de un documento
-    public void archivoCambiado(int idDocumento) {
+    // llamar tras cambiar el archivo de un documento; rutaAnterior = la que se ha sustituido o quitado
+    public void archivoCambiado(int idDocumento, String rutaAnterior) {
+        if (rutaAnterior != null) miniaturas.remove(rutaAnterior);
         for (int i = 0; i < documentos.size(); i++) {
             if (documentos.get(i).id == idDocumento) notifyItemChanged(i);
         }

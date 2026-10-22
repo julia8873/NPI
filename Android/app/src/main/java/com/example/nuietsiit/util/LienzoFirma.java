@@ -131,8 +131,10 @@ public class LienzoFirma extends View {
         Bundle estado = new Bundle();
         estado.putParcelable("super", super.onSaveInstanceState());
         estado.putFloatArray("registro", Arrays.copyOf(registro, nRegistro));
-        estado.putInt("ancho", getWidth());
-        estado.putInt("alto", getHeight());
+        // si aún no se ha reescalado (lienzo oculto desde la rotación anterior), los trazos siguen en ese tamaño
+        boolean pendiente = anchoRestaurado > 0 && altoRestaurado > 0;
+        estado.putInt("ancho", pendiente ? anchoRestaurado : getWidth());
+        estado.putInt("alto", pendiente ? altoRestaurado : getHeight());
         return estado;
     }
 

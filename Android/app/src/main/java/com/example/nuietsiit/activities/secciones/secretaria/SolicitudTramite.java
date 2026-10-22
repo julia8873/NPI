@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Asistente de 4 pasos para solicitar un trámite: datos → documentos (foto con la cámara o archivo
@@ -171,8 +172,12 @@ public class SolicitudTramite extends AppCompatActivity {
             }
         });
 
-        if (savedInstanceState != null) restaurar(savedInstanceState);
-        mostrarPaso(savedInstanceState != null ? savedInstanceState.getInt("paso") : 0);
+        if (savedInstanceState != null) {
+            mostrarPaso(restaurar(savedInstanceState));
+        } else {
+            borrarArchivosSobrantes();
+            mostrarPaso(0);
+        }
     }
 
     private void mostrarPaso(int nuevo) {
@@ -208,6 +213,8 @@ public class SolicitudTramite extends AppCompatActivity {
             }
             firma = lienzoFirma.exportar();
             firmaConHuella = false;
+            // el Bitmap es demasiado grande para el Bundle: se guarda ya por si se rota en el Resumen
+            guardarPng(firma, archivoFirmaEnCurso());
         }
         mostrarPaso(paso + 1);
     }
@@ -312,6 +319,7 @@ public class SolicitudTramite extends AppCompatActivity {
 
     // la app de cámara escribe la foto directamente en nuestra carpeta a través del FileProvider
     private void abrirCamara(int idDocumento) {
+        if (rutaFotoPendiente != null) return; // doble toque: la cámara ya se está abriendo
         File carpeta = carpetaSecretaria();
         if (carpeta == null) {
             Toast.makeText(this, "No se ha podido preparar la foto", Toast.LENGTH_SHORT).show();
@@ -377,20 +385,31 @@ public class SolicitudTramite extends AppCompatActivity {
     private void ponerArchivo(int idDocumento, String ruta) {
         String anterior = archivos.put(idDocumento, ruta);
         if (anterior != null) new File(anterior).delete();
-        adaptadorDocumentos.archivoCambiado(idDocumento);
+        adaptadorDocumentos.archivoCambiado(idDocumento, anterior);
         if (documentosQueFaltan().isEmpty()) tvErrorDocumentos.setVisibility(View.GONE);
     }
 
     private void quitarArchivo(int idDocumento) {
         String ruta = archivos.remove(idDocumento);
         if (ruta != null) new File(ruta).delete();
-        adaptadorDocumentos.archivoCambiado(idDocumento);
+        adaptadorDocumentos.archivoCambiado(idDocumento, ruta);
     }
 
     // getFilesDir()/secretaria/ (privado de la app, sin permisos). null si no se puede crear
     private File carpetaSecretaria() {
         File carpeta = new File(getFilesDir(), "secretaria");
         return carpeta.isDirectory() || carpeta.mkdirs() ? carpeta : null;
+    }
+
+    // archivos de asistentes que no llegaron a enviarse (p. ej. Android cerró la app en segundo plano)
+    private void borrarArchivosSobrantes() {
+        archivoFirmaEnCurso().delete();
+        File[] enCarpeta = new File(getFilesDir(), "secretaria").listFiles();
+        if (enCarpeta == null) return;
+        Set<String> enUso = db.getRutasArchivosSolicitudes();
+        for (File f : enCarpeta) {
+            if (!enUso.contains(f.getAbsolutePath())) f.delete();
+        }
     }
 
     // ---------- Firma con huella (alternativa a firmar a mano) ----------
@@ -407,6 +426,7 @@ public class SolicitudTramite extends AppCompatActivity {
                     public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult resultado) {
                         firmaConHuella = true;
                         firma = null;
+                        archivoFirmaEnCurso().delete();
                         tvErrorFirma.setVisibility(View.GONE);
                         mostrarPaso(3);
                     }
@@ -532,6 +552,7 @@ public class SolicitudTramite extends AppCompatActivity {
             fallo("No se ha podido enviar la solicitud");
             return;
         }
+        archivoFirmaEnCurso().delete();
         startActivity(new Intent(this, Justificante.class)
                 .putExtra("idSolicitud", (int) idSolicitud)
                 .putExtra("CORREO", correoUsuario));
@@ -547,7 +568,7 @@ public class SolicitudTramite extends AppCompatActivity {
     // PNG en getFilesDir()/secretaria/. null si falla
     private File guardarFirma() {
         File carpeta = carpetaSecretaria();
-        if (carpeta == null) return null;
+        if (carpeta == null || firma == null) return null;
         File archivo = new File(carpeta, "firma_" + System.currentTimeMillis() + ".png");
         return guardarPng(firma, archivo) ? archivo : null;
     }
@@ -584,14 +605,16 @@ public class SolicitudTramite extends AppCompatActivity {
         estado.putStringArrayList("rutasDocumentos", rutas);
         estado.putInt("idDocumentoPendiente", idDocumentoPendiente);
         estado.putString("rutaFotoPendiente", rutaFotoPendiente);
-        // el Bitmap de la firma es demasiado grande para el Bundle: va a un PNG en la caché
-        File archivoFirma = new File(getCacheDir(), "firma_en_curso.png");
-        if (firma != null && guardarPng(firma, archivoFirma)) {
-            estado.putString("rutaFirmaEnCurso", archivoFirma.getAbsolutePath());
-        }
+        // la firma exportada ya está en archivoFirmaEnCurso() (se guarda al salir del paso de firma)
     }
 
-    private void restaurar(Bundle estado) {
+    // PNG de la firma a mano mientras se está en el Resumen
+    private File archivoFirmaEnCurso() {
+        return new File(getCacheDir(), "firma_en_curso.png");
+    }
+
+    // devuelve el paso en el que hay que seguir
+    private int restaurar(Bundle estado) {
         firmaConHuella = estado.getBoolean("firmaConHuella");
         ArrayList<Integer> ids = estado.getIntegerArrayList("idsDocumentos");
         ArrayList<String> rutas = estado.getStringArrayList("rutasDocumentos");
@@ -601,8 +624,14 @@ public class SolicitudTramite extends AppCompatActivity {
         adaptadorDocumentos.notifyDataSetChanged();
         idDocumentoPendiente = estado.getInt("idDocumentoPendiente", -1);
         rutaFotoPendiente = estado.getString("rutaFotoPendiente");
-        String rutaFirma = estado.getString("rutaFirmaEnCurso");
-        if (rutaFirma != null) firma = BitmapFactory.decodeFile(rutaFirma);
+        int pasoGuardado = estado.getInt("paso");
+        if (pasoGuardado == 3 && !firmaConHuella) {
+            File archivoFirma = archivoFirmaEnCurso();
+            if (archivoFirma.exists()) firma = BitmapFactory.decodeFile(archivoFirma.getAbsolutePath());
+            // Android ha vaciado la caché: volver a la firma (los trazos del lienzo sí se conservan)
+            if (firma == null) return 2;
+        }
+        return pasoGuardado;
     }
 
     @Override
@@ -613,6 +642,7 @@ public class SolicitudTramite extends AppCompatActivity {
         if (isFinishing() && !enviando) {
             for (String ruta : archivos.values()) new File(ruta).delete();
             if (rutaFotoPendiente != null) new File(rutaFotoPendiente).delete();
+            archivoFirmaEnCurso().delete();
         }
     }
 
