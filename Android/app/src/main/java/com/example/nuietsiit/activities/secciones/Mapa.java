@@ -1,13 +1,22 @@
 package com.example.nuietsiit.activities.secciones;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -18,6 +27,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -35,6 +47,8 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -45,7 +59,6 @@ import java.util.concurrent.Executors;
 
 public class Mapa extends AppCompatActivity {
 
-    // Fuente de mapa pública basada en OpenStreetMap (100% gratuita y sin requerir API Key)
     public static final OnlineTileSourceBase OPENMAP_TILES = new XYTileSource(
             "OSM_DE",
             0, 19, 256, ".png",
@@ -55,13 +68,31 @@ public class Mapa extends AppCompatActivity {
             "© OpenStreetMap contributors"
     );
 
+    // Vistas principales
     private MapView mapView;
+    private ImageView ivPlanoEdificio;
     private ImageView ivIcono;
     private FloatingActionButton fabMiUbicacion;
     private ExtendedFloatingActionButton fabComoLlegar;
     private EditText etBuscadorMapa;
+    private MaterialCardView cardBuscadorMapa;
+    private HorizontalScrollView scrollPlantas;
+    private ChipGroup chipGroupPlantas;
+    private MaterialButtonToggleGroup toggleGroupModo;
+
     private MyLocationNewOverlay myLocationOverlay;
     private Polyline rutaPolyline;
+
+    // Matrix para zoom/pan en la imagen del plano
+    private final Matrix matrix = new Matrix();
+    private final Matrix savedMatrix = new Matrix();
+    private static final int NONE = 0;
+    private static final int DRAG = 1;
+    private static final int ZOOM = 2;
+    private int mode = NONE;
+    private final PointF start = new PointF();
+    private final PointF mid = new PointF();
+    private float oldDist = 1f;
 
     // Coordenadas de la ETSIIT UGR (Granada)
     private final GeoPoint etsiitPoint = new GeoPoint(37.197087, -3.624508);
@@ -83,23 +114,36 @@ public class Mapa extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Configurar User-Agent válido de navegador antes de cargar la configuración
         configurarUserAgent();
 
         setContentView(R.layout.mapa);
 
-        ivIcono = findViewById(R.id.ivIcono);
-        mapView = findViewById(R.id.mapView);
-        fabMiUbicacion = findViewById(R.id.fabMiUbicacion);
-        fabComoLlegar = findViewById(R.id.fabComoLlegar);
-        etBuscadorMapa = findViewById(R.id.etBuscadorMapa);
+        bindViews();
 
         if (ivIcono != null) {
             ivIcono.setOnClickListener(v -> finish());
         }
 
-        configurarMapa();
+        configurarMapaOSM();
+        configurarSelectorModo();
+        configurarSelectorPlantas();
+        configurarTouchListenerPlano();
+        configurarBuscador();
+
         preguntaPermisoUbicacion();
+    }
+
+    private void bindViews() {
+        ivIcono = findViewById(R.id.ivIcono);
+        mapView = findViewById(R.id.mapView);
+        ivPlanoEdificio = findViewById(R.id.ivPlanoEdificio);
+        fabMiUbicacion = findViewById(R.id.fabMiUbicacion);
+        fabComoLlegar = findViewById(R.id.fabComoLlegar);
+        etBuscadorMapa = findViewById(R.id.etBuscadorMapa);
+        cardBuscadorMapa = findViewById(R.id.cardBuscadorMapa);
+        scrollPlantas = findViewById(R.id.scrollPlantas);
+        chipGroupPlantas = findViewById(R.id.chipGroupPlantas);
+        toggleGroupModo = findViewById(R.id.toggleGroupModo);
     }
 
     private void configurarUserAgent() {
@@ -109,10 +153,195 @@ public class Mapa extends AppCompatActivity {
         Configuration.getInstance().setUserAgentValue(userAgent);
     }
 
-    private void configurarMapa() {
+    private void configurarSelectorModo() {
+        if (toggleGroupModo == null) return;
+
+        toggleGroupModo.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+
+            if (checkedId == R.id.btnModoMapa) {
+                // Modo Mapa GPS
+                if (mapView != null) mapView.setVisibility(View.VISIBLE);
+                if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.VISIBLE);
+                if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.VISIBLE);
+
+                if (ivPlanoEdificio != null) ivPlanoEdificio.setVisibility(View.GONE);
+                if (cardBuscadorMapa != null) cardBuscadorMapa.setVisibility(View.GONE);
+                if (scrollPlantas != null) scrollPlantas.setVisibility(View.GONE);
+
+            } else if (checkedId == R.id.btnModoPlanos) {
+                // Modo Planos ETSIIT
+                if (mapView != null) mapView.setVisibility(View.GONE);
+                if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.GONE);
+                if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.GONE);
+
+                if (ivPlanoEdificio != null) ivPlanoEdificio.setVisibility(View.VISIBLE);
+                if (cardBuscadorMapa != null) cardBuscadorMapa.setVisibility(View.VISIBLE);
+                if (scrollPlantas != null) scrollPlantas.setVisibility(View.VISIBLE);
+
+                // Cargar planta baja por defecto si no hay ninguna
+                cargarPlanoAsset("baja.jpg");
+            }
+        });
+    }
+
+    private void configurarSelectorPlantas() {
+        if (chipGroupPlantas == null) return;
+
+        chipGroupPlantas.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+            int checkedId = checkedIds.get(0);
+
+            if (checkedId == R.id.chipSotano) {
+                cargarPlanoAsset("sotano.jpg");
+            } else if (checkedId == R.id.chipBaja) {
+                cargarPlanoAsset("baja.jpg");
+            } else if (checkedId == R.id.chipPrimera) {
+                cargarPlanoAsset("primera.jpg");
+            } else if (checkedId == R.id.chipSegunda) {
+                cargarPlanoAsset("segunda.jpg");
+            } else if (checkedId == R.id.chipTercera) {
+                cargarPlanoAsset("tercera.jpg");
+            } else if (checkedId == R.id.chipCuarta) {
+                cargarPlanoAsset("cuarta.jpg");
+            } else if (checkedId == R.id.chipQuinta) {
+                cargarPlanoAsset("quinta.jpg");
+            }
+        });
+    }
+
+    private void cargarPlanoAsset(String nombreArchivo) {
+        try (InputStream is = getAssets().open("mapa_etsiit/ConSuelo/" + nombreArchivo)) {
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            if (bitmap != null && ivPlanoEdificio != null) {
+                ivPlanoEdificio.setImageBitmap(bitmap);
+                ivPlanoEdificio.post(() -> resetearMatrizImagen(bitmap));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "No se pudo cargar el plano de la planta", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void configurarTouchListenerPlano() {
+        if (ivPlanoEdificio == null) return;
+
+        ivPlanoEdificio.setOnTouchListener((v, event) -> {
+            ImageView view = (ImageView) v;
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    savedMatrix.set(matrix);
+                    start.set(event.getX(), event.getY());
+                    mode = DRAG;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    oldDist = calcularDistancia(event);
+                    if (oldDist > 10f) {
+                        savedMatrix.set(matrix);
+                        calcularPuntoMedio(mid, event);
+                        mode = ZOOM;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = NONE;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == DRAG) {
+                        matrix.set(savedMatrix);
+                        matrix.postTranslate(event.getX() - start.x, event.getY() - start.y);
+                    } else if (mode == ZOOM) {
+                        float newDist = calcularDistancia(event);
+                        if (newDist > 10f) {
+                            matrix.set(savedMatrix);
+                            float scale = newDist / oldDist;
+                            matrix.postScale(scale, scale, mid.x, mid.y);
+                        }
+                    }
+                    break;
+            }
+            view.setImageMatrix(matrix);
+            return true;
+        });
+    }
+
+    private float calcularDistancia(MotionEvent event) {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        return (float) Math.sqrt(x * x + y * y);
+    }
+
+    private void calcularPuntoMedio(PointF point, MotionEvent event) {
+        float x = event.getX(0) + event.getX(1);
+        float y = event.getY(0) + event.getY(1);
+        point.set(x / 2, y / 2);
+    }
+
+    private void resetearMatrizImagen(Bitmap bitmap) {
+        if (ivPlanoEdificio == null || bitmap == null) return;
+        int viewWidth = ivPlanoEdificio.getWidth();
+        int viewHeight = ivPlanoEdificio.getHeight();
+        if (viewWidth == 0 || viewHeight == 0) return;
+
+        int imgWidth = bitmap.getWidth();
+        int imgHeight = bitmap.getHeight();
+
+        float scale = Math.min((float) viewWidth / imgWidth, (float) viewHeight / imgHeight);
+        float dx = (viewWidth - imgWidth * scale) / 2f;
+        float dy = (viewHeight - imgHeight * scale) / 2f;
+
+        matrix.reset();
+        matrix.postScale(scale, scale);
+        matrix.postTranslate(dx, dy);
+        ivPlanoEdificio.setImageMatrix(matrix);
+    }
+
+    private void configurarBuscador() {
+        if (etBuscadorMapa != null) {
+            etBuscadorMapa.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    String query = etBuscadorMapa.getText().toString().trim().toLowerCase(Locale.ROOT);
+                    if (!query.isEmpty()) {
+                        procesarBusquedaPlano(query);
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    private void procesarBusquedaPlano(String query) {
+        if (chipGroupPlantas == null) return;
+
+        if (query.contains("sotano") || query.contains("sótano") || query.contains("-1")) {
+            chipGroupPlantas.check(R.id.chipSotano);
+            Toast.makeText(this, "Mostrando Sótano para: " + query, Toast.LENGTH_SHORT).show();
+        } else if (query.contains("1") || query.contains("primera")) {
+            chipGroupPlantas.check(R.id.chipPrimera);
+            Toast.makeText(this, "Mostrando Planta 1 para: " + query, Toast.LENGTH_SHORT).show();
+        } else if (query.contains("2") || query.contains("segunda")) {
+            chipGroupPlantas.check(R.id.chipSegunda);
+            Toast.makeText(this, "Mostrando Planta 2 para: " + query, Toast.LENGTH_SHORT).show();
+        } else if (query.contains("3") || query.contains("tercera")) {
+            chipGroupPlantas.check(R.id.chipTercera);
+            Toast.makeText(this, "Mostrando Planta 3 para: " + query, Toast.LENGTH_SHORT).show();
+        } else if (query.contains("4") || query.contains("cuarta")) {
+            chipGroupPlantas.check(R.id.chipCuarta);
+            Toast.makeText(this, "Mostrando Planta 4 para: " + query, Toast.LENGTH_SHORT).show();
+        } else if (query.contains("5") || query.contains("quinta")) {
+            chipGroupPlantas.check(R.id.chipQuinta);
+            Toast.makeText(this, "Mostrando Planta 5 para: " + query, Toast.LENGTH_SHORT).show();
+        } else {
+            chipGroupPlantas.check(R.id.chipBaja);
+            Toast.makeText(this, "Buscando '" + query + "' en Planta Baja", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void configurarMapaOSM() {
         if (mapView == null) return;
 
-        // Usar OpenStreetMap DE (público, gratuito y sin requerir API Key)
         mapView.setTileSource(OPENMAP_TILES);
         mapView.setMultiTouchControls(true);
 
@@ -155,20 +384,6 @@ public class Mapa extends AppCompatActivity {
                     return;
                 }
                 calcularYMostrarRuta(userLocation, etsiitPoint);
-            });
-        }
-
-        if (etBuscadorMapa != null) {
-            etBuscadorMapa.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    String query = etBuscadorMapa.getText().toString().trim();
-                    if (!query.isEmpty()) {
-                        Toast.makeText(this, "Buscando: " + query + " en ETSIIT...", Toast.LENGTH_SHORT).show();
-                        centrarEnETSIIT();
-                    }
-                    return true;
-                }
-                return false;
             });
         }
     }
@@ -224,12 +439,11 @@ public class Mapa extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            // Si falla OSRM o no hay internet, trazamos línea recta como respaldo
             if (!exitoOSRM || puntosRuta.isEmpty()) {
                 puntosRuta.add(origen);
                 puntosRuta.add(destino);
                 distanciaMetros = origen.distanceToAsDouble(destino);
-                duracionSegundosCoche = (distanciaMetros / 1000.0) / 30.0 * 3600.0; // aprox. 30 km/h en ciudad
+                duracionSegundosCoche = (distanciaMetros / 1000.0) / 30.0 * 3600.0;
             }
 
             final List<GeoPoint> rutaFinal = puntosRuta;
@@ -239,30 +453,26 @@ public class Mapa extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (mapView == null) return;
 
-                // 1. Eliminar linea de ruta anterior si existía
                 if (rutaPolyline != null) {
                     mapView.getOverlays().remove(rutaPolyline);
                 }
 
-                // 2. Crear y añadir la nueva línea de ruta al fondo (índice 0)
                 rutaPolyline = new Polyline(mapView);
                 rutaPolyline.setPoints(rutaFinal);
                 rutaPolyline.getOutlinePaint().setColor(Color.parseColor("#FF8C42"));
                 rutaPolyline.getOutlinePaint().setStrokeWidth(12f);
                 mapView.getOverlays().add(0, rutaPolyline);
 
-                // 3. Asegurar que el icono de ubicación ("monigote") siga activo y visible sobre la ruta
                 if (myLocationOverlay != null) {
                     if (!mapView.getOverlays().contains(myLocationOverlay)) {
                         mapView.getOverlays().add(myLocationOverlay);
                     }
-                    myLocationOverlay.disableFollowLocation(); // Evitar que fuerce la cámara al usuario
-                    myLocationOverlay.enableMyLocation();     // Mantener visible el icono/monigote
+                    myLocationOverlay.disableFollowLocation();
+                    myLocationOverlay.enableMyLocation();
                 }
 
                 mapView.invalidate();
 
-                // 4. Centrar y encuadrar mapa para ver la ruta entera
                 if (rutaFinal.size() >= 2) {
                     BoundingBox boundingBox = BoundingBox.fromGeoPoints(rutaFinal);
                     mapView.zoomToBoundingBox(boundingBox, true, 120);
@@ -279,7 +489,6 @@ public class Mapa extends AppCompatActivity {
                 : String.format(Locale.getDefault(), "%d m", (int) distanciaMetros);
 
         int minsCoche = (int) Math.max(1, Math.ceil(duracionCocheSeg / 60.0));
-        // Velocidad media a pie: 75 m/min (~4.5 km/h)
         int minsAPie = (int) Math.max(1, Math.ceil(distanciaMetros / 75.0));
 
         String mensaje = "📍 Distancia: " + distanciaTexto + "\n\n"
@@ -302,7 +511,6 @@ public class Mapa extends AppCompatActivity {
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(mapIntent);
         } else {
-            // Si no tiene la app de Google Maps instalada, abrir navegador/intención genérica
             Intent genericIntent = new Intent(Intent.ACTION_VIEW,
                     Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + etsiitPoint.getLatitude() + "," + etsiitPoint.getLongitude()));
             startActivity(genericIntent);

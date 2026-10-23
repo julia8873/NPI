@@ -39,12 +39,45 @@
             android:src="@drawable/icono" />
     </RelativeLayout>
 
-    <!-- 2. BUSCADOR SUPERIOR (Arriba) -->
-    <com.google.android.material.card.MaterialCardView
+    <!-- SELECTOR DE VISTA: MAPA GPS VS PLANOS ETSIIT -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleGroupModo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="12dp"
+        app:checkedButton="@id/btnModoMapa"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoMapa"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🗺️ Mapa GPS"
+            android:textSize="13sp"
+            app:strokeColor="#FF8C42" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoPlanos"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏢 Planos ETSIIT"
+            android:textSize="13sp"
+            app:strokeColor="#FF8C42" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- 2. BUSCADOR SUPERIOR (Solo visible en modo Planos) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardBuscadorMapa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
         app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="16dp"
         app:cardElevation="3dp"
@@ -62,9 +95,9 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:contentDescription="Buscar"
                 android:src="@android:drawable/ic_menu_search"
-                app:tint="#FF8C42"
-                android:contentDescription="Buscar" />
+                app:tint="#FF8C42" />
 
             <EditText
                 android:id="@+id/etBuscadorMapa"
@@ -82,7 +115,77 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 3. RECUADRO CENTRAL PARA EL MAPA -->
+    <!-- 3. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
+    <HorizontalScrollView
+        android:id="@+id/scrollPlantas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupPlantas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSotano"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sótano" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBaja"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Planta Baja" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPrimera"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 1" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSegunda"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 2" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTercera"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 3" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCuarta"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 4" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipQuinta"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 5" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- 4. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardMapaContainer"
         android:layout_width="match_parent"
@@ -100,10 +203,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- Capa Modo Mapa GPS -->
             <org.osmdroid.views.MapView
                 android:id="@+id/mapView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+            <!-- Capa Modo Planos ETSIIT (ImageView táctil con Zoom/Pan Matrix) -->
+            <ImageView
+                android:id="@+id/ivPlanoEdificio"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Plano de la planta"
+                android:scaleType="matrix"
+                android:visibility="gone" />
 
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/fabComoLlegar"

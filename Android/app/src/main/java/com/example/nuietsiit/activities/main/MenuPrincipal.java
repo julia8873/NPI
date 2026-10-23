@@ -292,13 +292,11 @@ public class MenuPrincipal extends AppCompatActivity {
     private void configurarSliderNoticias() {
         listaNoticias = new ArrayList<>();
         listaNoticias.add(R.drawable.noticia1);
-        listaNoticias.add(R.drawable.noticia5);
-        listaNoticias.add(R.drawable.noticia3);
-        listaNoticias.add(R.drawable.noticia6);
         listaNoticias.add(R.drawable.noticia2);
-        listaNoticias.add(R.drawable.noticia7);
+        listaNoticias.add(R.drawable.noticia3);
         listaNoticias.add(R.drawable.noticia4);
-        listaNoticias.add(R.drawable.noticia8);
+        listaNoticias.add(R.drawable.noticia5);
+        listaNoticias.add(R.drawable.noticia6);
 
         // Adaptador
         vpNoticias.setAdapter(new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -311,7 +309,7 @@ public class MenuPrincipal extends AppCompatActivity {
                         ViewGroup.LayoutParams.MATCH_PARENT
                 ));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                // Al pulsar una noticia del carrusel se abre la pantalla de Noticias (Miguel)
+                // Al pulsar una noticia del carrusel se abre la pantalla de Noticias
                 imageView.setOnClickListener(v -> {
                     Intent intent = new Intent(MenuPrincipal.this, Noticias.class);
                     intent.putExtra("CORREO", correoUsuario);
@@ -337,7 +335,7 @@ public class MenuPrincipal extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 sliderHandler.removeCallbacks(sliderRunnable);
-                sliderHandler.postDelayed(sliderRunnable, 3000); // 3 segundos
+                sliderHandler.postDelayed(sliderRunnable, 5000); // 3 segundos
             }
         });
     }
