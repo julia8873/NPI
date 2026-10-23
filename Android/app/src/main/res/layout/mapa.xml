@@ -83,7 +83,6 @@
     </com.google.android.material.card.MaterialCardView>
 
     <!-- 3. RECUADRO CENTRAL PARA EL MAPA -->
-    <!-- 3. RECUADRO CENTRAL PARA EL MAPA -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardMapaContainer"
         android:layout_width="match_parent"
@@ -101,156 +100,36 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!-- VISTA INTERACTIVA DEL MAPA -->
-            <ImageView
-                android:id="@+id/ivMapa"
+            <org.osmdroid.views.MapView
+                android:id="@+id/mapView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="Plano interactivo de la planta"
-                android:scaleType="fitCenter" />
+                android:layout_height="match_parent" />
 
-            <!-- Mensaje flotante con la planta actual (opcional, como overlay) -->
-            <TextView
-                android:id="@+id/tvPlantaActual"
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fabComoLlegar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|start"
-                android:layout_margin="12dp"
-                android:background="#80000000"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
-                android:text="Planta Baja (Planta 0)"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="16dp"
+                android:text="Cómo llegar"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textSize="13sp"
+                app:backgroundTint="#FF8C42"
+                app:icon="@android:drawable/ic_menu_directions"
+                app:iconTint="#FFFFFF" />
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabMiUbicacion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:contentDescription="Mi ubicación"
+                android:src="@android:drawable/ic_menu_mylocation"
+                app:backgroundTint="#FFFFFF"
+                app:fabCustomSize="48dp"
+                app:tint="#FF8C42" />
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
-
-    <!-- 4. BARRA INFERIOR DE PLANTAS (Selector de planta -1, 0, 1, 2, 3...) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="8dp"
-            android:text="Selecciona Planta:"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/llBarraPlantas"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="2dp">
-
-                <!-- Botón Planta -1 -->
-                <Button
-                    android:id="@+id/btnPlantaMinus1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta -1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 0 (Seleccionada por defecto) -->
-                <Button
-                    android:id="@+id/btnPlanta0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta Baja"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#FF8C42"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 1 -->
-                <Button
-                    android:id="@+id/btnPlanta1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta 1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 2 -->
-                <Button
-                    android:id="@+id/btnPlanta2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta 2"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 3 -->
-                <Button
-                    android:id="@+id/btnPlanta3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta 3"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 4 -->
-                <Button
-                    android:id="@+id/btnPlanta4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta 4"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-                <!-- Botón Planta 5 -->
-                <Button
-                    android:id="@+id/btnPlanta5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Planta 5"
-                    android:textColor="#FFFFFF"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#888888"
-                    app:cornerRadius="16dp" />
-
-            </LinearLayout>
-        </HorizontalScrollView>
-    </LinearLayout>
 
 </LinearLayout>
