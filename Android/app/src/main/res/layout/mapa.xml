@@ -115,7 +115,78 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 3. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
+    <!-- 3. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardMapaContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginVertical="8dp"
+        app:cardBackgroundColor="#000000"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp"
+        app:strokeColor="#FF8C42"
+        app:strokeWidth="2dp">
+
+        <FrameLayout
+            android:id="@+id/flContenedorMapa"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000">
+
+            <!-- Capa Modo Mapa GPS -->
+            <org.osmdroid.views.MapView
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- Capa Modo Planos ETSIIT -->
+            <FrameLayout
+                android:id="@+id/containerPlanoConMarcadores"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <!-- Imagen del Plano -->
+                <ImageView
+                    android:id="@+id/ivPlanoEdificio"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#000000"
+                    android:contentDescription="Plano de la planta"
+                    android:scaleType="matrix" />
+
+                <!-- Los marcadores se añadirán dinámicamente aquí dentro -->
+            </FrameLayout>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fabComoLlegar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="16dp"
+                android:text="Cómo llegar"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                app:backgroundTint="#FF8C42"
+                app:icon="@android:drawable/ic_menu_directions"
+                app:iconTint="#FFFFFF" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabMiUbicacion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:contentDescription="Mi ubicación"
+                android:src="@android:drawable/ic_menu_mylocation"
+                app:backgroundTint="#FFFFFF"
+                app:fabCustomSize="48dp"
+                app:tint="#FF8C42" />
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 4. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
     <HorizontalScrollView
         android:id="@+id/scrollPlantas"
         android:layout_width="match_parent"
@@ -184,65 +255,5 @@
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
-
-    <!-- 4. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardMapaContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginVertical="8dp"
-        app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="6dp"
-        app:strokeColor="#FF8C42"
-        app:strokeWidth="2dp">
-
-        <FrameLayout
-            android:id="@+id/flContenedorMapa"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <!-- Capa Modo Mapa GPS -->
-            <org.osmdroid.views.MapView
-                android:id="@+id/mapView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <!-- Capa Modo Planos ETSIIT (ImageView táctil con Zoom/Pan Matrix) -->
-            <ImageView
-                android:id="@+id/ivPlanoEdificio"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="Plano de la planta"
-                android:scaleType="matrix"
-                android:visibility="gone" />
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:id="@+id/fabComoLlegar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|start"
-                android:layout_margin="16dp"
-                android:text="Cómo llegar"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
-                app:backgroundTint="#FF8C42"
-                app:icon="@android:drawable/ic_menu_directions"
-                app:iconTint="#FFFFFF" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fabMiUbicacion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:contentDescription="Mi ubicación"
-                android:src="@android:drawable/ic_menu_mylocation"
-                app:backgroundTint="#FFFFFF"
-                app:fabCustomSize="48dp"
-                app:tint="#FF8C42" />
-        </FrameLayout>
-    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>

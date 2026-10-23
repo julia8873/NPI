@@ -38,7 +38,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".activities.main.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
-        <activity android:name=".activities.secciones.Mapa" />
+        <activity android:name=".activities.secciones.mapa.Mapa" />
         <activity android:name=".activities.secciones.Actividades" />
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />
