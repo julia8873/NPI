@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.actividades.ActividadAdapter;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
 import com.example.nuietsiit.data.ActividadesDB;
@@ -47,7 +48,7 @@ import java.util.Set;
  * - Deslizar una tarjeta a la derecha = apuntarse. A la izquierda = ocultarla (con "Deshacer").
  * - Pulsar una tarjeta = detalle con botones de apuntarse, añadir al calendario y más info.
  */
-public class Actividades extends AppCompatActivity {
+public class Actividades extends BaseActivity {
 
     private static final String FILTRO_APUNTADO = "__apuntado"; // chip "Mis actividades"
     private static final int NARANJA = 0xFFFF8C42;

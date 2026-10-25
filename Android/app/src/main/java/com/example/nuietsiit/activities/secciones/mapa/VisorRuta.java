@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +23,7 @@ import java.util.Locale;
  * Extras: ORIGEN_ID, ORIGEN_NOMBRE, ORIGEN_METODO, DESTINO_NOMBRE
  * Prueba sin sensores: mantener pulsado el texto del rumbo para activar el deslizador manual.
  */
-public class VisorRuta extends AppCompatActivity implements Brujula.Listener {
+public class VisorRuta extends BaseActivity implements Brujula.Listener {
 
     private ImageView ivFotoRuta;
     private TextView tvRumbo;

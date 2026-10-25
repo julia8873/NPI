@@ -11,11 +11,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
 
-public class Login extends AppCompatActivity {
+public class Login extends BaseActivity {
 
     // Declaración de los componentes de la interfaz de usuario
     private EditText etCorreo, etPassword;

@@ -6,15 +6,19 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Documento;
+import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -234,6 +238,64 @@ public class SecretariaDB {
             while (c.moveToNext()) horas.add(c.getString(0));
         }
         return horas;
+    }
+
+    /**
+     * Obtiene las citas activas de secretaría para una fecha (YYYY-MM-DD),
+     * devueltas como objetos EventoCalendario para integrarse en el Calendario.
+     */
+    public List<EventoCalendario> obtenerCitasPorFecha(String fechaYYYYMMDD, String correoUsuario) {
+        List<EventoCalendario> lista = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String correo = correoUsuario != null ? correoUsuario.toLowerCase().trim() : "";
+
+        String sql = "SELECT c.idCita, c.correoUsuario, c.fecha, c.hora, p.nombreProcedimiento " +
+                     "FROM CITA c " +
+                     "LEFT JOIN PROCEDIMIENTO p ON p.idProcedimiento = c.idProcedimiento " +
+                     "WHERE c.fecha = ? AND c.estado = 'activa' ";
+
+        List<String> argsList = new ArrayList<>();
+        argsList.add(fechaYYYYMMDD);
+
+        if (!correo.isEmpty()) {
+            sql += "AND (c.correoUsuario = ? OR c.correoUsuario = '' OR c.correoUsuario IS NULL) ";
+            argsList.add(correo);
+        }
+
+        try (Cursor c = db.rawQuery(sql, argsList.toArray(new String[0]))) {
+            while (c.moveToNext()) {
+                int idCita = c.getInt(c.getColumnIndexOrThrow("idCita"));
+                String hora = c.getString(c.getColumnIndexOrThrow("hora"));
+                String proc = c.getString(c.getColumnIndexOrThrow("nombreProcedimiento"));
+
+                String titulo = proc != null && !proc.isEmpty() ? "Cita: " + proc : "Cita Previa Secretaría";
+                String desc = "Secretaría de la ETSIIT · Cita presencial activa";
+
+                // ID negativo especial (-20000 - idCita)
+                lista.add(new EventoCalendario(-20000 - idCita, "", titulo, "Cita", fechaYYYYMMDD, hora, desc));
+            }
+        } catch (Exception ignored) {}
+        return lista;
+    }
+
+    /**
+     * Puebla la tabla CITA con citas de prueba si está vacía.
+     */
+    public void poblarCitasDeEjemploSiVacio() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor c = db.rawQuery("SELECT COUNT(*) FROM CITA WHERE estado = 'activa'", null)) {
+            if (c.moveToFirst() && c.getInt(0) == 0) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Calendar cal = Calendar.getInstance();
+
+                String hoy = sdf.format(cal.getTime());
+                insertarCita("invitado@correo.ugr.es", 1, hoy, "11:30");
+
+                cal.add(Calendar.DAY_OF_MONTH, 2);
+                String en2dias = sdf.format(cal.getTime());
+                insertarCita("invitado@correo.ugr.es", 3, en2dias, "12:15");
+            }
+        } catch (Exception ignored) {}
     }
 
     private boolean cambiarEstadoCita(int idCita, String estado) {

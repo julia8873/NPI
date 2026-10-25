@@ -11,10 +11,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.AcademicoDB;
 import com.example.nuietsiit.data.DBHelper;
 
-public class DetalleAsignatura extends AppCompatActivity {
+public class DetalleAsignatura extends BaseActivity {
 
     private String enlaceGuiaDocente = "";
 

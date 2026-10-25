@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.data.Comedores.ComedoresDB;
 import com.example.nuietsiit.data.Comedores.Comedor;
@@ -47,7 +48,7 @@ import java.util.Locale;
  * consultar menús, horarios y precios desde SQLite para el día seleccionado, y navegar entre días
  * mediante botones o sensores de inclinación lateral (con restricción de no permitir fechas pasadas).
  */
-public class Comedores extends AppCompatActivity {
+public class Comedores extends BaseActivity {
 
     // Componentes de la interfaz de usuario
     private TextView tvMensajeComedorCercano;

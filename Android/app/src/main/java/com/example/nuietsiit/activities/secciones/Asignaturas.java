@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
@@ -27,7 +28,7 @@ import com.example.nuietsiit.data.DBHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Asignaturas extends AppCompatActivity {
+public class Asignaturas extends BaseActivity {
 
     private ImageView ivIcono;
     private LinearLayout layoutLoggedOut;

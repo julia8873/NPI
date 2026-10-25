@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
@@ -40,7 +41,7 @@ import java.util.Set;
  * Cita previa en la secretaría: motivo → día (próximos 10 laborables) → franja de 10 min → confirmar.
  * Máximo una cita activa por motivo: si ya hay, elegir otra franja la cambia.
  */
-public class CitaPrevia extends AppCompatActivity {
+public class CitaPrevia extends BaseActivity {
 
     private static final String ESTADO_MOTIVO = "motivo";
     private static final String ESTADO_FECHA = "fecha";

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Paso;
@@ -24,7 +25,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.List;
 
-public class PasosTramite extends AppCompatActivity {
+public class PasosTramite extends BaseActivity {
 
     private static final String PREFS = "secretaria";
     private static final String PREF_INCLINAR = "inclinarPasos";

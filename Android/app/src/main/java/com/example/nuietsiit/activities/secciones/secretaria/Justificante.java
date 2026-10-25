@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
@@ -32,7 +33,7 @@ import com.google.android.material.appbar.MaterialToolbar;
  * Mientras está abierto: brillo al máximo y pantalla siempre encendida.
  * QR: pellizcar amplía de 1× a 3× (sin pasar del ancho de pantalla), doble toque vuelve a 1×.
  */
-public class Justificante extends AppCompatActivity {
+public class Justificante extends BaseActivity {
 
     private static final float ESCALA_MIN = 1f;
     private static final float ESCALA_MAX = 3f;

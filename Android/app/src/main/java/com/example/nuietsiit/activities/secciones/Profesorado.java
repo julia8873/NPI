@@ -1,4 +1,6 @@
 package com.example.nuietsiit.activities.secciones;
 
-public class Profesorado {
+import com.example.nuietsiit.activities.BaseActivity;
+
+public class Profesorado extends BaseActivity {
 }

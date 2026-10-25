@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.IdiomasDB;
@@ -26,7 +27,7 @@ import com.example.nuietsiit.data.UsuariosDB;
 
 import java.util.List;
 
-public class AjustesCuenta  extends AppCompatActivity {
+public class AjustesCuenta  extends BaseActivity {
 
     private EditText etNombre, etPassword;
     private AutoCompleteTextView etGrado, etIdioma;

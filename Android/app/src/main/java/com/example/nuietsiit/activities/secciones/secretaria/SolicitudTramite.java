@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.UsuariosDB;
@@ -68,7 +69,7 @@ import java.util.Set;
  * del almacenamiento) → firma → resumen y envío (mantener pulsado 1,5 s). Al enviar guarda la
  * SOLICITUD y abre su justificante. Al rotar se conservan el paso, los documentos y la firma.
  */
-public class SolicitudTramite extends AppCompatActivity {
+public class SolicitudTramite extends BaseActivity {
 
     private static final String[] TITULOS = {"Tus datos", "Documentos", "Firma", "Resumen"};
     private static final long DURACION_MANTENER = 1500;

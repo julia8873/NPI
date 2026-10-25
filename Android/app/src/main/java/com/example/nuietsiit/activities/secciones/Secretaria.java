@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
 import com.example.nuietsiit.activities.secciones.secretaria.DetalleTramite;
 import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
@@ -28,7 +29,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 
-public class Secretaria extends AppCompatActivity {
+public class Secretaria extends BaseActivity {
 
     private static final String ESTADO_CATEGORIA = "categoria";
 

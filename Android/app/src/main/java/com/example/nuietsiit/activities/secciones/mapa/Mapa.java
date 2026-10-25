@@ -36,6 +36,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -70,7 +71,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 
-public class Mapa extends AppCompatActivity {
+public class Mapa extends BaseActivity {
 
     public static final OnlineTileSourceBase OPENMAP_TILES = new XYTileSource(
             "OSM_DE",

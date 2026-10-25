@@ -36,6 +36,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
@@ -48,6 +49,7 @@ import com.example.nuietsiit.activities.secciones.Secretaria;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.util.DetectorInclinacion;
@@ -64,7 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class MenuPrincipal extends AppCompatActivity {
+public class MenuPrincipal extends BaseActivity {
 
     // Componentes de la interfaz de usuario
     private TextView tvBienvenida, tvAnteriorNombre, tvSiguienteNombre, tvNombreSeccion;
@@ -95,6 +97,7 @@ public class MenuPrincipal extends AppCompatActivity {
     private Button btnAnadirEvento;
     private CalendarioDB calendarioDB;
     private ActividadesDB actividadesDB;
+    private SecretariaDB secretariaDB;
     private final Calendar mesMostradoCal = Calendar.getInstance();
     private String fechaSeleccionadaStr;
 
@@ -113,6 +116,10 @@ public class MenuPrincipal extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_principal);
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // QUITAR???????????????????????????????????????????????????????????????
+        comprobarAnimacionOla(getIntent());
 
         // Inicializar base de datos
         BD = DBHelper.getInstance(this);
@@ -157,12 +164,37 @@ public class MenuPrincipal extends AppCompatActivity {
         // Inicializar Calendario y eventos
         calendarioDB = new CalendarioDB(BD);
         actividadesDB = new ActividadesDB(BD);
+        secretariaDB = new SecretariaDB(BD);
+        secretariaDB.poblarCitasDeEjemploSiVacio();
         inicializarCalendario();
 
         // Notificaciones del sistema: avisos urgentes y actividades de hoy/mañana (Miguel)
         Notificador.revisarAvisos(this, correoUsuario);
     }
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // QUITAR???????????????????????????????????????????????????????????????
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        comprobarAnimacionOla(intent);
+    }
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // QUITAR???????????????????????????????????????????????????????????????
+    private void comprobarAnimacionOla(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("START_WAVE_DOWN", false)) {
+            // Limpiamos el extra para no repetirlo innecesariamente
+            intent.removeExtra("START_WAVE_DOWN");
+
+            WaveView waveView = findViewById(R.id.waveView);
+
+            if (waveView != null) {
+                waveView.startWaveDown(null);
+            }
+        }
+    }
     /**
      * Obtiene el nombre del usuario según su correo y actualiza la etiqueta de bienvenida.
      */
@@ -564,10 +596,11 @@ public class MenuPrincipal extends AppCompatActivity {
                     boolean esMismoMes = cDia.get(Calendar.MONTH) == mesMostradoCal.get(Calendar.MONTH);
                     boolean esSeleccionado = dateStr.equals(fechaSeleccionadaStr);
 
-                    // Consultar eventos para esta fecha
+                    // Consultar eventos para esta fecha (Usuario, Actividades Oficiales y Citas de Secretaría)
                     List<EventoCalendario> evsUser = calendarioDB != null ? calendarioDB.obtenerEventosPorFecha(dateStr, correoUsuario) : new ArrayList<>();
                     List<EventoCalendario> evsOficiales = actividadesDB != null ? actividadesDB.obtenerActividadesPorFecha(dateStr) : new ArrayList<>();
-                    boolean tieneEventos = !evsUser.isEmpty() || !evsOficiales.isEmpty();
+                    List<EventoCalendario> evsCitas = secretariaDB != null ? secretariaDB.obtenerCitasPorFecha(dateStr, correoUsuario) : new ArrayList<>();
+                    boolean tieneEventos = !evsUser.isEmpty() || !evsOficiales.isEmpty() || !evsCitas.isEmpty();
 
                     if (!esMismoMes) {
                         tvNumeroDia.setTextColor(Color.parseColor("#CCCCCC"));
@@ -590,19 +623,20 @@ public class MenuPrincipal extends AppCompatActivity {
                         gdCirculo.setColor(Color.parseColor("#FF8C42")); // Naranja primario
                         flCirculoDia.setBackground(gdCirculo);
                     } else if (tieneEventos && esMismoMes) {
-                        // ¡RESALTAR DÍAS CON EVENTOS O ENTREGAS! Fondo cálido anaranjado suave
+                        // ¡RESALTAR DÍAS CON EVENTOS O CITAS! Fondo cálido suave
                         gdCirculo.setColor(Color.parseColor("#FFE0B2"));
                         flCirculoDia.setBackground(gdCirculo);
                     } else {
                         flCirculoDia.setBackground(null);
                     }
 
-                    // Puntos indicadores de tipo de evento (Examen, Entrega, Actividad, Otro)
+                    // Puntos indicadores de tipo de evento (Examen, Entrega, Actividad, Cita, Otro)
                     llPuntosIndicadores.removeAllViews();
                     if (tieneEventos && esMismoMes) {
                         Set<String> tipos = new HashSet<>();
                         for (EventoCalendario e : evsUser) tipos.add(e.tipo);
                         if (!evsOficiales.isEmpty()) tipos.add("Actividad");
+                        if (!evsCitas.isEmpty()) tipos.add("Cita");
 
                         for (String t : tipos) {
                             View dot = new View(MenuPrincipal.this);
@@ -617,6 +651,7 @@ public class MenuPrincipal extends AppCompatActivity {
                             if ("Examen".equalsIgnoreCase(t)) colorDot = Color.parseColor("#E53935");
                             else if ("Entrega".equalsIgnoreCase(t)) colorDot = Color.parseColor("#FB8C00");
                             else if ("Actividad".equalsIgnoreCase(t)) colorDot = Color.parseColor("#1E88E5");
+                            else if ("Cita".equalsIgnoreCase(t) || "Cita Secretaría".equalsIgnoreCase(t)) colorDot = Color.parseColor("#8E24AA");
                             else if ("Otro".equalsIgnoreCase(t)) colorDot = Color.parseColor("#43A047");
 
                             gdDot.setColor(colorDot);
@@ -655,12 +690,16 @@ public class MenuPrincipal extends AppCompatActivity {
         // 1. Obtener eventos guardados por el usuario
         List<EventoCalendario> eventosUsuario = calendarioDB != null ? calendarioDB.obtenerEventosPorFecha(fechaSeleccionadaStr, correoUsuario) : new ArrayList<>();
 
-        // 2. Obtener automáticamente las actividades oficiales publicadas en la sección "Actividades"
+        // 2. Obtener actividades oficiales de la sección "Actividades"
         List<EventoCalendario> actividadesSeccion = actividadesDB != null ? actividadesDB.obtenerActividadesPorFecha(fechaSeleccionadaStr) : new ArrayList<>();
+
+        // 3. Obtener citas activas de la sección "Secretaría"
+        List<EventoCalendario> citasSecretaria = secretariaDB != null ? secretariaDB.obtenerCitasPorFecha(fechaSeleccionadaStr, correoUsuario) : new ArrayList<>();
 
         List<EventoCalendario> eventos = new ArrayList<>();
         eventos.addAll(eventosUsuario);
         eventos.addAll(actividadesSeccion);
+        eventos.addAll(citasSecretaria);
 
         if (tvNumEventosFecha != null) {
             tvNumEventosFecha.setText(eventos.size() + (eventos.size() == 1 ? " evento" : " eventos"));
@@ -689,10 +728,13 @@ public class MenuPrincipal extends AppCompatActivity {
                 rowLayout.setGravity(Gravity.CENTER_VERTICAL);
 
                 TextView tvBadge = new TextView(this);
-                boolean esActividadOficial = ev.id < 0;
+                boolean esActividadOficial = ev.id < 0 && ev.id > -20000;
+                boolean esCitaSecretaria = ev.id <= -20000;
 
                 if (esActividadOficial) {
                     tvBadge.setText("ACTIVIDAD ETSIIT");
+                } else if (esCitaSecretaria) {
+                    tvBadge.setText("CITA SECRETARÍA");
                 } else {
                     tvBadge.setText(ev.tipo.toUpperCase());
                 }
@@ -703,7 +745,9 @@ public class MenuPrincipal extends AppCompatActivity {
                 tvBadge.setPadding(16, 8, 16, 8);
 
                 int colorBadge = Color.parseColor("#FF8C42");
-                if (esActividadOficial || "Actividad".equalsIgnoreCase(ev.tipo)) {
+                if (esCitaSecretaria || "Cita".equalsIgnoreCase(ev.tipo)) {
+                    colorBadge = Color.parseColor("#8E24AA"); // morado
+                } else if (esActividadOficial || "Actividad".equalsIgnoreCase(ev.tipo)) {
                     colorBadge = Color.parseColor("#1E88E5"); // azul
                 } else if ("Examen".equalsIgnoreCase(ev.tipo)) {
                     colorBadge = Color.parseColor("#E53935"); // rojo
@@ -758,6 +802,15 @@ public class MenuPrincipal extends AppCompatActivity {
                     btnAccion.setContentDescription("Ver actividad");
                     btnAccion.setOnClickListener(v -> {
                         Intent intent = new Intent(MenuPrincipal.this, Actividades.class);
+                        intent.putExtra("CORREO", correoUsuario);
+                        startActivity(intent);
+                    });
+                } else if (esCitaSecretaria) {
+                    btnAccion.setImageResource(android.R.drawable.ic_menu_info_details);
+                    btnAccion.setColorFilter(Color.parseColor("#8E24AA"));
+                    btnAccion.setContentDescription("Ver Secretaría");
+                    btnAccion.setOnClickListener(v -> {
+                        Intent intent = new Intent(MenuPrincipal.this, Secretaria.class);
                         intent.putExtra("CORREO", correoUsuario);
                         startActivity(intent);
                     });

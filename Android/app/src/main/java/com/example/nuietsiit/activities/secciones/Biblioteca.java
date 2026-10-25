@@ -6,8 +6,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 
-public class Biblioteca extends AppCompatActivity {
+public class Biblioteca extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

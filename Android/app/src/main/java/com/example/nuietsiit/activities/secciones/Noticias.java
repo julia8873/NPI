@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.noticias.AnuncioAdapter;
 import com.example.nuietsiit.data.AnunciosDB;
 import com.example.nuietsiit.data.AnunciosLeidos;
@@ -34,7 +35,7 @@ import java.util.Set;
  * - Los urgentes salen arriba con borde rojo.
  * - Se recuerda qué avisos has leído.
  */
-public class Noticias extends AppCompatActivity {
+public class Noticias extends BaseActivity {
 
     private static final String FILTRO_NO_LEIDOS = "__noleidos";
     private static final int ROJO = 0xFFD32F2F;

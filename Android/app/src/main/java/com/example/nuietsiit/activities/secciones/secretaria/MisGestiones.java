@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
@@ -38,7 +39,7 @@ import java.util.List;
  * Mis citas y solicitudes con su estado. Pestañas "Citas" y "Solicitudes".
  * Citas: deslizar a la izquierda = cancelar (con "Deshacer"). Tocar cualquiera = justificante.
  */
-public class MisGestiones extends AppCompatActivity {
+public class MisGestiones extends BaseActivity {
 
     private static final int PAGINA_CITAS = 0;
     private static final int PAGINA_SOLICITUDES = 1;

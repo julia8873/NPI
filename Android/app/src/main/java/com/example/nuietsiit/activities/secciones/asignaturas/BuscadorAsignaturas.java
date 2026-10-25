@@ -20,10 +20,11 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.AcademicoDB;
 import com.example.nuietsiit.data.DBHelper;
 
-public class BuscadorAsignaturas extends AppCompatActivity {
+public class BuscadorAsignaturas extends BaseActivity {
 
     private ScrollView scrollGrados;
     private LinearLayout layoutRuletaCursos;
