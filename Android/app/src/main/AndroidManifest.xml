@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <!-- Notificaciones de avisos urgentes y actividades -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
@@ -39,6 +41,10 @@
         <activity android:name=".activities.main.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
         <activity android:name=".activities.secciones.mapa.Mapa" />
+        <!-- Visor de ruta: foto según hacia dónde mire el usuario (brújula) -->
+        <activity
+            android:name=".activities.secciones.mapa.VisorRuta"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.Actividades" />
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />

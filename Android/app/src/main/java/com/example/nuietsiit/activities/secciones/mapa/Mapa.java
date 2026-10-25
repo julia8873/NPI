@@ -4,14 +4,19 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -19,6 +24,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,11 +36,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.SesionUtil;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,6 +65,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -102,6 +114,63 @@ public class Mapa extends AppCompatActivity {
     private final List<Marcador> listaMarcadores = new ArrayList<>();
     private String plantaActual = "planta0";
 
+    // --- Ruta / ubicación del usuario dentro de la ETSIIT ---
+    private TextView tvTituloMapa;
+    private MaterialCardView cardRutaActiva;
+    private TextView tvRutaInfo;
+    private MaterialButton btnAbrirVisor;
+    private MaterialButton btnCancelarRuta;
+    private Marcador destinoRuta;          // punto naranja al que quiere ir
+    private UbicacionUsuario origenActual; // dónde hemos ubicado al usuario
+    private Marcador marcadorOrigen;       // punto azul que dibuja el origen en el plano
+    private Calendar ahoraSimulado;
+    private MaterialButton btnCambiarUbicacion;
+    private boolean rutaPendienteGps = false;      // estamos esperando permiso/ajustes de GPS para seguir con la ruta
+    private AlertDialog dialogoBuscandoGps;
+    private int intentosGps = 0;
+    private static final double RADIO_ETSIIT_METROS = 80;   // a menos de esto del punto de la ETSIIT = "dentro"
+    private static final float PRECISION_MAXIMA_METROS = 100; // peor precisión que esto = no nos fiamos del GPS
+    private static final int MAX_INTENTOS_GPS = 16;          // x 500 ms = 8 s
+    private final Runnable esperarFixGps = new Runnable() {
+        @Override
+        public void run() {
+            if (isFinishing()) return;
+            android.location.Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
+            if (fix != null) {
+                cerrarDialogoBuscando();
+                decidirPorGps(fix);
+            } else if (++intentosGps >= MAX_INTENTOS_GPS) {
+                cerrarDialogoBuscando();
+                Toast.makeText(Mapa.this, "No hemos podido obtener tu posición", Toast.LENGTH_SHORT).show();
+                mostrarMenuManual();
+            } else {
+                handler.postDelayed(this, 500);
+            }
+        }
+    };        // solo pruebas (builds debug): fecha/hora falsa para el horario
+
+    // --- Aviso "activa la ubicación del móvil" ---
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean dialogoUbicacionVisible = false;
+    private boolean esperandoAjustesUbicacion = false;
+    private static final long ESPERA_PRIMERA_POSICION_MS = 12000;
+    private final Runnable comprobarPrimeraPosicion = () -> {
+        if (isFinishing() || !tienePermisoUbicacion()) return;
+        if (myLocationOverlay == null || myLocationOverlay.getMyLocation() == null) {
+            mostrarDialogoActivarUbicacion("Todavía no detectamos tu ubicación.\n\n"
+                    + "¿Quieres revisar los ajustes de ubicación del móvil?");
+        }
+    };
+
+    private final ActivityResultLauncher<ScanOptions> escanerQR =
+            registerForActivityResult(new ScanContract(), result -> {
+                if (result.getContents() == null) {
+                    Toast.makeText(this, "Escaneo cancelado", Toast.LENGTH_SHORT).show();
+                } else {
+                    procesarQR(result.getContents());
+                }
+            });
+
     private final ActivityResultLauncher<String[]> locationPermissionRequest =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
                 Boolean fineGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
@@ -109,8 +178,16 @@ public class Mapa extends AppCompatActivity {
 
                 if (Boolean.TRUE.equals(fineGranted) || Boolean.TRUE.equals(coarseGranted)) {
                     activarUbicacionUsuario();
+                    if (rutaPendienteGps) {
+                        rutaPendienteGps = false;
+                        ubicarConGps();
+                    }
                 } else {
                     centrarEnETSIIT();
+                    if (rutaPendienteGps) {
+                        rutaPendienteGps = false;
+                        mostrarMenuManual();
+                    }
                 }
             });
 
@@ -133,6 +210,7 @@ public class Mapa extends AppCompatActivity {
         configurarSelectorPlantas();
         configurarTouchListenerPlano();
         configurarBuscador();
+        configurarPanelRuta();
 
         preguntaPermisoUbicacion();
 
@@ -185,68 +263,83 @@ public class Mapa extends AppCompatActivity {
     private void actualizarPosicionMarcadores() {
         if (ivPlanoEdificio == null) return;
 
-        float[] pts = new float[2];
-
         for (Marcador m : listaMarcadores) {
-            View icono = m.getVistaIcono();
-            if (icono == null) continue;
+            posicionarMarcador(m);
+        }
+        if (marcadorOrigen != null) {
+            posicionarMarcador(marcadorOrigen);
+        }
+    }
 
-            if (m.getPlanta().equalsIgnoreCase(plantaActual)) {
-                icono.setVisibility(View.VISIBLE);
+    private void posicionarMarcador(Marcador m) {
+        View icono = m.getVistaIcono();
+        if (icono == null) return;
 
-                pts[0] = m.getXOriginal();
-                pts[1] = m.getYOriginal();
+        if (m.getPlanta().equalsIgnoreCase(plantaActual)) {
+            icono.setVisibility(View.VISIBLE);
 
-                matrix.mapPoints(pts);
+            float[] pts = {m.getXOriginal(), m.getYOriginal()};
+            matrix.mapPoints(pts);
 
-                // Centrar el círculo justo sobre la coordenada X e Y de la imagen
-                float xPantalla = pts[0] - (icono.getWidth() / 2f);
-                float yPantalla = pts[1] - (icono.getHeight() / 2f);
-
-                icono.setX(xPantalla);
-                icono.setY(yPantalla);
-            } else {
-                icono.setVisibility(View.GONE);
-            }
+            // Centrar el círculo justo sobre la coordenada X e Y de la imagen
+            float ancho = icono.getWidth() > 0 ? icono.getWidth() : icono.getLayoutParams().width;
+            float alto = icono.getHeight() > 0 ? icono.getHeight() : icono.getLayoutParams().height;
+            icono.setX(pts[0] - (ancho / 2f));
+            icono.setY(pts[1] - (alto / 2f));
+        } else {
+            icono.setVisibility(View.GONE);
         }
     }
 
     private void mostrarBurbujaInfo(View vistaIcono, Marcador marcador) {
+        float d = getResources().getDisplayMetrics().density;
 
-        // 1. Crear el TextView dinámicamente con el estilo del mensaje
-        TextView tvMensaje = new TextView(this);
+        // Tarjeta pequeña: título + botón "Iniciar ruta"
+        LinearLayout tarjeta = new LinearLayout(this);
+        tarjeta.setOrientation(LinearLayout.VERTICAL);
+        tarjeta.setPadding((int) (12 * d), (int) (8 * d), (int) (12 * d), (int) (8 * d));
 
-        String texto = marcador.getTitulo();
-        tvMensaje.setText(texto);
-        tvMensaje.setTextColor(Color.BLACK);
-        tvMensaje.setTextSize(12f); // Tamaño de letra pequeño
-        tvMensaje.setPadding(24, 16, 24, 16);
-
-        // 2. Fondo tipo tarjeta pequeña con bordes redondeados y sombra
         android.graphics.drawable.GradientDrawable fondo = new android.graphics.drawable.GradientDrawable();
         fondo.setColor(Color.WHITE);
-        fondo.setCornerRadius(16f); // Esquinas redondeadas
-        fondo.setStroke(2, Color.parseColor("#FF8C42")); // Borde fino naranja
-        tvMensaje.setBackground(fondo);
-        tvMensaje.setElevation(8f);
+        fondo.setCornerRadius(16f * d / 2f);
+        fondo.setStroke((int) Math.max(1, d), Color.parseColor("#FF8C42"));
+        tarjeta.setBackground(fondo);
+        tarjeta.setElevation(8f);
 
-        // 3. Crear el PopupWindow
+        TextView tvMensaje = new TextView(this);
+        tvMensaje.setText(marcador.getTitulo());
+        tvMensaje.setTextColor(Color.BLACK);
+        tvMensaje.setTextSize(13f);
+        tarjeta.addView(tvMensaje);
+
+        MaterialButton btnIniciar = new MaterialButton(this);
+        btnIniciar.setText("Iniciar ruta");
+        btnIniciar.setTextSize(12f);
+        btnIniciar.setAllCaps(false);
+        btnIniciar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF8C42")));
+        btnIniciar.setTextColor(Color.WHITE);
+        LinearLayout.LayoutParams lpBtn = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpBtn.topMargin = (int) (6 * d);
+        tarjeta.addView(btnIniciar, lpBtn);
+
         PopupWindow popupWindow = new PopupWindow(
-                tvMensaje,
+                tarjeta,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 true // Permite cerrarlo tocando fuera
         );
-
-        // Ajustes para poder cerrarlo al pulsar fuera
         popupWindow.setOutsideTouchable(true);
         popupWindow.setFocusable(true);
 
-        // 4. Mostrar el mensaje justo encima/al lado del icono del marcador
-        // offsets: desplaza la burbuja ligeramente en X e Y para que no tape el punto
+        btnIniciar.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            iniciarRuta(marcador);
+        });
+
+        // Mostrar justo encima/al lado del icono del marcador
         int offsetX = 20;
         int offsetY = -vistaIcono.getHeight() - 10;
-
         popupWindow.showAsDropDown(vistaIcono, offsetX, offsetY);
     }
 
@@ -261,6 +354,12 @@ public class Mapa extends AppCompatActivity {
         scrollPlantas = findViewById(R.id.scrollPlantas);
         chipGroupPlantas = findViewById(R.id.chipGroupPlantas);
         toggleGroupModo = findViewById(R.id.toggleGroupModo);
+        tvTituloMapa = findViewById(R.id.tvTituloMapa);
+        cardRutaActiva = findViewById(R.id.cardRutaActiva);
+        tvRutaInfo = findViewById(R.id.tvRutaInfo);
+        btnAbrirVisor = findViewById(R.id.btnAbrirVisor);
+        btnCancelarRuta = findViewById(R.id.btnCancelarRuta);
+        btnCambiarUbicacion = findViewById(R.id.btnCambiarUbicacion);
     }
 
     private void configurarUserAgent() {
@@ -301,6 +400,7 @@ public class Mapa extends AppCompatActivity {
                 // Cargar planta baja por defecto
                 cargarPlanoDrawable("planta0");
             }
+            actualizarPanelRuta();
         });
     }
 
@@ -729,6 +829,418 @@ public class Mapa extends AppCompatActivity {
                 mapView.getController().setZoom(17.0);
             }
         }));
+
+        comprobarUbicacionDelMovil();
+    }
+
+    /**
+     * Si el móvil tiene la ubicación apagada, o tras unos segundos seguimos sin posición,
+     * preguntamos si quiere activarla (lleva a los ajustes de ubicación).
+     */
+    private void comprobarUbicacionDelMovil() {
+        handler.removeCallbacks(comprobarPrimeraPosicion);
+
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean activada = lm != null && lm.isLocationEnabled();
+        if (!activada) {
+            mostrarDialogoActivarUbicacion("No detectamos tu ubicación porque la ubicación del móvil está desactivada.\n\n"
+                    + "¿Quieres activarla?");
+            return;
+        }
+        handler.postDelayed(comprobarPrimeraPosicion, ESPERA_PRIMERA_POSICION_MS);
+    }
+
+    private void mostrarDialogoActivarUbicacion(String mensaje) {
+        if (dialogoUbicacionVisible || isFinishing()) return;
+        dialogoUbicacionVisible = true;
+
+        new AlertDialog.Builder(this)
+                .setTitle("Ubicación no detectada")
+                .setMessage(mensaje)
+                .setPositiveButton("Activar ubicación", (dialog, which) -> {
+                    esperandoAjustesUbicacion = true;
+                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                })
+                .setNegativeButton("Ahora no", (dialog, which) -> centrarEnETSIIT())
+                .setOnDismissListener(d -> dialogoUbicacionVisible = false)
+                .show();
+    }
+
+    // =====================================================================
+    //  RUTA: ubicar al usuario (horario -> entrada -> QR) y abrir el visor
+    // =====================================================================
+
+    private void configurarPanelRuta() {
+        if (btnCancelarRuta != null) btnCancelarRuta.setOnClickListener(v -> cancelarRuta());
+        if (btnAbrirVisor != null) btnAbrirVisor.setOnClickListener(v -> abrirVisorRuta());
+        if (btnCambiarUbicacion != null) btnCambiarUbicacion.setOnClickListener(v -> mostrarMenuManual());
+
+        // Solo builds debug: mantener pulsado el título para simular día/hora del horario
+        if (tvTituloMapa != null && esDebug()) {
+            tvTituloMapa.setOnLongClickListener(v -> {
+                mostrarDialogoSimulacionHorario();
+                return true;
+            });
+        }
+    }
+
+    private boolean esDebug() {
+        return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    /**
+     * Se llama al pulsar "Iniciar ruta". Orden de decisión:
+     *  1) Horario: si ahora tiene clase con aula conocida -> está en esa puerta.
+     *  2) GPS: fuera de la ETSIIT -> entrada; dentro -> escanear QR.
+     *  3) Manual: el usuario elige.
+     */
+    private void iniciarRuta(Marcador destino) {
+        destinoRuta = destino;
+        rutaPendienteGps = false;
+
+        Calendar ahora = (ahoraSimulado != null) ? ahoraSimulado : Calendar.getInstance();
+        LocalizadorUsuario.SesionActual sesion = LocalizadorUsuario.sesionEnCurso(
+                this, SesionUtil.correo(getIntent()), ahora);
+        UbicacionUsuario puertaClase = (sesion != null) ? puertaDeClase(sesion) : null;
+
+        if (puertaClase != null) {
+            Toast.makeText(this, "Según tu horario ahora tienes " + sesion.nombreAsignatura
+                    + " en el " + sesion.aula, Toast.LENGTH_LONG).show();
+            fijarOrigen(puertaClase);
+        } else {
+            ubicarConGps();
+        }
+    }
+
+    // ---------------------------- 2) GPS ----------------------------
+
+    private void ubicarConGps() {
+        if (!tienePermisoUbicacion()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Necesitamos tu ubicación")
+                    .setMessage("No tienes clase ahora mismo, así que intentaremos ubicarte con el GPS. "
+                            + "¿Quieres permitir el acceso a tu ubicación?")
+                    .setPositiveButton("Sí", (d, w) -> {
+                        rutaPendienteGps = true;
+                        solicitarPermisosUbicacion();
+                    })
+                    .setNegativeButton("No, elegir a mano", (d, w) -> mostrarMenuManual())
+                    .setNeutralButton("Cancelar", (d, w) -> destinoRuta = null)
+                    .show();
+            return;
+        }
+
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (lm == null || !lm.isLocationEnabled()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("GPS desactivado")
+                    .setMessage("Para ubicarte automáticamente necesitamos que actives la ubicación del móvil. "
+                            + "¿Quieres activarla?")
+                    .setPositiveButton("Activar ubicación", (d, w) -> {
+                        rutaPendienteGps = true;
+                        esperandoAjustesUbicacion = true;
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    })
+                    .setNegativeButton("No, elegir a mano", (d, w) -> mostrarMenuManual())
+                    .setNeutralButton("Cancelar", (d, w) -> destinoRuta = null)
+                    .show();
+            return;
+        }
+
+        // Permiso y ubicación activados: esperamos una posición (hasta 8 s)
+        activarUbicacionUsuario();
+        android.location.Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
+        if (fix != null) {
+            decidirPorGps(fix);
+            return;
+        }
+        intentosGps = 0;
+        dialogoBuscandoGps = new AlertDialog.Builder(this)
+                .setTitle("Buscando tu posición")
+                .setMessage("Un momento...")
+                .setNegativeButton("Elegir a mano", (d, w) -> {
+                    handler.removeCallbacks(esperarFixGps);
+                    mostrarMenuManual();
+                })
+                .setCancelable(false)
+                .show();
+        handler.postDelayed(esperarFixGps, 500);
+    }
+
+    private void cerrarDialogoBuscando() {
+        handler.removeCallbacks(esperarFixGps);
+        if (dialogoBuscandoGps != null && dialogoBuscandoGps.isShowing()) dialogoBuscandoGps.dismiss();
+        dialogoBuscandoGps = null;
+    }
+
+    /** Con una posición GPS decidimos si está dentro o fuera de la ETSIIT. */
+    private void decidirPorGps(android.location.Location fix) {
+        if (fix.hasAccuracy() && fix.getAccuracy() > PRECISION_MAXIMA_METROS) {
+            Toast.makeText(this, "El GPS no es lo bastante preciso ahora mismo", Toast.LENGTH_SHORT).show();
+            mostrarMenuManual();
+            return;
+        }
+        double metros = new GeoPoint(fix.getLatitude(), fix.getLongitude()).distanceToAsDouble(etsiitPoint);
+        if (metros <= RADIO_ETSIIT_METROS) {
+            pedirEscaneoQR(true);   // dentro: el GPS no sirve en interior, usamos QR
+        } else {
+            pedirIrALaEntrada(metros);   // fuera: entrada
+        }
+    }
+
+    // ---------------------------- 3) Manual ----------------------------
+
+    /** El usuario elige cómo indicar dónde está. También sirve para corregir la ubicación detectada. */
+    private void mostrarMenuManual() {
+        final String[] opciones = {
+                "📚 Estoy en la puerta de un aula",
+                "🚪 Estoy en la entrada de la ETSIIT",
+                "📷 Escanear un código QR"
+        };
+        new AlertDialog.Builder(this)
+                .setTitle("¿Dónde estás?")
+                .setItems(opciones, (d, which) -> {
+                    if (which == 0) elegirAula();
+                    else if (which == 1) fijarOrigen(RegistroPuntosQR.entrada());
+                    else pedirEscaneoQR(false);
+                })
+                .setNegativeButton("Cancelar", (d, w) -> {
+                    if (origenActual == null) destinoRuta = null;
+                })
+                .show();
+    }
+
+    private void elegirAula() {
+        final java.util.List<Marcador> aulas = new ArrayList<>();
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().contains("Aula")) aulas.add(m);
+        }
+        if (aulas.isEmpty()) {
+            Toast.makeText(this, "No hay aulas registradas en el mapa", Toast.LENGTH_SHORT).show();
+            mostrarMenuManual();
+            return;
+        }
+        String[] nombres = new String[aulas.size()];
+        for (int i = 0; i < nombres.length; i++) nombres[i] = aulas.get(i).getTitulo();
+        new AlertDialog.Builder(this)
+                .setTitle("¿En qué aula estás?")
+                .setItems(nombres, (d, which) -> {
+                    Marcador m = aulas.get(which);
+                    fijarOrigen(UbicacionUsuario.enPixeles(
+                            UbicacionUsuario.idDesdeNombre(m.getTitulo().replaceAll("^[^A-Za-z]+", "")),
+                            "Puerta de " + m.getTitulo().replaceAll("^[^A-Za-z]+", ""),
+                            m.getPlanta(), m.getXOriginal(), m.getYOriginal(),
+                            UbicacionUsuario.Metodo.MANUAL));
+                })
+                .setNegativeButton("Atrás", (d, w) -> mostrarMenuManual())
+                .show();
+    }
+
+    /** Busca el punto naranja del aula de la clase y lo usa como "puerta de la clase". */
+    private UbicacionUsuario puertaDeClase(LocalizadorUsuario.SesionActual sesion) {
+        if (sesion.aula == null) return null;
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().contains(sesion.aula)) {
+                return UbicacionUsuario.enPixeles(
+                        UbicacionUsuario.idDesdeNombre(sesion.aula),
+                        "Puerta del " + sesion.aula,
+                        m.getPlanta(), m.getXOriginal(), m.getYOriginal(),
+                        UbicacionUsuario.Metodo.HORARIO);
+            }
+        }
+        return null;
+    }
+
+    private void pedirIrALaEntrada(double metrosALaEtsiit) {
+        String distancia = (metrosALaEtsiit >= 1000)
+                ? String.format(Locale.getDefault(), "a %.1f km", metrosALaEtsiit / 1000.0)
+                : String.format(Locale.getDefault(), "a unos %d m", (int) metrosALaEtsiit);
+        new AlertDialog.Builder(this)
+                .setTitle("Estás fuera de la ETSIIT")
+                .setMessage("Según tu GPS estás " + distancia + " de la ETSIIT.\n\n"
+                        + "Colócate en la entrada principal (la de la escalinata frontal) "
+                        + "y pulsa «Ya estoy aquí» para empezar la ruta.")
+                .setPositiveButton("Ya estoy aquí", (d, w) -> fijarOrigen(RegistroPuntosQR.entrada()))
+                .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual())
+                .show();
+    }
+
+    /** Dentro del edificio -> escanear el QR más cercano. */
+    private void pedirEscaneoQR(boolean detectadoPorGps) {
+        AlertDialog.Builder b = new AlertDialog.Builder(this)
+                .setTitle("Escanea un código QR")
+                .setMessage((detectadoPorGps ? "Parece que estás dentro de la ETSIIT, y el GPS no es fiable en interiores.\n\n" : "")
+                        + "Busca el código QR de ubicación más cercano (están en los halls y pasillos) "
+                        + "y escanéalo para saber dónde estás.")
+                .setPositiveButton("Escanear QR", (d, w) -> lanzarEscaner())
+                .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual());
+        if (esDebug()) {
+            b.setNeutralButton("Simular QR (pruebas)", (d, w) -> mostrarListaSimularQR());
+        }
+        b.show();
+    }
+
+    private void lanzarEscaner() {
+        ScanOptions opciones = new ScanOptions();
+        opciones.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
+        opciones.setPrompt("Apunta al código QR de ubicación más cercano");
+        opciones.setBeepEnabled(false);
+        opciones.setOrientationLocked(false);
+        escanerQR.launch(opciones);
+    }
+
+    private void procesarQR(String contenido) {
+        UbicacionUsuario u = RegistroPuntosQR.desdeContenido(contenido);
+        if (u == null) {
+            new AlertDialog.Builder(this)
+                    .setTitle("QR no reconocido")
+                    .setMessage("Ese código no es uno de los QR de ubicación de la ETSIIT.")
+                    .setPositiveButton("Reintentar", (d, w) -> lanzarEscaner())
+                    .setNegativeButton("Cancelar", (d, w) -> destinoRuta = null)
+                    .show();
+            return;
+        }
+        fijarOrigen(u);
+    }
+
+    /** Solo debug: elegir un QR de la lista sin tener que imprimirlo/escanearlo. */
+    private void mostrarListaSimularQR() {
+        final java.util.List<UbicacionUsuario> puntos = RegistroPuntosQR.todosLosQR();
+        String[] nombres = new String[puntos.size()];
+        for (int i = 0; i < nombres.length; i++) {
+            nombres[i] = puntos.get(i).nombre + "  [" + puntos.get(i).idPunto + "]";
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Simular escaneo de QR")
+                .setItems(nombres, (d, which) -> fijarOrigen(puntos.get(which)))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    /** Solo debug: simular qué día/hora es para probar el método del horario. */
+    private void mostrarDialogoSimulacionHorario() {
+        final String[] opciones = {
+                "Usar la hora real",
+                "Lunes 09:00  (NPI teoría)",
+                "Lunes 11:00  (PL teoría)",
+                "Miércoles 11:00  (NPI prácticas)",
+                "Jueves 09:00  (PL prácticas)",
+                "Sábado 12:00  (sin clase)"
+        };
+        final int[] dias = {0, Calendar.MONDAY, Calendar.MONDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.SATURDAY};
+        final int[] horas = {0, 9, 11, 11, 9, 12};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Simular día y hora (pruebas)")
+                .setItems(opciones, (d, which) -> {
+                    if (which == 0) {
+                        ahoraSimulado = null;
+                    } else {
+                        Calendar c = Calendar.getInstance();
+                        c.set(Calendar.DAY_OF_WEEK, dias[which]);
+                        c.set(Calendar.HOUR_OF_DAY, horas[which]);
+                        c.set(Calendar.MINUTE, 0);
+                        ahoraSimulado = c;
+                    }
+                    Toast.makeText(this, "Horario: " + opciones[which], Toast.LENGTH_SHORT).show();
+                })
+                .show();
+    }
+
+    private String nombreDestino() {
+        return destinoRuta != null ? destinoRuta.getTitulo() : "tu destino";
+    }
+
+    /** El usuario ya está ubicado: lo dibujamos en el plano y mostramos el panel con el visor. */
+    private void fijarOrigen(UbicacionUsuario u) {
+        origenActual = u;
+
+        // Ir a la planta donde está el usuario
+        int chip = chipIdDePlanta(u.planta);
+        if (chip != 0 && chipGroupPlantas != null && !u.planta.equalsIgnoreCase(plantaActual)) {
+            chipGroupPlantas.check(chip); // el listener carga el plano
+        }
+
+        int ancho = 1;
+        int alto = 1;
+        if (ivPlanoEdificio != null && ivPlanoEdificio.getDrawable() != null) {
+            ancho = ivPlanoEdificio.getDrawable().getIntrinsicWidth();
+            alto = ivPlanoEdificio.getDrawable().getIntrinsicHeight();
+        }
+
+        // Punto azul de "tú estás aquí"
+        if (marcadorOrigen != null && marcadorOrigen.getVistaIcono() != null) {
+            containerPlanoConMarcadores.removeView(marcadorOrigen.getVistaIcono());
+        }
+        marcadorOrigen = new Marcador("Tu posición", u.planta, u.xPx(ancho), u.yPx(alto));
+        View punto = crearPuntoCircular(Color.parseColor("#1E88E5"), 18);
+        punto.setVisibility(View.GONE);
+        marcadorOrigen.setVistaIcono(punto);
+        containerPlanoConMarcadores.addView(punto);
+
+        actualizarPosicionMarcadores();
+        actualizarPanelRuta();
+        Toast.makeText(this, "Te hemos ubicado: " + u.nombre + " (" + u.descripcionMetodo() + ")",
+                Toast.LENGTH_LONG).show();
+    }
+
+    private View crearPuntoCircular(int color, int dp) {
+        float d = getResources().getDisplayMetrics().density;
+        int px = (int) (dp * d);
+        View v = new View(this);
+        v.setLayoutParams(new FrameLayout.LayoutParams(px, px));
+        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
+        g.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        g.setColor(color);
+        g.setStroke((int) (2 * d), Color.WHITE);
+        v.setBackground(g);
+        return v;
+    }
+
+    private int chipIdDePlanta(String planta) {
+        switch (planta) {
+            case "sotano":  return R.id.chipSotano;
+            case "planta0": return R.id.chipBaja;
+            case "planta1": return R.id.chipPrimera;
+            case "planta2": return R.id.chipSegunda;
+            case "planta3": return R.id.chipTercera;
+            case "planta4": return R.id.chipCuarta;
+            case "planta5": return R.id.chipQuinta;
+            default:        return 0;
+        }
+    }
+
+    private void actualizarPanelRuta() {
+        if (cardRutaActiva == null) return;
+        boolean enPlanos = containerPlanoConMarcadores != null
+                && containerPlanoConMarcadores.getVisibility() == View.VISIBLE;
+        if (origenActual == null || destinoRuta == null || !enPlanos) {
+            cardRutaActiva.setVisibility(View.GONE);
+            return;
+        }
+        tvRutaInfo.setText("📍 Estás en: " + origenActual.nombre + " (" + origenActual.descripcionMetodo() + ")\n"
+                + "🎯 Destino: " + destinoRuta.getTitulo());
+        cardRutaActiva.setVisibility(View.VISIBLE);
+    }
+
+    private void cancelarRuta() {
+        if (marcadorOrigen != null && marcadorOrigen.getVistaIcono() != null && containerPlanoConMarcadores != null) {
+            containerPlanoConMarcadores.removeView(marcadorOrigen.getVistaIcono());
+        }
+        marcadorOrigen = null;
+        origenActual = null;
+        destinoRuta = null;
+        actualizarPanelRuta();
+    }
+
+    private void abrirVisorRuta() {
+        if (origenActual == null || destinoRuta == null) return;
+        Intent i = new Intent(this, VisorRuta.class);
+        i.putExtra("ORIGEN_ID", origenActual.idPunto);
+        i.putExtra("ORIGEN_NOMBRE", origenActual.nombre);
+        i.putExtra("ORIGEN_METODO", origenActual.descripcionMetodo());
+        i.putExtra("DESTINO_NOMBRE", destinoRuta.getTitulo());
+        startActivity(i);
     }
 
     private void centrarEnETSIIT() {
@@ -748,11 +1260,23 @@ public class Mapa extends AppCompatActivity {
         if (myLocationOverlay != null && tienePermisoUbicacion()) {
             myLocationOverlay.enableMyLocation();
         }
+        if (esperandoAjustesUbicacion) { // volvemos de los ajustes de ubicación del móvil
+            esperandoAjustesUbicacion = false;
+            if (tienePermisoUbicacion()) activarUbicacionUsuario();
+            if (rutaPendienteGps && destinoRuta != null) {
+                rutaPendienteGps = false;
+                ubicarConGps();
+            } else {
+                rutaPendienteGps = false;
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        handler.removeCallbacks(comprobarPrimeraPosicion);
+        cerrarDialogoBuscando();
         Configuration.getInstance().save(getApplicationContext(), getSharedPreferences("osmdroid", MODE_PRIVATE));
         if (mapView != null) {
             mapView.onPause();
