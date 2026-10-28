@@ -117,8 +117,6 @@ public class MenuPrincipal extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_principal);
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // QUITAR???????????????????????????????????????????????????????????????
         comprobarAnimacionOla(getIntent());
 
         // Inicializar base de datos
@@ -172,8 +170,6 @@ public class MenuPrincipal extends BaseActivity {
         Notificador.revisarAvisos(this, correoUsuario);
     }
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // QUITAR???????????????????????????????????????????????????????????????
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -181,8 +177,6 @@ public class MenuPrincipal extends BaseActivity {
         comprobarAnimacionOla(intent);
     }
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // QUITAR???????????????????????????????????????????????????????????????
     private void comprobarAnimacionOla(Intent intent) {
         if (intent != null && intent.getBooleanExtra("START_WAVE_DOWN", false)) {
             // Limpiamos el extra para no repetirlo innecesariamente
@@ -296,20 +290,32 @@ public class MenuPrincipal extends BaseActivity {
             });
         }
 
-        // Detector de gestos táctiles (swipe / deslizar) sobre el botón grande
+        // Detector de gestos táctiles (swipe / deslizar) optimizado
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            private static final int SWIPE_THRESHOLD = 40;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 40;
+
+            // Aumentamos los umbrales para evitar falsos positivos (convertidos a dp o valores más seguros)
+            private static final int SWIPE_THRESHOLD = 100; // Distancia mínima en píxeles
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100; // Velocidad mínima
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                // IMPORTANTE: onDown debe retornar true para que el detector registre los eventos de movimiento posteriores (onFling)
+                return true;
+            }
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 if (e1 == null || e2 == null) return false;
+
                 float diffX = e2.getX() - e1.getX();
                 float diffY = e2.getY() - e1.getY();
+
+                // Comprobamos si el movimiento horizontal es mayor que el vertical
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         fueDeslizamiento = true;
                         btnSeccionGrande.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+
                         if (diffX > 0) {
                             anteriorSeccion(); // Deslizar hacia la derecha -> Anterior
                         } else {

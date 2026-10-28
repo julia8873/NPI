@@ -500,39 +500,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 5. PÁGINAS FAVORITAS -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginBottom="8dp"
-                android:text="⭐ Mis Páginas Favoritas"
-                android:textColor="#1A1A1A"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvSinFavoritos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginBottom="16dp"
-                android:text="No tienes páginas favoritas. ¡Añade las que quieras pulsando la estrella!"
-                android:textColor="#666666"
-                android:textSize="13sp"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:id="@+id/llFavoritosContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:orientation="vertical" />
-
         </LinearLayout>
     </ScrollView>
 
-    <!-- QUITAR??????? -->
     <!-- LA OLA (Se coloca al final para quedar por encima de todo el contenido) -->
     <com.example.nuietsiit.activities.main.WaveView
     android:id="@+id/waveView"
