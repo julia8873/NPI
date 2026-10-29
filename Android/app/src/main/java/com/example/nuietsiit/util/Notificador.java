@@ -23,7 +23,6 @@ import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.AnunciosDB;
 import com.example.nuietsiit.data.AnunciosLeidos;
 import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Actividad;
 import com.example.nuietsiit.data.modelo.Anuncio;
 
@@ -37,6 +36,7 @@ import java.util.Set;
  *  - Avisos urgentes que aún no has leído.
  *  - Actividades a las que estás apuntado que son hoy o mañana.
  * Cada aviso se notifica una sola vez. Se llama desde MenuPrincipal al abrir la app.
+ * Los recordatorios de actividades solo salen si hay sesión iniciada.
  */
 public final class Notificador {
 
@@ -58,7 +58,8 @@ public final class Notificador {
             return; // se vuelve a llamar desde onRequestPermissionsResult si lo acepta
         }
 
-        if (correo == null || correo.isEmpty()) correo = TablasActividades.CORREO_INVITADO;
+        // La sesión se lee de SharedPreferences (el parámetro se mantiene para no cambiar MenuPrincipal)
+        correo = act.getSharedPreferences("SesionUsuario", Context.MODE_PRIVATE).getString("CORREO", null);
         DBHelper bd = DBHelper.getInstance(act);
         SharedPreferences prefs = act.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         Set<String> enviadas = new HashSet<>(prefs.getStringSet(CLAVE, new HashSet<>()));
@@ -68,7 +69,7 @@ public final class Notificador {
         for (Anuncio a : new AnunciosDB(bd).obtenerAnunciosGenerales(FechasUtil.ahoraBD())) {
             String clave = "A" + a.id;
             if (!a.esUrgente() || leidos.contains(String.valueOf(a.id)) || enviadas.contains(clave)) continue;
-            Intent abrir = new Intent(act, Noticias.class).putExtra("CORREO", correo);
+            Intent abrir = new Intent(act, Noticias.class);
             mostrar(act, 1000 + a.id, "🚨 " + a.titulo, a.contenido, abrir);
             enviadas.add(clave);
         }
@@ -76,11 +77,14 @@ public final class Notificador {
         // 2) Actividades apuntadas que son hoy o mañana
         LocalDate manana = LocalDate.now().plusDays(1);
         LocalDateTime ahora = LocalDateTime.now();
-        for (Actividad x : new ActividadesDB(bd).listarActividadesConDetalles(correo, FechasUtil.hoyBD())) {
+        boolean haySesion = correo != null && !correo.isEmpty();
+        for (Actividad x : haySesion
+                ? new ActividadesDB(bd).listarActividadesConDetalles(correo, FechasUtil.hoyBD())
+                : new java.util.ArrayList<Actividad>()) {
             String clave = "C" + x.id;
             if (!x.inscrito || enviadas.contains(clave)) continue;
             if (x.inicio.isBefore(ahora) || x.inicio.toLocalDate().isAfter(manana)) continue;
-            Intent abrir = new Intent(act, Actividades.class).putExtra("CORREO", correo);
+            Intent abrir = new Intent(act, Actividades.class);
             mostrar(act, 2000 + x.id,
                     "⏰ " + FechasUtil.cuando(x.inicio) + " a las " + FechasUtil.hora(x.inicio) + ": " + x.titulo,
                     "Te apuntaste a esta actividad. ¡Que no se te olvide!", abrir);

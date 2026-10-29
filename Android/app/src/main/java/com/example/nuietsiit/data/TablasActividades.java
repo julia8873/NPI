@@ -90,6 +90,7 @@ public final class TablasActividades {
         long signos = actividad(db, "Lengua de signos española: nivel inicial",
                 "Aprende a comunicarte en LSE: abecedario, saludos y conversaciones sencillas.",
                 "abiertaugr", en(hoy, 30, 16, 0), en(hoy, 60, 18, 0), "https://abierta.ugr.es");
+
         curso(db, signos, 4, hoy.plusDays(3), hoy.plusDays(18), 25);
 
         // La cuenta de prueba ya está apuntada a la charla de mañana (para ver la notificación)

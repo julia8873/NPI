@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class Actividad {
 
     // {valor en la BD, texto del chip}
+    // Filtros en la seccion
     public static final String[][] TIPOS = {
             {"charla", "Charlas"},
             {"bibliomaker", "Bibliomaker"},
@@ -21,6 +22,7 @@ public class Actividad {
             {"otro", "Otras"}
     };
 
+    // Columnas de tabla
     public int id;
     public String titulo;
     public String descripcion;
@@ -36,28 +38,28 @@ public class Actividad {
     public LocalDate plazoFin;
     public Integer plazasTotales;   // null = sin límite
 
+
+    //No son columnas, se calcula
     public int inscritos;           // personas apuntadas
     public boolean inscrito;        // ¿está apuntado el usuario actual?
 
+
+    // Metodos que responden preguntas
     public boolean esAbiertaUGR() {
         return creditos != null && plazoInicio != null && plazoFin != null;
     }
-
     public boolean plazoAbierto() {
         if (!esAbiertaUGR()) return true;
         LocalDate hoy = LocalDate.now();
         return !hoy.isBefore(plazoInicio) && !hoy.isAfter(plazoFin);
     }
-
     public boolean completa() {
         return plazasTotales != null && inscritos >= plazasTotales;
     }
-
-    /** true si el plazo de inscripción acaba en 3 días o menos (se pinta en rojo) */
+    /** true si el plazo de inscripción acaba en 3 días o menos (se pinta    en rojo) */
     public boolean inscripcionUrgente() {
         return esAbiertaUGR() && plazoAbierto() && !completa() && FechasUtil.diasHasta(plazoFin) <= 3;
     }
-
     /** Texto del estado de inscripción de un curso AbiertaUGR */
     public String estadoInscripcion() {
         if (!esAbiertaUGR()) return "";
@@ -71,12 +73,14 @@ public class Actividad {
         return "Inscripción abierta hasta el " + FechasUtil.diaCorto(plazoFin);
     }
 
+    // Pone el texto de creditos bonito
     public String creditosTexto() {
         if (creditos == null) return "";
         double c = creditos;
         return (c == Math.floor(c) ? String.valueOf((int) c) : String.valueOf(c)) + " ECTS";
     }
 
+    // Sirve para buscar
     public String textoBusqueda() {
         return TextoUtil.textoBusqueda(titulo, descripcion, nombreTipo(tipo), lugar);
     }

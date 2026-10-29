@@ -13,7 +13,7 @@
         android:background="#FFFFFF"
         app:titleTextColor="#000000" />
 
-    <!-- Cabecera fija: buscador, filtros y pista del gesto -->
+    <!-- Cabecera fija: comunidades y filtros -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,21 +30,6 @@
             android:textColor="#FF8C42"
             app:strokeColor="#FF8C42" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Buscar actividad"
-            app:startIconDrawable="@android:drawable/ic_menu_search">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBuscar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:textColor="#000000" />
-        </com.google.android.material.textfield.TextInputLayout>
-
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,29 +44,6 @@
                 app:singleLine="true"
                 app:singleSelection="true" />
         </HorizontalScrollView>
-
-        <TextView
-            android:id="@+id/tvMostrandoPara"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#000000"
-            android:visibility="gone" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipSugerencia"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:text="👉 Desliza a la derecha para apuntarte · a la izquierda para ocultar"
-            android:textColor="#666666"
-            android:textSize="12sp" />
     </LinearLayout>
 
     <FrameLayout

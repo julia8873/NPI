@@ -8,12 +8,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.CalendarContract;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,13 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.actividades.ActividadAdapter;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.TablasActividades;
 import com.example.nuietsiit.data.modelo.Actividad;
-import com.example.nuietsiit.util.BuscadorTolerante;
+import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.FechasUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -44,7 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Pantalla de Actividades: lista de actividades y cursos AbiertaUGR con buscador y filtros.
+ * Pantalla de Actividades: lista de actividades y cursos AbiertaUGR con filtros.
+ * - Sin sesión iniciada se pueden ver, pero no apuntarse.
  * - Deslizar una tarjeta a la derecha = apuntarse. A la izquierda = ocultarla (con "Deshacer").
  * - Pulsar una tarjeta = detalle con botones de apuntarse, añadir al calendario y más info.
  */
@@ -55,16 +52,14 @@ public class Actividades extends BaseActivity {
     private static final int ROJO = 0xFFD32F2F;
 
     private ActividadesDB actividadesDB;
-    private String correoUsuario;
+    private String correoUsuario;                     // null = no hay sesión iniciada
     private String filtroSeleccionado;                // null = todas
     private final Set<Integer> ocultas = new HashSet<>(); // las descartadas deslizando a la izquierda
     private List<Actividad> todas = new ArrayList<>();
 
     private View raiz;
-    private EditText etBuscar;
     private ChipGroup chipsTipos;
-    private TextView tvMostrandoPara, tvVacio;
-    private Chip chipSugerencia;
+    private TextView tvVacio;
     private ActividadAdapter adaptador;
 
     @Override
@@ -78,23 +73,17 @@ public class Actividades extends BaseActivity {
         getSupportActionBar().setTitle("Actividades");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Si se entra sin iniciar sesión se usa la cuenta de prueba
-        correoUsuario = getIntent().getStringExtra("CORREO");
-        if (correoUsuario == null || correoUsuario.isEmpty()) {
-            correoUsuario = TablasActividades.CORREO_INVITADO;
-        }
+        // Sesión guardada al iniciar sesión (SharedPreferences "SesionUsuario")
+        correoUsuario = correoSesion();
         actividadesDB = new ActividadesDB(DBHelper.getInstance(this));
 
         raiz = findViewById(android.R.id.content);
-        etBuscar = findViewById(R.id.etBuscar);
 
         // Botón de comunidades de chat (grupos de WhatsApp/Telegram/Discord simulados)
         findViewById(R.id.btnComunidades).setOnClickListener(
                 v -> HojaComunidades.mostrar(this, correoUsuario));
         chipsTipos = findViewById(R.id.chipsTipos);
-        tvMostrandoPara = findViewById(R.id.tvMostrandoPara);
         tvVacio = findViewById(R.id.tvVacio);
-        chipSugerencia = findViewById(R.id.chipSugerencia);
 
         adaptador = new ActividadAdapter(this::mostrarDetalle);
         RecyclerView rv = findViewById(R.id.rvActividades);
@@ -106,15 +95,24 @@ public class Actividades extends BaseActivity {
 
         crearChips();
 
-        // Buscador tolerante a faltas (el mismo que usa Secretaría)
-        etBuscar.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) { aplicarFiltro(); }
-        });
-        chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
-
         cargarActividades();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume(); // BaseActivity: activa el sensor de agitar
+        // Por si ha iniciado o cerrado sesión mientras tanto
+        String correo = correoSesion();
+        if (correo == null ? correoUsuario != null : !correo.equals(correoUsuario)) {
+            correoUsuario = correo;
+            cargarActividades();
+        }
+    }
+
+    /** Correo del usuario con sesión iniciada, o null si no hay sesión. */
+    private String correoSesion() {
+        String correo = getSharedPreferences("SesionUsuario", MODE_PRIVATE).getString("CORREO", null);
+        return correo == null || correo.isEmpty() ? null : correo;
     }
 
     // -------------------------------------------------
@@ -153,36 +151,27 @@ public class Actividades extends BaseActivity {
         if (clave == null) chip.setChecked(true);
     }
 
-    // filtro del chip AND texto del buscador
+    // filtro del chip seleccionado
     private void aplicarFiltro() {
-        List<Actividad> base = new ArrayList<>();
+        List<Actividad> visibles = new ArrayList<>();
         for (Actividad a : todas) {
             if (ocultas.contains(a.id)) continue;
             if (filtroSeleccionado == null
                     || (FILTRO_APUNTADO.equals(filtroSeleccionado) && a.inscrito)
                     || filtroSeleccionado.equals(a.tipo)) {
-                base.add(a);
+                visibles.add(a);
             }
         }
+        adaptador.setActividades(visibles);
 
-        BuscadorTolerante.Busqueda<Actividad> r = BuscadorTolerante.buscar(
-                etBuscar.getText().toString(), base, a -> a.titulo, Actividad::textoBusqueda);
-        adaptador.setActividades(r.elementos);
-
-        tvMostrandoPara.setVisibility(r.mostrandoPara != null ? View.VISIBLE : View.GONE);
-        if (r.mostrandoPara != null) {
-            tvMostrandoPara.setText("Mostrando resultados para «" + r.mostrandoPara + "»");
+        tvVacio.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
+        if (!FILTRO_APUNTADO.equals(filtroSeleccionado)) {
+            tvVacio.setText("No hay actividades de este tipo.");
+        } else if (correoUsuario == null) {
+            tvVacio.setText("Inicia sesión para ver las actividades a las que te apuntes.");
+        } else {
+            tvVacio.setText("Todavía no te has apuntado a nada.");
         }
-        chipSugerencia.setVisibility(r.sugerencia != null ? View.VISIBLE : View.GONE);
-        if (r.sugerencia != null) {
-            chipSugerencia.setText("¿Quisiste decir «" + r.sugerencia + "»?");
-            chipSugerencia.setTag(r.sugerencia);
-        }
-
-        tvVacio.setVisibility(r.elementos.isEmpty() ? View.VISIBLE : View.GONE);
-        tvVacio.setText(FILTRO_APUNTADO.equals(filtroSeleccionado) && etBuscar.getText().length() == 0
-                ? "Todavía no te has apuntado a nada.\n¡Desliza una actividad a la derecha! 👉"
-                : "No hay actividades que coincidan.");
     }
 
     // -------------------------------------------------
@@ -190,6 +179,10 @@ public class Actividades extends BaseActivity {
     // -------------------------------------------------
 
     private void apuntar(Actividad a) {
+        if (correoUsuario == null) {
+            pedirSesion("apuntarte");
+            return;
+        }
         if (a.inscrito) {
             avisar("Ya estabas apuntado a «" + a.titulo + "»");
             return;
@@ -227,6 +220,14 @@ public class Actividades extends BaseActivity {
 
     private void avisar(String texto) {
         Snackbar.make(raiz, texto, Snackbar.LENGTH_SHORT).show();
+    }
+
+    /** Aviso de que hace falta iniciar sesión, con botón para ir al login. */
+    private void pedirSesion(String accion) {
+        Snackbar.make(raiz, "🔒 Inicia sesión para " + accion, Snackbar.LENGTH_LONG)
+                .setAction("Iniciar sesión", v -> startActivity(new Intent(this, Login.class)))
+                .setActionTextColor(NARANJA)
+                .show();
     }
 
     // -------------------------------------------------
@@ -269,6 +270,12 @@ public class Actividades extends BaseActivity {
             btnApuntarme.setText(a.completa() ? "Plazas agotadas" : a.estadoInscripcion());
             btnApuntarme.setBackgroundResource(R.drawable.boton_gris);
             btnApuntarme.setEnabled(false);
+        } else if (correoUsuario == null) {
+            btnApuntarme.setText("🔒 Inicia sesión para apuntarte");
+            btnApuntarme.setOnClickListener(x -> {
+                hoja.dismiss();
+                startActivity(new Intent(this, Login.class));
+            });
         } else {
             btnApuntarme.setText("🙋 Apuntarme");
             btnApuntarme.setOnClickListener(x -> { hoja.dismiss(); apuntar(a); });
@@ -311,21 +318,9 @@ public class Actividades extends BaseActivity {
     private void anadirACalendario(Actividad a) {
         // Si dura varios días (cursos) se añade solo la primera sesión
         boolean mismoDia = a.fin != null && a.fin.toLocalDate().equals(a.inicio.toLocalDate());
-        long inicio = FechasUtil.millis(a.inicio);
-        long fin = FechasUtil.millis(mismoDia ? a.fin : a.inicio.plusHours(2));
-
-        Intent intent = new Intent(Intent.ACTION_INSERT)
-                .setData(CalendarContract.Events.CONTENT_URI)
-                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, inicio)
-                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, fin)
-                .putExtra(CalendarContract.Events.TITLE, a.titulo)
-                .putExtra(CalendarContract.Events.DESCRIPTION, a.descripcion)
-                .putExtra(CalendarContract.Events.EVENT_LOCATION, lugar(a));
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            avisar("No hay ninguna app de calendario en este móvil");
-        }
+        boolean ok = CalendarioUtil.anadirEvento(this, a.titulo, a.descripcion, lugar(a),
+                a.inicio, mismoDia ? a.fin : a.inicio.plusHours(2));
+        if (!ok) avisar("No hay ninguna app de calendario en este móvil");
     }
 
     private void abrirEnlace(String url) {
