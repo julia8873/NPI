@@ -269,6 +269,50 @@ public class UsuariosDB {
         return db.rawQuery("SELECT * FROM PROFESOR ORDER BY nombreProfesor", null);
     }
 
+    public Cursor buscarProfesoresPorTexto(String textoBusqueda) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String param = "%" + textoBusqueda.trim() + "%";
+        String query = "SELECT DISTINCT P.correoProfesor, P.nombreProfesor, P.enlacePaginaWeb " +
+                "FROM PROFESOR P " +
+                "LEFT JOIN IMPARTE I ON P.correoProfesor = I.correoProfesor " +
+                "LEFT JOIN ASIGNATURA A ON I.codigoAsignatura = A.codigoAsignatura " +
+                "WHERE P.nombreProfesor LIKE ? OR P.correoProfesor LIKE ? OR A.nombreAsignatura LIKE ? " +
+                "ORDER BY P.nombreProfesor ASC";
+        return db.rawQuery(query, new String[]{param, param, param});
+    }
+
+    public Cursor obtenerProfesoresDeAsignatura(String codigoAsignatura) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT DISTINCT P.* FROM PROFESOR P " +
+                "JOIN IMPARTE I ON P.correoProfesor = I.correoProfesor " +
+                "WHERE I.codigoAsignatura = ? " +
+                "ORDER BY P.nombreProfesor ASC";
+        return db.rawQuery(query, new String[]{codigoAsignatura});
+    }
+
+    public Cursor obtenerProfesoresPorGradoYCurso(int idGrado, int curso) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT DISTINCT P.correoProfesor, P.nombreProfesor, P.enlacePaginaWeb, A.nombreAsignatura, A.codigoAsignatura " +
+                "FROM PROFESOR P " +
+                "JOIN IMPARTE I ON P.correoProfesor = I.correoProfesor " +
+                "JOIN ASIGNATURA_GRADO AG ON I.codigoAsignatura = AG.codigoAsignatura " +
+                "JOIN ASIGNATURA A ON AG.codigoAsignatura = A.codigoAsignatura " +
+                "WHERE AG.idGrado = ? AND AG.curso = ? " +
+                "ORDER BY P.nombreProfesor ASC";
+        return db.rawQuery(query, new String[]{String.valueOf(idGrado), String.valueOf(curso)});
+    }
+
+    public Cursor listarSesionesDocentesDeProfesor(String correoProfesor) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String query = "SELECT S.*, A.nombreAsignatura, E.nombreEspacio " +
+                "FROM SESION_CLASE S " +
+                "JOIN ASIGNATURA A ON S.codigoAsignatura = A.codigoAsignatura " +
+                "LEFT JOIN ESPACIO E ON S.idEspacio = E.idEspacio " +
+                "WHERE S.correoProfesor = ? " +
+                "ORDER BY S.diaSemana, S.horaInicio";
+        return db.rawQuery(query, new String[]{correoProfesor.toLowerCase()});
+    }
+
     // --------------------------------------------------------------
     // ADMINISTRADOR
     // --------------------------------------------------------------

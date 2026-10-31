@@ -51,6 +51,8 @@
         <activity android:name=".activities.secciones.Secretaria" />
         <activity android:name=".activities.secciones.asignaturas.BuscadorAsignaturas" />
         <activity android:name=".activities.secciones.asignaturas.DetalleAsignatura" />
+        <activity android:name=".activities.secciones.profesorado.BuscadorProfesores" />
+        <activity android:name=".activities.secciones.profesorado.DetalleProfesor" />
         <activity android:name=".activities.secciones.secretaria.DetalleTramite" />
         <activity
             android:name=".activities.secciones.secretaria.PasosTramite"

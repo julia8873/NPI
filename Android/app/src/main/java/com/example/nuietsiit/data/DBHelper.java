@@ -15,7 +15,7 @@ import com.example.nuietsiit.data.Comedores.TablasComedores;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 7; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores
+    private static final int VERSION_BD = 8; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores ; 8: info básica sobre profesorado
 
     private static DBHelper instance;
 
