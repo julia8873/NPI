@@ -129,7 +129,7 @@ public class ComedoresDB {
         ContentValues cv = new ContentValues();
         cv.put("idComedor", idComedor);
         cv.put("fecha", fecha);       // 'YYYY-MM-DD'
-        cv.put("modalidad", modalidad); // 'en_comedor'|'para_llevar'
+        cv.put("modalidad", modalidad); // 'en_comedor'|'para_llevar'|'vegetariano'
         return db.insert("MENU", null, cv);
     }
 
@@ -226,45 +226,38 @@ public class ComedoresDB {
     }
 
     /**
-     * Obtiene la información del menú para un comedor y fecha específica (yyyy-MM-dd).
-     * Si no existe en la base de datos, genera y registra automáticamente un menú de ejemplo.
+     * Asegura que los menús guardados de la simulación (del martes 3 al viernes 6 de noviembre)
+     * estén presentes en la base de datos SQLite.
+     */
+    public void asegurarMenusSimulacion() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        TablasComedores.poblarDiasSimulacion(db);
+    }
+
+    /**
+     * Obtiene la información del menú tradicional (en_comedor).
      */
     public MenuInfo obtenerMenuParaComedorYFecha(int idComedor, String fecha) {
+        return obtenerMenuParaComedorYFecha(idComedor, fecha, false);
+    }
+
+    /**
+     * Obtiene la información del menú para un comedor y fecha específica (yyyy-MM-dd),
+     * permitiendo seleccionar entre menú tradicional o vegetariano.
+     */
+    public MenuInfo obtenerMenuParaComedorYFecha(int idComedor, String fecha, boolean esVegetariano) {
+        String modalidad = esVegetariano ? "vegetariano" : "en_comedor";
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         long idMenu = -1;
         try (Cursor c = db.rawQuery(
-                "SELECT idMenu FROM MENU WHERE idComedor = ? AND fecha = ? AND modalidad = 'en_comedor'",
-                new String[]{String.valueOf(idComedor), fecha})) {
+                "SELECT idMenu FROM MENU WHERE idComedor = ? AND fecha = ? AND modalidad = ?",
+                new String[]{String.valueOf(idComedor), fecha, modalidad})) {
             if (c != null && c.moveToFirst()) {
                 idMenu = c.getInt(0);
             }
-        }
-
-        // Si no hay menú registrado para esa fecha, insertamos datos de ejemplo
-        if (idMenu == -1) {
-            idMenu = insertarMenu(idComedor, fecha, "en_comedor");
-            if (idMenu != -1) {
-                String plato1 = "Salmorejo cordobés o Sopa de picadillo";
-                String plato2 = "Pechuga de pollo a la plancha con patatas";
-                String plato3 = "Fruta de temporada o Yogur";
-
-                if (idComedor == 2) {
-                    plato1 = "Ensalada mixta"; plato2 = "Lomo adobado con verduras"; plato3 = "Flan casero";
-                } else if (idComedor == 3) {
-                    plato1 = "Crema de verduras"; plato2 = "Merluza a la romana"; plato3 = "Fruta o Helado";
-                } else if (idComedor == 4) {
-                    plato1 = "Pasta boloñesa"; plato2 = "Filete de ternera con patatas"; plato3 = "Yogur griego";
-                }
-
-                long p1 = insertarPlato(plato1 + " (" + fecha + ")", "Primer plato", null);
-                long p2 = insertarPlato(plato2 + " (" + fecha + ")", "Segundo plato", null);
-                long p3 = insertarPlato(plato3, "Postre", null);
-
-                insertarMenuPlato((int) idMenu, (int) p1, "primero");
-                insertarMenuPlato((int) idMenu, (int) p2, "segundo");
-                insertarMenuPlato((int) idMenu, (int) p3, "postre");
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         String primero = "No disponible";
@@ -286,9 +279,127 @@ public class ComedoresDB {
                         }
                     } while (c.moveToNext());
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
+        // Si la base de datos no contiene los platos o están incompletos, recurrir al catálogo simulado
+        if ("No disponible".equals(primero) || "No disponible".equals(segundo)) {
+            return generarMenuSimulado(idComedor, fecha, esVegetariano);
+        }
+
         return new MenuInfo(primero, segundo, postre);
+    }
+
+    /**
+     * Genera datos de menú variados y realistas (tanto vegetarianos como normales) para evitar que la vista quede vacía.
+     */
+    public MenuInfo generarMenuSimulado(int idComedor, String fecha, boolean esVegetariano) {
+        if (esVegetariano) {
+            if (fecha != null && fecha.endsWith("11-03")) {
+                switch (idComedor) {
+                    case 2:
+                        return new MenuInfo("Ensalada campera vegetal con patata, maíz y aguacate",
+                                "Tofu marinado a la plancha con verduras salteadas",
+                                "Macedonia de frutas naturales");
+                    case 3:
+                        return new MenuInfo("Crema de calabaza y zanahoria con pipas tostadas",
+                                "Berenjenas rellenas de soja texturizada y verduras",
+                                "Fruta fresca de temporada");
+                    case 4:
+                        return new MenuInfo("Pasta penne con boloñesa de lentejas y albahaca",
+                                "Filete de seitán a la plancha con patatas asadas",
+                                "Yogur de soja con arándanos");
+                    default:
+                        return new MenuInfo("Salmorejo cordobés vegano con tofu y picatostes",
+                                "Hamburguesa de lentejas y quinoa con verduras asadas",
+                                "Fruta de temporada (Manzana / Pera)");
+                }
+            } else if (fecha != null && fecha.endsWith("11-04")) {
+                switch (idComedor) {
+                    case 2:
+                        return new MenuInfo("Garbanzos estofados con espinacas y pimientos",
+                                "Albóndigas de espinacas y garbanzos con salsa de tomate",
+                                "Mandarina de temporada");
+                    case 3:
+                        return new MenuInfo("Arroz con verduras variadas y setas salteadas",
+                                "Escalope de seitán empanado con patatas fritas",
+                                "Rodajas de piña al natural");
+                    case 4:
+                        return new MenuInfo("Pisto manchego tradicional con garbanzos tostados",
+                                "Medallones de calabacín y queso vegano al horno",
+                                "Kiwi de temporada");
+                    default:
+                        return new MenuInfo("Lentejas pardinas con verduras de la huerta (100% vegetal)",
+                                "Tortilla vegana de patatas y cebolla con ensalada",
+                                "Compota de manzana casera con canela");
+                }
+            } else if (fecha != null && fecha.endsWith("11-05")) {
+                switch (idComedor) {
+                    case 2:
+                        return new MenuInfo("Arroz con tomate casero, pisto y plátano frito",
+                                "Filete de tofu a las finas hierbas con ensalada verde",
+                                "Naranja con canela");
+                    case 3:
+                        return new MenuInfo("Gazpacho andaluz tradicional con picadillo vegetal",
+                                "Falafel casero de garbanzos con salsa tahini y patatas",
+                                "Yogur vegetal de vainilla");
+                    case 4:
+                        return new MenuInfo("Crema de verduras y puerros con picatostes",
+                                "Hamburguesa de garbanzos y espinacas con ensalada",
+                                "Fruta variada de temporada");
+                    default:
+                        return new MenuInfo("Paella vegetal con alcachofas, judías y pimientos",
+                                "Cazuela de fideos con setas silvestres y espárragos",
+                                "Plátano de Canarias");
+                }
+            } else if (fecha != null && fecha.endsWith("11-06")) {
+                switch (idComedor) {
+                    case 2:
+                        return new MenuInfo("Sopa de verduras con fideos finos y garbanzos",
+                                "Hamburguesa de remolacha y avena con patatas rústicas",
+                                "Peras al natural");
+                    case 3:
+                        return new MenuInfo("Guiso marinero vegetal de patatas con algas y alcachofas",
+                                "Nuggets de tofu crujientes con salsa barbacoa",
+                                "Naranja de mesa pelada con nueces");
+                    case 4:
+                        return new MenuInfo("Alubias blancas estofadas con calabaza y zanahorias",
+                                "Salteado de seitán con champiñones y pimientos",
+                                "Melón de temporada");
+                    default:
+                        return new MenuInfo("Macarrones con pisto de verduras y orégano",
+                                "Croquetas veganas de boletus con ensalada de tomate",
+                                "Manzana asada con canela");
+                }
+            } else {
+                return new MenuInfo("Crema de calabacín y puerros con picatostes",
+                        "Hamburguesa de lentejas y quinoa con verduras asadas",
+                        "Fruta fresca de temporada");
+            }
+        } else {
+            if (fecha != null && fecha.endsWith("11-03")) {
+                return new MenuInfo("Salmorejo cordobés con huevo duro y jamón ibérico",
+                        "Pechuga de pollo a la plancha con patatas a lo pobre",
+                        "Fruta de temporada (Manzana / Naranja)");
+            } else if (fecha != null && fecha.endsWith("11-04")) {
+                return new MenuInfo("Lentejas pardinas con verduras y chorizo",
+                        "San Jacobo de pavo y queso con patatas fritas",
+                        "Natillas caseras con galleta");
+            } else if (fecha != null && fecha.endsWith("11-05")) {
+                return new MenuInfo("Paella mixta de pollo, magro y verduras",
+                        "Merluza al horno con limón y perejil",
+                        "Plátano de Canarias");
+            } else if (fecha != null && fecha.endsWith("11-06")) {
+                return new MenuInfo("Macarrones a la boloñesa con queso gratinado",
+                        "Bacalao a la vizcaína con pimientos asados",
+                        "Yogur natural azucarado");
+            } else {
+                return new MenuInfo("Primer plato tradicional del día",
+                        "Segundo plato tradicional del día",
+                        "Postre casero");
+            }
+        }
     }
 }
