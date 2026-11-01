@@ -1,514 +1,305 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#F8FAFC">
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#F5F7FA"
         android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="18dp">
+            android:padding="20dp">
 
-            <!-- Cabecera: Texto de Bienvenida e Icono de Perfil -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- 1. CABECERA (MASCOTA AYUDANTE Y PERFIL) -->
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#EAEAEA"
-                app:strokeWidth="1dp">
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="25dp">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                <!-- Mascota Ayudante IA -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMascotaAyudante"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardBackgroundColor="#FFF3EB"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#FFD8BE"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_toStartOf="@id/ivIcono"
-                        android:orientation="vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp">
+
+                        <ImageView
+                            android:id="@+id/ivMascotaAyudante"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:contentDescription="Mascota Ayudante ETSIIT"
+                            android:src="@drawable/ic_mascota_ayudante" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="ETSIIT GRANADA"
+                            android:layout_marginStart="6dp"
+                            android:text="Asistente AI"
                             android:textColor="#FF8C42"
-                            android:textSize="11sp"
-                            android:letterSpacing="0.1"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvBienvenida"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="¡Bienvenido!"
-                            android:textColor="#1A1A1A"
-                            android:textSize="20sp"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Foto de perfil en la esquina superior derecha -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp"
+                    app:strokeWidth="0dp">
 
                     <ImageView
                         android:id="@+id/ivIcono"
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:background="@drawable/fondo_circulo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:clickable="true"
-                        android:contentDescription="Icono de perfil"
+                        android:contentDescription="Perfil"
                         android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
-                        android:padding="2dp"
-                        android:src="@drawable/icono" />
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 1. NOTICIAS DEL CAMPUS -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="📰 Noticias"
-                    android:textColor="#1A1A1A"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_perfil_etsiit" />
+                </com.google.android.material.card.MaterialCardView>
             </RelativeLayout>
 
+            <!-- 2. SLIDER DE NOTICIAS PREMIUM (REDISEÑADO) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="20dp"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="4dp"
-                app:strokeColor="#FF8C42"
-                app:strokeWidth="2dp">
-
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/vpNoticias"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- 2. SECCIÓN DESTACADA (Hero Card) -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginBottom="8dp"
-                android:text="🚀 Secciones destacadas"
-                android:textColor="#1A1A1A"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="#FF8C42"
+                android:layout_height="150dp"
+                android:layout_marginBottom="18dp"
+                app:cardBackgroundColor="#FFF8F3"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="8dp"
-                app:strokeWidth="0dp">
+                app:cardElevation="3dp"
+                app:strokeColor="#FFE3D1"
+                app:strokeWidth="1dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="20dp">
+                    android:layout_height="match_parent">
 
-                    <!-- Contenido visual de la sección (Icono con fondo translúcido + Nombre) -->
-                    <LinearLayout
+                    <!-- Carrusel ViewPager2 -->
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/vpNoticias"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Gradiente inferior para mejorar contraste -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_alignParentBottom="true"/>
+
+                    <!-- Badge Superior: Cápsula estilizada "Novedades ETSIIT" -->
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_margin="12dp"
+                        app:cardBackgroundColor="#E6FFFFFF"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="2dp"
+                        app:strokeColor="#FFD8BE"
+                        app:strokeWidth="1dp">
 
-                        <FrameLayout
-                            android:layout_width="68dp"
-                            android:layout_height="68dp"
-                            android:layout_marginBottom="10dp"
-                            android:background="@drawable/boton_circular"
-                            android:backgroundTint="#26FFFFFF">
-
-                            <ImageView
-                                android:id="@+id/ivIconoSeccion"
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="Icono de la sección"
-                                android:src="@drawable/ic_seccion_mapa"
-                                app:tint="#FFFFFF" />
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/tvNombreSeccion"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Mapa"
-                            android:textColor="#FFFFFF"
-                            android:textSize="26sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp">
 
-                    <!-- Botón grande / Tarjeta interactiva de sección -->
-                    <Button
-                        android:id="@+id/btnSeccionGrande"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@android:color/transparent"
-                        app:backgroundTint="@null" />
+                            <View
+                                android:layout_width="6dp"
+                                android:layout_height="6dp"
+                                android:layout_marginEnd="6dp"
+                                android:background="@drawable/boton_circular"
+                                android:backgroundTint="#FF8C42" />
 
-                    <TextView
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Novedades ETSIIT"
+                                android:textColor="#0F172A"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Indicadores de página estilo píldora (Puntos inferiores) -->
+                    <LinearLayout
+                        android:id="@+id/llIndicadoresNoticias"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
                         android:layout_alignParentEnd="true"
-                        android:text="Desliza o usa las flechas ⇄"
-                        android:textColor="#FFF0E5"
-                        android:textSize="11sp" />
+                        android:layout_alignParentBottom="true"
+                        android:layout_margin="14dp"
+                        android:gravity="center"
+                        android:orientation="horizontal" />
+
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 3. CONTROLES DE NAVEGACIÓN -->
-            <LinearLayout
+            <!-- 3. ÓRBITAS DE BURBUJAS REALES (FUERA DE LA TARJETA, ABAJO A LA DERECHA) -->
+            <com.example.nuietsiit.activities.main.OrbitalBurbujasView
+                android:id="@+id/orbitalBurbujas"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:layout_height="380dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="16dp" />
 
-                <!-- Botón y etiqueta Anterior -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="2dp"
-                    app:strokeColor="#EAEAEA"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:id="@+id/layoutAnterior"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="12dp">
-
-                        <ImageButton
-                            android:id="@+id/btnAnteriorSeccion"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:background="@drawable/boton_redondeado"
-                            android:src="@drawable/ic_chevron_left"
-                            android:contentDescription="Sección anterior"
-                            android:scaleType="centerInside"
-                            app:tint="#FFFFFF" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Anterior"
-                                android:textColor="#888888"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvAnteriorNombre"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="Biblioteca"
-                                android:textColor="#1A1A1A"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Botón y etiqueta Siguiente -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="2dp"
-                    app:strokeColor="#EAEAEA"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:id="@+id/layoutSiguiente"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="12dp">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="10dp"
-                            android:layout_weight="1"
-                            android:gravity="end"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Siguiente"
-                                android:textColor="#888888"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvSiguienteNombre"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="Actividades"
-                                android:textColor="#1A1A1A"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <ImageButton
-                            android:id="@+id/btnSiguienteSeccion"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:background="@drawable/boton_redondeado"
-                            android:src="@drawable/ic_chevron_right"
-                            android:contentDescription="Siguiente sección"
-                            android:scaleType="centerInside"
-                            app:tint="#FFFFFF" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- 4. CALENDARIO DE ACTIVIDADES, EXÁMENES Y ENTREGAS -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    android:id="@+id/tvTituloCalendario"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="📅 Calendario"
-                    android:textColor="#1A1A1A"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAnadirEvento"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:text="+ Añadir"
-                    android:textColor="#FF8C42"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-
+            <!-- 4. TARJETA CALENDARIO -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardEventoHoy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="2dp"
-                android:layout_marginBottom="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="22dp"
-                app:cardElevation="3dp"
-                app:strokeColor="#EAEAEA"
-                app:strokeWidth="1dp">
+                app:cardElevation="4dp"
+                app:strokeColor="#FF8C42"
+                app:strokeWidth="1.5dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Navegación de mes (< Febrero 2025 >) -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/tagHora"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp">
-
-                        <ImageButton
-                            android:id="@+id/btnMesAnterior"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/boton_redondeado"
-                            android:contentDescription="Mes anterior"
-                            android:padding="8dp"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_chevron_left"
-                            app:tint="#FFFFFF" />
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        app:cardBackgroundColor="#FFF3EB"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp">
 
                         <TextView
-                            android:id="@+id/tvMesAno"
+                            android:id="@+id/tvHoraEvento"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:text="Febrero 2025"
-                            android:textColor="#1A1A1A"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="HOY • CALENDARIO"
+                            android:textColor="#FF8C42"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Botón Enlace Directo al Nuevo Calendario -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btnAbrirCalendario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:cardBackgroundColor="#FFF3EB"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#FFD8BE"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📅 Abrir Calendario"
+                                android:textColor="#FF8C42"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:layout_marginStart="4dp"
+                                android:src="@drawable/ic_chevron_right"
+                                app:tint="#FF8C42" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tagHora"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvTituloEventoHoy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Calendario de la ETSIIT"
+                            android:textColor="#0F172A"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
-                        <ImageButton
-                            android:id="@+id/btnMesSiguiente"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/boton_redondeado"
-                            android:contentDescription="Mes siguiente"
-                            android:padding="8dp"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_chevron_right"
-                            app:tint="#FFFFFF" />
-                    </RelativeLayout>
-
-                    <!-- Días de la semana -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:orientation="horizontal">
-
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="L" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="M" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="X" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="J" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="V" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="S" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="D" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvSubtituloEventoHoy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Actividades, citas y anota tus exámenes y entregas 📅"
+                            android:textColor="#64748B"
+                            android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Grid interactivo con indicadores de eventos destacados -->
-                    <GridView
-                        android:id="@+id/gvCalendario"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:numColumns="7"
-                        android:horizontalSpacing="2dp"
-                        android:verticalSpacing="2dp"
-                        android:stretchMode="columnWidth"
-                        android:gravity="center" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="12dp"
-                        android:background="#F0F0F0" />
-
-                    <!-- Cabecera de fecha seleccionada -->
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:id="@+id/tvFechaSeleccionada"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:text="Eventos para la fecha seleccionada"
-                            android:textColor="#1A1A1A"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvNumEventosFecha"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:text="0 eventos"
-                            android:textColor="#888888"
-                            android:textSize="12sp" />
-                    </RelativeLayout>
-
-                    <!-- Mensaje cuando no hay eventos -->
-                    <TextView
-                        android:id="@+id/tvSinEventos"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginVertical="12dp"
-                        android:gravity="center"
-                        android:text="No hay actividades, exámenes ni entregas para esta fecha."
-                        android:textColor="#888888"
-                        android:textSize="13sp"
-                        android:visibility="gone" />
-
-                    <!-- Contenedor dinámico de eventos para el día seleccionado -->
-                    <LinearLayout
-                        android:id="@+id/llEventosContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-
-                </LinearLayout>
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- LA OLA (Se coloca al final para quedar por encima de todo el contenido) -->
     <com.example.nuietsiit.activities.main.WaveView
-    android:id="@+id/waveView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:elevation="100dp"
-    android:visibility="gone" />
+        android:id="@+id/waveView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="100dp"
+        android:visibility="gone" />
 
 </FrameLayout>
