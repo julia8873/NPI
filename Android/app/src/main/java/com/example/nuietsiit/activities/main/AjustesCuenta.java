@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -27,10 +28,11 @@ import com.example.nuietsiit.data.UsuariosDB;
 
 import java.util.List;
 
-public class AjustesCuenta  extends BaseActivity {
+public class AjustesCuenta extends BaseActivity {
 
     private EditText etNombre, etPassword;
     private AutoCompleteTextView etGrado, etIdioma;
+    private SwitchCompat switchVegetariano;
     private Button btnLogOut, btnGuardarCambios;
 
     private DBHelper BD;
@@ -49,11 +51,16 @@ public class AjustesCuenta  extends BaseActivity {
         if (getIntent() != null && getIntent().hasExtra("CORREO")) {
             correoUsuario = getIntent().getStringExtra("CORREO");
         }
+        if (correoUsuario == null || correoUsuario.isEmpty()) {
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            correoUsuario = prefs.getString("CORREO", null);
+        }
 
         etNombre = findViewById(R.id.etNombre);
         etPassword = findViewById(R.id.etPassword);
         etGrado = findViewById(R.id.etGrado);
         etIdioma = findViewById(R.id.etIdioma);
+        switchVegetariano = findViewById(R.id.switchVegetariano);
         btnGuardarCambios = findViewById(R.id.btnGuardarCambios);
         btnLogOut = findViewById(R.id.btnLogOut);
 
@@ -80,6 +87,12 @@ public class AjustesCuenta  extends BaseActivity {
 
         etGrado.setText(gradoActual, false);
         etIdioma.setText(idiomaActual, false);
+
+        // Cargar preferencia de menú vegetariano
+        boolean esVeg = usuariosDB.esUsuarioVegetariano(correoUsuario);
+        if (switchVegetariano != null) {
+            switchVegetariano.setChecked(esVeg);
+        }
     }
 
     private void configurarDesplegables() {
@@ -181,6 +194,7 @@ public class AjustesCuenta  extends BaseActivity {
     private void guardarCambios() {
         String nuevoNombre = etNombre.getText().toString().trim();
         String nuevaPassword = etPassword.getText().toString().trim();
+        boolean esVegetariano = switchVegetariano != null && switchVegetariano.isChecked();
 
         if (correoUsuario == null || correoUsuario.isEmpty()) {
             Toast.makeText(AjustesCuenta.this, "Error al identificar el usuario actual", Toast.LENGTH_SHORT).show();
@@ -199,10 +213,13 @@ public class AjustesCuenta  extends BaseActivity {
                 nuevaPassword,
                 idGradoSeleccionado,
                 codigoIdiomaSeleccionado,
-                null
+                null,
+                esVegetariano
         );
 
         if (actualizado) {
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            prefs.edit().putBoolean("ES_VEGETARIANO", esVegetariano).apply();
             Toast.makeText(AjustesCuenta.this, "Datos actualizados correctamente", Toast.LENGTH_SHORT).show();
             etPassword.setText("");
         } else {

@@ -29,8 +29,21 @@ public class UsuariosDB {
     // ESTUDIANTE
     // --------------------------------------------------------------
 
+    /**
+     * Asegura de forma dinámica que la columna 'esVegetariano' existe en la tabla ESTUDIANTE.
+     */
+    public void asegurarColumnaVegetariano() {
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            db.execSQL("ALTER TABLE ESTUDIANTE ADD COLUMN esVegetariano INTEGER NOT NULL DEFAULT 0");
+        } catch (Exception ignored) {
+            // La columna ya existe en la base de datos
+        }
+    }
+
     // Inserta un nuevo estudiante con valores por defecto para grado (1) e idioma ('es')
     public boolean insertarEstudiante(String correo, String nombre, String contraseniaHash) {
+        asegurarColumnaVegetariano();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         db.execSQL("INSERT OR IGNORE INTO IDIOMA (codigoIdioma, nombreIdioma) VALUES ('es', 'Español'), ('en', 'English')");
@@ -44,6 +57,7 @@ public class UsuariosDB {
         cv.put("idGrado", 0);
         cv.put("codigoIdioma", "es");
         cv.put("tokenNotificacion", (String) null);
+        cv.put("esVegetariano", 0);
 
         long resultado = db.insert("ESTUDIANTE", null, cv);
         return resultado != -1;
@@ -167,6 +181,28 @@ public class UsuariosDB {
         return "";
     }
 
+    /**
+     * Comprueba si el estudiante tiene activada la preferencia de menú vegetariano.
+     */
+    public boolean esUsuarioVegetariano(String correo) {
+        if (correo == null || correo.isEmpty()) return false;
+        asegurarColumnaVegetariano();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor cursor = db.rawQuery(
+                "SELECT esVegetariano FROM ESTUDIANTE WHERE correoEstudiante = ?",
+                new String[]{correo.toLowerCase()})) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int colIdx = cursor.getColumnIndex("esVegetariano");
+                if (colIdx != -1) {
+                    return cursor.getInt(colIdx) == 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Actualiza el enlace al calendario de Google de un estudiante.
     public boolean actualizarCalendarioEstudiante(String correo, String enlaceCalendario) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -181,6 +217,16 @@ public class UsuariosDB {
     public boolean actualizarAjustesEstudiante(String correo, String nuevoNombre, String nuevaPassword,
                                                Integer nuevoIdGrado, String nuevoCodigoIdioma,
                                                String nuevoCalendario) {
+        return actualizarAjustesEstudiante(correo, nuevoNombre, nuevaPassword, nuevoIdGrado, nuevoCodigoIdioma, nuevoCalendario, null);
+    }
+
+    /**
+     * Actualiza los datos de un estudiante, incluyendo su preferencia de dieta vegetariana.
+     */
+    public boolean actualizarAjustesEstudiante(String correo, String nuevoNombre, String nuevaPassword,
+                                               Integer nuevoIdGrado, String nuevoCodigoIdioma,
+                                               String nuevoCalendario, Boolean esVegetariano) {
+        asegurarColumnaVegetariano();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -202,6 +248,9 @@ public class UsuariosDB {
         }
         if (nuevoCalendario != null) {
             cv.put("enlaceCalendarioGoogle", nuevoCalendario);
+        }
+        if (esVegetariano != null) {
+            cv.put("esVegetariano", esVegetariano ? 1 : 0);
         }
 
         if (cv.size() == 0) {
@@ -472,5 +521,3 @@ public class UsuariosDB {
         return lista;
     }
 }
-
-//
