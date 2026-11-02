@@ -3,6 +3,7 @@ package com.example.nuietsiit.activities.secciones.mapa;
 import android.Manifest;
 import android.annotation.SuppressLint;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -22,10 +23,11 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -37,7 +39,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
@@ -70,6 +71,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -153,7 +155,7 @@ public class Mapa extends BaseActivity {
                 handler.postDelayed(this, 500);
             }
         }
-    };        // solo pruebas (builds debug): fecha/hora falsa para el horario
+    };
 
     // --- Aviso "activa la ubicación del móvil" ---
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -238,6 +240,11 @@ public class Mapa extends BaseActivity {
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
+
+        // Actualizar el adaptador del buscador tras registrar los marcadores
+        if (etBuscadorMapa != null) {
+            etBuscadorMapa.setAdapter(new MarcadorAdapter(this, listaMarcadores));
+        }
     }
 
     private void crearVistasMarcadores() {
@@ -260,7 +267,7 @@ public class Mapa extends BaseActivity {
 
             puntoInteres.setVisibility(View.GONE);
 
-            // EVENTO DE CLIC: Ahora muestra la burbuja flotante pequeña
+            // EVENTO DE CLIC: Muestra la burbuja flotante pequeña
             puntoInteres.setOnClickListener(v -> mostrarBurbujaInfo(v, m));
 
             m.setVistaIcono(puntoInteres);
@@ -302,7 +309,6 @@ public class Mapa extends BaseActivity {
     private void mostrarBurbujaInfo(View vistaIcono, Marcador marcador) {
         float d = getResources().getDisplayMetrics().density;
 
-        // Tarjeta pequeña: título + botón "Iniciar ruta"
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
         tarjeta.setPadding((int) (12 * d), (int) (8 * d), (int) (12 * d), (int) (8 * d));
@@ -335,7 +341,7 @@ public class Mapa extends BaseActivity {
                 tarjeta,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                true // Permite cerrarlo tocando fuera
+                true
         );
         popupWindow.setOutsideTouchable(true);
         popupWindow.setFocusable(true);
@@ -345,7 +351,6 @@ public class Mapa extends BaseActivity {
             iniciarRuta(marcador);
         });
 
-        // Mostrar justo encima/al lado del icono del marcador
         int offsetX = 20;
         int offsetY = -vistaIcono.getHeight() - 10;
         popupWindow.showAsDropDown(vistaIcono, offsetX, offsetY);
@@ -384,28 +389,23 @@ public class Mapa extends BaseActivity {
             if (!isChecked) return;
 
             if (checkedId == R.id.btnModoMapa) {
-                // Modo Mapa GPS
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
                 if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.VISIBLE);
                 if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.VISIBLE);
 
-                // Ocultar el contenedor del plano (y sus marcadores)
                 if (containerPlanoConMarcadores != null) containerPlanoConMarcadores.setVisibility(View.GONE);
                 if (cardBuscadorMapa != null) cardBuscadorMapa.setVisibility(View.GONE);
                 if (scrollPlantas != null) scrollPlantas.setVisibility(View.GONE);
 
             } else if (checkedId == R.id.btnModoPlanos) {
-                // Modo Planos ETSIIT
                 if (mapView != null) mapView.setVisibility(View.GONE);
                 if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.GONE);
                 if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.GONE);
 
-                // MOSTRAR el contenedor del plano
                 if (containerPlanoConMarcadores != null) containerPlanoConMarcadores.setVisibility(View.VISIBLE);
                 if (cardBuscadorMapa != null) cardBuscadorMapa.setVisibility(View.VISIBLE);
                 if (scrollPlantas != null) scrollPlantas.setVisibility(View.VISIBLE);
 
-                // Cargar planta baja por defecto
                 cargarPlanoDrawable("planta0");
             }
             actualizarPanelRuta();
@@ -438,7 +438,7 @@ public class Mapa extends BaseActivity {
     }
 
     private void cargarPlanoDrawable(String nombreSinExtension) {
-        this.plantaActual = nombreSinExtension; // Registrar qué planta se está viendo
+        this.plantaActual = nombreSinExtension;
 
         int resId = getResources().getIdentifier(nombreSinExtension, "drawable", getPackageName());
 
@@ -498,21 +498,14 @@ public class Mapa extends BaseActivity {
                     break;
             }
 
-            // Aplicar restricción para no hacer la imagen más pequeña que su visión completa
             constrainMatrix(view);
-
             view.setImageMatrix(matrix);
-
-            // Actualizar la posición de los marcadores con la matriz recién modificada
             actualizarPosicionMarcadores();
 
             return true;
         });
     }
 
-    /**
-     * Asegura que la imagen no se reduzca más allá de su tamaño completo inicial.
-     */
     private void constrainMatrix(ImageView view) {
         if (view.getDrawable() == null) return;
 
@@ -528,10 +521,8 @@ public class Mapa extends BaseActivity {
 
         if (viewWidth == 0 || viewHeight == 0 || drawableWidth == 0 || drawableHeight == 0) return;
 
-        // Escala mínima para mostrar la imagen completa dentro del cuadro (Fit Center)
         float minScale = Math.min((float) viewWidth / drawableWidth, (float) viewHeight / drawableHeight);
 
-        // Si el usuario intenta reducir la imagen más allá del tamaño completo, la forzamos a mantenerse en minScale
         if (currentScaleX < minScale) {
             float scaleFactor = minScale / currentScaleX;
             matrix.postScale(scaleFactor, scaleFactor, viewWidth / 2f, viewHeight / 2f);
@@ -568,25 +559,22 @@ public class Mapa extends BaseActivity {
         matrix.postTranslate(dx, dy);
         ivPlanoEdificio.setImageMatrix(matrix);
 
-        // Reposicionar los marcadores tras recalcular la matriz inicial
         actualizarPosicionMarcadores();
     }
 
     private void configurarBuscador() {
         if (etBuscadorMapa != null) {
-            List<String> titulos = new ArrayList<>();
-            for (Marcador m : listaMarcadores) {
-                titulos.add(m.getTitulo());
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, titulos);
+            MarcadorAdapter adapter = new MarcadorAdapter(this, listaMarcadores);
             etBuscadorMapa.setAdapter(adapter);
             etBuscadorMapa.setThreshold(1);
 
             etBuscadorMapa.setOnItemClickListener((parent, view, position, id) -> {
-                String seleccion = (String) parent.getItemAtPosition(position);
-                etBuscadorMapa.setText(seleccion);
-                etBuscadorMapa.dismissDropDown();
-                procesarBusquedaPlano(seleccion.toLowerCase(Locale.ROOT));
+                Marcador m = (Marcador) parent.getItemAtPosition(position);
+                if (m != null) {
+                    etBuscadorMapa.setText(m.getTitulo());
+                    etBuscadorMapa.dismissDropDown();
+                    procesarBusquedaPlano(m.getTitulo().toLowerCase(Locale.ROOT));
+                }
             });
 
             etBuscadorMapa.setOnEditorActionListener((v, actionId, event) -> {
@@ -607,8 +595,9 @@ public class Mapa extends BaseActivity {
         if (chipGroupPlantas == null) return;
 
         Marcador encontrado = null;
+        String qNorm = normalizarTexto(query);
         for (Marcador m : listaMarcadores) {
-            if (m.getTitulo().toLowerCase(Locale.ROOT).contains(query)) {
+            if (normalizarTexto(m.getTitulo()).contains(qNorm)) {
                 encontrado = m;
                 break;
             }
@@ -835,9 +824,7 @@ public class Mapa extends BaseActivity {
                     .setTitle("Uso de Ubicación")
                     .setMessage("¿Deseas activar tu ubicación actual para mostrarla en el mapa?")
                     .setPositiveButton("Sí", (dialog, which) -> solicitarPermisosUbicacion())
-                    .setNegativeButton("No", (dialog, which) -> {
-                        centrarEnETSIIT();
-                    })
+                    .setNegativeButton("No", (dialog, which) -> centrarEnETSIIT())
                     .setCancelable(false)
                     .show();
         }
@@ -876,10 +863,6 @@ public class Mapa extends BaseActivity {
         comprobarUbicacionDelMovil();
     }
 
-    /**
-     * Si el móvil tiene la ubicación apagada, o tras unos segundos seguimos sin posición,
-     * preguntamos si quiere activarla (lleva a los ajustes de ubicación).
-     */
     private void comprobarUbicacionDelMovil() {
         handler.removeCallbacks(comprobarPrimeraPosicion);
 
@@ -918,7 +901,6 @@ public class Mapa extends BaseActivity {
         if (btnAbrirVisor != null) btnAbrirVisor.setOnClickListener(v -> abrirVisorRuta());
         if (btnCambiarUbicacion != null) btnCambiarUbicacion.setOnClickListener(v -> mostrarMenuManual());
 
-        // Solo builds debug: mantener pulsado el título para simular día/hora del horario
         if (tvTituloMapa != null && esDebug()) {
             tvTituloMapa.setOnLongClickListener(v -> {
                 mostrarDialogoSimulacionHorario();
@@ -931,12 +913,6 @@ public class Mapa extends BaseActivity {
         return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
-    /**
-     * Se llama al pulsar "Iniciar ruta". Orden de decisión:
-     *  1) Horario: si ahora tiene clase con aula conocida -> está en esa puerta.
-     *  2) GPS: fuera de la ETSIIT -> entrada; dentro -> escanear QR.
-     *  3) Manual: el usuario elige.
-     */
     private void iniciarRuta(Marcador destino) {
         destinoRuta = destino;
         rutaPendienteGps = false;
@@ -954,8 +930,6 @@ public class Mapa extends BaseActivity {
             ubicarConGps();
         }
     }
-
-    // ---------------------------- 2) GPS ----------------------------
 
     private void ubicarConGps() {
         if (!tienePermisoUbicacion()) {
@@ -990,7 +964,6 @@ public class Mapa extends BaseActivity {
             return;
         }
 
-        // Permiso y ubicación activados: esperamos una posición (hasta 8 s)
         activarUbicacionUsuario();
         Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
         if (fix != null) {
@@ -1016,7 +989,6 @@ public class Mapa extends BaseActivity {
         dialogoBuscandoGps = null;
     }
 
-    /** Con una posición GPS decidimos si está dentro o fuera de la ETSIIT. */
     private void decidirPorGps(Location fix) {
         if (fix.hasAccuracy() && fix.getAccuracy() > PRECISION_MAXIMA_METROS) {
             Toast.makeText(this, "El GPS no es lo bastante preciso ahora mismo", Toast.LENGTH_SHORT).show();
@@ -1025,15 +997,12 @@ public class Mapa extends BaseActivity {
         }
         double metros = new GeoPoint(fix.getLatitude(), fix.getLongitude()).distanceToAsDouble(etsiitPoint);
         if (metros <= RADIO_ETSIIT_METROS) {
-            pedirEscaneoQR(true);   // dentro: el GPS no sirve en interior, usamos QR
+            pedirEscaneoQR(true);
         } else {
-            pedirIrALaEntrada(metros);   // fuera: entrada
+            pedirIrALaEntrada(metros);
         }
     }
 
-    // ---------------------------- 3) Manual ----------------------------
-
-    /** El usuario elige cómo indicar dónde está. También sirve para corregir la ubicación detectada. */
     private void mostrarMenuManual() {
         final String[] opciones = {
                 "📚 Estoy en la puerta de un aula",
@@ -1056,30 +1025,61 @@ public class Mapa extends BaseActivity {
     private void elegirAula() {
         final List<Marcador> aulas = new ArrayList<>();
         for (Marcador m : listaMarcadores) {
-            if (m.getTitulo().contains("Aula")) aulas.add(m);
+            if (m.getTitulo().toLowerCase(Locale.ROOT).contains("aula")) {
+                aulas.add(m);
+            }
         }
         if (aulas.isEmpty()) {
             Toast.makeText(this, "No hay aulas registradas en el mapa", Toast.LENGTH_SHORT).show();
             mostrarMenuManual();
             return;
         }
-        String[] nombres = new String[aulas.size()];
-        for (int i = 0; i < nombres.length; i++) nombres[i] = aulas.get(i).getTitulo();
-        new AlertDialog.Builder(this)
-                .setTitle("¿En qué aula estás?")
-                .setItems(nombres, (d, which) -> {
-                    Marcador m = aulas.get(which);
-                    fijarOrigen(UbicacionUsuario.enPixeles(
-                            UbicacionUsuario.idDesdeNombre(m.getTitulo().replaceAll("^[^A-Za-z]+", "")),
-                            "Puerta de " + m.getTitulo().replaceAll("^[^A-Za-z]+", ""),
-                            m.getPlanta(), m.getXOriginal(), m.getYOriginal(),
-                            UbicacionUsuario.Metodo.MANUAL));
-                })
+
+        float density = getResources().getDisplayMetrics().density;
+        LinearLayout layoutDialog = new LinearLayout(this);
+        layoutDialog.setOrientation(LinearLayout.VERTICAL);
+        layoutDialog.setPadding((int) (20 * density), (int) (16 * density), (int) (20 * density), (int) (8 * density));
+
+        TextView tvInstruction = new TextView(this);
+        tvInstruction.setText("Escribe el nombre o número del aula donde estás:");
+        tvInstruction.setTextColor(Color.BLACK);
+        tvInstruction.setTextSize(14f);
+        layoutDialog.addView(tvInstruction);
+
+        AutoCompleteTextView autoText = new AutoCompleteTextView(this);
+        autoText.setHint("Ej: Aula 0.5, 1.4, 2.1...");
+        autoText.setTextSize(14f);
+        autoText.setThreshold(1);
+        autoText.setPadding((int) (12 * density), (int) (12 * density), (int) (12 * density), (int) (12 * density));
+
+        LinearLayout.LayoutParams lpAuto = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpAuto.topMargin = (int) (10 * density);
+        layoutDialog.addView(autoText, lpAuto);
+
+        MarcadorAdapter adapter = new MarcadorAdapter(this, aulas);
+        autoText.setAdapter(adapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("🔍 Buscar tu aula actual")
+                .setView(layoutDialog)
                 .setNegativeButton("Atrás", (d, w) -> mostrarMenuManual())
-                .show();
+                .create();
+
+        autoText.setOnItemClickListener((parent, view, position, id) -> {
+            Marcador m = (Marcador) parent.getItemAtPosition(position);
+            dialog.dismiss();
+            fijarOrigen(UbicacionUsuario.enPixeles(
+                    UbicacionUsuario.idDesdeNombre(m.getTitulo().replaceAll("^[^A-Za-z0-9.]+", "")),
+                    "Puerta de " + m.getTitulo().replaceAll("^[^A-Za-z0-9.]+", ""),
+                    m.getPlanta(), m.getXOriginal(), m.getYOriginal(),
+                    UbicacionUsuario.Metodo.MANUAL));
+        });
+
+        dialog.show();
+        autoText.post(autoText::showDropDown);
     }
 
-    /** Busca el punto naranja del aula de la clase y lo usa como "puerta de la clase". */
     private UbicacionUsuario puertaDeClase(LocalizadorUsuario.SesionActual sesion) {
         if (sesion.aula == null) return null;
         for (Marcador m : listaMarcadores) {
@@ -1108,7 +1108,6 @@ public class Mapa extends BaseActivity {
                 .show();
     }
 
-    /** Dentro del edificio -> escanear el QR más cercano. */
     private void pedirEscaneoQR(boolean detectadoPorGps) {
         AlertDialog.Builder b = new AlertDialog.Builder(this)
                 .setTitle("Escanea un código QR")
@@ -1146,7 +1145,6 @@ public class Mapa extends BaseActivity {
         fijarOrigen(u);
     }
 
-    /** Solo debug: elegir un QR de la lista sin tener que imprimirlo/escanearlo. */
     private void mostrarListaSimularQR() {
         final List<UbicacionUsuario> puntos = RegistroPuntosQR.todosLosQR();
         String[] nombres = new String[puntos.size()];
@@ -1160,7 +1158,6 @@ public class Mapa extends BaseActivity {
                 .show();
     }
 
-    /** Solo debug: simular qué día/hora es para probar el método del horario. */
     private void mostrarDialogoSimulacionHorario() {
         final String[] opciones = {
                 "Usar la hora real",
@@ -1194,14 +1191,12 @@ public class Mapa extends BaseActivity {
         return destinoRuta != null ? destinoRuta.getTitulo() : "tu destino";
     }
 
-    /** El usuario ya está ubicado: lo dibujamos en el plano y mostramos el panel con el visor. */
     private void fijarOrigen(UbicacionUsuario u) {
         origenActual = u;
 
-        // Ir a la planta donde está el usuario
         int chip = chipIdDePlanta(u.planta);
         if (chip != 0 && chipGroupPlantas != null && !u.planta.equalsIgnoreCase(plantaActual)) {
-            chipGroupPlantas.check(chip); // el listener carga el plano
+            chipGroupPlantas.check(chip);
         }
 
         int ancho = 1;
@@ -1211,7 +1206,6 @@ public class Mapa extends BaseActivity {
             alto = ivPlanoEdificio.getDrawable().getIntrinsicHeight();
         }
 
-        // Punto azul de "tú estás aquí"
         if (marcadorOrigen != null && marcadorOrigen.getVistaIcono() != null) {
             containerPlanoConMarcadores.removeView(marcadorOrigen.getVistaIcono());
         }
@@ -1315,7 +1309,7 @@ public class Mapa extends BaseActivity {
         if (myLocationOverlay != null && tienePermisoUbicacion()) {
             myLocationOverlay.enableMyLocation();
         }
-        if (esperandoAjustesUbicacion) { // volvemos de los ajustes de ubicación del móvil
+        if (esperandoAjustesUbicacion) {
             esperandoAjustesUbicacion = false;
             if (tienePermisoUbicacion()) activarUbicacionUsuario();
             if (rutaPendienteGps && destinoRuta != null) {
@@ -1339,5 +1333,91 @@ public class Mapa extends BaseActivity {
         if (myLocationOverlay != null) {
             myLocationOverlay.disableMyLocation();
         }
+    }
+
+    // Adaptador personalizado para autocompletado con filtro normalizado (sin distinción de emojis/mayúsculas/tildes)
+    public static class MarcadorAdapter extends ArrayAdapter<Marcador> {
+        private final List<Marcador> originalList;
+        private List<Marcador> filteredList;
+
+        public MarcadorAdapter(Context context, List<Marcador> objects) {
+            super(context, android.R.layout.simple_dropdown_item_1line, objects);
+            this.originalList = new ArrayList<>(objects);
+            this.filteredList = new ArrayList<>(objects);
+        }
+
+        @Override
+        public int getCount() {
+            return filteredList.size();
+        }
+
+        @Override
+        public Marcador getItem(int position) {
+            return filteredList.get(position);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+            if (view instanceof TextView) {
+                Marcador m = getItem(position);
+                if (m != null) {
+                    ((TextView) view).setText(m.getTituloLimpio());
+                }
+            }
+            return view;
+        }
+
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    FilterResults results = new FilterResults();
+                    if (constraint == null || constraint.length() == 0) {
+                        results.values = originalList;
+                        results.count = originalList.size();
+                    } else {
+                        String query = normalizarTexto(constraint.toString());
+                        List<Marcador> match = new ArrayList<>();
+                        for (Marcador m : originalList) {
+                            String tituloNorm = normalizarTexto(m.getTitulo());
+                            if (tituloNorm.contains(query)) {
+                                match.add(m);
+                            }
+                        }
+                        results.values = match;
+                        results.count = match.size();
+                    }
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    if (results.values != null) {
+                        filteredList = (List<Marcador>) results.values;
+                    } else {
+                        filteredList = new ArrayList<>();
+                    }
+                    notifyDataSetChanged();
+                }
+
+                @Override
+                public CharSequence convertResultToString(Object resultValue) {
+                    if (resultValue instanceof Marcador) {
+                        return ((Marcador) resultValue).getTituloLimpio();
+                    }
+                    return super.convertResultToString(resultValue);
+                }
+            };
+        }
+    }
+
+    public static String normalizarTexto(String texto) {
+        if (texto == null) return "";
+        return Normalizer.normalize(texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT)
+                .trim();
     }
 }
