@@ -203,6 +203,19 @@ public class UsuariosDB {
         return false;
     }
 
+    /**
+     * Actualiza la preferencia de menú vegetariano del estudiante.
+     */
+    public boolean actualizarPreferenciaVegetariano(String correo, boolean esVegetariano) {
+        if (correo == null || correo.isEmpty()) return false;
+        asegurarColumnaVegetariano();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("esVegetariano", esVegetariano ? 1 : 0);
+        int filas = db.update("ESTUDIANTE", cv, "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
     // Actualiza el enlace al calendario de Google de un estudiante.
     public boolean actualizarCalendarioEstudiante(String correo, String enlaceCalendario) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();

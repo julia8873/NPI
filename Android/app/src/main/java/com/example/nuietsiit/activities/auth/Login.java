@@ -2,11 +2,13 @@ package com.example.nuietsiit.activities.auth;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -24,7 +26,8 @@ public class Login extends BaseActivity {
 
     // Declaración de los componentes de la interfaz de usuario
     private EditText etCorreo, etPassword;
-    private Button btnLogin, btnSignUp;
+    private Button btnLogin;
+    private View btnSignUp;
 
     // Instancia del Helper para gestionar la base de datos SQLite
     private UsuariosDB BD;
@@ -66,6 +69,19 @@ public class Login extends BaseActivity {
             });
         }
 
+        TextView tvOlvidePassword = findViewById(R.id.tvOlvidePassword);
+        if (tvOlvidePassword != null) {
+            tvOlvidePassword.setPaintFlags(tvOlvidePassword.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            tvOlvidePassword.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setTitle("Recuperar contraseña 🔑")
+                        .setMessage("Para restablecer la contraseña de tu cuenta universitaria, debes acceder al portal de gestión de cuentas de la UGR o contactar con el CSIRC (csirc@ugr.es).")
+                        .setPositiveButton("Entendido", null)
+                        .show();
+            });
+        }
+
         // Evento de clic para el botón de Inicio de Sesión
         btnLogin.setOnClickListener(view -> {
             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
@@ -73,11 +89,13 @@ public class Login extends BaseActivity {
         });
 
         // Evento de clic para navegar a la pantalla de Registro (Sign Up)
-        btnSignUp.setOnClickListener(view -> {
-            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            Intent intent = new Intent(Login.this, SignUp.class);
-            startActivity(intent);
-        });
+        if (btnSignUp != null) {
+            btnSignUp.setOnClickListener(view -> {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                Intent intent = new Intent(Login.this, SignUp.class);
+                startActivity(intent);
+            });
+        }
     }
 
     /**

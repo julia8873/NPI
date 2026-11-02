@@ -4,7 +4,7 @@
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="@android:color/white"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:fillViewport="true">
@@ -13,11 +13,12 @@
         android:id="@+id/contenidoLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/nui_superficie"
+        android:background="@android:color/white"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical"
-        android:paddingBottom="32dp">
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="28dp">
 
         <!-- 1. CABECERA: Botón volver · Título · Botón Chat Asistente -->
         <LinearLayout
@@ -25,32 +26,31 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp">
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp">
 
             <ImageButton
                 android:id="@+id/btnVolver"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_nui_circulo_suave"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
                 android:contentDescription="Volver"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:padding="10dp"
+                android:padding="12dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_chevron_left"
-                app:tint="@color/nui_tinta" />
+                app:tint="#1A1A1A" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
                 android:letterSpacing="-0.02"
                 android:maxLines="1"
-                android:text="Iniciar Sesión"
-                android:textColor="@color/nui_tinta"
-                android:textSize="20sp"
+                android:text="Iniciar sesión"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -64,12 +64,12 @@
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="14dp">
+                android:paddingStart="14dp"
+                android:paddingEnd="16dp">
 
                 <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_nui_bot"
                     app:tint="@android:color/white" />
@@ -80,170 +80,240 @@
                     android:layout_marginStart="6dp"
                     android:text="Chat"
                     android:textColor="@android:color/white"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- 2. SECCIÓN HERO: Avatar y bienvenida -->
+        <!-- 2. SECCIÓN HERO: Tarjeta ¡Hola de nuevo! -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_tarjeta_bienvenido"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="8dp">
+            android:padding="20dp">
 
             <FrameLayout
-                android:layout_width="76dp"
-                android:layout_height="76dp"
-                android:background="@drawable/bg_nui_circulo_suave">
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:background="@drawable/bg_icono_naranja_bienvenido">
 
                 <ImageView
-                    android:id="@+id/ivIcono"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:layout_gravity="center"
                     android:importantForAccessibility="no"
-                    android:src="@drawable/ic_nui_usuario"
-                    app:tint="@color/nui_acento" />
+                    android:src="@drawable/ic_hero_user" />
             </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:letterSpacing="-0.02"
+                android:layout_marginTop="14dp"
+                android:letterSpacing="-0.01"
                 android:text="¡Hola de nuevo!"
-                android:textColor="@color/nui_tinta"
-                android:textSize="23sp"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:gravity="center"
                 android:lineSpacingExtra="2dp"
                 android:text="Accede con tu cuenta universitaria para personalizar tus asignaturas, menús y horarios."
-                android:textColor="@color/nui_apagado"
-                android:textSize="13sp" />
+                android:textColor="#666666"
+                android:textSize="13.5sp" />
         </LinearLayout>
 
-        <!-- 3. TARJETA FORMULARIO: Correo, Contraseña y Botón Login -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- 3. CAMPOS DE FORMULARIO -->
+
+        <!-- Campo 1: Correo electrónico -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/nui_suave"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#FFE3D1"
-            app:strokeWidth="1dp">
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_input_box"
+            android:gravity="center_vertical"
+            android:minHeight="62dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="14dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_input_mail"
+                app:tint="#8A8A8E" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="18dp"
-                android:paddingVertical="20dp">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <!-- Etiqueta: Correo -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.06"
-                    android:text="✉️ CORREO ELECTRÓNICO"
-                    android:textColor="@color/nui_apagado"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
+                    android:text="Correo electrónico"
+                    android:textColor="#666666"
+                    android:textSize="11.5sp" />
 
                 <EditText
                     android:id="@+id/etCorreo"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/bg_nui_campo_texto"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@null"
                     android:hint="ejemplo@correo.ugr.es"
                     android:inputType="textEmailAddress"
-                    android:textColor="@color/nui_tinta"
-                    android:textColorHint="@color/nui_apagado"
-                    android:textSize="14sp" />
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:singleLine="true"
+                    android:textColor="#1A1A1A"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="14.5sp" />
+            </LinearLayout>
+        </LinearLayout>
 
-                <!-- Etiqueta: Contraseña -->
+        <!-- Campo 2: Contraseña -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input_box"
+            android:gravity="center_vertical"
+            android:minHeight="62dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="14dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_input_lock"
+                app:tint="#8A8A8E" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:letterSpacing="0.06"
-                    android:text="🔒 CONTRASEÑA"
-                    android:textColor="@color/nui_apagado"
-                    android:textSize="10.5sp"
-                    android:textStyle="bold" />
+                    android:text="Contraseña"
+                    android:textColor="#666666"
+                    android:textSize="11.5sp" />
 
                 <EditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="22dp"
-                    android:background="@drawable/bg_nui_campo_texto"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@null"
                     android:hint="Introduce tu contraseña"
                     android:inputType="textPassword"
-                    android:textColor="@color/nui_tinta"
-                    android:textColorHint="@color/nui_apagado"
-                    android:textSize="14sp" />
-
-                <!-- Botón Login -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLogin"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:backgroundTint="@color/nui_acento"
-                    android:text="Iniciar Sesión"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="14dp" />
-
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:singleLine="true"
+                    android:textColor="#1A1A1A"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="14.5sp" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <!-- 4. SECCIÓN REGISTRO -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Enlace: ¿Olvidaste tu contraseña? -->
+        <TextView
+            android:id="@+id/tvOlvidePassword"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingHorizontal="20dp">
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="18dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            android:text="¿Olvidaste tu contraseña?"
+            android:textColor="#BF4800"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- 4. BOTÓN INICIAR SESIÓN -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#F25C19"
+            android:letterSpacing="0.01"
+            android:text="Iniciar sesión"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="28dp"
+            app:elevation="4dp" />
+
+        <!-- 5. PIE: "¿No tienes una cuenta aún?" y Botón Crear cuenta nueva -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="12dp"
+            android:text="¿No tienes una cuenta aún?"
+            android:textColor="#666666"
+            android:textSize="13.5sp" />
+
+        <LinearLayout
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_boton_iniciar_sesion_tarjeta"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <FrameLayout
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_icono_azul_login">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_person_add"
+                    app:tint="@android:color/white" />
+            </FrameLayout>
 
             <TextView
-                android:id="@+id/tvCrearCuenta"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="¿No tienes una cuenta aún?"
-                android:textColor="@color/nui_apagado"
-                android:textSize="13.5sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSignUp"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="10dp"
-                android:backgroundTint="@color/nui_suave"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:letterSpacing="-0.01"
                 android:text="Crear cuenta nueva"
-                android:textColor="@color/nui_tinta"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:cornerRadius="14dp"
-                app:strokeColor="#FFE3D1"
-                app:strokeWidth="1dp" />
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="6dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="#F25C19" />
         </LinearLayout>
 
     </LinearLayout>

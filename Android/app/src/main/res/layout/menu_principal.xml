@@ -158,7 +158,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
@@ -267,8 +267,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="14dp" />
 
         <!-- 5. ACCESO DIRECTO CONTEXTUAL / PÁGINAS RECIENTES (Estética a juego) -->
         <LinearLayout
@@ -276,7 +276,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="6dp"
             android:layout_marginBottom="8dp"
             android:orientation="vertical">
 
@@ -299,15 +299,18 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvTiempoSimulacion"
+                    android:id="@+id/btnCambiarModoAcceso"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_nui_circulo_suave"
-                    android:paddingHorizontal="7dp"
-                    android:paddingVertical="2dp"
-                    android:text="Rotación 10 min"
-                    android:textColor="@color/nui_apagado"
-                    android:textSize="9.5sp"
+                    android:background="@drawable/bg_boton_cambiar_acceso"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="🔄 Cambiar a último visto"
+                    android:textColor="#FF7A2F"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -419,23 +422,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Lista horizontal de chips con otras páginas recientes -->
-            <HorizontalScrollView
-                android:id="@+id/hsvRecientes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:scrollbars="none"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:id="@+id/llChipsRecientes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
-
-        </LinearLayout>
+</LinearLayout>
 
     </LinearLayout>
 

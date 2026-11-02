@@ -268,102 +268,248 @@
                         android:layout_height="match_parent"
                         android:background="#60000000" />
 
-                    <!-- Textos del menú del día -->
+                    <!-- Textos del menú del día organizados por secciones -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:paddingHorizontal="32dp"
+                        android:paddingTop="20dp"
+                        android:paddingBottom="24dp">
 
                         <TextView
                             android:id="@+id/tvDia"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_marginTop="5dp"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="2dp"
+                            android:translationX="-4dp"
                             android:fontFamily="serif"
+                            android:letterSpacing="0.04"
                             android:text="Día"
                             android:textColor="@android:color/white"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold" />
 
-                        <!-- Primer Plato con icono a la izquierda -->
-                        <TextView
-                            android:id="@+id/tvPrimerPlato"
-                            android:layout_width="wrap_content"
+                        <!-- SECCIÓN 1: PRIMER PLATO -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="50dp"
-                            android:layout_marginStart="40dp"
-                            android:layout_marginEnd="40dp"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="Primer plato"
-                            android:textColor="@android:color/white"
-                            android:textSize="15sp" />
+                            android:layout_marginTop="42dp"
+                            android:orientation="vertical">
 
-                        <!-- Segundo Plato con icono a la izquierda -->
-                        <TextView
-                            android:id="@+id/tvSegundoPlato"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="25dp"
-                            android:layout_marginStart="40dp"
-                            android:layout_marginEnd="40dp"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="Segundo plato"
-                            android:textColor="@android:color/white"
-                            android:textSize="15sp" />
+                            <!-- Divider encima del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="8dp"
+                                android:background="#33FFFFFF" />
 
-                        <!-- Postre con icono a la izquierda -->
-                        <TextView
-                            android:id="@+id/tvPostre"
-                            android:layout_width="wrap_content"
+                            <!-- Título con icono -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/primer_plato" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="serif"
+                                    android:letterSpacing="0.06"
+                                    android:text="PRIMER PLATO"
+                                    android:textColor="#FFA726"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <!-- Divider debajo del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="6dp"
+                                android:background="#33FFFFFF" />
+
+                            <!-- Nombre del plato (sin divider después) -->
+                            <TextView
+                                android:id="@+id/tvPrimerPlato"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="30dp"
+                                android:fontFamily="serif"
+                                android:lineSpacingExtra="2dp"
+                                android:text="Primer plato"
+                                android:textColor="@android:color/white"
+                                android:textSize="14.5sp" />
+                        </LinearLayout>
+
+                        <!-- SECCIÓN 2: SEGUNDO PLATO -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="25dp"
-                            android:layout_marginStart="40dp"
-                            android:layout_marginEnd="40dp"
-                            android:fontFamily="serif"
-                            android:gravity="center_vertical"
-                            android:text="Postre"
-                            android:textColor="@android:color/white"
-                            android:textSize="15sp" />
+                            android:layout_marginTop="18dp"
+                            android:orientation="vertical">
+
+                            <!-- Divider encima del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="8dp"
+                                android:background="#33FFFFFF" />
+
+                            <!-- Título con icono -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/segundo_plato" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="serif"
+                                    android:letterSpacing="0.06"
+                                    android:text="SEGUNDO PLATO"
+                                    android:textColor="#FFA726"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <!-- Divider debajo del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="6dp"
+                                android:background="#33FFFFFF" />
+
+                            <!-- Nombre del plato (sin divider después) -->
+                            <TextView
+                                android:id="@+id/tvSegundoPlato"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="30dp"
+                                android:fontFamily="serif"
+                                android:lineSpacingExtra="2dp"
+                                android:text="Segundo plato"
+                                android:textColor="@android:color/white"
+                                android:textSize="14.5sp" />
+                        </LinearLayout>
+
+                        <!-- SECCIÓN 3: POSTRE -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="18dp"
+                            android:orientation="vertical">
+
+                            <!-- Divider encima del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginBottom="8dp"
+                                android:background="#33FFFFFF" />
+
+                            <!-- Título con icono -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/postre" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="8dp"
+                                    android:fontFamily="serif"
+                                    android:letterSpacing="0.06"
+                                    android:text="POSTRE"
+                                    android:textColor="#FFA726"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <!-- Divider debajo del título -->
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="6dp"
+                                android:background="#33FFFFFF" />
+
+                            <!-- Nombre del plato (sin divider después) -->
+                            <TextView
+                                android:id="@+id/tvPostre"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="30dp"
+                                android:fontFamily="serif"
+                                android:lineSpacingExtra="2dp"
+                                android:text="Postre"
+                                android:textColor="@android:color/white"
+                                android:textSize="14.5sp" />
+                        </LinearLayout>
 
                     </LinearLayout>
 
                 </FrameLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Flecha Día Anterior (Lateral Izquierdo del cartel) -->
+            <!-- Flecha Día Anterior (Arriba, a la altura de la fecha) -->
             <ImageButton
                 android:id="@+id/btnDiaAnterior"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignTop="@id/cardMenu"
                 android:layout_alignStart="@id/cardMenu"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="6dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="10dp"
                 android:background="@drawable/boton_circular"
                 android:contentDescription="Día anterior"
                 android:elevation="10dp"
-                android:padding="8dp"
+                android:padding="7dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_chevron_left"
+                app:tint="@android:color/white"
                 android:visibility="gone" />
 
-            <!-- Flecha Día Siguiente (Lateral Derecho del cartel) -->
+            <!-- Flecha Día Siguiente (Arriba, a la altura de la fecha) -->
             <ImageButton
                 android:id="@+id/btnDiaSiguiente"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignTop="@id/cardMenu"
                 android:layout_alignEnd="@id/cardMenu"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="6dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/boton_circular"
                 android:contentDescription="Día siguiente"
                 android:elevation="10dp"
-                android:padding="8dp"
+                android:padding="7dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_chevron_right" />
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@android:color/white" />
 
         </RelativeLayout>
 

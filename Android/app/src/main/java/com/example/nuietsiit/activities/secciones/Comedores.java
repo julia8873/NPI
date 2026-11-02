@@ -113,9 +113,6 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Determinar modo de menú vegetariano/normal por defecto según el perfil del usuario
-        determinarModoVegetarianoInicial();
-
         // Simulación: Iniciar en el martes 3 de noviembre de 2026
         calendarioSeleccionado = Calendar.getInstance();
         calendarioSeleccionado.set(Calendar.YEAR, 2026);
@@ -138,6 +135,9 @@ public class Comedores extends BaseActivity {
         btnHorario = findViewById(R.id.btnHorario);
         btnPrecios = findViewById(R.id.btnPrecios);
         btnTipoMenu = findViewById(R.id.btnTipoMenu);
+
+        // Determinar modo de menú vegetariano/normal por defecto según el perfil del usuario
+        determinarModoVegetarianoInicial();
 
         // Botones inferiores de días de la semana (Lunes a Viernes)
         btnDiaL = findViewById(R.id.btnDiaL);
@@ -306,14 +306,32 @@ public class Comedores extends BaseActivity {
      * Si el perfil tiene activada la preferencia vegetariana, menú vegetariano por defecto.
      */
     private void determinarModoVegetarianoInicial() {
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        boolean prefVegetariano = prefs.getBoolean("ES_VEGETARIANO", false);
         String correo = obtenerCorreoUsuarioActual();
         if (correo != null && !correo.isEmpty()) {
             UsuariosDB usuariosDB = new UsuariosDB(this);
-            esModoVegetariano = usuariosDB.esUsuarioVegetariano(correo);
+            esModoVegetariano = usuariosDB.esUsuarioVegetariano(correo) || prefVegetariano;
         } else {
-            esModoVegetariano = false;
+            esModoVegetariano = prefVegetariano;
         }
         actualizarBotonTipoMenu();
+    }
+
+    private void guardarPreferenciaVegetariano(boolean esVegetariano) {
+        getSharedPreferences("SesionUsuario", MODE_PRIVATE)
+                .edit()
+                .putBoolean("ES_VEGETARIANO", esVegetariano)
+                .apply();
+        String correo = obtenerCorreoUsuarioActual();
+        if (correo != null && !correo.isEmpty()) {
+            try {
+                UsuariosDB usuariosDB = new UsuariosDB(this);
+                usuariosDB.actualizarPreferenciaVegetariano(correo, esVegetariano);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -322,6 +340,7 @@ public class Comedores extends BaseActivity {
     private void alternarTipoMenu() {
         getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
         esModoVegetariano = !esModoVegetariano;
+        guardarPreferenciaVegetariano(esModoVegetariano);
         actualizarBotonTipoMenu();
         actualizarVistasDialogoTipoMenu();
 
@@ -352,15 +371,14 @@ public class Comedores extends BaseActivity {
 
         btnOpcionMenuNormalDialog.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (esModoVegetariano) {
-                esModoVegetariano = false;
-                actualizarBotonTipoMenu();
-                actualizarVistasDialogoTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
-                Toast.makeText(this, "🥩 Mostrando Menú", Toast.LENGTH_SHORT).show();
+            esModoVegetariano = false;
+            guardarPreferenciaVegetariano(false);
+            actualizarBotonTipoMenu();
+            actualizarVistasDialogoTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
+            Toast.makeText(this, "🥩 Mostrando Menú", Toast.LENGTH_SHORT).show();
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
             }
@@ -368,15 +386,14 @@ public class Comedores extends BaseActivity {
 
         btnOpcionMenuVegetarianoDialog.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (!esModoVegetariano) {
-                esModoVegetariano = true;
-                actualizarBotonTipoMenu();
-                actualizarVistasDialogoTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
-                Toast.makeText(this, "🌱 Mostrando Menú Vegetariano", Toast.LENGTH_SHORT).show();
+            esModoVegetariano = true;
+            guardarPreferenciaVegetariano(true);
+            actualizarBotonTipoMenu();
+            actualizarVistasDialogoTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
+            Toast.makeText(this, "🌱 Mostrando Menú Vegetariano", Toast.LENGTH_SHORT).show();
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
             }
@@ -399,8 +416,7 @@ public class Comedores extends BaseActivity {
      * la opción activa cambie inmediatamente en pantalla.
      */
     private void actualizarVistasDialogoTipoMenu() {
-        if (dialogTipoMenu != null && dialogTipoMenu.isShowing()
-                && btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
+        if (btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
                 && badgeMenuNormalDialog != null && badgeMenuVegetarianoDialog != null) {
 
             if (esModoVegetariano) {
@@ -638,16 +654,20 @@ public class Comedores extends BaseActivity {
         }
 
         // Si el usuario regresa de AjustesCuenta tras cambiar su preferencia, actualizar el menú
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        boolean preferenciaVeg = prefs.getBoolean("ES_VEGETARIANO", false);
         String correo = obtenerCorreoUsuarioActual();
         if (correo != null && !correo.isEmpty()) {
             UsuariosDB usuariosDB = new UsuariosDB(this);
-            boolean preferenciaVeg = usuariosDB.esUsuarioVegetariano(correo);
-            if (preferenciaVeg != esModoVegetariano) {
-                esModoVegetariano = preferenciaVeg;
-                actualizarBotonTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
+            if (usuariosDB.esUsuarioVegetariano(correo)) {
+                preferenciaVeg = true;
+            }
+        }
+        if (preferenciaVeg != esModoVegetariano) {
+            esModoVegetariano = preferenciaVeg;
+            actualizarBotonTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
         }
     }
@@ -821,7 +841,7 @@ public class Comedores extends BaseActivity {
                 cardMenu.setVisibility(View.VISIBLE);
             }
 
-            // Mostrar solo el día y mes (ej: "3 de noviembre") sin el día de la semana ni texto extra
+            // Mostrar el día y mes (ej: "3 de noviembre") e indicar si es menú vegetariano
             SimpleDateFormat sdf = new SimpleDateFormat("d 'de' MMMM", Locale.forLanguageTag("es"));
             String fechaFormateada = sdf.format(calendarioSeleccionado.getTime());
             tvDia.setText(fechaFormateada);
@@ -835,32 +855,14 @@ public class Comedores extends BaseActivity {
             tvSegundoPlato.setVisibility(View.VISIBLE);
             tvPostre.setVisibility(View.VISIBLE);
 
-            tvPrimerPlato.setText("Primer plato: " + menuInfo.getPrimerPlato());
-            tvSegundoPlato.setText("Segundo plato: " + menuInfo.getSegundoPlato());
-            tvPostre.setText("Postre: " + menuInfo.getPostre());
+            tvPrimerPlato.setText(menuInfo.getPrimerPlato());
+            tvSegundoPlato.setText(menuInfo.getSegundoPlato());
+            tvPostre.setText(menuInfo.getPostre());
 
-            int iconSize = (int) (getResources().getDisplayMetrics().density * 24);
-
-            Drawable dPrimero = ContextCompat.getDrawable(this, R.drawable.primer_plato);
-            if (dPrimero != null) {
-                dPrimero.setBounds(0, 0, iconSize, iconSize);
-                tvPrimerPlato.setCompoundDrawablesRelative(dPrimero, null, null, null);
-                tvPrimerPlato.setCompoundDrawablePadding(12);
-            }
-
-            Drawable dSegundo = ContextCompat.getDrawable(this, R.drawable.segundo_plato);
-            if (dSegundo != null) {
-                dSegundo.setBounds(0, 0, iconSize, iconSize);
-                tvSegundoPlato.setCompoundDrawablesRelative(dSegundo, null, null, null);
-                tvSegundoPlato.setCompoundDrawablePadding(12);
-            }
-
-            Drawable dPostre = ContextCompat.getDrawable(this, R.drawable.postre);
-            if (dPostre != null) {
-                dPostre.setBounds(0, 0, iconSize, iconSize);
-                tvPostre.setCompoundDrawablesRelative(dPostre, null, null, null);
-                tvPostre.setCompoundDrawablePadding(12);
-            }
+            // Los iconos y títulos están ahora integrados en la cabecera de cada sección en el XML
+            tvPrimerPlato.setCompoundDrawablesRelative(null, null, null, null);
+            tvSegundoPlato.setCompoundDrawablesRelative(null, null, null, null);
+            tvPostre.setCompoundDrawablesRelative(null, null, null, null);
         }
 
         // Actualizar visibilidad de flechas y el indicador del día de la semana

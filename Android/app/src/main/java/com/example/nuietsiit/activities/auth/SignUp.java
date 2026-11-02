@@ -23,7 +23,7 @@ import com.example.nuietsiit.data.UsuariosDB;
 public class SignUp extends BaseActivity {
 
     // Declaración de los componentes de la interfaz de usuario
-    private EditText etNombre, etCorreo, etPassword;
+    private EditText etNombre, etCorreo, etPassword, etConfirmPassword;
     private Button btnCrearCuenta;
 
     // Instancia del Helper para la gestión de la base de datos SQLite
@@ -43,6 +43,7 @@ public class SignUp extends BaseActivity {
         etNombre = findViewById(R.id.etNombre);
         etCorreo = findViewById(R.id.etCorreo);
         etPassword = findViewById(R.id.etPassword);
+        etConfirmPassword = findViewById(R.id.etConfirmPassword);
         btnCrearCuenta = findViewById(R.id.btnCrearCuenta);
 
         View btnVolver = findViewById(R.id.btnVolver);
@@ -106,10 +107,17 @@ public class SignUp extends BaseActivity {
         String nombre = etNombre.getText().toString().trim();
         String correo = etCorreo.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+        String confirmPassword = etConfirmPassword != null ? etConfirmPassword.getText().toString().trim() : "";
 
         // Validar que ninguno de los campos esté vacío
-        if (nombre.isEmpty() || correo.isEmpty() || password.isEmpty()) {
+        if (nombre.isEmpty() || correo.isEmpty() || password.isEmpty() || (etConfirmPassword != null && confirmPassword.isEmpty())) {
             Toast.makeText(SignUp.this, "Por favor, rellena todos los datos", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Validar que las contraseñas coincidan
+        if (etConfirmPassword != null && !password.equals(confirmPassword)) {
+            Toast.makeText(SignUp.this, "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
             return;
         }
 

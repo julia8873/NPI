@@ -97,7 +97,7 @@ public class MenuPrincipal extends BaseActivity {
 
     private MaterialCardView cardAccesoDirecto;
     private TextView tvTituloCabeceraAccesoDirecto;
-    private TextView tvTiempoSimulacion;
+    private TextView btnCambiarModoAcceso;
     private FrameLayout flIconoAccesoDirecto;
     private ImageView ivIconoAccesoDirecto;
     private ImageView ivChevronAccesoDirecto;
@@ -105,8 +105,6 @@ public class MenuPrincipal extends BaseActivity {
     private TextView tvSubinfoAccesoDirecto;
     private TextView tvTituloAccesoDirecto;
     private TextView tvDescAccesoDirecto;
-    private HorizontalScrollView hsvRecientes;
-    private LinearLayout llChipsRecientes;
 
     private boolean simulacionManualForzada = false;
     private boolean simulacionManualEsComedor = true;
@@ -171,7 +169,13 @@ public class MenuPrincipal extends BaseActivity {
 
         cardAccesoDirecto = findViewById(R.id.cardAccesoDirecto);
         tvTituloCabeceraAccesoDirecto = findViewById(R.id.tvTituloCabeceraAccesoDirecto);
-        tvTiempoSimulacion = findViewById(R.id.tvTiempoSimulacion);
+        btnCambiarModoAcceso = findViewById(R.id.btnCambiarModoAcceso);
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setOnClickListener(v -> {
+                vibrarConfirmacion();
+                alternarModoAccesoDirecto();
+            });
+        }
         flIconoAccesoDirecto = findViewById(R.id.flIconoAccesoDirecto);
         ivIconoAccesoDirecto = findViewById(R.id.ivIconoAccesoDirecto);
         ivChevronAccesoDirecto = findViewById(R.id.ivChevronAccesoDirecto);
@@ -179,8 +183,6 @@ public class MenuPrincipal extends BaseActivity {
         tvSubinfoAccesoDirecto = findViewById(R.id.tvSubinfoAccesoDirecto);
         tvTituloAccesoDirecto = findViewById(R.id.tvTituloAccesoDirecto);
         tvDescAccesoDirecto = findViewById(R.id.tvDescAccesoDirecto);
-        hsvRecientes = findViewById(R.id.hsvRecientes);
-        llChipsRecientes = findViewById(R.id.llChipsRecientes);
 
         aplicarMargenesSistema();
         configurarPerfilClick();
@@ -407,31 +409,42 @@ public class MenuPrincipal extends BaseActivity {
     //        ACCESOS DIRECTOS Y SIMULACIÓN 10 MIN
     // -------------------------------------------------
 
+    private void alternarModoAccesoDirecto() {
+        simulacionManualForzada = true;
+        simulacionManualEsComedor = !simulacionManualEsComedor;
+        actualizarAccesoDirecto();
+        String mensaje = simulacionManualEsComedor ? "Mostrando ruta sugerida" : "Mostrando última página vista";
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+    }
+
     private void actualizarAccesoDirecto() {
         if (cardAccesoDirecto == null) return;
 
         java.util.Calendar ahora = java.util.Calendar.getInstance();
         int minuto = ahora.get(java.util.Calendar.MINUTE);
-        // Simulación: cada 10 minutos alterna (0-9 min: Comedor, 10-19 min: Reciente, etc.)
+        // Simulación: cada 10 minutos alterna si no ha sido modificado manualmente
         boolean esModoComedor;
         if (simulacionManualForzada) {
             esModoComedor = simulacionManualEsComedor;
         } else {
             esModoComedor = ((minuto / 10) % 2 == 0);
+            simulacionManualEsComedor = esModoComedor;
         }
 
-        int minutosRestantesEnBloque = 10 - (minuto % 10);
-
         if (esModoComedor) {
-            configurarAccesoDirectoComedor(minutosRestantesEnBloque);
+            configurarAccesoDirectoComedor();
         } else {
-            configurarAccesoDirectoReciente(minutosRestantesEnBloque);
+            configurarAccesoDirectoReciente();
         }
     }
 
-    private void configurarAccesoDirectoComedor(int minsRestantes) {
+    private void configurarAccesoDirectoComedor() {
         tvTituloCabeceraAccesoDirecto.setText("ACCESO RÁPIDO CONTEXTUAL");
-        tvTiempoSimulacion.setText(String.format(Locale.getDefault(), "Cambia en %d min · Aula 0.7", minsRestantes));
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setText("🔄 Cambiar a último visto");
+            btnCambiarModoAcceso.setTextColor(Color.parseColor("#FF7A2F"));
+            btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
+        }
 
         cardAccesoDirecto.setCardBackgroundColor(Color.parseColor("#FFFBF7"));
         cardAccesoDirecto.setStrokeColor(Color.parseColor("#FFE7D6"));
@@ -463,19 +476,12 @@ public class MenuPrincipal extends BaseActivity {
         // Alternancia manual con pulsación larga para pruebas rápidas
         cardAccesoDirecto.setOnLongClickListener(v -> {
             vibrarConfirmacion();
-            simulacionManualForzada = true;
-            simulacionManualEsComedor = false;
-            Toast.makeText(this, "Simulación: mostrando última página vista", Toast.LENGTH_SHORT).show();
-            actualizarAccesoDirecto();
+            alternarModoAccesoDirecto();
             return true;
         });
-
-        if (hsvRecientes != null) {
-            hsvRecientes.setVisibility(View.GONE);
-        }
     }
 
-    private void configurarAccesoDirectoReciente(int minsRestantes) {
+    private void configurarAccesoDirectoReciente() {
         SharedPreferences prefs = getSharedPreferences(PREF_NAVEGACION, MODE_PRIVATE);
         int ultimoIndice = prefs.getInt(KEY_ULTIMA_SECCION, 6); // Por defecto Comedores
         String historial = prefs.getString(KEY_HISTORIAL_SECCIONES, String.valueOf(ultimoIndice));
@@ -483,7 +489,12 @@ public class MenuPrincipal extends BaseActivity {
         HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[ultimoIndice];
 
         tvTituloCabeceraAccesoDirecto.setText("PÁGINA RECIENTE");
-        tvTiempoSimulacion.setText(String.format(Locale.getDefault(), "Cambia en %d min · Recientes", minsRestantes));
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setText("🔄 Cambiar a sugerido");
+            btnCambiarModoAcceso.setTextColor(seccion.color);
+            int bgTint = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.15f);
+            btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(bgTint));
+        }
 
         int bgCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.08f);
         int borderCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.30f);
@@ -515,62 +526,9 @@ public class MenuPrincipal extends BaseActivity {
         // Alternancia manual con pulsación larga para pruebas rápidas
         cardAccesoDirecto.setOnLongClickListener(v -> {
             vibrarConfirmacion();
-            simulacionManualForzada = true;
-            simulacionManualEsComedor = true;
-            Toast.makeText(this, "Simulación: mostrando ruta Aula 0.7 ➔ Comedor", Toast.LENGTH_SHORT).show();
-            actualizarAccesoDirecto();
+            alternarModoAccesoDirecto();
             return true;
         });
-
-        mostrarChipsRecientes(historial, ultimoIndice);
-    }
-
-    private void mostrarChipsRecientes(String historial, int ignorarIndice) {
-        if (llChipsRecientes == null || hsvRecientes == null) return;
-        llChipsRecientes.removeAllViews();
-
-        if (historial == null || historial.isEmpty()) {
-            hsvRecientes.setVisibility(View.GONE);
-            return;
-        }
-
-        String[] tokens = historial.split(",");
-        int añadidos = 0;
-        for (String t : tokens) {
-            try {
-                int idx = Integer.parseInt(t.trim());
-                if (idx < 0 || idx >= DESTINOS.length || idx == ignorarIndice) continue;
-
-                HubSeccionesView.Seccion s = HubSeccionesView.SECCIONES[idx];
-                TextView chip = new TextView(this);
-                chip.setText("● " + s.titulo);
-                chip.setTextSize(11f);
-                chip.setTypeface(null, android.graphics.Typeface.BOLD);
-                chip.setTextColor(s.color);
-                chip.setBackgroundResource(R.drawable.bg_nui_etiqueta);
-                int bgChip = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, s.color, 0.14f);
-                chip.setBackgroundTintList(ColorStateList.valueOf(bgChip));
-                int padH = (int) (11 * getResources().getDisplayMetrics().density);
-                int padV = (int) (4 * getResources().getDisplayMetrics().density);
-                chip.setPadding(padH, padV, padH, padV);
-
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lp.setMarginEnd((int) (6 * getResources().getDisplayMetrics().density));
-                chip.setLayoutParams(lp);
-
-                chip.setOnClickListener(v -> {
-                    vibrarConfirmacion();
-                    abrirSeccion(idx);
-                });
-
-                llChipsRecientes.addView(chip);
-                añadidos++;
-                if (añadidos >= 3) break;
-            } catch (Exception ignored) {}
-        }
-
-        hsvRecientes.setVisibility(añadidos > 0 ? View.VISIBLE : View.GONE);
     }
 
     // -------------------------------------------------
