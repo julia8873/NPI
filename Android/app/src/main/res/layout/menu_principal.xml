@@ -503,12 +503,27 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- Botón flotante Asistente AI Conversacional (Gemini) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAsistenteChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:contentDescription="Abrir Asistente AI Gemini"
+        android:elevation="12dp"
+        android:src="@drawable/ic_chat_bot"
+        app:backgroundTint="#FF8C42"
+        app:fabSize="normal"
+        app:tint="#FFFFFF" />
+
     <!-- LA OLA (Se coloca al final para quedar por encima de todo el contenido) -->
     <com.example.nuietsiit.activities.main.WaveView
-    android:id="@+id/waveView"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:elevation="100dp"
-    android:visibility="gone" />
+        android:id="@+id/waveView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="100dp"
+        android:visibility="gone" />
 
 </FrameLayout>
+

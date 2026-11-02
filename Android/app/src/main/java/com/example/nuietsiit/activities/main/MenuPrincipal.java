@@ -46,6 +46,7 @@ import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.activities.secciones.Profesorado;
 import com.example.nuietsiit.activities.secciones.Secretaria;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
@@ -55,7 +56,8 @@ import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.Notificador;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -168,6 +170,18 @@ public class MenuPrincipal extends BaseActivity {
 
         // Notificaciones del sistema: avisos urgentes y actividades de hoy/mañana (Miguel)
         Notificador.revisarAvisos(this, correoUsuario);
+
+        // Configuración del botón flotante (FAB) para el Asistente AI Gemini
+        FloatingActionButton fabAsistenteChat = findViewById(R.id.fabAsistenteChat);
+        if (fabAsistenteChat != null) {
+            fabAsistenteChat.setOnClickListener(v -> {
+                Intent chatIntent = new Intent(MenuPrincipal.this, ChatActivity.class);
+                if (correoUsuario != null) {
+                    chatIntent.putExtra("CORREO", correoUsuario);
+                }
+                startActivity(chatIntent);
+            });
+        }
     }
 
     @Override
