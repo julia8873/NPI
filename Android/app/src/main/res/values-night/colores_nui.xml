@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta del rediseño en modo claro para toda la app (sin modo oscuro) -->
+    <color name="nui_superficie">#FFFFFF</color>
+    <color name="nui_tinta">#14110F</color>
+    <color name="nui_apagado">#7B766F</color>
+    <color name="nui_linea">#EBE8E2</color>
+    <color name="nui_acento">#FF7A2F</color>
+    <color name="nui_suave">#F7F4EF</color>
+    <color name="nui_tinte">#FFF0E4</color>
+</resources>

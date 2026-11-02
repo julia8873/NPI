@@ -1,8 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.NUIETSIIT" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <!-- Base application theme forzado a Light -->
+    <style name="Base.Theme.NUIETSIIT" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:colorBackground">#FFFFFF</item>
     </style>
 
     <style name="Theme.NUIETSIIT" parent="Base.Theme.NUIETSIIT" />
