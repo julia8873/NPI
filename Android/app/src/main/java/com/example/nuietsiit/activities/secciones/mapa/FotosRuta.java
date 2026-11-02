@@ -10,15 +10,7 @@ import java.util.Locale;
  * Fotos de ruta para el visor ("realidad virtual" casera).
  *
  * CONVENCIÓN: las fotos son drawables llamados   ruta_<clave>_<grados>
- *   - <clave>:  idPunto de donde se hace la foto (ver UbicacionUsuario.idPunto), p. ej. "entrada", "p0_hall".
- *   - <grados>: hacia dónde miraba la cámara respecto al norte, MÚLTIPLO DE 15 (0 = N, 90 = E, 180 = S, 270 = O).
- *   Ejemplo: res/drawable-nodpi/ruta_entrada_0.jpg  (mirando al norte desde la entrada)
- *            res/drawable-nodpi/ruta_entrada_90.jpg (mirando al este desde la entrada)
- *
- * El visor muestra la foto cuyo rumbo esté más cerca del rumbo del usuario, si está a menos de
- * TOLERANCIA_GRADOS. Si no hay ninguna, pantalla negra. Para añadir fotos no hay que tocar código.
- *
- * Mientras no haya fotos propias del punto se usa la clave "demo" (ruta_demo_0 = foto de prueba).
+ * o secuenciales por pasos: ruta_<clave>_1, ruta_<clave>_2, ...
  */
 public final class FotosRuta {
 
@@ -30,20 +22,40 @@ public final class FotosRuta {
     public static final class Foto {
         public final int grados;
         public final int idRecurso;
+        public final int pasoIndex;
 
         Foto(int grados, int idRecurso) {
             this.grados = grados;
             this.idRecurso = idRecurso;
+            this.pasoIndex = 0;
+        }
+
+        Foto(int grados, int idRecurso, int pasoIndex) {
+            this.grados = grados;
+            this.idRecurso = idRecurso;
+            this.pasoIndex = pasoIndex;
         }
     }
 
-    /** Todas las fotos existentes para esa clave (ruta_<clave>_0, _15, _30 ... _345). */
+    /** Todas las fotos existentes para esa clave. */
     public static List<Foto> cargar(Context ctx, String clave) {
         List<Foto> fotos = new ArrayList<>();
         String base = "ruta_" + clave.toLowerCase(Locale.ROOT) + "_";
+        
+        // 1. Probar formato por grados (ruta_clave_0, ruta_clave_15...)
         for (int g = 0; g < 360; g += 15) {
             int id = ctx.getResources().getIdentifier(base + g, "drawable", ctx.getPackageName());
             if (id != 0) fotos.add(new Foto(g, id));
+        }
+
+        // 2. Si no hay por grados, probar formato secuencial/pasos (ruta_comedor_1, ruta_comedor_2...)
+        if (fotos.isEmpty()) {
+            for (int i = 1; i <= 50; i++) {
+                int id = ctx.getResources().getIdentifier(base + i, "drawable", ctx.getPackageName());
+                if (id != 0) {
+                    fotos.add(new Foto(i * (360 / 24), id, i));
+                }
+            }
         }
         return fotos;
     }
@@ -56,6 +68,7 @@ public final class FotosRuta {
 
     /** La foto más cercana al rumbo, o null si ninguna está dentro de la tolerancia. */
     public static Foto elegir(List<Foto> fotos, float rumbo) {
+        if (fotos.isEmpty()) return null;
         Foto mejor = null;
         float mejorDif = Float.MAX_VALUE;
         for (Foto f : fotos) {

@@ -1,10 +1,7 @@
 package com.example.nuietsiit.activities.main;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,7 +33,6 @@ import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.EventoCalendario;
-import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.Notificador;
 import com.google.android.material.card.MaterialCardView;
 
@@ -53,12 +49,6 @@ public class MenuPrincipal extends BaseActivity {
     private View cardMascotaAyudante;
     private MaterialCardView cardEventoHoy;
     private View btnAbrirCalendario;
-    private OrbitalBurbujasView orbitalBurbujas;
-
-    private DetectorInclinacion detectorInclinacion;
-    private ShakeDetector shakeDetector;
-    private SensorManager sensorManager;
-    private Sensor acelerometro;
 
     private CalendarioDB calendarioDB;
     private ActividadesDB actividadesDB;
@@ -96,7 +86,6 @@ public class MenuPrincipal extends BaseActivity {
         ivIcono = findViewById(R.id.ivIcono);
         cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
         vpNoticias = findViewById(R.id.vpNoticias);
-        orbitalBurbujas = findViewById(R.id.orbitalBurbujas);
         cardEventoHoy = findViewById(R.id.cardEventoHoy);
         btnAbrirCalendario = findViewById(R.id.btnAbrirCalendario);
         tvHoraEvento = findViewById(R.id.tvHoraEvento);
@@ -106,7 +95,7 @@ public class MenuPrincipal extends BaseActivity {
         configurarPerfilClick();
         configurarMascotaClick();
         configurarSliderNoticias();
-        configurarOrbitalBurbujas();
+        configurarBotonesSecciones();
         cargarEventoHoy();
 
         Notificador.revisarAvisos(this, correoUsuario);
@@ -149,17 +138,21 @@ public class MenuPrincipal extends BaseActivity {
                 new AlertDialog.Builder(MenuPrincipal.this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
                         .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes tocar cualquier burbuja orbital para hacerla explotar y entrar en la sección.")
+                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.")
                         .setPositiveButton("¡Entendido!", null)
                         .show();
             });
         }
     }
 
-    private void configurarOrbitalBurbujas() {
-        if (orbitalBurbujas != null) {
-            orbitalBurbujas.setOnSeccionSelectedListener(this::abrirSeccion);
-        }
+    private void configurarBotonesSecciones() {
+        findViewById(R.id.btnSeccionMapa).setOnClickListener(v -> abrirSeccion(0));
+        findViewById(R.id.btnSeccionActividades).setOnClickListener(v -> abrirSeccion(1));
+        findViewById(R.id.btnSeccionAsignaturas).setOnClickListener(v -> abrirSeccion(2));
+        findViewById(R.id.btnSeccionProfesorado).setOnClickListener(v -> abrirSeccion(3));
+        findViewById(R.id.btnSeccionSecretaria).setOnClickListener(v -> abrirSeccion(4));
+        findViewById(R.id.btnSeccionComedores).setOnClickListener(v -> abrirSeccion(5));
+        findViewById(R.id.btnSeccionBiblioteca).setOnClickListener(v -> abrirSeccion(6));
     }
 
     private void abrirSeccion(int posicion) {

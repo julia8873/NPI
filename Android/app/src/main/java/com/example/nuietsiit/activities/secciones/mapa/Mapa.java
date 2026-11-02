@@ -225,9 +225,9 @@ public class Mapa extends BaseActivity {
 
         listaMarcadores.add(new Marcador("☕ Comedor", "sotano", 2300f, 2050f));
         listaMarcadores.add(new Marcador("🚪 Secretaría", "planta0", 3000f, 2050f));
-        listaMarcadores.add(new Marcador("📚 Biblioteca ETSIIT", "planta1", 2200f, 1400f));
+        listaMarcadores.add(new Marcador("📚 Biblioteca", "planta1", 2200f, 1400f));
         listaMarcadores.add(new Marcador("💻 Aula 2.1", "planta2", 2850f, 950f));
-        listaMarcadores.add(new Marcador("💻 Aula 0.5", "planta0", 4850f, 2450f));
+        listaMarcadores.add(new Marcador("💻 Aula 0.4", "planta0", 4450f, 2250f));
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
@@ -583,27 +583,34 @@ public class Mapa extends BaseActivity {
     private void procesarBusquedaPlano(String query) {
         if (chipGroupPlantas == null) return;
 
-        if (query.contains("sotano") || query.contains("sótano") || query.contains("-1")) {
-            chipGroupPlantas.check(R.id.chipSotano);
-            Toast.makeText(this, "Mostrando Sótano para: " + query, Toast.LENGTH_SHORT).show();
-        } else if (query.contains("1") || query.contains("primera")) {
-            chipGroupPlantas.check(R.id.chipPrimera);
-            Toast.makeText(this, "Mostrando Planta 1 para: " + query, Toast.LENGTH_SHORT).show();
-        } else if (query.contains("2") || query.contains("segunda")) {
-            chipGroupPlantas.check(R.id.chipSegunda);
-            Toast.makeText(this, "Mostrando Planta 2 para: " + query, Toast.LENGTH_SHORT).show();
-        } else if (query.contains("3") || query.contains("tercera")) {
-            chipGroupPlantas.check(R.id.chipTercera);
-            Toast.makeText(this, "Mostrando Planta 3 para: " + query, Toast.LENGTH_SHORT).show();
-        } else if (query.contains("4") || query.contains("cuarta")) {
-            chipGroupPlantas.check(R.id.chipCuarta);
-            Toast.makeText(this, "Mostrando Planta 4 para: " + query, Toast.LENGTH_SHORT).show();
-        } else if (query.contains("5") || query.contains("quinta")) {
-            chipGroupPlantas.check(R.id.chipQuinta);
-            Toast.makeText(this, "Mostrando Planta 5 para: " + query, Toast.LENGTH_SHORT).show();
+        Marcador encontrado = null;
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().toLowerCase(Locale.ROOT).contains(query)) {
+                encontrado = m;
+                break;
+            }
+        }
+
+        if (encontrado != null) {
+            String planta = encontrado.getPlanta();
+            if (planta.equals("sotano")) {
+                chipGroupPlantas.check(R.id.chipSotano);
+            } else if (planta.equals("planta1")) {
+                chipGroupPlantas.check(R.id.chipPrimera);
+            } else if (planta.equals("planta2")) {
+                chipGroupPlantas.check(R.id.chipSegunda);
+            } else if (planta.equals("planta3")) {
+                chipGroupPlantas.check(R.id.chipTercera);
+            } else if (planta.equals("planta4")) {
+                chipGroupPlantas.check(R.id.chipCuarta);
+            } else if (planta.equals("planta5")) {
+                chipGroupPlantas.check(R.id.chipQuinta);
+            } else {
+                chipGroupPlantas.check(R.id.chipBaja);
+            }
+            Toast.makeText(this, "🎯 Punto encontrado: " + encontrado.getTitulo(), Toast.LENGTH_SHORT).show();
         } else {
-            chipGroupPlantas.check(R.id.chipBaja);
-            Toast.makeText(this, "Buscando '" + query + "' en Planta Baja", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "⚠️ Solo se permite buscar entre los puntos registrados del mapa", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1236,8 +1243,13 @@ public class Mapa extends BaseActivity {
 
     private void abrirVisorRuta() {
         if (origenActual == null || destinoRuta == null) return;
+        String claveRuta = origenActual.idPunto;
+        if (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_4")
+                && destinoRuta != null && destinoRuta.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
+            claveRuta = "comedor";
+        }
         Intent i = new Intent(this, VisorRuta.class);
-        i.putExtra("ORIGEN_ID", origenActual.idPunto);
+        i.putExtra("ORIGEN_ID", claveRuta);
         i.putExtra("ORIGEN_NOMBRE", origenActual.nombre);
         i.putExtra("ORIGEN_METODO", origenActual.descripcionMetodo());
         i.putExtra("DESTINO_NOMBRE", destinoRuta.getTitulo());
