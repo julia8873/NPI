@@ -6,4 +6,23 @@
     </style>
 
     <style name="Theme.NUIETSIIT" parent="Base.Theme.NUIETSIIT" />
+
+    <!-- Estilo para los números de los días (Negro puro) -->
+    <style name="TextoDiasCalendario" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Estilo para las iniciales de los días de la semana (L, M, X...) (Negro puro) -->
+    <style name="TextoSemanaCalendario" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Tema para cambiar el color del nombre del mes/año y selector de fecha (Negro puro) -->
+    <style name="TemaCustomCalendario">
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="colorOnSurface">#000000</item>
+    </style>
 </resources>

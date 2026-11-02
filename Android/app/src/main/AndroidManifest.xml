@@ -2,6 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Notificaciones de avisos urgentes y actividades -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NUIETSIIT">
         <activity
-            android:name=".services.Login"
+            android:name=".activities.main.MenuPrincipal"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -21,14 +32,49 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".services.MenuPrincipal" />
-        <activity android:name=".services.Noticias" />
-        <activity android:name=".services.Mapa" />
-        <activity android:name=".services.Actividades" />
-        <activity android:name=".services.Asignaturas" />
-        <activity android:name=".services.Profesorado" />
-        <activity android:name=".services.Secretaria" />
-        <activity android:name=".services.Comedores" />
+        <activity
+            android:name=".activities.auth.Login"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activities.auth.SignUp"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".activities.main.AjustesCuenta" />
+        <activity android:name=".activities.secciones.Noticias" />
+        <activity android:name=".activities.secciones.mapa.Mapa" />
+        <!-- Visor de ruta: foto según hacia dónde mire el usuario (brújula) -->
+        <activity
+            android:name=".activities.secciones.mapa.VisorRuta"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.secciones.Actividades" />
+        <activity android:name=".activities.secciones.Asignaturas" />
+        <activity android:name=".activities.secciones.Profesorado" />
+        <activity android:name=".activities.secciones.Secretaria" />
+        <activity android:name=".activities.secciones.asignaturas.BuscadorAsignaturas" />
+        <activity android:name=".activities.secciones.asignaturas.DetalleAsignatura" />
+        <activity android:name=".activities.secciones.profesorado.BuscadorProfesores" />
+        <activity android:name=".activities.secciones.profesorado.DetalleProfesor" />
+        <activity android:name=".activities.secciones.secretaria.DetalleTramite" />
+        <activity
+            android:name=".activities.secciones.secretaria.PasosTramite"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.secciones.secretaria.SolicitudTramite" />
+        <activity android:name=".activities.secciones.secretaria.CitaPrevia" />
+        <activity android:name=".activities.secciones.secretaria.Justificante" />
+        <activity android:name=".activities.secciones.secretaria.MisGestiones" />
+        <activity android:name=".activities.secciones.Comedores" />
+        <activity android:name=".activities.secciones.Biblioteca" />
+        <activity android:name=".activities.secciones.Calendario" />
+
+        <!-- Secretaría: la app de cámara guarda la foto del documento en getFilesDir()/secretaria/ -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/rutas_archivos" />
+        </provider>
     </application>
 
 </manifest>

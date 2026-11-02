@@ -34,10 +34,14 @@ android {
 
 dependencies {
     implementation(libs.activity.ktx)
+    implementation(libs.annotation)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
+    implementation(libs.zxing.android.embedded) // QR del justificante (Secretaría) y escáner ISBN (Biblioteca)
+    implementation(libs.biometric) // firmar solicitudes con la huella (Secretaría)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 }

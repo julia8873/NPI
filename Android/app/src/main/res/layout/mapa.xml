@@ -1,6 +1,330 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8F9FA"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- 1. CABECERA: Título de la sección e icono de perfil -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:paddingHorizontal="4dp">
+
+        <TextView
+            android:id="@+id/tvTituloMapa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/ivIcono"
+            android:text="Mapa Interactivo"
+            android:textColor="#000000"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:contentDescription="Icono de perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:src="@drawable/icono" />
+    </RelativeLayout>
+
+    <!-- SELECTOR DE VISTA: MAPA GPS VS PLANOS ETSIIT -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleGroupModo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:checkedButton="@id/btnModoMapa"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoMapa"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🗺️ Mapa GPS"
+            android:textSize="13sp"
+            app:strokeColor="#FF8C42" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModoPlanos"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🏢 Planos ETSIIT"
+            android:textSize="13sp"
+            app:strokeColor="#FF8C42" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <!-- 2. BUSCADOR SUPERIOR (Solo visible en modo Planos) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardBuscadorMapa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="3dp"
+        app:strokeColor="#E0E0E0"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="4dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Buscar"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#FF8C42" />
+
+            <EditText
+                android:id="@+id/etBuscadorMapa"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:hint="Buscar aula, despacho, laboratorio o servicio..."
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:textColor="#000000"
+                android:textColorHint="#888888"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 3. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardMapaContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginVertical="8dp"
+        app:cardBackgroundColor="#000000"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp"
+        app:strokeColor="#FF8C42"
+        app:strokeWidth="2dp">
+
+        <FrameLayout
+            android:id="@+id/flContenedorMapa"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000">
+
+            <!-- Capa Modo Mapa GPS -->
+            <org.osmdroid.views.MapView
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- Capa Modo Planos ETSIIT -->
+            <FrameLayout
+                android:id="@+id/containerPlanoConMarcadores"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <!-- Imagen del Plano -->
+                <ImageView
+                    android:id="@+id/ivPlanoEdificio"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#000000"
+                    android:contentDescription="Plano de la planta"
+                    android:scaleType="matrix" />
+
+                <!-- Los marcadores se añadirán dinámicamente aquí dentro -->
+            </FrameLayout>
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fabComoLlegar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="16dp"
+                android:text="Cómo llegar"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                app:backgroundTint="#FF8C42"
+                app:icon="@android:drawable/ic_menu_directions"
+                app:iconTint="#FFFFFF" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabMiUbicacion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:contentDescription="Mi ubicación"
+                android:src="@android:drawable/ic_menu_mylocation"
+                app:backgroundTint="#FFFFFF"
+                app:fabCustomSize="48dp"
+                app:tint="#FF8C42" />
+
+            <!-- Panel de ruta activa (solo en modo Planos): dónde estás, a dónde vas y botón del visor -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardRutaActiva"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_margin="12dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:strokeColor="#FF8C42"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvRutaInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAbrirVisor"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:text="Visor"
+                            android:textAllCaps="false"
+                            app:backgroundTint="#FF8C42" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCambiarUbicacion"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            android:text="Cambiar"
+                            android:textAllCaps="false"
+                            android:textColor="#FF8C42"
+                            app:strokeColor="#FF8C42" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnCancelarRuta"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Cancelar"
+                            android:textAllCaps="false"
+                            android:textColor="#FF8C42"
+                            app:strokeColor="#FF8C42" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 4. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
+    <HorizontalScrollView
+        android:id="@+id/scrollPlantas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupPlantas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSotano"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sótano" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBaja"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Planta Baja" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPrimera"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 1" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSegunda"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 2" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTercera"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 3" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCuarta"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 4" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipQuinta"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Planta 5" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+</LinearLayout>

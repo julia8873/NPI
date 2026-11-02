@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#FFFFFF"
+        app:titleTextColor="#000000" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textColor="#000000"
+                android:textStyle="bold" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPlazo"
+                app:chipBackgroundColor="#FF8C42"
+                android:textColor="#FFFFFF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvDescripcion"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvTituloRequisitos"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Requisitos" />
+
+            <TextView
+                android:id="@+id/tvRequisitos"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/tvTituloPlazos"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Plazos" />
+
+            <TextView
+                android:id="@+id/tvPlazos"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Documentos necesarios" />
+
+            <LinearLayout
+                android:id="@+id/llDocumentos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/btnPasos"
+                android:background="@drawable/boton_redondeado"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp" />
+
+            <Button
+                android:id="@+id/btnSolicitar"
+                android:background="@drawable/boton_redondeado"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Solicitar" />
+
+            <TextView
+                android:id="@+id/tvMotivoSolicitar"
+                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnPedirCita"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pedir cita"
+                android:textColor="#FF8C42"
+                app:strokeColor="#FF8C42" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
