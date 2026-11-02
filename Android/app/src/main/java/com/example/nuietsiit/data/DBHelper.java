@@ -15,7 +15,7 @@ import com.example.nuietsiit.data.Comedores.TablasComedores;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 8; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores ; 8: info básica sobre profesorado
+    private static final int VERSION_BD = 9; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores · 8: info básica sobre profesorado · 9: modalidad vegetariana en MENU
 
     private static DBHelper instance;
 
@@ -394,7 +394,7 @@ public class DBHelper extends SQLiteOpenHelper {
             "  idMenu    INTEGER PRIMARY KEY AUTOINCREMENT," +
             "  idComedor INTEGER NOT NULL," +
             "  fecha     TEXT NOT NULL," +
-            "  modalidad TEXT NOT NULL CHECK (modalidad IN ('en_comedor','para_llevar'))," +
+            "  modalidad TEXT NOT NULL CHECK (modalidad IN ('en_comedor','para_llevar','vegetariano'))," +
             "  UNIQUE (idComedor, fecha, modalidad)," +
             "  FOREIGN KEY (idComedor) REFERENCES COMEDOR(idComedor)" +
             ")"

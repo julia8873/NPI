@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@android:color/transparent"
+    app:strokeWidth="1.5dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <FrameLayout
+            android:id="@+id/fichaIconoCaja"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/bg_nui_icono_ficha">
+
+            <ImageView
+                android:id="@+id/fichaIcono"
+                android:layout_width="17dp"
+                android:layout_height="17dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                app:tint="@android:color/white" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/fichaBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="16dp"
+            android:layout_gravity="top|end"
+            android:background="@drawable/bg_nui_badge"
+            android:gravity="center"
+            android:minWidth="16dp"
+            android:paddingHorizontal="4dp"
+            android:textColor="@android:color/white"
+            android:textSize="9.5sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/fichaTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:autoSizeMaxTextSize="12sp"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeTextType="uniform"
+            android:maxLines="1"
+            android:textColor="@color/nui_tinta"
+            android:textStyle="bold" />
+    </FrameLayout>
+</com.google.android.material.card.MaterialCardView>
