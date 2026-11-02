@@ -99,7 +99,7 @@
                 android:src="@android:drawable/ic_menu_search"
                 app:tint="#FF8C42" />
 
-            <EditText
+            <AutoCompleteTextView
                 android:id="@+id/etBuscadorMapa"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"

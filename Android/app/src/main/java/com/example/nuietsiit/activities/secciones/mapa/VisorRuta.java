@@ -23,6 +23,7 @@ import java.util.Locale;
 
 /**
  * Visor de ruta: pantalla interactiva que guía al usuario mediante giros y pasos.
+ * Soporta navegación guiada para Comedor y Aula 0.5 -> Aula 1.4.
  */
 public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorEventListener {
 
@@ -38,33 +39,45 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
     private boolean modoManual = false;
 
     // --- Control automático de ruta guiada ---
+    private boolean esRutaGuiada = false;
     private boolean esRutaComedor = false;
-    private int indiceComedorActual = 1; // de 1 a 33
+    private boolean esRutaAula = false;
+    private int indiceRutaActual = 1; // de 1 a N
     private int pasosDados = 0;
     private int pasosRequeridosNodo = 3;
     private float rumboRequeridoNodo = 0f;
     private boolean esperandoGiro = false;
-    private final List<Integer> recursosComedor = new ArrayList<>();
+    private final List<Integer> recursosRuta = new ArrayList<>();
 
-    // Indica cuántos pasos dar en cada foto/nodo (0 si es un nodo exclusivo de giro)
-    private final int[] pasosPorFoto = {
+    // Configuración Ruta 1: Comedor
+    private final int[] pasosPorFotoComedor = {
             3, 0, 6, 7, 0, 5, 0, 4, 0, 5,
             0, 7, 0, 6, 6, 8, 4, 0, 6, 8,
             0, 3, 7, 8, 0, 4, 6, 0, 5, 5,
             0, 6
     };
-
-    // Ángulos/Rumbos requeridos para los giros (0..359 grados)
-    private final float[] rumbosGiroPorFoto = {
+    private final float[] rumbosGiroComedor = {
             0f,   90f, 0f, 0f,   180f,  0f,   135f, 0f,   180f,  0f,
             135f, 0f,   180f, 0f,  0f,   0f,   0f,   270f,  0f,   0f,
             180f, 0f,   0f,  0f,  270f,  0f,   0f,   0f,  0f,   0f,
             90f,  0f
     };
 
+    // Configuración Ruta 2: Aula 0.5 -> Aula 1.4
+    private final int[] pasosPorFotoAula = {
+            3, 0, 7, 9, 0, 6, 6, 6, 3, 0,
+            3, 0, 6, 6, 6, 6, 6, 6, 2, 0
+    };
+    private final float[] rumbosGiroAula = {
+            0f, 90f, 0f, 0f, 45f, 0f, 0f, 0f, 0f, 225f,
+            0f, 270f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f
+    };
+
     private SensorManager sensorManager;
     private Sensor acelerometro;
     private long ultimoPasoTimestamp = 0;
+
+    private String destinoNombre = "Destino ETSIIT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +88,17 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         inicializarVistas();
 
         String origenId = getIntent().getStringExtra("ORIGEN_ID");
-        esRutaComedor = (origenId != null && origenId.equalsIgnoreCase("comedor"));
+        String extraDestino = getIntent().getStringExtra("DESTINO_NOMBRE");
+        if (extraDestino != null && !extraDestino.isEmpty()) {
+            destinoNombre = extraDestino;
+        }
 
-        if (esRutaComedor) {
-            configurarRutaComedor();
+        esRutaComedor = (origenId != null && origenId.equalsIgnoreCase("comedor"));
+        esRutaAula = (origenId != null && origenId.equalsIgnoreCase("aula_0_5"));
+        esRutaGuiada = esRutaComedor || esRutaAula;
+
+        if (esRutaGuiada) {
+            configurarRutaGuiada(origenId);
         } else {
             fotos = FotosRuta.cargarConFallback(this, origenId == null ? FotosRuta.CLAVE_DEMO : origenId);
         }
@@ -104,7 +124,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         }
     }
 
-    private void configurarRutaComedor() {
+    private void configurarRutaGuiada(String tipo) {
         btnAnterior.setVisibility(View.VISIBLE);
         btnSiguiente.setVisibility(View.VISIBLE);
         tvRumbo.setVisibility(View.GONE);
@@ -119,17 +139,25 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
             forzarFotoSiguiente();
         });
 
-        for (int i = 1; i <= 33; i++) {
-            int id = getResources().getIdentifier("ruta_comedor_" + i, "drawable", getPackageName());
-            if (id != 0) recursosComedor.add(id);
+        String prefijo = esRutaComedor ? "ruta_comedor_" : "ruta_aula_";
+        int maxFotos = esRutaComedor ? 33 : 25;
+
+        for (int i = 1; i <= maxFotos; i++) {
+            int id = getResources().getIdentifier(prefijo + i, "drawable", getPackageName());
+            if (id != 0) recursosRuta.add(id);
         }
 
-        if (!recursosComedor.isEmpty()) {
-            ivFotoRuta.setImageResource(recursosComedor.get(0));
+        if (recursosRuta.isEmpty()) {
+            int fallbackId = getResources().getIdentifier("ruta_demo_0", "drawable", getPackageName());
+            if (fallbackId != 0) recursosRuta.add(fallbackId);
+        }
+
+        if (!recursosRuta.isEmpty()) {
+            ivFotoRuta.setImageResource(recursosRuta.get(0));
             ivFotoRuta.animate().alpha(1f).setDuration(150).start();
         }
 
-        configurarNodoComedorActual();
+        configurarNodoRutaActual();
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager != null) {
@@ -160,13 +188,13 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         if (!brujula.disponible()) {
             tvEstadoFoto.setText("Sin sensor de orientación: usa el control manual");
             activarModoManual(true);
-        } else if (!esRutaComedor) {
+        } else if (!esRutaGuiada) {
             tvEstadoFoto.setText("Esperando al sensor de orientación...");
         }
     }
 
-    private void avanzarPasoComedor() {
-        if (!esRutaComedor) return;
+    private void avanzarPasoRuta() {
+        if (!esRutaGuiada) return;
         if (esperandoGiro) {
             Toast.makeText(this, "⚠️ Primero debes girar hacia la dirección indicada", Toast.LENGTH_SHORT).show();
             return;
@@ -174,66 +202,71 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
         pasosDados++;
         if (pasosDados >= pasosRequeridosNodo) {
-            avanzarSiguienteFotoComedor();
+            avanzarSiguienteFotoRuta();
         } else {
-            actualizarTextoComedor();
+            actualizarTextoRuta();
         }
     }
 
-    private void avanzarSiguienteFotoComedor() {
+    private void avanzarSiguienteFotoRuta() {
         pasosDados = 0;
         esperandoGiro = false;
-        indiceComedorActual++;
+        indiceRutaActual++;
 
-        if (indiceComedorActual > recursosComedor.size()) {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al Comedor de la ETSIIT!");
-            Toast.makeText(this, "¡Llegaste al Comedor!", Toast.LENGTH_LONG).show();
+        if (indiceRutaActual > recursosRuta.size()) {
+            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            Toast.makeText(this, "¡Llegaste a " + destinoNombre + "!", Toast.LENGTH_LONG).show();
         } else {
-            ivFotoRuta.setImageResource(recursosComedor.get(indiceComedorActual - 1));
-            configurarNodoComedorActual();
+            ivFotoRuta.setImageResource(recursosRuta.get(indiceRutaActual - 1));
+            configurarNodoRutaActual();
         }
     }
 
     private void forzarFotoAnterior() {
-        if (!esRutaComedor) return;
-        if (indiceComedorActual > 1) {
-            indiceComedorActual--;
+        if (!esRutaGuiada) return;
+        if (indiceRutaActual > 1) {
+            indiceRutaActual--;
             pasosDados = 0;
             esperandoGiro = false;
-            ivFotoRuta.setImageResource(recursosComedor.get(indiceComedorActual - 1));
-            configurarNodoComedorActual();
+            ivFotoRuta.setImageResource(recursosRuta.get(indiceRutaActual - 1));
+            configurarNodoRutaActual();
         }
     }
 
     private void forzarFotoSiguiente() {
-        if (!esRutaComedor) return;
-        if (indiceComedorActual < recursosComedor.size()) {
-            avanzarSiguienteFotoComedor();
+        if (!esRutaGuiada) return;
+        if (indiceRutaActual < recursosRuta.size()) {
+            avanzarSiguienteFotoRuta();
         } else {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al Comedor de la ETSIIT!");
-            Toast.makeText(this, "¡Llegaste al Comedor!", Toast.LENGTH_LONG).show();
+            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            Toast.makeText(this, "¡Llegaste a " + destinoNombre + "!", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void configurarNodoComedorActual() {
-        int index = indiceComedorActual - 1;
-        if (index >= 0 && index < pasosPorFoto.length) {
-            pasosRequeridosNodo = pasosPorFoto[index];
+    private void configurarNodoRutaActual() {
+        int index = indiceRutaActual - 1;
+
+        int[] pasosArray = esRutaComedor ? pasosPorFotoComedor : pasosPorFotoAula;
+        float[] rumbosArray = esRutaComedor ? rumbosGiroComedor : rumbosGiroAula;
+
+        if (index >= 0 && index < pasosArray.length) {
+            pasosRequeridosNodo = pasosArray[index];
             esperandoGiro = (pasosRequeridosNodo == 0);
             if (esperandoGiro) {
-                rumboRequeridoNodo = rumbosGiroPorFoto[index];
+                rumboRequeridoNodo = rumbosArray[index];
             }
         } else {
             pasosRequeridosNodo = 3;
             esperandoGiro = false;
         }
-        actualizarTextoComedor();
+
+        actualizarTextoRuta();
     }
 
-    private void actualizarTextoComedor() {
-        if (!esRutaComedor) return;
-        if (indiceComedorActual > recursosComedor.size()) {
-            tvEstadoFoto.setText("🎉 ¡Destino alcanzado: Comedor ETSIIT!");
+    private void actualizarTextoRuta() {
+        if (!esRutaGuiada) return;
+        if (indiceRutaActual > recursosRuta.size()) {
+            tvEstadoFoto.setText("🎉 ¡Destino alcanzado: " + destinoNombre + "!");
             return;
         }
         if (esperandoGiro) {
@@ -249,7 +282,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
     private void activarModoManual(boolean activo) {
         modoManual = activo;
         sbRumboManual.setVisibility(activo ? View.VISIBLE : View.GONE);
-        if (activo && !esRutaComedor) mostrarRumbo(sbRumboManual.getProgress());
+        if (activo && !esRutaGuiada) mostrarRumbo(sbRumboManual.getProgress());
     }
 
     @Override
@@ -272,7 +305,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && esRutaComedor && !esperandoGiro) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER && esRutaGuiada && !esperandoGiro) {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
@@ -287,7 +320,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
                 long ahora = System.currentTimeMillis();
                 if (ahora - ultimoPasoTimestamp > 380) {
                     ultimoPasoTimestamp = ahora;
-                    avanzarPasoComedor();
+                    avanzarPasoRuta();
                 }
             }
         }
@@ -298,8 +331,8 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
     @Override
     public void onRumbo(float grados) {
-        if (esRutaComedor) {
-            if (indiceComedorActual == 1) {
+        if (esRutaGuiada) {
+            if (indiceRutaActual == 1) {
                 float difSur = FotosRuta.diferencia(180f, grados);
                 if (difSur > 35f) {
                     tvEstadoFoto.setText("⚠️ ¡Gira hacia el Sur para iniciar la ruta!");
@@ -310,7 +343,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
                 float difGiro = FotosRuta.diferencia(rumboRequeridoNodo, grados);
                 if (difGiro <= 30f) {
                     Toast.makeText(this, "¡Giro completado! Avanzando...", Toast.LENGTH_SHORT).show();
-                    avanzarSiguienteFotoComedor();
+                    avanzarSiguienteFotoRuta();
                 } else {
                     float diffRelativa = (rumboRequeridoNodo - grados + 540f) % 360f - 180f;
                     String sentido = diffRelativa > 0 ? "hacia la DERECHA" : "hacia la IZQUIERDA";
