@@ -94,60 +94,68 @@
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Capa inferior: Barra de Navegación Flotante -->
+    <!-- Capa inferior: Barra de Navegación Flotante Mejorada -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardControles"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="24dp"
-        app:cardBackgroundColor="#CC0F172A"
-        app:cardCornerRadius="28dp"
-        app:cardElevation="8dp"
-        app:strokeColor="#33FFFFFF"
-        app:strokeWidth="1dp">
+        android:layout_marginBottom="28dp"
+        app:cardBackgroundColor="#E60F172A"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="12dp"
+        app:strokeColor="#475569"
+        app:strokeWidth="1.5dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
 
+            <!-- Botón ANTERIOR -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAnterior"
                 style="@style/Widget.MaterialComponents.Button.Icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="12dp"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
                 android:visibility="gone"
                 app:backgroundTint="#334155"
-                app:cornerRadius="24dp"
+                app:cornerRadius="26dp"
                 app:icon="@android:drawable/ic_media_previous"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconTint="#FFFFFF" />
+                app:iconTint="#FFFFFF"
+                app:strokeColor="#64748B"
+                app:strokeWidth="1dp" />
 
+            <!-- Botón SIGUIENTE -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSiguiente"
                 style="@style/Widget.MaterialComponents.Button.Icon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
                 android:visibility="gone"
                 app:backgroundTint="#FF8C42"
-                app:cornerRadius="24dp"
+                app:cornerRadius="26dp"
                 app:icon="@android:drawable/ic_media_next"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconTint="#FFFFFF" />
+                app:iconTint="#FFFFFF"
+                app:rippleColor="#FFB380"
+                app:strokeColor="#FFB380"
+                app:strokeWidth="1dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
