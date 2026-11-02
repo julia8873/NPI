@@ -30,6 +30,8 @@ import com.example.nuietsiit.activities.main.WaveView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 public class BaseActivity extends AppCompatActivity {
 
     private SensorManager mSensorManager;
@@ -39,6 +41,7 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -49,38 +52,20 @@ public class BaseActivity extends AppCompatActivity {
         mShakeDetector = new ShakeDetector();
         mShakeDetector.setOnShakeListener(() -> {
             if (!(BaseActivity.this instanceof MenuPrincipal)) {
-
-                ViewGroup rootView = findViewById(android.R.id.content);
-
-                if (mWaveView == null && rootView != null) {
-                    mWaveView = new WaveView(BaseActivity.this, null);
-                    mWaveView.setId(View.generateViewId());
-
-                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT
-                    );
-                    mWaveView.setLayoutParams(params);
-                    mWaveView.setElevation(100f);
-
-                    rootView.addView(mWaveView);
-                }
-
-                if (mWaveView != null) {
-                    mWaveView.setVisibility(View.VISIBLE);
-                    mWaveView.bringToFront();
-
-                    mWaveView.startWaveUp(() -> {
-                        Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
-                        intent.putExtra("START_WAVE_DOWN", true);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intent);
-                        overridePendingTransition(0, 0);
-                        finish();
-                    });
-                }
+                Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish();
+            } else {
+                onShakeMenuPrincipal();
             }
         });
+    }
+
+    /**
+     * Gancho para que MenuPrincipal entre a la sección seleccionada al agitar el móvil.
+     */
+    protected void onShakeMenuPrincipal() {
     }
 
     @Override
@@ -181,7 +166,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (mSensorManager != null && mAccelerometer != null) {
-            mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
+            mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
     }
 
