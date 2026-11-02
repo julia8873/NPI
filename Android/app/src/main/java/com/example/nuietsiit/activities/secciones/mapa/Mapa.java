@@ -6,11 +6,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.GradientDrawable;
+import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +23,8 @@ import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -88,7 +93,7 @@ public class Mapa extends BaseActivity {
     private ImageView ivIcono;
     private FloatingActionButton fabMiUbicacion;
     private ExtendedFloatingActionButton fabComoLlegar;
-    private EditText etBuscadorMapa;
+    private AutoCompleteTextView etBuscadorMapa;
     private MaterialCardView cardBuscadorMapa;
     private HorizontalScrollView scrollPlantas;
     private ChipGroup chipGroupPlantas;
@@ -136,7 +141,7 @@ public class Mapa extends BaseActivity {
         @Override
         public void run() {
             if (isFinishing()) return;
-            android.location.Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
+            Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
             if (fix != null) {
                 cerrarDialogoBuscando();
                 decidirPorGps(fix);
@@ -228,6 +233,8 @@ public class Mapa extends BaseActivity {
         listaMarcadores.add(new Marcador("📚 Biblioteca", "planta1", 2200f, 1400f));
         listaMarcadores.add(new Marcador("💻 Aula 2.1", "planta2", 2850f, 950f));
         listaMarcadores.add(new Marcador("💻 Aula 0.4", "planta0", 4450f, 2250f));
+        listaMarcadores.add(new Marcador("💻 Aula 0.5", "planta0", 4650f, 2450f));
+        listaMarcadores.add(new Marcador("💻 Aula 1.4", "planta1", 3300f, 1450f));
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
@@ -245,8 +252,8 @@ public class Mapa extends BaseActivity {
             puntoInteres.setLayoutParams(params);
 
             // Estilo del marcador circular
-            android.graphics.drawable.GradientDrawable indicador = new android.graphics.drawable.GradientDrawable();
-            indicador.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            GradientDrawable indicador = new GradientDrawable();
+            indicador.setShape(GradientDrawable.OVAL);
             indicador.setColor(Color.parseColor("#FF8C42"));
             indicador.setStroke((int) (2 * getResources().getDisplayMetrics().density), Color.WHITE);
             puntoInteres.setBackground(indicador);
@@ -300,7 +307,7 @@ public class Mapa extends BaseActivity {
         tarjeta.setOrientation(LinearLayout.VERTICAL);
         tarjeta.setPadding((int) (12 * d), (int) (8 * d), (int) (12 * d), (int) (8 * d));
 
-        android.graphics.drawable.GradientDrawable fondo = new android.graphics.drawable.GradientDrawable();
+        GradientDrawable fondo = new GradientDrawable();
         fondo.setColor(Color.WHITE);
         fondo.setCornerRadius(16f * d / 2f);
         fondo.setStroke((int) Math.max(1, d), Color.parseColor("#FF8C42"));
@@ -317,7 +324,7 @@ public class Mapa extends BaseActivity {
         btnIniciar.setText("Iniciar ruta");
         btnIniciar.setTextSize(12f);
         btnIniciar.setAllCaps(false);
-        btnIniciar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#FF8C42")));
+        btnIniciar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF8C42")));
         btnIniciar.setTextColor(Color.WHITE);
         LinearLayout.LayoutParams lpBtn = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -567,12 +574,28 @@ public class Mapa extends BaseActivity {
 
     private void configurarBuscador() {
         if (etBuscadorMapa != null) {
+            List<String> titulos = new ArrayList<>();
+            for (Marcador m : listaMarcadores) {
+                titulos.add(m.getTitulo());
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, titulos);
+            etBuscadorMapa.setAdapter(adapter);
+            etBuscadorMapa.setThreshold(1);
+
+            etBuscadorMapa.setOnItemClickListener((parent, view, position, id) -> {
+                String seleccion = (String) parent.getItemAtPosition(position);
+                etBuscadorMapa.setText(seleccion);
+                etBuscadorMapa.dismissDropDown();
+                procesarBusquedaPlano(seleccion.toLowerCase(Locale.ROOT));
+            });
+
             etBuscadorMapa.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
                     String query = etBuscadorMapa.getText().toString().trim().toLowerCase(Locale.ROOT);
                     if (!query.isEmpty()) {
                         procesarBusquedaPlano(query);
                     }
+                    etBuscadorMapa.dismissDropDown();
                     return true;
                 }
                 return false;
@@ -608,9 +631,21 @@ public class Mapa extends BaseActivity {
             } else {
                 chipGroupPlantas.check(R.id.chipBaja);
             }
+            resaltarMarcador(encontrado);
             Toast.makeText(this, "🎯 Punto encontrado: " + encontrado.getTitulo(), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "⚠️ Solo se permite buscar entre los puntos registrados del mapa", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void resaltarMarcador(Marcador m) {
+        View vista = m.getVistaIcono();
+        if (vista != null) {
+            vista.setVisibility(View.VISIBLE);
+            vista.animate().scaleX(2.0f).scaleY(2.0f).setDuration(300).withEndAction(() -> {
+                vista.animate().scaleX(1f).scaleY(1f).setDuration(300).start();
+            }).start();
+            mostrarBurbujaInfo(vista, m);
         }
     }
 
@@ -957,7 +992,7 @@ public class Mapa extends BaseActivity {
 
         // Permiso y ubicación activados: esperamos una posición (hasta 8 s)
         activarUbicacionUsuario();
-        android.location.Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
+        Location fix = (myLocationOverlay != null) ? myLocationOverlay.getLastFix() : null;
         if (fix != null) {
             decidirPorGps(fix);
             return;
@@ -982,7 +1017,7 @@ public class Mapa extends BaseActivity {
     }
 
     /** Con una posición GPS decidimos si está dentro o fuera de la ETSIIT. */
-    private void decidirPorGps(android.location.Location fix) {
+    private void decidirPorGps(Location fix) {
         if (fix.hasAccuracy() && fix.getAccuracy() > PRECISION_MAXIMA_METROS) {
             Toast.makeText(this, "El GPS no es lo bastante preciso ahora mismo", Toast.LENGTH_SHORT).show();
             mostrarMenuManual();
@@ -1019,7 +1054,7 @@ public class Mapa extends BaseActivity {
     }
 
     private void elegirAula() {
-        final java.util.List<Marcador> aulas = new ArrayList<>();
+        final List<Marcador> aulas = new ArrayList<>();
         for (Marcador m : listaMarcadores) {
             if (m.getTitulo().contains("Aula")) aulas.add(m);
         }
@@ -1113,7 +1148,7 @@ public class Mapa extends BaseActivity {
 
     /** Solo debug: elegir un QR de la lista sin tener que imprimirlo/escanearlo. */
     private void mostrarListaSimularQR() {
-        final java.util.List<UbicacionUsuario> puntos = RegistroPuntosQR.todosLosQR();
+        final List<UbicacionUsuario> puntos = RegistroPuntosQR.todosLosQR();
         String[] nombres = new String[puntos.size()];
         for (int i = 0; i < nombres.length; i++) {
             nombres[i] = puntos.get(i).nombre + "  [" + puntos.get(i).idPunto + "]";
@@ -1197,8 +1232,8 @@ public class Mapa extends BaseActivity {
         int px = (int) (dp * d);
         View v = new View(this);
         v.setLayoutParams(new FrameLayout.LayoutParams(px, px));
-        android.graphics.drawable.GradientDrawable g = new android.graphics.drawable.GradientDrawable();
-        g.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        GradientDrawable g = new GradientDrawable();
+        g.setShape(GradientDrawable.OVAL);
         g.setColor(color);
         g.setStroke((int) (2 * d), Color.WHITE);
         v.setBackground(g);
@@ -1244,7 +1279,14 @@ public class Mapa extends BaseActivity {
     private void abrirVisorRuta() {
         if (origenActual == null || destinoRuta == null) return;
         String claveRuta = origenActual.idPunto;
-        if (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_4")
+
+        boolean esAula05Origen = (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_5"))
+                || (origenActual.nombre != null && origenActual.nombre.contains("0.5"));
+        boolean esAula14Destino = (destinoRuta.getTitulo() != null && destinoRuta.getTitulo().contains("1.4"));
+
+        if (esAula05Origen && esAula14Destino) {
+            claveRuta = "aula_0_5";
+        } else if (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_4")
                 && destinoRuta != null && destinoRuta.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
             claveRuta = "comedor";
         }
