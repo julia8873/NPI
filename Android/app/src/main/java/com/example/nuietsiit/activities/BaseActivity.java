@@ -101,64 +101,7 @@ public class BaseActivity extends AppCompatActivity {
                 toolbar.addView(ivIcono);
             }
 
-            ViewGroup rootView = findViewById(android.R.id.content);
-            if (rootView != null) {
-                FrameLayout mascotLayout = new FrameLayout(this);
-                FrameLayout.LayoutParams mascotParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                );
-                mascotParams.gravity = Gravity.BOTTOM | Gravity.END;
-                mascotParams.setMargins(0, 0, 48, 48);
-                mascotLayout.setLayoutParams(mascotParams);
 
-                MaterialCardView mascotCard = new MaterialCardView(this);
-                FrameLayout.LayoutParams cardParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.WRAP_CONTENT
-                );
-                mascotCard.setLayoutParams(cardParams);
-                mascotCard.setRadius(50f);
-                mascotCard.setCardBackgroundColor(Color.parseColor("#FFF3EB"));
-                mascotCard.setCardElevation(8f);
-                mascotCard.setStrokeWidth(2);
-                mascotCard.setStrokeColor(Color.parseColor("#FFD8BE"));
-                mascotCard.setClickable(true);
-                mascotCard.setFocusable(true);
-
-                LinearLayout layout = new LinearLayout(this);
-                layout.setOrientation(LinearLayout.HORIZONTAL);
-                layout.setGravity(Gravity.CENTER_VERTICAL);
-                layout.setPadding(32, 20, 32, 20);
-
-                ImageView iv = new ImageView(this);
-                iv.setImageResource(R.drawable.ic_mascota_ayudante);
-                LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(72, 72);
-                iv.setLayoutParams(imgParams);
-
-                TextView tv = new TextView(this);
-                tv.setText(" Asistente AI");
-                tv.setTextColor(Color.parseColor("#FF8C42"));
-                tv.setTextSize(13f);
-                tv.setTypeface(null, Typeface.BOLD);
-
-                layout.addView(iv);
-                layout.addView(tv);
-                mascotCard.addView(layout);
-                mascotLayout.addView(mascotCard);
-
-                mascotCard.setOnClickListener(v -> {
-                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                    new AlertDialog.Builder(this)
-                            .setIcon(R.drawable.ic_mascota_ayudante)
-                            .setTitle("Asistente Virtual ETSIIT 🤖")
-                            .setMessage("¡Hola! Soy tu asistente inteligente de la ETSIIT. Estoy aquí para ayudarte en esta sección.")
-                            .setPositiveButton("¡Entendido!", null)
-                            .show();
-                });
-
-                rootView.addView(mascotLayout);
-            }
         }
     }
 

@@ -218,6 +218,31 @@ public class Mapa extends BaseActivity {
         containerPlanoConMarcadores = findViewById(R.id.containerPlanoConMarcadores);
         // Inicializar los marcadores de la aplicación
         registrarMarcadores();
+        comprobarAutoRutaComedor();
+    }
+
+    private void comprobarAutoRutaComedor() {
+        if (!getIntent().getBooleanExtra("AUTO_RUTA_COMEDOR", false)) return;
+
+        if (toggleGroupModo != null) {
+            toggleGroupModo.check(R.id.btnModoPlanos);
+        }
+
+        Marcador destino = null;
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
+                destino = m;
+                break;
+            }
+        }
+        if (destino != null) {
+            destinoRuta = destino;
+            UbicacionUsuario u = UbicacionUsuario.normalizada(
+                    "aula_0_7", "Aula 0.7", "planta0", 0.60f, 0.45f, UbicacionUsuario.Metodo.HORARIO);
+            fijarOrigen(u);
+            cargarPlanoDrawable("planta0");
+            Toast.makeText(this, "🍽️ Ruta contextual activa: Aula 0.7 ➔ Comedor", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void registrarMarcadores() {
@@ -228,6 +253,7 @@ public class Mapa extends BaseActivity {
         listaMarcadores.add(new Marcador("📚 Biblioteca", "planta1", 2200f, 1400f));
         listaMarcadores.add(new Marcador("💻 Aula 2.1", "planta2", 2850f, 950f));
         listaMarcadores.add(new Marcador("💻 Aula 0.4", "planta0", 4450f, 2250f));
+        listaMarcadores.add(new Marcador("💻 Aula 0.7", "planta0", 4750f, 2350f));
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
@@ -1244,7 +1270,7 @@ public class Mapa extends BaseActivity {
     private void abrirVisorRuta() {
         if (origenActual == null || destinoRuta == null) return;
         String claveRuta = origenActual.idPunto;
-        if (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_4")
+        if (origenActual.idPunto != null && (origenActual.idPunto.contains("aula_0_4") || origenActual.idPunto.contains("0_7") || origenActual.idPunto.contains("aula_0_7"))
                 && destinoRuta != null && destinoRuta.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
             claveRuta = "comedor";
         }

@@ -2,25 +2,29 @@ package com.example.nuietsiit.activities.main;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.HapticFeedbackConstants;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
 import android.view.ViewGroup;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
+import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -45,6 +49,7 @@ import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.util.DetectorInclinacionMenu;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.Notificador;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
@@ -77,6 +82,11 @@ public class MenuPrincipal extends BaseActivity {
     };
     private static final int INDICE_AVISOS = 0;
 
+    // Accesos directos contextuales y páginas recientes
+    private static final String PREF_NAVEGACION = "nui_navegacion";
+    private static final String KEY_ULTIMA_SECCION = "ultima_seccion_vista";
+    private static final String KEY_HISTORIAL_SECCIONES = "historial_secciones";
+
     private TextView tvHoraEvento, tvTituloEventoHoy, tvSubtituloEventoHoy;
     private ImageView ivIcono;
     private View cardMascotaAyudante;
@@ -84,6 +94,31 @@ public class MenuPrincipal extends BaseActivity {
     private HubSeccionesView hub;
     private NivelInclinacionView nivel;
     private DetectorInclinacionMenu detector;
+
+    private MaterialCardView cardAccesoDirecto;
+    private TextView tvTituloCabeceraAccesoDirecto;
+    private TextView tvTiempoSimulacion;
+    private FrameLayout flIconoAccesoDirecto;
+    private ImageView ivIconoAccesoDirecto;
+    private ImageView ivChevronAccesoDirecto;
+    private TextView tvTagAccesoDirecto;
+    private TextView tvSubinfoAccesoDirecto;
+    private TextView tvTituloAccesoDirecto;
+    private TextView tvDescAccesoDirecto;
+    private HorizontalScrollView hsvRecientes;
+    private LinearLayout llChipsRecientes;
+
+    private boolean simulacionManualForzada = false;
+    private boolean simulacionManualEsComedor = true;
+
+    private final Handler accesoDirectoHandler = new Handler(Looper.getMainLooper());
+    private final Runnable accesoDirectoRunnable = new Runnable() {
+        @Override
+        public void run() {
+            actualizarAccesoDirecto();
+            accesoDirectoHandler.postDelayed(this, 15000); // Comprueba cada 15s el bloque de 10 min
+        }
+    };
 
     private CalendarioDB calendarioDB;
     private ActividadesDB actividadesDB;
@@ -102,7 +137,6 @@ public class MenuPrincipal extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_principal);
-
 
         BD = DBHelper.getInstance(this);
         calendarioDB = new CalendarioDB(BD);
@@ -128,11 +162,25 @@ public class MenuPrincipal extends BaseActivity {
         cardEventoHoy = findViewById(R.id.cardEventoHoy);
         vpNoticias = findViewById(R.id.vpNoticias);
         configurarSliderNoticias();
+
         tvHoraEvento = findViewById(R.id.tvHoraEvento);
         tvTituloEventoHoy = findViewById(R.id.tvTituloEventoHoy);
         tvSubtituloEventoHoy = findViewById(R.id.tvSubtituloEventoHoy);
         hub = findViewById(R.id.hubSecciones);
         nivel = findViewById(R.id.nivelInclinacion);
+
+        cardAccesoDirecto = findViewById(R.id.cardAccesoDirecto);
+        tvTituloCabeceraAccesoDirecto = findViewById(R.id.tvTituloCabeceraAccesoDirecto);
+        tvTiempoSimulacion = findViewById(R.id.tvTiempoSimulacion);
+        flIconoAccesoDirecto = findViewById(R.id.flIconoAccesoDirecto);
+        ivIconoAccesoDirecto = findViewById(R.id.ivIconoAccesoDirecto);
+        ivChevronAccesoDirecto = findViewById(R.id.ivChevronAccesoDirecto);
+        tvTagAccesoDirecto = findViewById(R.id.tvTagAccesoDirecto);
+        tvSubinfoAccesoDirecto = findViewById(R.id.tvSubinfoAccesoDirecto);
+        tvTituloAccesoDirecto = findViewById(R.id.tvTituloAccesoDirecto);
+        tvDescAccesoDirecto = findViewById(R.id.tvDescAccesoDirecto);
+        hsvRecientes = findViewById(R.id.hsvRecientes);
+        llChipsRecientes = findViewById(R.id.llChipsRecientes);
 
         aplicarMargenesSistema();
         configurarPerfilClick();
@@ -149,7 +197,7 @@ public class MenuPrincipal extends BaseActivity {
         setIntent(intent);
     }
 
-        /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
+    /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
     private void aplicarMargenesSistema() {
         View contenido = findViewById(R.id.contenidoMenu);
         ViewCompat.setOnApplyWindowInsetsListener(contenido, (v, insets) -> {
@@ -219,12 +267,12 @@ public class MenuPrincipal extends BaseActivity {
             public void alCambiarSeleccion(int fila, int columna) {
                 hub.setSeleccion(fila * 3 + columna, true);
                 nivel.setZona(fila, columna);
-                hub.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                vibrarSeleccion();
             }
 
             @Override
             public void alEstarListo(boolean listo) {
-                // Desactivado: no hay estado listo de vertical a horizontal
+                nivel.setListo(listo);
             }
 
             @Override
@@ -258,12 +306,7 @@ public class MenuPrincipal extends BaseActivity {
             guardarEstadoGiroscopio(true);
             actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
             actualizarEstadoVisualGiroscopio();
-            actualizarEstadoVisualGiroscopio();
-        if (giroscopioHabilitado) {
             detector.iniciar();
-        } else {
-            detector.parar();
-        }
             Toast.makeText(this, "🧭 Sensor de inclinación activado", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
@@ -315,15 +358,219 @@ public class MenuPrincipal extends BaseActivity {
                 : HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
+    private void vibrarSeleccion() {
+        hub.performHapticFeedback(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+                : HapticFeedbackConstants.VIRTUAL_KEY);
+    }
+
+    private void registrarSeccionVisitada(int indice) {
+        if (indice < 0 || indice >= DESTINOS.length) return;
+        SharedPreferences prefs = getSharedPreferences(PREF_NAVEGACION, MODE_PRIVATE);
+        String historial = prefs.getString(KEY_HISTORIAL_SECCIONES, "");
+        List<Integer> lista = new ArrayList<>();
+        lista.add(indice);
+        if (!historial.isEmpty()) {
+            for (String s : historial.split(",")) {
+                try {
+                    int val = Integer.parseInt(s.trim());
+                    if (val != indice && val >= 0 && val < DESTINOS.length && !lista.contains(val)) {
+                        lista.add(val);
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(lista.size(), 5); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(lista.get(i));
+        }
+        prefs.edit()
+                .putInt(KEY_ULTIMA_SECCION, indice)
+                .putString(KEY_HISTORIAL_SECCIONES, sb.toString())
+                .apply();
+    }
+
     private void abrirSeccion(int indice) {
         if (abriendo || indice < 0 || indice >= DESTINOS.length) return;
         abriendo = true;
+        registrarSeccionVisitada(indice);
         hub.setSeleccion(indice, true);
         hub.animarApertura(indice, () -> {
             Intent intent = new Intent(MenuPrincipal.this, DESTINOS[indice]);
             intent.putExtra("CORREO", correoUsuario);
             startActivity(intent);
         });
+    }
+
+    // -------------------------------------------------
+    //        ACCESOS DIRECTOS Y SIMULACIÓN 10 MIN
+    // -------------------------------------------------
+
+    private void actualizarAccesoDirecto() {
+        if (cardAccesoDirecto == null) return;
+
+        java.util.Calendar ahora = java.util.Calendar.getInstance();
+        int minuto = ahora.get(java.util.Calendar.MINUTE);
+        // Simulación: cada 10 minutos alterna (0-9 min: Comedor, 10-19 min: Reciente, etc.)
+        boolean esModoComedor;
+        if (simulacionManualForzada) {
+            esModoComedor = simulacionManualEsComedor;
+        } else {
+            esModoComedor = ((minuto / 10) % 2 == 0);
+        }
+
+        int minutosRestantesEnBloque = 10 - (minuto % 10);
+
+        if (esModoComedor) {
+            configurarAccesoDirectoComedor(minutosRestantesEnBloque);
+        } else {
+            configurarAccesoDirectoReciente(minutosRestantesEnBloque);
+        }
+    }
+
+    private void configurarAccesoDirectoComedor(int minsRestantes) {
+        tvTituloCabeceraAccesoDirecto.setText("ACCESO RÁPIDO CONTEXTUAL");
+        tvTiempoSimulacion.setText(String.format(Locale.getDefault(), "Cambia en %d min · Aula 0.7", minsRestantes));
+
+        cardAccesoDirecto.setCardBackgroundColor(Color.parseColor("#FFFBF7"));
+        cardAccesoDirecto.setStrokeColor(Color.parseColor("#FFE7D6"));
+
+        flIconoAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF7A2F")));
+        ivIconoAccesoDirecto.setImageResource(R.drawable.ic_nui_mapa);
+        ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+
+        tvTagAccesoDirecto.setText("🍽️ HORA DE COMER");
+        tvTagAccesoDirecto.setTextColor(Color.parseColor("#FF7A2F"));
+        tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
+
+        if (ivChevronAccesoDirecto != null) {
+            ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.parseColor("#FF7A2F")));
+        }
+
+        tvSubinfoAccesoDirecto.setText("Horario ETSIIT");
+        tvTituloAccesoDirecto.setText("Ruta: Aula 0.7 ➔ Comedor");
+        tvDescAccesoDirecto.setText("Tienes clase en 0.7 · Toca para abrir mapa y ruta guiada");
+
+        cardAccesoDirecto.setOnClickListener(v -> {
+            vibrarConfirmacion();
+            Intent intent = new Intent(MenuPrincipal.this, Mapa.class);
+            intent.putExtra("CORREO", correoUsuario);
+            intent.putExtra("AUTO_RUTA_COMEDOR", true);
+            startActivity(intent);
+        });
+
+        // Alternancia manual con pulsación larga para pruebas rápidas
+        cardAccesoDirecto.setOnLongClickListener(v -> {
+            vibrarConfirmacion();
+            simulacionManualForzada = true;
+            simulacionManualEsComedor = false;
+            Toast.makeText(this, "Simulación: mostrando última página vista", Toast.LENGTH_SHORT).show();
+            actualizarAccesoDirecto();
+            return true;
+        });
+
+        if (hsvRecientes != null) {
+            hsvRecientes.setVisibility(View.GONE);
+        }
+    }
+
+    private void configurarAccesoDirectoReciente(int minsRestantes) {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAVEGACION, MODE_PRIVATE);
+        int ultimoIndice = prefs.getInt(KEY_ULTIMA_SECCION, 6); // Por defecto Comedores
+        String historial = prefs.getString(KEY_HISTORIAL_SECCIONES, String.valueOf(ultimoIndice));
+
+        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[ultimoIndice];
+
+        tvTituloCabeceraAccesoDirecto.setText("PÁGINA RECIENTE");
+        tvTiempoSimulacion.setText(String.format(Locale.getDefault(), "Cambia en %d min · Recientes", minsRestantes));
+
+        int bgCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.08f);
+        int borderCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.30f);
+        cardAccesoDirecto.setCardBackgroundColor(bgCard);
+        cardAccesoDirecto.setStrokeColor(borderCard);
+
+        flIconoAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(seccion.color));
+        ivIconoAccesoDirecto.setImageResource(seccion.icono);
+        ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+
+        tvTagAccesoDirecto.setText("🕒 VISTO RECIENTEMENTE");
+        tvTagAccesoDirecto.setTextColor(seccion.color);
+        int bgTag = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.18f);
+        tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(bgTag));
+
+        if (ivChevronAccesoDirecto != null) {
+            ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(seccion.color));
+        }
+
+        tvSubinfoAccesoDirecto.setText("Acceso directo");
+        tvTituloAccesoDirecto.setText(seccion.titulo);
+        tvDescAccesoDirecto.setText("Última página abierta · Toca para volver a entrar");
+
+        cardAccesoDirecto.setOnClickListener(v -> {
+            vibrarConfirmacion();
+            abrirSeccion(ultimoIndice);
+        });
+
+        // Alternancia manual con pulsación larga para pruebas rápidas
+        cardAccesoDirecto.setOnLongClickListener(v -> {
+            vibrarConfirmacion();
+            simulacionManualForzada = true;
+            simulacionManualEsComedor = true;
+            Toast.makeText(this, "Simulación: mostrando ruta Aula 0.7 ➔ Comedor", Toast.LENGTH_SHORT).show();
+            actualizarAccesoDirecto();
+            return true;
+        });
+
+        mostrarChipsRecientes(historial, ultimoIndice);
+    }
+
+    private void mostrarChipsRecientes(String historial, int ignorarIndice) {
+        if (llChipsRecientes == null || hsvRecientes == null) return;
+        llChipsRecientes.removeAllViews();
+
+        if (historial == null || historial.isEmpty()) {
+            hsvRecientes.setVisibility(View.GONE);
+            return;
+        }
+
+        String[] tokens = historial.split(",");
+        int añadidos = 0;
+        for (String t : tokens) {
+            try {
+                int idx = Integer.parseInt(t.trim());
+                if (idx < 0 || idx >= DESTINOS.length || idx == ignorarIndice) continue;
+
+                HubSeccionesView.Seccion s = HubSeccionesView.SECCIONES[idx];
+                TextView chip = new TextView(this);
+                chip.setText("● " + s.titulo);
+                chip.setTextSize(11f);
+                chip.setTypeface(null, android.graphics.Typeface.BOLD);
+                chip.setTextColor(s.color);
+                chip.setBackgroundResource(R.drawable.bg_nui_etiqueta);
+                int bgChip = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, s.color, 0.14f);
+                chip.setBackgroundTintList(ColorStateList.valueOf(bgChip));
+                int padH = (int) (11 * getResources().getDisplayMetrics().density);
+                int padV = (int) (4 * getResources().getDisplayMetrics().density);
+                chip.setPadding(padH, padV, padH, padV);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                lp.setMarginEnd((int) (6 * getResources().getDisplayMetrics().density));
+                chip.setLayoutParams(lp);
+
+                chip.setOnClickListener(v -> {
+                    vibrarConfirmacion();
+                    abrirSeccion(idx);
+                });
+
+                llChipsRecientes.addView(chip);
+                añadidos++;
+                if (añadidos >= 3) break;
+            } catch (Exception ignored) {}
+        }
+
+        hsvRecientes.setVisibility(añadidos > 0 ? View.VISIBLE : View.GONE);
     }
 
     // -------------------------------------------------
@@ -437,6 +684,7 @@ public class MenuPrincipal extends BaseActivity {
     protected void onPause() {
         super.onPause();
         sliderHandler.removeCallbacks(sliderRunnable);
+        accesoDirectoHandler.removeCallbacks(accesoDirectoRunnable);
         detector.parar();
     }
 
@@ -446,11 +694,14 @@ public class MenuPrincipal extends BaseActivity {
         abriendo = false;
         sliderHandler.removeCallbacks(sliderRunnable);
         sliderHandler.postDelayed(sliderRunnable, 3500);
+        accesoDirectoHandler.removeCallbacks(accesoDirectoRunnable);
+        accesoDirectoHandler.post(accesoDirectoRunnable);
         hub.restaurar();
         nivel.setListo(false);
         cargarEventoHoy();
         actualizarAvisosSinLeer();
         actualizarEstadoVisualGiroscopio();
+        actualizarAccesoDirecto();
         if (giroscopioHabilitado) {
             detector.iniciar();
         } else {

@@ -29,6 +29,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -59,12 +62,11 @@ public class Comedores extends BaseActivity {
 
     // Componentes de la interfaz de usuario
     private TextView tvMensajeComedorCercano;
-    private TextView tvUbicacionActual;
     private TextView tvDia, tvPrimerPlato, tvSegundoPlato, tvPostre;
     private ImageView ivIcono;
     private View cardMenu;
     private ImageButton btnDiaAnterior, btnDiaSiguiente;
-    private Button btnHorario, btnPrecios, btnTipoMenu, btnComedores;
+    private Button btnHorario, btnPrecios, btnTipoMenu;
     private TextView btnDiaL, btnDiaM, btnDiaX, btnDiaJ, btnDiaV;
 
     // Estado del modo de menú (normal vs vegetariano)
@@ -95,7 +97,6 @@ public class Comedores extends BaseActivity {
                 if ((fineGranted != null && fineGranted) || (coarseGranted != null && coarseGranted)) {
                     obtenerUbicacionYProcesar();
                 } else {
-                    tvUbicacionActual.setText("📍 Permiso de ubicación no concedido.");
                     aplicarUbicacionPorDefecto(37.197050, -3.624260);
                 }
             });
@@ -124,7 +125,6 @@ public class Comedores extends BaseActivity {
 
         // Enlazar vistas del layout XML
         tvMensajeComedorCercano = findViewById(R.id.tvMensajeComedoreCercano);
-        tvUbicacionActual = findViewById(R.id.tvUbicacionActual);
         tvDia = findViewById(R.id.tvDia);
         tvPrimerPlato = findViewById(R.id.tvPrimerPlato);
         tvSegundoPlato = findViewById(R.id.tvSegundoPlato);
@@ -132,11 +132,12 @@ public class Comedores extends BaseActivity {
         ivIcono = findViewById(R.id.ivIcono);
         cardMenu = findViewById(R.id.cardMenu);
 
+        aplicarMargenesSistema();
+
         // Botones superiores: Horario, Precios y Alternar Vegetariano/Normal
         btnHorario = findViewById(R.id.btnHorario);
         btnPrecios = findViewById(R.id.btnPrecios);
         btnTipoMenu = findViewById(R.id.btnTipoMenu);
-        btnComedores = findViewById(R.id.btnComedores);
 
         // Botones inferiores de días de la semana (Lunes a Viernes)
         btnDiaL = findViewById(R.id.btnDiaL);
@@ -160,10 +161,34 @@ public class Comedores extends BaseActivity {
             mostrarBottomSheetTipoMenu();
         });
 
-        btnComedores.setOnClickListener(v -> {
-            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            mostrarBottomSheetComedores();
-        });
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! Soy tu asistente de Comedores. Aquí puedes consultar el menú del día de la UGR, ver los horarios y cambiar entre menú normal o vegetariano.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
+        }
+
+        View cardComedorCercano = findViewById(R.id.cardComedorCercano);
+        if (cardComedorCercano != null) {
+            cardComedorCercano.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarBottomSheetComedores();
+            });
+        }
+        if (tvMensajeComedorCercano != null) {
+            tvMensajeComedorCercano.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarBottomSheetComedores();
+            });
+        }
+
+
 
         // Configurar selección directa mediante los botones de los días
         btnDiaL.setOnClickListener(v ->
@@ -683,7 +708,6 @@ public class Comedores extends BaseActivity {
         if (ultimaUbicacion != null) {
             procesarUbicacionUsuario(ultimaUbicacion);
         } else {
-            tvUbicacionActual.setText("📍 Esperando señal GPS...");
             aplicarUbicacionPorDefecto(37.197050, -3.624260);
         }
     }
@@ -733,8 +757,7 @@ public class Comedores extends BaseActivity {
         double userLat = location.getLatitude();
         double userLon = location.getLongitude();
 
-        tvUbicacionActual.setText(String.format(Locale.getDefault(),
-                "📍 Lat: %.4f, Lon: %.4f", userLat, userLon));
+
 
         calcularDistanciasYOrdenar(userLat, userLon);
     }
@@ -892,6 +915,20 @@ public class Comedores extends BaseActivity {
         }
         if (detectorInclinacionDias != null) {
             detectorInclinacionDias.parar();
+        }
+    }
+
+    /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
+    private void aplicarMargenesSistema() {
+        View scroll = findViewById(R.id.scrollComedores);
+        if (scroll != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(scroll, (v, insets) -> {
+                Insets barras = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(scroll);
         }
     }
 }

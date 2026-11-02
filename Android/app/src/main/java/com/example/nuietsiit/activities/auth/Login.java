@@ -3,17 +3,21 @@ package com.example.nuietsiit.activities.auth;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
-import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
 
 public class Login extends BaseActivity {
@@ -30,6 +34,8 @@ public class Login extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        aplicarMargenesSistema();
+
         // Inicialización de la base de datos
         BD = new UsuariosDB(this);
 
@@ -39,14 +45,55 @@ public class Login extends BaseActivity {
         btnLogin = findViewById(R.id.btnLogin);
         btnSignUp = findViewById(R.id.btnSignUp);
 
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! Para iniciar sesión introduce tu correo institucional y contraseña de la UGR. Si aún no tienes cuenta, pulsa en 'Crear cuenta nueva'.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
+        }
+
         // Evento de clic para el botón de Inicio de Sesión
-        btnLogin.setOnClickListener(view -> realizarLogin());
+        btnLogin.setOnClickListener(view -> {
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            realizarLogin();
+        });
 
         // Evento de clic para navegar a la pantalla de Registro (Sign Up)
         btnSignUp.setOnClickListener(view -> {
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             Intent intent = new Intent(Login.this, SignUp.class);
             startActivity(intent);
         });
+    }
+
+    /**
+     * Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde).
+     */
+    private void aplicarMargenesSistema() {
+        View scroll = findViewById(R.id.scrollView);
+        if (scroll != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(scroll, (v, insets) -> {
+                Insets barras = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(scroll);
+        }
     }
 
     /**
