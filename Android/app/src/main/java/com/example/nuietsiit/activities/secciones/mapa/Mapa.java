@@ -42,6 +42,11 @@ import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
+import android.content.SharedPreferences;
+import android.view.HapticFeedbackConstants;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -61,6 +66,8 @@ import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.CustomZoomButtonsController;
+import org.osmdroid.views.CustomZoomButtonsDisplay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
@@ -205,10 +212,36 @@ public class Mapa extends BaseActivity {
 
         setContentView(R.layout.mapa);
 
+        aplicarMargenesSistema();
+
         bindViews();
 
         if (ivIcono != null) {
-            ivIcono.setOnClickListener(v -> finish());
+            ivIcono.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                String correo = obtenerCorreoUsuarioActual();
+                if (correo == null || correo.isEmpty()) {
+                    Intent intent = new Intent(Mapa.this, com.example.nuietsiit.activities.auth.Login.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(Mapa.this, com.example.nuietsiit.activities.main.AjustesCuenta.class);
+                    intent.putExtra("CORREO", correo);
+                    startActivity(intent);
+                }
+            });
+        }
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! En esta sección puedes consultar el mapa GPS del campus y los planos interactivos de cada planta de la ETSIIT, buscar aulas y calcular rutas.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
         }
 
         configurarMapaOSM();
@@ -223,6 +256,31 @@ public class Mapa extends BaseActivity {
         containerPlanoConMarcadores = findViewById(R.id.containerPlanoConMarcadores);
         // Inicializar los marcadores de la aplicación
         registrarMarcadores();
+        comprobarAutoRutaComedor();
+    }
+
+    private void comprobarAutoRutaComedor() {
+        if (!getIntent().getBooleanExtra("AUTO_RUTA_COMEDOR", false)) return;
+
+        if (toggleGroupModo != null) {
+            toggleGroupModo.check(R.id.btnModoPlanos);
+        }
+
+        Marcador destino = null;
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
+                destino = m;
+                break;
+            }
+        }
+        if (destino != null) {
+            destinoRuta = destino;
+            UbicacionUsuario u = UbicacionUsuario.normalizada(
+                    "aula_0_7", "Aula 0.7", "planta0", 0.60f, 0.45f, UbicacionUsuario.Metodo.HORARIO);
+            fijarOrigen(u);
+            cargarPlanoDrawable("planta0");
+            Toast.makeText(this, "🍽️ Ruta contextual activa: Aula 0.7 ➔ Comedor", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void registrarMarcadores() {
@@ -235,6 +293,7 @@ public class Mapa extends BaseActivity {
         listaMarcadores.add(new Marcador("💻 Aula 0.4", "planta0", 4450f, 2250f));
         listaMarcadores.add(new Marcador("💻 Aula 0.5", "planta0", 4650f, 2450f));
         listaMarcadores.add(new Marcador("💻 Aula 1.4", "planta1", 3300f, 1450f));
+        listaMarcadores.add(new Marcador("💻 Aula 0.7", "planta0", 4750f, 2350f));
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
@@ -385,7 +444,10 @@ public class Mapa extends BaseActivity {
 
             if (checkedId == R.id.btnModoMapa) {
                 // Modo Mapa GPS
-                if (mapView != null) mapView.setVisibility(View.VISIBLE);
+                if (mapView != null) {
+                    mapView.setVisibility(View.VISIBLE);
+                    mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
+                }
                 if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.VISIBLE);
                 if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.VISIBLE);
 
@@ -396,7 +458,10 @@ public class Mapa extends BaseActivity {
 
             } else if (checkedId == R.id.btnModoPlanos) {
                 // Modo Planos ETSIIT
-                if (mapView != null) mapView.setVisibility(View.GONE);
+                if (mapView != null) {
+                    mapView.setVisibility(View.GONE);
+                    mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
+                }
                 if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.GONE);
                 if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.GONE);
 
@@ -654,6 +719,21 @@ public class Mapa extends BaseActivity {
 
         mapView.setTileSource(OPENMAP_TILES);
         mapView.setMultiTouchControls(true);
+
+        // Configuración de los botones de zoom (+ y -):
+        // Posicionados en horizontal hacia la derecha, de modo que el botón '+' queda pegado
+        // a la izquierda del botón de ubicación y el botón '-' cabe holgadamente entre 'Cómo llegar' y '+'.
+        mapView.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
+        CustomZoomButtonsDisplay zoomDisplay = mapView.getZoomController().getDisplay();
+        zoomDisplay.setPositions(
+                true,
+                CustomZoomButtonsDisplay.HorizontalPosition.RIGHT,
+                CustomZoomButtonsDisplay.VerticalPosition.BOTTOM
+        );
+        float density = getResources().getDisplayMetrics().density;
+        zoomDisplay.setMarginPadding(0f, 0.25f);
+        // Margen derecho: ancho fabMiUbicacion (48dp) + margen (14dp) + separación (8dp) = 70dp
+        zoomDisplay.setAdditionalPixelMargins(0f, 0f, 70f * density, 20f * density);
 
         mapView.getController().setZoom(18.0);
         mapView.getController().setCenter(etsiitPoint);
@@ -1279,14 +1359,14 @@ public class Mapa extends BaseActivity {
     private void abrirVisorRuta() {
         if (origenActual == null || destinoRuta == null) return;
         String claveRuta = origenActual.idPunto;
-
         boolean esAula05Origen = (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_5"))
                 || (origenActual.nombre != null && origenActual.nombre.contains("0.5"));
         boolean esAula14Destino = (destinoRuta.getTitulo() != null && destinoRuta.getTitulo().contains("1.4"));
 
         if (esAula05Origen && esAula14Destino) {
             claveRuta = "aula_0_5";
-        } else if (origenActual.idPunto != null && origenActual.idPunto.contains("aula_0_4")
+        } else if (origenActual.idPunto != null
+                && (origenActual.idPunto.contains("aula_0_4") || origenActual.idPunto.contains("0_7") || origenActual.idPunto.contains("aula_0_7"))
                 && destinoRuta != null && destinoRuta.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
             claveRuta = "comedor";
         }
@@ -1340,4 +1420,26 @@ public class Mapa extends BaseActivity {
             myLocationOverlay.disableMyLocation();
         }
     }
+    private String obtenerCorreoUsuarioActual() {
+        if (getIntent() != null && getIntent().hasExtra("CORREO")) {
+            String c = getIntent().getStringExtra("CORREO");
+            if (c != null && !c.isEmpty()) return c;
+        }
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        return prefs.getString("CORREO", null);
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootMapa);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets barras = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(root);
+        }
+    }
+
 }

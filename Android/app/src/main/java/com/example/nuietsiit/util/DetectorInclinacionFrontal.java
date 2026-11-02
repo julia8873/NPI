@@ -8,9 +8,8 @@ import android.hardware.SensorManager;
 import android.os.SystemClock;
 
 /**
- * Detecta cuando el usuario parte de una posición COMPLETAMENTE VERTICAL
- * (sosteniendo el móvil erguido de frente) y lo tumba del todo hacia atrás
- * (dejándolo en posición completamente horizontal con la pantalla hacia arriba).
+ * Detecta cuando el usuario parte de una posición natural de lectura erguida
+ * y tumba el móvil hacia atrás (hacia la posición horizontal boca arriba).
  */
 public class DetectorInclinacionFrontal implements SensorEventListener {
 
@@ -19,15 +18,17 @@ public class DetectorInclinacionFrontal implements SensorEventListener {
     }
 
     private static final float ALFA = 0.8f;                 // Filtro paso bajo para suavizar aceleraciones bruscas
-    // Para considerarse completamente vertical: Y elevado (cerca de 9.8) y Z bajo (cerca de 0)
-    private static final float UMBRAL_VERTICAL_Y = 8.2f;    // Y > 8.2 m/s²
-    private static final float UMBRAL_VERTICAL_Z_MAX = 4.0f; // |Z| < 4.0 m/s²
+    // Para considerarse en posición erguida o de lectura natural:
+    // El usuario sostiene el móvil de frente (Y >= 4.0 m/s², Z <= 7.5 m/s²)
+    private static final float UMBRAL_REPOSO_Y_MIN = 4.0f;
+    private static final float UMBRAL_REPOSO_Z_MAX = 7.5f;
 
-    // Para considerarse tumbado del todo (horizontal boca arriba): Z elevado y Y cerca de 0
-    private static final float UMBRAL_TUMBADO_Z = 8.3f;     // Z > 8.3 m/s² (pantalla mirando al techo)
-    private static final float UMBRAL_TUMBADO_Y_MAX = 3.0f; // |Y| < 3.0 m/s² (sin inclinación vertical)
+    // Para considerarse inclinado hacia atrás (hacia la horizontal con pantalla arriba o volteado):
+    // Z aumenta (>= 7.5 m/s²) o Y cae (<= 3.2 m/s²)
+    private static final float UMBRAL_INCLINADO_Z_MIN = 7.5f;
+    private static final float UMBRAL_INCLINADO_Y_MAX = 3.2f;
 
-    private static final long ENFRIAMIENTO_MS = 1200;       // Tiempo mínimo entre detecciones
+    private static final long ENFRIAMIENTO_MS = 1000;       // Tiempo mínimo entre detecciones
 
     private final SensorManager sensorManager;
     private final Sensor acelerometro;
@@ -76,20 +77,20 @@ public class DetectorInclinacionFrontal implements SensorEventListener {
             zFiltrado = ALFA * zFiltrado + (1 - ALFA) * zActual;
         }
 
-        // 1. Condición de partida estricta: posición completamente vertical
-        if (yFiltrado > UMBRAL_VERTICAL_Y && Math.abs(zFiltrado) < UMBRAL_VERTICAL_Z_MAX) {
+        // 1. Armado: el usuario sostiene el móvil en posición de lectura normal
+        if (yFiltrado >= UMBRAL_REPOSO_Y_MIN && zFiltrado <= UMBRAL_REPOSO_Z_MAX) {
             armado = true;
             return;
         }
 
-        // 2. Condición de disparo: habiendo partido de vertical, que se tumbe del todo (horizontal boca arriba o hacia abajo)
+        // 2. Disparo: si estaba armado y el usuario lo inclina hacia atrás
         long ahora = SystemClock.elapsedRealtime();
-        boolean tumbadoDelTodo = (zFiltrado > UMBRAL_TUMBADO_Z && Math.abs(yFiltrado) < UMBRAL_TUMBADO_Y_MAX)
-                || (zFiltrado < -7.8f && Math.abs(yFiltrado) < 3.5f) // Tumbado hacia abajo
-                || (yFiltrado < -6.5f); // Volteado completamente hacia abajo
+        boolean inclinadoAtras = (zFiltrado >= UMBRAL_INCLINADO_Z_MIN || yFiltrado <= UMBRAL_INCLINADO_Y_MAX)
+                || (zFiltrado < -7.0f) // Volteado hacia abajo
+                || (yFiltrado < -5.0f); // Invertido
 
-        if (armado && tumbadoDelTodo && (ahora - ultimoDisparo > ENFRIAMIENTO_MS)) {
-            armado = false; // Se desarma hasta que el usuario vuelva a colocarlo completamente vertical
+        if (armado && inclinadoAtras && (ahora - ultimoDisparo > ENFRIAMIENTO_MS)) {
+            armado = false; // Se desarma hasta que el usuario vuelva a colocarlo en posición de lectura
             ultimoDisparo = ahora;
             if (listener != null) {
                 listener.alInclinarAtras();

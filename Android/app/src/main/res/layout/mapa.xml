@@ -1,87 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootMapa"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/nui_superficie"
+    android:orientation="vertical">
 
-    <!-- 1. CABECERA: Título de la sección e icono de perfil -->
-    <RelativeLayout
+    <!-- 1. CABECERA: Título · Chat · Perfil (Idéntica a MenuPrincipal y Comedores) -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:paddingHorizontal="4dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
 
         <TextView
             android:id="@+id/tvTituloMapa"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/ivIcono"
-            android:text="Mapa Interactivo"
-            android:textColor="#000000"
-            android:textSize="22sp"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="Mapa"
+            android:textColor="@color/nui_tinta"
+            android:textSize="20sp"
             android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="Abrir asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/ivIcono"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="Icono de perfil"
+            android:contentDescription="Perfil"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:src="@drawable/icono" />
-    </RelativeLayout>
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
+    </LinearLayout>
 
-    <!-- SELECTOR DE VISTA: MAPA GPS VS PLANOS ETSIIT -->
+    <!-- 2. SELECTOR DE VISTA: MAPA GPS VS PLANOS ETSIIT -->
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/toggleGroupModo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:checkedButton="@id/btnModoMapa"
         app:selectionRequired="true"
         app:singleSelection="true">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnModoMapa"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="42dp"
             android:layout_weight="1"
             android:text="🗺️ Mapa GPS"
-            android:textSize="13sp"
-            app:strokeColor="#FF8C42" />
+            android:textColor="@color/selector_toggle_texto_mapa"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/selector_toggle_boton_mapa"
+            app:cornerRadius="14dp"
+            app:strokeColor="#FFE7D6"
+            app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnModoPlanos"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="42dp"
             android:layout_weight="1"
             android:text="🏢 Planos ETSIIT"
-            android:textSize="13sp"
-            app:strokeColor="#FF8C42" />
+            android:textColor="@color/selector_toggle_texto_mapa"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/selector_toggle_boton_mapa"
+            app:cornerRadius="14dp"
+            app:strokeColor="#FFE7D6"
+            app:strokeWidth="1dp" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <!-- 2. BUSCADOR SUPERIOR (Solo visible en modo Planos) -->
+    <!-- 3. BUSCADOR SUPERIOR (Solo visible en modo Planos) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardBuscadorMapa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:visibility="gone"
-        app:cardBackgroundColor="#FFFFFF"
+        app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="16dp"
-        app:cardElevation="3dp"
-        app:strokeColor="#E0E0E0"
+        app:cardElevation="2dp"
+        app:strokeColor="#FFE7D6"
         app:strokeWidth="1dp">
 
         <LinearLayout
@@ -90,43 +139,45 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="14dp"
-            android:paddingVertical="4dp">
+            android:paddingVertical="2dp">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Buscar"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
                 android:src="@android:drawable/ic_menu_search"
-                app:tint="#FF8C42" />
+                app:tint="@color/nui_acento" />
 
             <AutoCompleteTextView
                 android:id="@+id/etBuscadorMapa"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="44dp"
                 android:background="@null"
                 android:hint="Buscar aula, despacho, laboratorio o servicio..."
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:textColor="#000000"
-                android:textColorHint="#888888"
-                android:textSize="14sp" />
+                android:textColor="@color/nui_tinta"
+                android:textColorHint="@color/nui_apagado"
+                android:textSize="13.5sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 3. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
+    <!-- 4. RECUADRO CENTRAL PARA EL MAPA O PLANO -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardMapaContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginVertical="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="8dp"
         app:cardBackgroundColor="#000000"
         app:cardCornerRadius="20dp"
-        app:cardElevation="6dp"
-        app:strokeColor="#FF8C42"
-        app:strokeWidth="2dp">
+        app:cardElevation="4dp"
+        app:strokeColor="#FFE7D6"
+        app:strokeWidth="1.5dp">
 
         <FrameLayout
             android:id="@+id/flContenedorMapa"
@@ -164,25 +215,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
-                android:layout_margin="16dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginBottom="16dp"
                 android:text="Cómo llegar"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
-                app:backgroundTint="#FF8C42"
+                android:textColor="@android:color/white"
+                android:textSize="12.5sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/nui_acento"
+                app:cornerRadius="16dp"
+                app:elevation="4dp"
                 app:icon="@android:drawable/ic_menu_directions"
-                app:iconTint="#FFFFFF" />
+                app:iconTint="@android:color/white" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabMiUbicacion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginBottom="16dp"
                 android:contentDescription="Mi ubicación"
                 android:src="@android:drawable/ic_menu_mylocation"
-                app:backgroundTint="#FFFFFF"
+                app:backgroundTint="@android:color/white"
+                app:elevation="4dp"
                 app:fabCustomSize="48dp"
-                app:tint="#FF8C42" />
+                app:tint="@color/nui_acento" />
 
             <!-- Panel de ruta activa (solo en modo Planos): dónde estás, a dónde vas y botón del visor -->
             <com.google.android.material.card.MaterialCardView
@@ -192,77 +249,93 @@
                 android:layout_gravity="bottom"
                 android:layout_margin="12dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFFBF7"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="8dp"
-                app:strokeColor="#FF8C42"
-                app:strokeWidth="1dp">
+                app:strokeColor="#FFE7D6"
+                app:strokeWidth="1.5dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:id="@+id/tvRutaInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="#000000"
+                        android:lineSpacingExtra="2dp"
+                        android:textColor="@color/nui_tinta"
                         android:textSize="13sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnAbrirVisor"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="6dp"
                             android:layout_weight="1"
+                            android:backgroundTint="@color/nui_acento"
                             android:text="Visor"
                             android:textAllCaps="false"
-                            app:backgroundTint="#FF8C42" />
+                            android:textColor="@android:color/white"
+                            android:textSize="12.5sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="12dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCambiarUbicacion"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="6dp"
+                            android:layout_weight="1.1"
+                            android:backgroundTint="@color/nui_suave"
                             android:insetLeft="0dp"
                             android:insetRight="0dp"
                             android:text="Cambiar"
                             android:textAllCaps="false"
-                            android:textColor="#FF8C42"
-                            app:strokeColor="#FF8C42" />
+                            android:textColor="@color/nui_tinta"
+                            android:textSize="12.5sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="#FFE3D1"
+                            app:strokeWidth="1dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCancelarRuta"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            style="@style/Widget.Material3.Button.TonalButton"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_height="40dp"
+                            android:layout_weight="1.1"
+                            android:backgroundTint="@color/nui_suave"
                             android:text="Cancelar"
                             android:textAllCaps="false"
-                            android:textColor="#FF8C42"
-                            app:strokeColor="#FF8C42" />
+                            android:textColor="#E02424"
+                            android:textSize="12.5sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="#FEE2E2"
+                            app:strokeWidth="1dp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 4. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
+    <!-- 5. SELECTOR DE PLANTAS (Solo visible en modo Planos) -->
     <HorizontalScrollView
         android:id="@+id/scrollPlantas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="10dp"
         android:scrollbars="none"
         android:visibility="gone">
 
@@ -279,7 +352,12 @@
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sótano" />
+                android:text="Sótano"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipBaja"
@@ -287,42 +365,72 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="Planta Baja" />
+                android:text="Planta Baja"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipPrimera"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Planta 1" />
+                android:text="Planta 1"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipSegunda"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Planta 2" />
+                android:text="Planta 2"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTercera"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Planta 3" />
+                android:text="Planta 3"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipCuarta"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Planta 4" />
+                android:text="Planta 4"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipQuinta"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Planta 5" />
+                android:text="Planta 5"
+                android:textColor="@color/selector_chip_text_nui"
+                app:chipBackgroundColor="@color/selector_chip_background_nui"
+                app:chipCornerRadius="12dp"
+                app:chipStrokeColor="@color/selector_chip_stroke_nui"
+                app:chipStrokeWidth="1dp" />
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
