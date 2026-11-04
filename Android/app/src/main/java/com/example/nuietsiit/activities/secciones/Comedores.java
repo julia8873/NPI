@@ -27,6 +27,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -62,6 +63,7 @@ public class Comedores extends BaseActivity {
 
     // Componentes de la interfaz de usuario
     private TextView tvMensajeComedorCercano;
+    private TextView tvTagComedorCercano;
     private TextView tvDia, tvPrimerPlato, tvSegundoPlato, tvPostre;
     private ImageView ivIcono;
     private View cardMenu;
@@ -122,12 +124,21 @@ public class Comedores extends BaseActivity {
 
         // Enlazar vistas del layout XML
         tvMensajeComedorCercano = findViewById(R.id.tvMensajeComedoreCercano);
+        tvTagComedorCercano = findViewById(R.id.tvTagComedorCercano);
         tvDia = findViewById(R.id.tvDia);
         tvPrimerPlato = findViewById(R.id.tvPrimerPlato);
         tvSegundoPlato = findViewById(R.id.tvSegundoPlato);
         tvPostre = findViewById(R.id.tvPostre);
         ivIcono = findViewById(R.id.ivIcono);
         cardMenu = findViewById(R.id.cardMenu);
+
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
 
         aplicarMargenesSistema();
 
@@ -165,7 +176,7 @@ public class Comedores extends BaseActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new androidx.appcompat.app.AlertDialog.Builder(this)
+                new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
                         .setTitle("Asistente Virtual ETSIIT 🤖")
                         .setMessage("¡Hola! Soy tu asistente de Comedores. Aquí puedes consultar el menú del día de la UGR, ver los horarios y cambiar entre menú normal o vegetariano.")
@@ -347,9 +358,6 @@ public class Comedores extends BaseActivity {
         if (comedorSeleccionado != null) {
             mostrarComedorPrincipal(comedorSeleccionado);
         }
-
-        String mensaje = esModoVegetariano ? "🌱 Mostrando Menú Vegetariano" : "🥩 Mostrando Menú";
-        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -378,7 +386,6 @@ public class Comedores extends BaseActivity {
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
-            Toast.makeText(this, "🥩 Mostrando Menú", Toast.LENGTH_SHORT).show();
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
             }
@@ -393,7 +400,6 @@ public class Comedores extends BaseActivity {
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
-            Toast.makeText(this, "🌱 Mostrando Menú Vegetariano", Toast.LENGTH_SHORT).show();
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
             }
@@ -634,7 +640,6 @@ public class Comedores extends BaseActivity {
                 comedorSeleccionado = comedor;
                 mostrarComedorPrincipal(comedor);
                 dialog.dismiss();
-                Toast.makeText(Comedores.this, "Mostrando: " + comedor.getNombreComedor(), Toast.LENGTH_SHORT).show();
             });
 
             llBsListaComedores.addView(itemView);
@@ -818,9 +823,11 @@ public class Comedores extends BaseActivity {
     private void mostrarComedorPrincipal(Comedor comedor) {
         boolean esElMasCercano = !listaComedores.isEmpty() && listaComedores.get(0).getIdComedor() == comedor.getIdComedor();
         if (esElMasCercano) {
-            tvMensajeComedorCercano.setText("¡Tu comedor más cercano!\n" + comedor.getNombreComedor());
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText("📍 COMEDOR MÁS CERCANO");
+            tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         } else {
-            tvMensajeComedorCercano.setText("Comedor seleccionado:\n" + comedor.getNombreComedor());
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText("📍 COMEDOR SELECCIONADO");
+            tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         }
 
         if (calendarioSeleccionado == null) {

@@ -92,7 +92,6 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
             0f, 0f, 0f, 0f, 0f
     };
 
-    private static final int FOTO_OPCION_ASCENSOR_COMEDOR = 10;
     private static final int FOTO_OPCION_ASCENSOR_AULA = 5;
 
     private SensorManager sensorManager;
@@ -260,7 +259,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         }
 
         if (preguntaAscensorMostrada) return;
-        int fotoClave = esRutaComedor ? FOTO_OPCION_ASCENSOR_COMEDOR : FOTO_OPCION_ASCENSOR_AULA;
+        int fotoClave = esRutaComedor ? -1 : FOTO_OPCION_ASCENSOR_AULA;
 
         if (indiceRutaActual == fotoClave) {
             preguntaAscensorMostrada = true;

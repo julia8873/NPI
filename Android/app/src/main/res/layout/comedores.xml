@@ -20,7 +20,7 @@
         android:orientation="vertical"
         android:paddingBottom="16dp">
 
-        <!-- 1. CABECERA: Empieza exactamente donde el título del menú principal con chat y perfil idénticos -->
+        <!-- 1. CABECERA: Empieza con el botón volver y el título de comedores -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,6 +29,19 @@
             android:paddingHorizontal="16dp"
             android:paddingTop="6dp"
             android:paddingBottom="6dp">
+
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:contentDescription="Volver al menú principal"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/nui_tinta" />
 
             <TextView
                 android:layout_width="0dp"
@@ -141,6 +154,7 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvTagComedorCercano"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_nui_etiqueta"
@@ -476,15 +490,15 @@
                 </FrameLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Flecha Día Anterior (Arriba, a la altura de la fecha) -->
+            <!-- Flecha Día Anterior (Abajo, en el centro) -->
             <ImageButton
                 android:id="@+id/btnDiaAnterior"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_alignTop="@id/cardMenu"
+                android:layout_alignBottom="@id/cardMenu"
                 android:layout_alignStart="@id/cardMenu"
-                android:layout_marginTop="15dp"
-                android:layout_marginStart="10dp"
+                android:layout_marginBottom="15dp"
+                android:layout_marginStart="90dp"
                 android:background="@drawable/boton_circular"
                 android:contentDescription="Día anterior"
                 android:elevation="10dp"
@@ -494,15 +508,15 @@
                 app:tint="@android:color/white"
                 android:visibility="gone" />
 
-            <!-- Flecha Día Siguiente (Arriba, a la altura de la fecha) -->
+            <!-- Flecha Día Siguiente (Abajo, en el centro) -->
             <ImageButton
                 android:id="@+id/btnDiaSiguiente"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_alignTop="@id/cardMenu"
+                android:layout_alignBottom="@id/cardMenu"
                 android:layout_alignEnd="@id/cardMenu"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="90dp"
                 android:background="@drawable/boton_circular"
                 android:contentDescription="Día siguiente"
                 android:elevation="10dp"

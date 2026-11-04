@@ -12,14 +12,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -32,7 +31,7 @@ import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Biblioteca;
-import com.example.nuietsiit.activities.secciones.Calendario;
+import com.example.nuietsiit.activities.secciones.calendario.Calendario;
 import com.example.nuietsiit.activities.secciones.Comedores;
 import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.activities.secciones.Profesorado;
@@ -49,6 +48,7 @@ import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.util.DetectorInclinacionMenu;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.Notificador;
+import com.example.nuietsiit.util.RecienteUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 
@@ -410,6 +410,8 @@ public class MenuPrincipal extends BaseActivity {
         if (abriendo || indice < 0 || indice >= DESTINOS.length) return;
         abriendo = true;
         registrarSeccionVisitada(indice);
+        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[indice];
+        RecienteUtil.guardar(this, DESTINOS[indice], seccion.titulo, "Sección de la escuela", null, null, indice);
         hub.setSeleccion(indice, true);
         hub.animarApertura(indice, () -> {
             Intent intent = new Intent(MenuPrincipal.this, DESTINOS[indice]);
@@ -495,22 +497,19 @@ public class MenuPrincipal extends BaseActivity {
     }
 
     private void configurarAccesoDirectoReciente() {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAVEGACION, MODE_PRIVATE);
-        int ultimoIndice = prefs.getInt(KEY_ULTIMA_SECCION, 6); // Por defecto Comedores
-        String historial = prefs.getString(KEY_HISTORIAL_SECCIONES, String.valueOf(ultimoIndice));
-
-        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[ultimoIndice];
+        RecienteUtil.DatosRecientes recientes = RecienteUtil.obtener(this);
+        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[recientes.seccionIndex];
 
         tvTituloCabeceraAccesoDirecto.setText("PÁGINA RECIENTE");
         if (btnCambiarModoAcceso != null) {
             btnCambiarModoAcceso.setText("🔄 Cambiar a sugerido");
             btnCambiarModoAcceso.setTextColor(seccion.color);
-            int bgTint = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.15f);
+            int bgTint = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.15f);
             btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(bgTint));
         }
 
-        int bgCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.08f);
-        int borderCard = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.30f);
+        int bgCard = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.08f);
+        int borderCard = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.30f);
         cardAccesoDirecto.setCardBackgroundColor(bgCard);
         cardAccesoDirecto.setStrokeColor(borderCard);
 
@@ -520,23 +519,36 @@ public class MenuPrincipal extends BaseActivity {
 
         tvTagAccesoDirecto.setText("🕒 VISTO RECIENTEMENTE");
         tvTagAccesoDirecto.setTextColor(seccion.color);
-        int bgTag = androidx.core.graphics.ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.18f);
+        int bgTag = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.18f);
         tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(bgTag));
 
         if (ivChevronAccesoDirecto != null) {
             ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(seccion.color));
         }
 
-        tvSubinfoAccesoDirecto.setText("Acceso directo");
-        tvTituloAccesoDirecto.setText(seccion.titulo);
-        tvDescAccesoDirecto.setText("Última página abierta · Toca para volver a entrar");
+        tvSubinfoAccesoDirecto.setText("Acceso directo exacto");
+        tvTituloAccesoDirecto.setText(recientes.titulo);
+        tvDescAccesoDirecto.setText(recientes.subtitulo + " · Toca para volver");
 
         cardAccesoDirecto.setOnClickListener(v -> {
             vibrarConfirmacion();
-            abrirSeccion(ultimoIndice);
+            try {
+                if (recientes.className != null && !recientes.className.isEmpty()) {
+                    Class<?> targetClass = Class.forName(recientes.className);
+                    Intent intent = new Intent(MenuPrincipal.this, targetClass);
+                    intent.putExtra("CORREO", correoUsuario);
+                    if (recientes.extraKey != null && !recientes.extraKey.isEmpty() && recientes.extraVal != null) {
+                        intent.putExtra(recientes.extraKey, recientes.extraVal);
+                    }
+                    startActivity(intent);
+                } else {
+                    abrirSeccion(recientes.seccionIndex);
+                }
+            } catch (Exception e) {
+                abrirSeccion(recientes.seccionIndex);
+            }
         });
 
-        // Alternancia manual con pulsación larga para pruebas rápidas
         cardAccesoDirecto.setOnLongClickListener(v -> {
             vibrarConfirmacion();
             alternarModoAccesoDirecto();

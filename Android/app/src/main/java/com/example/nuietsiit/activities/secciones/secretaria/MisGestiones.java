@@ -26,6 +26,7 @@ import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
+import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
@@ -63,6 +64,7 @@ public class MisGestiones extends BaseActivity {
 
         db = new SecretariaDB(DBHelper.getInstance(this));
         correoUsuario = SesionUtil.correo(getIntent());
+        RecienteUtil.guardar(this, MisGestiones.class, "Mis Gestiones", "Citas y solicitudes", null, null, 5);
 
         citasAdapter = new GestionAdapter(this::abrirJustificante);
         solicitudesAdapter = new GestionAdapter(this::abrirJustificante);

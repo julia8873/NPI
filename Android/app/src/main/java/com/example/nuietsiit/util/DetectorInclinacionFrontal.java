@@ -24,11 +24,11 @@ public class DetectorInclinacionFrontal implements SensorEventListener {
     private static final float UMBRAL_REPOSO_Z_MAX = 7.5f;
 
     // Para considerarse inclinado hacia atrás (hacia la horizontal con pantalla arriba o volteado):
-    // Z aumenta (>= 7.5 m/s²) o Y cae (<= 3.2 m/s²)
-    private static final float UMBRAL_INCLINADO_Z_MIN = 7.5f;
-    private static final float UMBRAL_INCLINADO_Y_MAX = 3.2f;
+    // Z aumenta (>= 8.8 m/s²) o Y cae (<= 1.5 m/s²)
+    private static final float UMBRAL_INCLINADO_Z_MIN = 8.8f;
+    private static final float UMBRAL_INCLINADO_Y_MAX = 1.5f;
 
-    private static final long ENFRIAMIENTO_MS = 1000;       // Tiempo mínimo entre detecciones
+    private static final long ENFRIAMIENTO_MS = 2000;       // 2s de enfriamiento para evitar cambios accidentales
 
     private final SensorManager sensorManager;
     private final Sensor acelerometro;

@@ -116,7 +116,6 @@ public class BaseActivity extends AppCompatActivity {
 
         if (!(this instanceof MenuPrincipal) && !(this instanceof Login) && !(this instanceof SignUp)) {
             MaterialToolbar toolbar = findViewById(R.id.toolbar);
-            if (toolbar == null) toolbar = findViewById(R.id.toolbarCalendario);
             if (toolbar != null && toolbar.findViewById(R.id.ivIcono) == null) {
                 ImageView ivIcono = new ImageView(this);
                 ivIcono.setId(R.id.ivIcono);

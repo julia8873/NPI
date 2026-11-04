@@ -64,7 +64,7 @@
         <activity android:name=".activities.secciones.secretaria.MisGestiones" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
-        <activity android:name=".activities.secciones.Calendario" />
+        <activity android:name=".activities.secciones.calendario.Calendario" />
 
         <!-- Secretaría: la app de cámara guarda la foto del documento en getFilesDir()/secretaria/ -->
         <provider

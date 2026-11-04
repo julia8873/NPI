@@ -1,4 +1,4 @@
-package com.example.nuietsiit.activities.secciones;
+package com.example.nuietsiit.activities.secciones.calendario;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -38,6 +38,11 @@ public class CalendarGridView extends View {
 
     public CalendarGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init();
+    }
+
+    public CalendarGridView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         init();
     }
 

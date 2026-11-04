@@ -7,7 +7,7 @@
     android:background="@color/nui_superficie"
     android:orientation="vertical">
 
-    <!-- 1. CABECERA: Título · Chat · Perfil (Idéntica a MenuPrincipal y Comedores) -->
+    <!-- 1. CABECERA: Botón volver · Título · Chat · Perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,6 +16,19 @@
         android:paddingHorizontal="16dp"
         android:paddingTop="6dp"
         android:paddingBottom="6dp">
+
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="Volver al menú principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
 
         <TextView
             android:id="@+id/tvTituloMapa"

@@ -1,8 +1,10 @@
-package com.example.nuietsiit.activities.secciones;
+package com.example.nuietsiit.activities.secciones.calendario;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,19 +17,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.EventoCalendario;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,12 +75,43 @@ public class Calendario extends BaseActivity {
             correoUsuario = getIntent().getStringExtra("CORREO");
         }
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbarCalendario);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        aplicarMargenesSistema();
+
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
+        }
+
+        ImageView ivIcono = findViewById(R.id.ivIcono);
+        if (ivIcono != null) {
+            ivIcono.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                if (correoUsuario == null || correoUsuario.isEmpty()) {
+                    Intent intent = new Intent(Calendario.this, Login.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(Calendario.this, AjustesCuenta.class);
+                    intent.putExtra("CORREO", correoUsuario);
+                    startActivity(intent);
+                }
+            });
+        }
 
         calendarView = findViewById(R.id.calendarView);
         tvFechaSeleccionadaHeader = findViewById(R.id.tvFechaSeleccionadaHeader);
@@ -93,13 +129,15 @@ public class Calendario extends BaseActivity {
         actualizarHeaderFecha(new Date());
         cargarEventosFecha(fechaSeleccionadaStr);
 
-        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            Calendar cal = Calendar.getInstance();
-            cal.set(year, month, dayOfMonth);
-            fechaSeleccionadaStr = sdf.format(cal.getTime());
-            actualizarHeaderFecha(cal.getTime());
-            cargarEventosFecha(fechaSeleccionadaStr);
-        });
+        if (calendarView != null) {
+            calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+                Calendar cal = Calendar.getInstance();
+                cal.set(year, month, dayOfMonth);
+                fechaSeleccionadaStr = sdf.format(cal.getTime());
+                actualizarHeaderFecha(cal.getTime());
+                cargarEventosFecha(fechaSeleccionadaStr);
+            });
+        }
 
         btnAnadirEventoRapido.setOnClickListener(v -> mostrarDialogoAnadirEvento());
     }
@@ -175,7 +213,7 @@ public class Calendario extends BaseActivity {
                     }
 
                     calendarioDB.insertarEvento(correoUsuario, titulo, tipo, fechaSeleccionadaStr, hora, desc);
-                    Toast.makeText(this, "Evento anotado para el calendario", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Evento anotado para el calendario", Toast.LENGTH_LONG).show();
                     cargarEventosFecha(fechaSeleccionadaStr);
                 })
                 .setNegativeButton("Cancelar", null)
@@ -256,6 +294,17 @@ public class Calendario extends BaseActivity {
                 cardTipoBadge = itemView.findViewById(R.id.cardTipoBadge);
                 btnEliminar = itemView.findViewById(R.id.btnEliminarEvento);
             }
+        }
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootCalendario);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
         }
     }
 }

@@ -48,6 +48,10 @@ import android.view.HapticFeedbackConstants;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -218,15 +222,23 @@ public class Mapa extends BaseActivity {
 
         bindViews();
 
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
+
         if (ivIcono != null) {
             ivIcono.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 String correo = obtenerCorreoUsuarioActual();
                 if (correo == null || correo.isEmpty()) {
-                    Intent intent = new Intent(Mapa.this, com.example.nuietsiit.activities.auth.Login.class);
+                    Intent intent = new Intent(Mapa.this, Login.class);
                     startActivity(intent);
                 } else {
-                    Intent intent = new Intent(Mapa.this, com.example.nuietsiit.activities.main.AjustesCuenta.class);
+                    Intent intent = new Intent(Mapa.this, AjustesCuenta.class);
                     intent.putExtra("CORREO", correo);
                     startActivity(intent);
                 }
@@ -295,7 +307,6 @@ public class Mapa extends BaseActivity {
         listaMarcadores.add(new Marcador("💻 Aula 0.4", "planta0", 4450f, 2250f));
         listaMarcadores.add(new Marcador("💻 Aula 0.5", "planta0", 4650f, 2450f));
         listaMarcadores.add(new Marcador("💻 Aula 1.4", "planta1", 3300f, 1450f));
-        listaMarcadores.add(new Marcador("💻 Aula 0.7", "planta0", 4750f, 2350f));
 
         // Crear dinámicamente las vistas ImageView para cada marcador
         crearVistasMarcadores();
@@ -504,8 +515,22 @@ public class Mapa extends BaseActivity {
         });
     }
 
+    private String nombrePlantaLegible(String id) {
+        switch (id) {
+            case "sotano": return "Sótano";
+            case "planta0": return "Planta Baja";
+            case "planta1": return "Planta 1";
+            case "planta2": return "Planta 2";
+            case "planta3": return "Planta 3";
+            case "planta4": return "Planta 4";
+            case "planta5": return "Planta 5";
+            default: return id;
+        }
+    }
+
     private void cargarPlanoDrawable(String nombreSinExtension) {
         this.plantaActual = nombreSinExtension;
+        RecienteUtil.guardar(this, Mapa.class, "Plano: " + nombrePlantaLegible(nombreSinExtension), "Mapa ETSIIT", "PLANTA", nombreSinExtension, 1);
 
         int resId = getResources().getIdentifier(nombreSinExtension, "drawable", getPackageName());
 
