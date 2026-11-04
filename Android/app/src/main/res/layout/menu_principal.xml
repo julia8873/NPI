@@ -426,4 +426,12 @@
 
     </LinearLayout>
 
+    <!-- Animacion de la ola al regresar al menu principal por agitacion -->
+    <com.example.nuietsiit.activities.main.WaveView
+        android:id="@+id/waveView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="100dp"
+        android:visibility="gone" />
+
 </FrameLayout>

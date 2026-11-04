@@ -52,10 +52,52 @@ public class BaseActivity extends AppCompatActivity {
         mShakeDetector = new ShakeDetector();
         mShakeDetector.setOnShakeListener(() -> {
             if (!(BaseActivity.this instanceof MenuPrincipal)) {
-                Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-                finish();
+                if (isFinishing() || isDestroyed()) return;
+
+                if (mSensorManager != null) {
+                    mSensorManager.unregisterListener(mShakeDetector);
+                }
+
+                // 1. Obtener el contenedor raíz de la actividad
+                ViewGroup rootView = findViewById(android.R.id.content);
+
+                // 2. Si no se ha creado aún la vista de la ola, la instanciamos
+                if (mWaveView == null && rootView != null) {
+                    mWaveView = new WaveView(BaseActivity.this, null);
+                    mWaveView.setId(View.generateViewId());
+
+                    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                    );
+                    mWaveView.setLayoutParams(params);
+                    mWaveView.setElevation(100f);
+
+                    rootView.addView(mWaveView);
+                }
+
+                // 3. Ejecutar la animación
+                if (mWaveView != null) {
+                    mWaveView.setVisibility(View.VISIBLE);
+                    mWaveView.bringToFront();
+
+                    // Llama a la animación SOLO de subida
+                    mWaveView.startWaveUp(() -> {
+                        Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
+                        intent.putExtra("START_WAVE_DOWN", true); // Aviso para el MenuPrincipal
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0); // Evita parpadeos nativos
+                        finish();
+                    });
+                } else {
+                    Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
+                    intent.putExtra("START_WAVE_DOWN", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                    finish();
+                }
             } else {
                 onShakeMenuPrincipal();
             }

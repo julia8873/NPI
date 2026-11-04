@@ -136,6 +136,8 @@ public class MenuPrincipal extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.menu_principal);
 
+        comprobarAnimacionOla(getIntent());
+
         BD = DBHelper.getInstance(this);
         calendarioDB = new CalendarioDB(BD);
         actividadesDB = new ActividadesDB(BD);
@@ -197,6 +199,17 @@ public class MenuPrincipal extends BaseActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        comprobarAnimacionOla(intent);
+    }
+
+    private void comprobarAnimacionOla(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("START_WAVE_DOWN", false)) {
+            intent.removeExtra("START_WAVE_DOWN");
+            WaveView waveView = findViewById(R.id.waveView);
+            if (waveView != null) {
+                waveView.startWaveDown(null);
+            }
+        }
     }
 
     /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
