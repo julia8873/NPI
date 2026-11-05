@@ -197,7 +197,7 @@ public class MenuPrincipal extends BaseActivity {
         Notificador.revisarAvisos(this, correoUsuario);
 
         // Configuración del botón flotante (FAB) para el Asistente AI Gemini
-        FloatingActionButton fabAsistenteChat = findViewById(R.id.fabAsistenteChat);
+        View fabAsistenteChat = findViewById(R.id.fabAsistenteChat);
         if (fabAsistenteChat != null) {
             fabAsistenteChat.setOnClickListener(v -> {
                 Intent chatIntent = new Intent(MenuPrincipal.this, ChatActivity.class);
