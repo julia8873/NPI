@@ -46,7 +46,7 @@
                 android:focusable="true" />
 
             <LinearLayout
-                android:id="@+id/cardMascotaAyudante"
+                android:id="@+id/fabAsistenteChat"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginEnd="10dp"
@@ -424,6 +424,9 @@
 
 </LinearLayout>
 
+
+
+    <!-- LA OLA (Se coloca al final para quedar por encima de todo el contenido) -->
     </LinearLayout>
 
     <!-- Animacion de la ola al regresar al menu principal por agitacion -->
@@ -435,3 +438,4 @@
         android:visibility="gone" />
 
 </FrameLayout>
+
