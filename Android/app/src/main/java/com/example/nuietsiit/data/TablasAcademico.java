@@ -82,6 +82,7 @@ public final class TablasAcademico {
         // Matriculamos al invitado en NPI y PL en el Grupo A
         matricula(db, correoInvitado, "NPI", cursoAcademico, "A");
         matricula(db, correoInvitado, "PL", cursoAcademico, "A");
+        matricula(db, correoInvitado, "VC", cursoAcademico, "A");
 
         // -------------------------------------------------
         // 4. ESPACIOS Y EDIFICIO (Despachos y Aulas)
@@ -138,6 +139,7 @@ public final class TablasAcademico {
         // FP, VC, EDI, AF
         sesionClase(db, "FP", 2, "08:30", "10:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
         sesionClase(db, "VC", 2, "10:30", "12:30", "A", "teoria", "maria.garcia@ugr.es", cursoAcademico);
+        sesionClase(db, "VC", 4, "10:30", "12:30", "A", "practicas", "maria.garcia@ugr.es", cursoAcademico);
         sesionClase(db, "EDI", 3, "08:30", "10:30", "A", "teoria", "carlos.rodriguez@ugr.es", cursoAcademico);
         sesionClase(db, "AF", 5, "08:30", "10:30", "A", "teoria", "ana.martinez@ugr.es", cursoAcademico);
 

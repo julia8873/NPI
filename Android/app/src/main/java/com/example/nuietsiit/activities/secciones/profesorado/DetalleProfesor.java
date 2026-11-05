@@ -56,7 +56,10 @@ public class DetalleProfesor extends BaseActivity {
         usuariosDB = new UsuariosDB(BD);
         tutoriasDB = new TutoriasDB(BD);
 
-        btnVolver = findViewById(R.id.btnVolverDetalle);
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> finish());
+        }
         tvNombreProfesor = findViewById(R.id.tvNombreProfesor);
         tvCorreoProfesor = findViewById(R.id.tvCorreoProfesor);
         tvDespacho = findViewById(R.id.tvDespacho);
@@ -64,8 +67,6 @@ public class DetalleProfesor extends BaseActivity {
         btnWeb = findViewById(R.id.btnWeb);
         contenedorClases = findViewById(R.id.contenedorClases);
         contenedorTutorias = findViewById(R.id.contenedorTutorias);
-
-        btnVolver.setOnClickListener(v -> finish());
 
         correoProfesor = getIntent().getStringExtra("CORREO_PROFESOR");
 
