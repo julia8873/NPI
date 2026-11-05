@@ -92,9 +92,13 @@ public class Secretaria extends PantallaSecretaria {
 
         // Botón atrás en la barra superior
         MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Secretaría");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (barra != null) {
+            setSupportActionBar(barra);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Secretaría");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        }
 
         correoUsuario = SesionUtil.correo(getIntent());
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
