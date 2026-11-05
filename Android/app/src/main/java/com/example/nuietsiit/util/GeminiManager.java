@@ -69,7 +69,7 @@ public class GeminiManager {
         ToolConfig toolConfig = null;
 
         GenerativeModel gm = new GenerativeModel(
-                "gemini-3.5-flash",
+                "gemini-3.5-flash-lite",
                 BuildConfig.GEMINI_API_KEY,
                 genConfig,
                 safetySettings,
@@ -78,6 +78,9 @@ public class GeminiManager {
                 toolConfig,
                 systemInstruction
         );
+
+
+
 
         this.modelFutures = GenerativeModelFutures.from(gm);
         this.chatSession = modelFutures.startChat();
@@ -109,6 +112,11 @@ public class GeminiManager {
                 "Ayudar a los estudiantes, profesores y personal de la ETSIIT respondiendo dudas sobre la facultad " +
                 "(asignaturas, profesores, horarios, comedores, biblioteca, trámites y planos/ubicaciones) y ejecutando " +
                 "acciones dentro de la aplicación móvil cuando el usuario lo solicite mediante Function Calling.\n\n" +
+                "REGLAS OBLIGATORIAS E INQUEBRANTABLES PARA EL USO DE HERRAMIENTAS (FUNCTION CALLING):\n" +
+                "1. NUNCA te inventes datos, platos de comida o menús del comedor, profesores, tutorías, libros o actividades.\n" +
+                "2. SIEMPRE que el usuario pregunte por el menú del comedor (de hoy, mañana o cualquier fecha), DEBES invocar OBLIGATORIAMENTE la función 'consultarMenuComedor'. Si no especifica el nombre del comedor, usa 'ETSIIT'.\n" +
+                "3. NO emitas textos preliminares como 'voy a consultar' o 'un momento'. Invoca INMEDIATAMENTE la herramienta correspondiente sin texto previo.\n" +
+                "4. Una vez ejecutada la herramienta, responde al usuario con el resultado final formateado amablemente en viñetas.\n\n" +
                 "TONO Y ESTILO DE RESPUESTA:\n" +
                 "1. Sé siempre amable, cercano, conciso y profesional.\n" +
                 "2. Mantén tus respuestas breves y estructuradas (usa viñetas).\n" +
@@ -120,11 +128,13 @@ public class GeminiManager {
                 "=======================================\n\n" +
                 "Dirígete al usuario por su nombre de forma natural cuando sea oportuno (" + nombre + ").";
 
+
         Content.Builder builder = new Content.Builder();
         builder.setRole("system");
         builder.addText(promptText);
         return builder.build();
     }
+
 
     public void enviarMensaje(String textoMensaje, GeminiCallback callback) {
         Content contenidoMensaje = new Content.Builder().addText(textoMensaje).build();
@@ -224,28 +234,49 @@ public class GeminiManager {
                     break;
                 }
                 case "consultarMenuComedor": {
-                    String nombreComedor = args.get("nombreComedor") != null ? args.get("nombreComedor") : "Aynadamar";
+                    String nombreComedor = args.get("nombreComedor") != null ? args.get("nombreComedor") : "ETSIIT";
                     String fecha = args.get("fecha");
                     if (fecha == null || fecha.isEmpty()) {
                         fecha = LocalDate.now().toString();
                     }
+
+                    // Asegurar que las tablas de comedores estén pobladas con datos de hoy y simulación
+                    com.example.nuietsiit.data.Comedores.TablasComedores.poblar(dbHelper.getWritableDatabase());
                     ComedoresDB dao = new ComedoresDB(dbHelper);
+                    dao.asegurarMenusSimulacion();
+
                     List<Comedor> comedores = dao.obtenerListaComedores();
                     int idComedorEncontrado = 1;
+                    String nombreOficialComedor = "Comedor ETSIIT (Aynadamar)";
+
+                    String busquedaLower = nombreComedor.toLowerCase();
                     for (Comedor com : comedores) {
-                        if (com.getNombreComedor().toLowerCase().contains(nombreComedor.toLowerCase())) {
+                        String comNombreLower = com.getNombreComedor().toLowerCase();
+                        if (comNombreLower.contains(busquedaLower) || busquedaLower.contains(comNombreLower) ||
+                            (busquedaLower.contains("aynadamar") && com.getIdComedor() == 1) ||
+                            (busquedaLower.contains("etsiit") && com.getIdComedor() == 1) ||
+                            (busquedaLower.contains("ciencias") && com.getIdComedor() == 3)) {
                             idComedorEncontrado = com.getIdComedor();
+                            nombreOficialComedor = com.getNombreComedor();
                             break;
                         }
                     }
-                    MenuInfo menu = dao.obtenerMenuParaComedorYFecha(idComedorEncontrado, fecha);
-                    resultado.put("comedor", nombreComedor);
+
+
+                    MenuInfo menuNormal = dao.obtenerMenuParaComedorYFecha(idComedorEncontrado, fecha, false);
+                    MenuInfo menuVeg = dao.obtenerMenuParaComedorYFecha(idComedorEncontrado, fecha, true);
+
+                    resultado.put("comedor", nombreOficialComedor);
                     resultado.put("fecha", fecha);
-                    resultado.put("primerPlato", menu.getPrimerPlato());
-                    resultado.put("segundoPlato", menu.getSegundoPlato());
-                    resultado.put("postre", menu.getPostre());
+                    resultado.put("primerPlato", menuNormal.getPrimerPlato());
+                    resultado.put("segundoPlato", menuNormal.getSegundoPlato());
+                    resultado.put("postre", menuNormal.getPostre());
+                    resultado.put("primerPlatoVegetariano", menuVeg.getPrimerPlato());
+                    resultado.put("segundoPlatoVegetariano", menuVeg.getSegundoPlato());
+                    resultado.put("postreVegetariano", menuVeg.getPostre());
                     break;
                 }
+
                 case "buscarLibroBiblioteca": {
                     String query = args.get("query") != null ? args.get("query") : "";
                     BibliotecaDB dao = new BibliotecaDB(dbHelper);
