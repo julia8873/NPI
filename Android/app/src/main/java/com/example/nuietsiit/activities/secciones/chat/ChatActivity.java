@@ -13,7 +13,9 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.modelo.MensajeChat;
 import com.example.nuietsiit.util.GeminiManager;
+import com.example.nuietsiit.util.GeminiTools;
 import com.example.nuietsiit.util.SesionUtil;
+
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -45,8 +47,14 @@ public class ChatActivity extends BaseActivity {
         configurarRecyclerView();
         configurarEventos();
 
-        // Inicializar GeminiManager (sin herramientas aún en la Fase C)
-        geminiManager = new GeminiManager(this, correoUsuario, null);
+        // Inicializar GeminiManager con manejo de errores por si las herramientas fallan al deserializar
+        try {
+            geminiManager = new GeminiManager(this, correoUsuario, GeminiTools.obtenerHerramientas());
+        } catch (Exception e) {
+            Log.e("ChatGemini", "Error al inicializar herramientas de Function Calling", e);
+            geminiManager = new GeminiManager(this, correoUsuario, null);
+        }
+
 
         // Saludo inicial de bienvenida del asistente
         agregarMensajeBienvenida();
