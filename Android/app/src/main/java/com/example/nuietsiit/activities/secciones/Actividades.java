@@ -69,9 +69,13 @@ public class Actividades extends BaseActivity {
 
         // Barra superior con botón atrás
         MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Actividades");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (barra != null) {
+            setSupportActionBar(barra);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Actividades");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        }
 
         // Sesión guardada al iniciar sesión (SharedPreferences "SesionUsuario")
         correoUsuario = correoSesion();

@@ -57,9 +57,13 @@ public class Noticias extends BaseActivity {
         setContentView(R.layout.noticias);
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Noticias y avisos");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (barra != null) {
+            setSupportActionBar(barra);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Noticias y avisos");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        }
 
         anunciosDB = new AnunciosDB(DBHelper.getInstance(this));
 
