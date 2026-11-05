@@ -382,7 +382,6 @@ public class Comedores extends BaseActivity {
             esModoVegetariano = false;
             guardarPreferenciaVegetariano(false);
             actualizarBotonTipoMenu();
-            actualizarVistasDialogoTipoMenu();
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
@@ -396,7 +395,6 @@ public class Comedores extends BaseActivity {
             esModoVegetariano = true;
             guardarPreferenciaVegetariano(true);
             actualizarBotonTipoMenu();
-            actualizarVistasDialogoTipoMenu();
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
@@ -425,25 +423,22 @@ public class Comedores extends BaseActivity {
         if (btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
                 && badgeMenuNormalDialog != null && badgeMenuVegetarianoDialog != null) {
 
-            if (esModoVegetariano) {
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuVegetarianoDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuNormalDialog.setVisibility(View.GONE);
+            View vActiva = esModoVegetariano ? btnOpcionMenuVegetarianoDialog : btnOpcionMenuNormalDialog;
+            View vInactiva = esModoVegetariano ? btnOpcionMenuNormalDialog : btnOpcionMenuVegetarianoDialog;
+            View bActiva = esModoVegetariano ? badgeMenuVegetarianoDialog : badgeMenuNormalDialog;
+            View bInactiva = esModoVegetariano ? badgeMenuNormalDialog : badgeMenuVegetarianoDialog;
 
-                btnOpcionMenuVegetarianoDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuVegetarianoDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            } else {
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuNormalDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuVegetarianoDialog.setVisibility(View.GONE);
+            vActiva.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
+            bActiva.setVisibility(View.VISIBLE);
+            vInactiva.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
+            bInactiva.setVisibility(View.GONE);
 
-                btnOpcionMenuNormalDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuNormalDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            }
+            final View targetView = vActiva;
+            targetView.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() -> {
+                if (targetView.isAttachedToWindow()) {
+                    targetView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+                }
+            }).start();
         }
     }
 

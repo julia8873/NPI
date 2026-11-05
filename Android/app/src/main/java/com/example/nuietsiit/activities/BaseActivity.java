@@ -2,8 +2,6 @@ package com.example.nuietsiit.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -13,12 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
@@ -27,10 +25,8 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.activities.main.ShakeDetector;
 import com.example.nuietsiit.activities.main.WaveView;
+import com.example.nuietsiit.util.DetectorBocaAbajo;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.card.MaterialCardView;
-
-import androidx.appcompat.app.AppCompatDelegate;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -38,6 +34,7 @@ public class BaseActivity extends AppCompatActivity {
     private Sensor mAccelerometer;
     private ShakeDetector mShakeDetector;
     private WaveView mWaveView;
+    private DetectorBocaAbajo mDetectorBocaAbajo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +46,8 @@ public class BaseActivity extends AppCompatActivity {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
 
+        mDetectorBocaAbajo = new DetectorBocaAbajo(this);
+
         mShakeDetector = new ShakeDetector();
         mShakeDetector.setOnShakeListener(() -> {
             if (!(BaseActivity.this instanceof MenuPrincipal)) {
@@ -58,10 +57,8 @@ public class BaseActivity extends AppCompatActivity {
                     mSensorManager.unregisterListener(mShakeDetector);
                 }
 
-                // 1. Obtener el contenedor raíz de la actividad
                 ViewGroup rootView = findViewById(android.R.id.content);
 
-                // 2. Si no se ha creado aún la vista de la ola, la instanciamos
                 if (mWaveView == null && rootView != null) {
                     mWaveView = new WaveView(BaseActivity.this, null);
                     mWaveView.setId(View.generateViewId());
@@ -76,18 +73,16 @@ public class BaseActivity extends AppCompatActivity {
                     rootView.addView(mWaveView);
                 }
 
-                // 3. Ejecutar la animación
                 if (mWaveView != null) {
                     mWaveView.setVisibility(View.VISIBLE);
                     mWaveView.bringToFront();
 
-                    // Llama a la animación SOLO de subida
                     mWaveView.startWaveUp(() -> {
                         Intent intent = new Intent(BaseActivity.this, MenuPrincipal.class);
-                        intent.putExtra("START_WAVE_DOWN", true); // Aviso para el MenuPrincipal
+                        intent.putExtra("START_WAVE_DOWN", true);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         startActivity(intent);
-                        overridePendingTransition(0, 0); // Evita parpadeos nativos
+                        overridePendingTransition(0, 0);
                         finish();
                     });
                 } else {
@@ -104,15 +99,57 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Gancho para que MenuPrincipal entre a la sección seleccionada al agitar el móvil.
-     */
+    protected void configurarCabeceraUnificada(String titulo) {
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
+
+        TextView tvTitulo = findViewById(R.id.tvTituloSeccion);
+        if (tvTitulo != null && titulo != null) {
+            tvTitulo.setText(titulo);
+        }
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
+        }
+
+        ImageView ivIcono = findViewById(R.id.ivIcono);
+        if (ivIcono != null) {
+            ivIcono.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                String correo = getSharedPreferences("SesionUsuario", MODE_PRIVATE).getString("CORREO", null);
+                if (correo == null || correo.isEmpty()) {
+                    startActivity(new Intent(this, Login.class));
+                } else {
+                    Intent intent = new Intent(this, AjustesCuenta.class);
+                    intent.putExtra("CORREO", correo);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
     protected void onShakeMenuPrincipal() {
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+
+        configurarCabeceraUnificada(null);
 
         if (!(this instanceof MenuPrincipal) && !(this instanceof Login) && !(this instanceof SignUp)) {
             MaterialToolbar toolbar = findViewById(R.id.toolbar);
@@ -141,8 +178,6 @@ public class BaseActivity extends AppCompatActivity {
                 });
                 toolbar.addView(ivIcono);
             }
-
-
         }
     }
 
@@ -152,12 +187,18 @@ public class BaseActivity extends AppCompatActivity {
         if (mSensorManager != null && mAccelerometer != null) {
             mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
+        if (mDetectorBocaAbajo != null) {
+            mDetectorBocaAbajo.iniciar();
+        }
     }
 
     @Override
     protected void onPause() {
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(mShakeDetector);
+        }
+        if (mDetectorBocaAbajo != null) {
+            mDetectorBocaAbajo.parar();
         }
         super.onPause();
     }

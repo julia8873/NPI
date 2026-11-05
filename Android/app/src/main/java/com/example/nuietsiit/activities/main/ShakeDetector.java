@@ -13,12 +13,12 @@ import android.hardware.SensorEventListener;
  */
 public class ShakeDetector implements SensorEventListener {
 
-    // Umbral de aceleración lateral en m/s² para detectar un golpe a un lado
-    private static final float UMBRAL_LATERAL = 8.8f;
+    // Umbral de aceleración lateral en m/s² para detectar un golpe a un lado (aumentado para reducir sensibilidad)
+    private static final float UMBRAL_LATERAL = 13.5f;
     // Ventana mínima y máxima entre el golpe a un lado y el rebote al lado contrario
-    private static final int TIEMPO_MIN_REBOTE_MS = 60;
-    private static final int TIEMPO_MAX_REBOTE_MS = 500;
-    private static final int ENFRIAMIENTO_DISPARO_MS = 800;
+    private static final int TIEMPO_MIN_REBOTE_MS = 80;
+    private static final int TIEMPO_MAX_REBOTE_MS = 400;
+    private static final int ENFRIAMIENTO_DISPARO_MS = 1200;
 
     private OnShakeListener mListener;
 

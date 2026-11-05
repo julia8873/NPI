@@ -5,129 +5,184 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
 
-    <!-- Cabecera -->
-    <RelativeLayout
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:paddingHorizontal="8dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
+
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="Volver al menú principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
 
         <TextView
-            android:id="@+id/tvProfesorado"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTituloSeccion"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/ivIcono"
-            android:text="Profesorado y Tutorías"
-            android:textColor="#000000"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="Profesorado"
+            android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
 
+        <LinearLayout
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="Abrir asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/ivIcono"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="Icono de perfil"
+            android:contentDescription="Perfil"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:src="@drawable/icono" />
-    </RelativeLayout>
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
+    </LinearLayout>
 
-    <!-- Recuadro expansible para las tutorías / estado del usuario -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardTutorias"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="24dp"
-        app:cardBackgroundColor="#F5F5F5"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp">
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <FrameLayout
+        <!-- Recuadro expansible para las tutorías / estado del usuario -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTutorias"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="16dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:cardBackgroundColor="#F5F5F5"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
 
-            <!-- 1. VISTA SIN SESIÓN INICIADA -->
-            <LinearLayout
-                android:id="@+id/layoutLoggedOut"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="visible">
+                android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:gravity="center"
-                    android:text="No has iniciado sesión aún.\nPara gestionar y ver tus tutorías reservadas accede con tus credenciales."
-                    android:textColor="#666666"
-                    android:textSize="15sp" />
-
-                <Button
-                    android:id="@+id/btnLogin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Iniciar sesión" />
-            </LinearLayout>
-
-            <!-- 2. VISTA CON SESIÓN INICIADA (Tutorías reservadas) -->
-            <LinearLayout
-                android:id="@+id/layoutLoggedIn"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tvUserWelcome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:text="Tus tutorías reservadas:"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <ScrollView
+                <!-- 1. VISTA SIN SESIÓN INICIADA -->
+                <LinearLayout
+                    android:id="@+id/layoutLoggedOut"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="visible">
 
-                    <LinearLayout
-                        android:id="@+id/contenedorTutoriasReservadas"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-                        <!-- Tarjetas de tutorías reservadas dinámicas -->
-                    </LinearLayout>
-                </ScrollView>
+                        android:layout_marginHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="No has iniciado sesión aún.\nPara gestionar y ver tus tutorías reservadas accede con tus credenciales."
+                        android:textColor="#666666"
+                        android:textSize="15sp" />
 
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Iniciar sesión" />
+                </LinearLayout>
 
-        </FrameLayout>
-    </androidx.cardview.widget.CardView>
+                <!-- 2. VISTA CON SESIÓN INICIADA (Tutorías reservadas) -->
+                <LinearLayout
+                    android:id="@+id/layoutLoggedIn"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-    <!-- EL BOTÓN PARA EL BUSCADOR DE PROFESORADO -->
-    <Button
-        android:id="@+id/btnBuscarProfesorado"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp"
-        android:padding="16dp"
-        android:text="¿Quieres buscar profesorado o tutorías?"
-        android:textSize="16sp"
-        app:cornerRadius="24dp" />
+                    <TextView
+                        android:id="@+id/tvUserWelcome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="Tus tutorías reservadas:"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
+                    <ScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <LinearLayout
+                            android:id="@+id/contenedorTutoriasReservadas"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <!-- Tarjetas de tutorías reservadas dinámicas -->
+                        </LinearLayout>
+                    </ScrollView>
+
+                </LinearLayout>
+
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- EL BOTÓN PARA EL BUSCADOR DE PROFESORADO -->
+        <Button
+            android:id="@+id/btnBuscarProfesorado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:padding="16dp"
+            android:text="¿Quieres buscar profesorado o tutorías?"
+            android:textSize="16sp"
+            app:cornerRadius="24dp" />
+
+    </LinearLayout>
 </LinearLayout>

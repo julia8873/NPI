@@ -147,8 +147,8 @@ public class Mapa extends BaseActivity {
     private boolean rutaPendienteGps = false;      // estamos esperando permiso/ajustes de GPS para seguir con la ruta
     private AlertDialog dialogoBuscandoGps;
     private int intentosGps = 0;
-    private static final double RADIO_ETSIIT_METROS = 80;   // a menos de esto del punto de la ETSIIT = "dentro"
-    private static final float PRECISION_MAXIMA_METROS = 100; // peor precisión que esto = no nos fiamos del GPS
+    private static final double RADIO_ETSIIT_METROS = 280;   // Aumentado a 280m para abarcar todo el complejo ETSIIT e imprecisiones de interiores
+    private static final float PRECISION_MAXIMA_METROS = 150; // Margen de tolerancia de imprecisión de GPS en interiores
     private static final int MAX_INTENTOS_GPS = 16;          // x 500 ms = 8 s
     private final Runnable esperarFixGps = new Runnable() {
         @Override
@@ -1103,7 +1103,11 @@ public class Mapa extends BaseActivity {
             return;
         }
         double metros = new GeoPoint(fix.getLatitude(), fix.getLongitude()).distanceToAsDouble(etsiitPoint);
-        if (metros <= RADIO_ETSIIT_METROS) {
+        float precision = fix.hasAccuracy() ? fix.getAccuracy() : 0f;
+        // Descontar la imprecisión del GPS para no dar falsos "fuera de la ETSIIT" cuando estás en interiores
+        double distanciaAjustada = Math.max(0, metros - precision);
+
+        if (distanciaAjustada <= RADIO_ETSIIT_METROS) {
             pedirEscaneoQR(true);
         } else {
             pedirIrALaEntrada(metros);
@@ -1206,27 +1210,24 @@ public class Mapa extends BaseActivity {
                 ? String.format(Locale.getDefault(), "a %.1f km", metrosALaEtsiit / 1000.0)
                 : String.format(Locale.getDefault(), "a unos %d m", (int) metrosALaEtsiit);
         new AlertDialog.Builder(this)
-                .setTitle("Estás fuera de la ETSIIT")
+                .setTitle("Ubicación GPS")
                 .setMessage("Según tu GPS estás " + distancia + " de la ETSIIT.\n\n"
-                        + "Colócate en la entrada principal (la de la escalinata frontal) "
-                        + "y pulsa «Ya estoy aquí» para empezar la ruta.")
-                .setPositiveButton("Ya estoy aquí", (d, w) -> fijarOrigen(RegistroPuntosQR.entrada()))
+                        + "Si ya estás dentro del edificio, pulsa «Estoy dentro» para escanear un código QR.")
+                .setPositiveButton("Estoy dentro (escaneo QR)", (d, w) -> pedirEscaneoQR(true))
+                .setNeutralButton("En la entrada", (d, w) -> fijarOrigen(RegistroPuntosQR.entrada()))
                 .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual())
                 .show();
     }
 
     private void pedirEscaneoQR(boolean detectadoPorGps) {
-        AlertDialog.Builder b = new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Escanea un código QR")
                 .setMessage((detectadoPorGps ? "Parece que estás dentro de la ETSIIT, y el GPS no es fiable en interiores.\n\n" : "")
                         + "Busca el código QR de ubicación más cercano (están en los halls y pasillos) "
                         + "y escanéalo para saber dónde estás.")
                 .setPositiveButton("Escanear QR", (d, w) -> lanzarEscaner())
-                .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual());
-        if (esDebug()) {
-            b.setNeutralButton("Simular QR (pruebas)", (d, w) -> mostrarListaSimularQR());
-        }
-        b.show();
+                .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual())
+                .show();
     }
 
     private void lanzarEscaner() {

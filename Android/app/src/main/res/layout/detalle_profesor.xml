@@ -1,165 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
 
-        <!-- Título superior y botón de volver -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp">
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="Volver al menú principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
 
-            <TextView
-                android:id="@+id/btnVolverDetalle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="← Volver"
-                android:textColor="#FF9800"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Ficha del Profesor"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <!-- Información principal del profesor -->
         <TextView
-            android:id="@+id/tvNombreProfesor"
-            android:layout_width="match_parent"
+            android:id="@+id/tvTituloSeccion"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="Nombre del Profesor"
-            android:textColor="#333333"
-            android:textSize="24sp"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="Ficha del Profesor"
+            android:textColor="@color/nui_tinta"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvCorreoProfesor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="correo@ugr.es"
-            android:textColor="#666666"
-            android:textSize="15sp" />
+        <LinearLayout
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="Abrir asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
 
-        <!-- Botones de contacto rápido -->
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="Chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
+            android:clickable="true"
+            android:contentDescription="Perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <Button
-                android:id="@+id/btnEmail"
-                android:layout_width="0dp"
+            <!-- Información principal del profesor -->
+            <TextView
+                android:id="@+id/tvNombreProfesor"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="#FF9800"
-                android:text="Enviar Email"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF" />
+                android:layout_marginBottom="4dp"
+                android:text="Nombre del Profesor"
+                android:textColor="#333333"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnWeb"
-                android:layout_width="0dp"
+            <TextView
+                android:id="@+id/tvCorreoProfesor"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:backgroundTint="#757575"
-                android:text="Web Docente"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
+                android:layout_marginBottom="16dp"
+                android:text="correo@ugr.es"
+                android:textColor="#666666"
+                android:textSize="15sp" />
 
-        <!-- Despacho y Ubicación -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="#F5F5F5"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
+            <!-- Botones de contacto rápido -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginBottom="24dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/btnEmail"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Despacho y Ubicación"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#FF9800"
+                    android:text="Enviar Email"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF" />
 
-                <TextView
-                    android:id="@+id/tvDespacho"
+                <Button
+                    android:id="@+id/btnWeb"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#757575"
+                    android:text="Web Docente"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+
+            <!-- Despacho y Ubicación -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#F5F5F5"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Cargando información del despacho..."
-                    android:textColor="#444444"
-                    android:textSize="14sp" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Despacho y Ubicación"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvDespacho"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Cargando información del despacho..."
+                        android:textColor="#444444"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Bloque de Asignaturas / Clases impartidas -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Clases e Impartición:"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorClases"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
+                <!-- Tarjetas de clases dinámicas -->
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <!-- Bloque de Asignaturas / Clases impartidas -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Clases e Impartición:"
-            android:textColor="#333333"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <!-- Bloque de Tutorías y Reserva -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Horarios de Tutorías (Reservar):"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-        <LinearLayout
-            android:id="@+id/contenedorClases"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:orientation="vertical">
-            <!-- Tarjetas de clases dinámicas -->
+            <LinearLayout
+                android:id="@+id/contenedorTutorias"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!-- Tarjetas de tutorías dinámicas -->
+            </LinearLayout>
+
         </LinearLayout>
-
-        <!-- Bloque de Tutorías y Reserva -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Horarios de Tutorías (Reservar):"
-            android:textColor="#333333"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:id="@+id/contenedorTutorias"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <!-- Tarjetas de tutorías dinámicas -->
-        </LinearLayout>
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</LinearLayout>
