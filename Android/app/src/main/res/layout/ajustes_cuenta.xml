@@ -1,182 +1,535 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/scrollView"
+    android:id="@+id/scrollViewAjustes"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@android:color/white"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:fillViewport="true"
-    android:fitsSystemWindows="true">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="24dp">
+    android:scrollbars="none">
 
     <LinearLayout
+        android:id="@+id/contenidoAjustes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:background="@android:color/white"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingHorizontal="18dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="16dp">
 
-        <!-- Icono de usuario -->
-        <ImageView
-            android:id="@+id/ivIcono"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="24dp"
-            android:src="@drawable/icono" />
+        <!-- 1. CABECERA: Botón volver · Título · Botón Chat Asistente -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingBottom="10dp">
 
-        <!-- Etiqueta: Mis datos personales -->
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:contentDescription="Volver"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="11dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="#1A1A1A" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:text="Ajustes"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/cardMascotaAyudante"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_nui_chat"
+                android:clickable="true"
+                android:contentDescription="Abrir asistente"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="15dp">
+
+                <ImageView
+                    android:layout_width="19dp"
+                    android:layout_height="19dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_bot"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Chat"
+                    android:textColor="@android:color/white"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 2. TARJETA TU PERFIL (Informativa) -->
+        <LinearLayout
+            android:id="@+id/cardPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_tarjeta_bienvenido"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp">
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:backgroundTint="#F25C19">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_hero_user" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvNombrePerfil"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="-0.01"
+                    android:text="Tu perfil"
+                    android:textColor="#1A1A1A"
+                    android:textSize="15.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvCorreoPerfil"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="tu.correo@correo.ugr.es"
+                    android:textColor="#666666"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="4dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="#F25C19" />
+        </LinearLayout>
+
+        <!-- 3. SECCIÓN: PREFERENCIAS -->
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="20dp"
-            android:text="Mis datos personales"
-            android:textColor="#333333"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <!-- Etiqueta: Nombre -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="4dp"
-            android:text="Nombre"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Campo de entrada: Nombre -->
-        <EditText
-            android:id="@+id/etNombre"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/cuadro_introducir_datos"
-            android:textColor="#000000" />
-
-        <!-- Etiqueta: Contraseña -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="4dp"
-            android:text="Contraseña"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Campo de entrada: Contraseña -->
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/cuadro_introducir_datos"
-            android:inputType="textPassword"
-            android:textColor="#000000" />
-
-        <!-- Etiqueta: Grado -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="4dp"
-            android:text="Grado"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Campo de entrada: Grado -->
-        <AutoCompleteTextView
-            android:id="@+id/etGrado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/cuadro_introducir_datos"
-            android:textColor="#000000"
-            android:focusable="true"
-            android:clickable="true"
-            android:focusableInTouchMode="true"
-            android:cursorVisible="false"
-            android:completionThreshold="0" />
-
-        <!-- Etiqueta: Idioma -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="4dp"
-            android:text="Idioma"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- Campo de entrada: Idioma -->
-        <AutoCompleteTextView
-            android:id="@+id/etIdioma"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="30dp"
-            android:background="@drawable/cuadro_introducir_datos"
-            android:textColor="#000000"
-            android:focusable="true"
-            android:clickable="true"
-            android:focusableInTouchMode="true"
-            android:cursorVisible="false"
-            android:completionThreshold="0" />
-
-        <!-- Botón: Guardar cambios -->
-        <Button
-            android:id="@+id/btnGuardarCambios"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginBottom="50dp"
-            android:background="@drawable/boton_redondeado"
-            android:paddingHorizontal="58dp"
-            android:text="Guardar cambios"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:letterSpacing="0.08"
+            android:text="PREFERENCIAS"
+            android:textColor="#666666"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
 
-        <!-- Botón: Cerrar sesión -->
-        <Button
+        <!-- Fila 1 de Preferencias: Cuenta y Notificaciones -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <!-- Card: Cuenta -->
+            <LinearLayout
+                android:id="@+id/cardCuenta"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_cuenta"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_cuenta">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_hero_user" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Cuenta"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Card: Notificaciones -->
+            <LinearLayout
+                android:id="@+id/cardNotificaciones"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_notificaciones"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_notificaciones">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_bell"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Notificaciones"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Fila 2 de Preferencias: Apariencia e Idioma -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <!-- Card: Apariencia -->
+            <LinearLayout
+                android:id="@+id/cardApariencia"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_apariencia"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_apariencia">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_sun"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Apariencia"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Card: Idioma -->
+            <LinearLayout
+                android:id="@+id/cardIdioma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_idioma"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_idioma">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_globe"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Idioma"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Fila 3 de Preferencias: Privacidad y Ayuda -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <!-- Card: Privacidad -->
+            <LinearLayout
+                android:id="@+id/cardPrivacidad"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_privacidad"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_privacidad">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_input_shield"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Privacidad"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Card: Ayuda -->
+            <LinearLayout
+                android:id="@+id/cardAyuda"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_ayuda"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:minHeight="72dp"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <FrameLayout
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:background="@drawable/bg_icono_ayuda">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_help"
+                        app:tint="@android:color/white" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Ayuda"
+                    android:textColor="#1A1A1A"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 4. SECCIÓN: AJUSTES RÁPIDOS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:letterSpacing="0.08"
+            android:text="AJUSTES RÁPIDOS"
+            android:textColor="#666666"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_card_ajustes_rapidos"
+            android:orientation="vertical"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp">
+
+            <!-- Ajuste 1: Avisos de clase -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Avisos de clase"
+                    android:textColor="#1A1A1A"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchAvisosClase"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/switch_thumb_selector"
+                    app:trackTint="@color/switch_track_selector" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EFE5D3" />
+
+            <!-- Ajuste 2: Menú del comedor -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vegetariano"
+                    android:textColor="#1A1A1A"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchVegetariano"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/switch_thumb_selector"
+                    app:trackTint="@color/switch_track_selector" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 5. BOTÓN CERRAR SESIÓN -->
+        <LinearLayout
             android:id="@+id/btnLogOut"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginBottom="100dp"
-            android:background="@drawable/boton_redondeado"
-            android:paddingHorizontal="70dp"
-            android:text="Cerrar sesión"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_boton_logout"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <FrameLayout
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_icono_logout">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_logout"
+                    app:tint="@android:color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:text="Cerrar sesión"
+                android:textColor="#991B1B"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
     </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

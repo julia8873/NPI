@@ -22,9 +22,9 @@ public class DetectorInclinacion implements SensorEventListener {
     }
 
     private static final float ALFA = 0.8f;          // filtro paso bajo: peso del valor anterior
-    private static final float UMBRAL = 4f;          // m/s² para considerar que está inclinado
-    private static final float REPOSO = 1.5f;        // hay que volver por debajo para rearmar (histéresis)
-    private static final long ENFRIAMIENTO_MS = 700;
+    private static final float UMBRAL = 4.8f;          // m/s² umbral equilibrado para cambio de día fluido
+    private static final float REPOSO = 1.6f;        // hay que volver por debajo para rearmar (histéresis)
+    private static final long ENFRIAMIENTO_MS = 600;   // 600ms de enfriamiento para cambiar de día cómodamente
 
     private final SensorManager sensorManager;
     private final Sensor acelerometro;

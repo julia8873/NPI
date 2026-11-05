@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">NUI ETSIIT</string>
+    <string-array name="tipos_evento_array">
+        <item>Examen</item>
+        <item>Entrega</item>
+        <item>Personal</item>
+        <item>Recordatorio</item>
+    </string-array>
 </resources>

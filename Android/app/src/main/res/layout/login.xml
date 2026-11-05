@@ -4,119 +4,318 @@
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:fillViewport="true"
-    android:fitsSystemWindows="true">
+    android:background="@android:color/white"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:fillViewport="true">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
+        android:id="@+id/contenidoLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:background="@android:color/white"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="28dp">
 
+        <!-- 1. CABECERA: Botón volver · Título · Botón Chat Asistente -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp">
 
-            <!-- Icono de usuario -->
-            <ImageView
-                android:id="@+id/ivIcono"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_marginBottom="24dp"
-                android:src="@drawable/icono" />
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:contentDescription="Volver"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="#1A1A1A" />
 
-            <!-- Etiqueta: Correo -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="4dp"
-                android:text="Correo electrónico"
-                android:textColor="#333333"
-                android:textSize="14sp"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:text="Iniciar sesión"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/etCorreo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/cuadro_introducir_datos"
-                android:textColor="#000000" />
-
-            <!-- Etiqueta: Contraseña -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="4dp"
-                android:text="Contraseña"
-                android:textColor="#333333"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <!-- Campo de entrada: Contraseña -->
-            <EditText
-                android:id="@+id/etPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="32dp"
-                android:background="@drawable/cuadro_introducir_datos"
-                android:inputType="textPassword"
-                android:textColor="#000000" />
-
-            <!-- Botón de Inicio de Sesión (Login) -->
-            <Button
-                android:id="@+id/btnLogin"
+            <LinearLayout
+                android:id="@+id/cardMascotaAyudante"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/boton_redondeado"
-                android:paddingStart="70dp"
-                android:paddingEnd="70dp"
-                android:text="Login"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:backgroundTint="@null" />
+                android:layout_height="40dp"
+                android:background="@drawable/bg_nui_chat"
+                android:clickable="true"
+                android:contentDescription="Abrir asistente"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="16dp">
 
-            <!-- Mensaje de sugerencia para registro -->
-            <TextView
-                android:id="@+id/tvCrearCuenta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="¿No tienes una cuenta?"
-                android:textColor="#333333"
-                android:textSize="14sp" />
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_bot"
+                    app:tint="@android:color/white" />
 
-            <!-- Botón de Registro (Sign Up) -->
-            <Button
-                android:id="@+id/btnSignUp"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:paddingStart="70dp"
-                android:paddingEnd="70dp"
-                android:text="Sign Up"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:backgroundTint="#FFFFFF" />
-
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Chat"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- 2. SECCIÓN HERO: Tarjeta ¡Hola de nuevo! -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/bg_tarjeta_bienvenido"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <FrameLayout
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:background="@drawable/bg_icono_naranja_bienvenido">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_hero_user" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:letterSpacing="-0.01"
+                android:text="¡Hola de nuevo!"
+                android:textColor="#1A1A1A"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="2dp"
+                android:text="Accede con tu cuenta universitaria para personalizar tus asignaturas, menús y horarios."
+                android:textColor="#666666"
+                android:textSize="13.5sp" />
+        </LinearLayout>
+
+        <!-- 3. CAMPOS DE FORMULARIO -->
+
+        <!-- Campo 1: Correo electrónico -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_input_box"
+            android:gravity="center_vertical"
+            android:minHeight="62dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="14dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_input_mail"
+                app:tint="#8A8A8E" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Correo electrónico"
+                    android:textColor="#666666"
+                    android:textSize="11.5sp" />
+
+                <EditText
+                    android:id="@+id/etCorreo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@null"
+                    android:hint="ejemplo@correo.ugr.es"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:singleLine="true"
+                    android:textColor="#1A1A1A"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="14.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Campo 2: Contraseña -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input_box"
+            android:gravity="center_vertical"
+            android:minHeight="62dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="14dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_input_lock"
+                app:tint="#8A8A8E" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contraseña"
+                    android:textColor="#666666"
+                    android:textSize="11.5sp" />
+
+                <EditText
+                    android:id="@+id/etPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:background="@null"
+                    android:hint="Introduce tu contraseña"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:singleLine="true"
+                    android:textColor="#1A1A1A"
+                    android:textColorHint="#9E9E9E"
+                    android:textSize="14.5sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Enlace: ¿Olvidaste tu contraseña? -->
+        <TextView
+            android:id="@+id/tvOlvidePassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="18dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="4dp"
+            android:text="¿Olvidaste tu contraseña?"
+            android:textColor="#BF4800"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- 4. BOTÓN INICIAR SESIÓN -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#F25C19"
+            android:letterSpacing="0.01"
+            android:text="Iniciar sesión"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="28dp"
+            app:elevation="4dp" />
+
+        <!-- 5. PIE: "¿No tienes una cuenta aún?" y Botón Crear cuenta nueva -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="12dp"
+            android:text="¿No tienes una cuenta aún?"
+            android:textColor="#666666"
+            android:textSize="13.5sp" />
+
+        <LinearLayout
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_boton_iniciar_sesion_tarjeta"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="14dp">
+
+            <FrameLayout
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:background="@drawable/bg_icono_azul_login">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_person_add"
+                    app:tint="@android:color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:letterSpacing="-0.01"
+                android:text="Crear cuenta nueva"
+                android:textColor="#1A1A1A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="6dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="#F25C19" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </ScrollView>

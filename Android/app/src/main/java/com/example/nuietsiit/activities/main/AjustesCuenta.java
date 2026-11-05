@@ -2,227 +2,296 @@ package com.example.nuietsiit.activities.main;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
-import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.IdiomasDB;
 import com.example.nuietsiit.data.UsuariosDB;
 
 import java.util.List;
 
-public class AjustesCuenta  extends BaseActivity {
+public class AjustesCuenta extends BaseActivity {
 
-    private EditText etNombre, etPassword;
-    private AutoCompleteTextView etGrado, etIdioma;
-    private Button btnLogOut, btnGuardarCambios;
+    private TextView tvNombrePerfil, tvCorreoPerfil;
+    private SwitchCompat switchAvisosClase, switchVegetariano;
 
     private DBHelper BD;
     private String correoUsuario;
-
-    private Integer idGradoSeleccionado = null;
-    private String codigoIdiomaSeleccionado = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ajustes_cuenta);
 
+        aplicarMargenesSistema();
+
         BD = DBHelper.getInstance(this);
 
         if (getIntent() != null && getIntent().hasExtra("CORREO")) {
             correoUsuario = getIntent().getStringExtra("CORREO");
         }
+        if (correoUsuario == null || correoUsuario.isEmpty()) {
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            correoUsuario = prefs.getString("CORREO", null);
+        }
 
-        etNombre = findViewById(R.id.etNombre);
-        etPassword = findViewById(R.id.etPassword);
-        etGrado = findViewById(R.id.etGrado);
-        etIdioma = findViewById(R.id.etIdioma);
-        btnGuardarCambios = findViewById(R.id.btnGuardarCambios);
-        btnLogOut = findViewById(R.id.btnLogOut);
+        tvNombrePerfil = findViewById(R.id.tvNombrePerfil);
+        tvCorreoPerfil = findViewById(R.id.tvCorreoPerfil);
+        switchAvisosClase = findViewById(R.id.switchAvisosClase);
+        switchVegetariano = findViewById(R.id.switchVegetariano);
 
-        // 1. Cargar datos del usuario
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! Aquí puedes gestionar tus preferencias de cuenta, activar notificaciones de clase, configurar tu dieta y modificar tus datos personales.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
+            });
+        }
+
+        // Cargar datos del usuario
         cargarDatosUsuario();
 
-        // 2. Configurar los desplegables pasando la información inicial
-        configurarDesplegables();
+        // Configurar clics en las tarjetas
+        configurarAcciones();
+    }
 
-        btnGuardarCambios.setOnClickListener(view -> guardarCambios());
-        btnLogOut.setOnClickListener(view -> cerrarSesion());
+    private void aplicarMargenesSistema() {
+        View scroll = findViewById(R.id.scrollViewAjustes);
+        if (scroll != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(scroll, (v, insets) -> {
+                Insets barras = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(scroll);
+        }
     }
 
     private void cargarDatosUsuario() {
-        if (correoUsuario == null || correoUsuario.isEmpty()) return;
+        if (correoUsuario == null || correoUsuario.isEmpty()) {
+            if (tvCorreoPerfil != null) tvCorreoPerfil.setText("Sin sesión iniciada");
+            if (tvNombrePerfil != null) tvNombrePerfil.setText("Invitado");
+            return;
+        }
+
+        if (tvCorreoPerfil != null) {
+            tvCorreoPerfil.setText(correoUsuario);
+        }
 
         UsuariosDB usuariosDB = new UsuariosDB(BD);
+        String nombre = usuariosDB.obtenerNombreUsuario(correoUsuario);
+        if (tvNombrePerfil != null) {
+            if (nombre != null && !nombre.isEmpty()) {
+                tvNombrePerfil.setText(nombre);
+            } else {
+                tvNombrePerfil.setText("Tu perfil");
+            }
+        }
 
-        // Cargar textos actuales
-        etNombre.setText(usuariosDB.obtenerNombreUsuario(correoUsuario));
+        // Cargar interruptor de Avisos de clase
+        SharedPreferences configPrefs = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+        boolean avisosActivos = configPrefs.getBoolean("AVISOS_CLASE_HABILITADOS", true);
+        if (switchAvisosClase != null) {
+            switchAvisosClase.setChecked(avisosActivos);
+        }
 
-        String gradoActual = usuariosDB.obtenerGradoUsuario(correoUsuario);
-        String idiomaActual = usuariosDB.obtenerIdiomaUsuario(correoUsuario);
-
-        etGrado.setText(gradoActual, false);
-        etIdioma.setText(idiomaActual, false);
+        // Cargar interruptor de Menú del comedor
+        SharedPreferences sesionPrefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        boolean esVeg = usuariosDB.esUsuarioVegetariano(correoUsuario) || sesionPrefs.getBoolean("ES_VEGETARIANO", false);
+        if (switchVegetariano != null) {
+            switchVegetariano.setChecked(esVeg);
+        }
     }
 
-    private void configurarDesplegables() {
-        // --- GRADOS ---
+    private void configurarAcciones() {
+        View cardCuenta = findViewById(R.id.cardCuenta);
+        if (cardCuenta != null) {
+            cardCuenta.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarDialogoEditarCuenta();
+            });
+        }
+
+        View cardNotificaciones = findViewById(R.id.cardNotificaciones);
+        if (cardNotificaciones != null) {
+            cardNotificaciones.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarToastFaltaPorImplementar();
+            });
+        }
+
+        View cardApariencia = findViewById(R.id.cardApariencia);
+        if (cardApariencia != null) {
+            cardApariencia.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarToastFaltaPorImplementar();
+            });
+        }
+
+        View cardIdioma = findViewById(R.id.cardIdioma);
+        if (cardIdioma != null) {
+            cardIdioma.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarToastFaltaPorImplementar();
+            });
+        }
+
+        View cardPrivacidad = findViewById(R.id.cardPrivacidad);
+        if (cardPrivacidad != null) {
+            cardPrivacidad.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarToastFaltaPorImplementar();
+            });
+        }
+
+        View cardAyuda = findViewById(R.id.cardAyuda);
+        if (cardAyuda != null) {
+            cardAyuda.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarToastFaltaPorImplementar();
+            });
+        }
+
+        if (switchAvisosClase != null) {
+            switchAvisosClase.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                getSharedPreferences("ConfiguracionApp", MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("AVISOS_CLASE_HABILITADOS", isChecked)
+                        .apply();
+                String msg = isChecked ? "Avisos de clase activados" : "Avisos de clase desactivados";
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        if (switchVegetariano != null) {
+            switchVegetariano.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                buttonView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                getSharedPreferences("SesionUsuario", MODE_PRIVATE)
+                        .edit()
+                        .putBoolean("ES_VEGETARIANO", isChecked)
+                        .apply();
+                if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                    UsuariosDB usuariosDB = new UsuariosDB(BD);
+                    usuariosDB.actualizarPreferenciaVegetariano(correoUsuario, isChecked);
+                }
+                String msg = isChecked ? "🌱 Menú vegetariano activado" : "🥩 Menú normal activado";
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        View btnLogOut = findViewById(R.id.btnLogOut);
+        if (btnLogOut != null) {
+            btnLogOut.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                cerrarSesion();
+            });
+        }
+    }
+
+    private void mostrarToastFaltaPorImplementar() {
+        Toast.makeText(this, "Falta por implementar", Toast.LENGTH_SHORT).show();
+    }
+
+    private void mostrarDialogoEditarCuenta() {
+        if (correoUsuario == null || correoUsuario.isEmpty()) {
+            Toast.makeText(this, "Inicia sesión para editar tu perfil", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         UsuariosDB usuariosDB = new UsuariosDB(BD);
+        String nombreActual = usuariosDB.obtenerNombreUsuario(correoUsuario);
+        String gradoActual = usuariosDB.obtenerGradoUsuario(correoUsuario);
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_editar_perfil, null);
+        EditText etDialogNombre = dialogView.findViewById(R.id.etDialogNombre);
+        EditText etDialogPassword = dialogView.findViewById(R.id.etDialogPassword);
+        AutoCompleteTextView etDialogGrado = dialogView.findViewById(R.id.etDialogGrado);
+
+        etDialogNombre.setText(nombreActual);
+        etDialogGrado.setText(gradoActual, false);
+
         List<String> nombresGrados = usuariosDB.listarGrados();
         List<Integer> idsGrados = usuariosDB.listarIdGrados();
+        final Integer[] gradoSeleccionado = {null};
 
-        ArrayAdapter<String> adaptadorGrados = new ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                nombresGrados
-        ) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(Color.BLACK); // Color del campo cuando está cerrado
-                }
-                return view;
-            }
-
-            @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(Color.BLACK); // Color de la lista de opciones
-                }
-                return view;
-            }
-        };
-
-        etGrado.setAdapter(adaptadorGrados);
-        etGrado.setDropDownBackgroundDrawable(new ColorDrawable(Color.WHITE));
-        etGrado.setKeyListener(null);
-        etGrado.setOnClickListener(v -> etGrado.showDropDown());
-        etGrado.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) etGrado.showDropDown();
-        });
-        etGrado.setOnItemClickListener((parent, view, position, id) -> {
-            String gradoSeleccionado = (String) parent.getItemAtPosition(position);
-            int index = nombresGrados.indexOf(gradoSeleccionado);
-            if (index != -1 && index < idsGrados.size()) {
-                idGradoSeleccionado = idsGrados.get(index);
+        ArrayAdapter<String> adaptadorGrados = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, nombresGrados);
+        etDialogGrado.setAdapter(adaptadorGrados);
+        etDialogGrado.setKeyListener(null);
+        etDialogGrado.setOnClickListener(v -> etDialogGrado.showDropDown());
+        etDialogGrado.setOnItemClickListener((parent, view, position, id) -> {
+            if (position < idsGrados.size()) {
+                gradoSeleccionado[0] = idsGrados.get(position);
             }
         });
 
-        // --- IDIOMAS ---
-        IdiomasDB idiomasDB = new IdiomasDB(BD);
-        List<String> nombresIdiomas = idiomasDB.listarIdiomas();
-        List<String> codigosIdiomas = idiomasDB.listarCodigoIdiomas();
-
-        ArrayAdapter<String> adaptadorIdiomas = new ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                nombresIdiomas
-        ) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(Color.BLACK); // Color del campo cuando está cerrado
-                }
-                return view;
-            }
-
-            @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView textView = view.findViewById(android.R.id.text1);
-                if (textView != null) {
-                    textView.setTextColor(Color.BLACK); // Color de la lista de opciones
-                }
-                return view;
-            }
-        };
-
-        etIdioma.setAdapter(adaptadorIdiomas);
-        etIdioma.setDropDownBackgroundDrawable(new ColorDrawable(Color.WHITE));
-        etIdioma.setKeyListener(null);
-        etIdioma.setOnClickListener(v -> etIdioma.showDropDown());
-        etIdioma.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) etIdioma.showDropDown();
-        });
-        etIdioma.setOnItemClickListener((parent, view, position, id) -> {
-            String idiomaSeleccionado = (String) parent.getItemAtPosition(position);
-            int index = nombresIdiomas.indexOf(idiomaSeleccionado);
-            if (index != -1 && index < codigosIdiomas.size()) {
-                codigoIdiomaSeleccionado = codigosIdiomas.get(index);
-            }
-        });
+        new AlertDialog.Builder(this)
+                .setTitle("Editar perfil")
+                .setView(dialogView)
+                .setPositiveButton("Guardar", (dialog, which) -> {
+                    String nuevoNombre = etDialogNombre.getText().toString().trim();
+                    String nuevaPassword = etDialogPassword.getText().toString().trim();
+                    if (!nuevoNombre.isEmpty()) {
+                        usuariosDB.actualizarAjustesEstudiante(
+                                correoUsuario,
+                                nuevoNombre,
+                                nuevaPassword,
+                                gradoSeleccionado[0],
+                                null,
+                                null,
+                                switchVegetariano != null && switchVegetariano.isChecked()
+                        );
+                        tvNombrePerfil.setText(nuevoNombre);
+                        Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
-    private void guardarCambios() {
-        String nuevoNombre = etNombre.getText().toString().trim();
-        String nuevaPassword = etPassword.getText().toString().trim();
-
-        if (correoUsuario == null || correoUsuario.isEmpty()) {
-            Toast.makeText(AjustesCuenta.this, "Error al identificar el usuario actual", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (nuevoNombre.isEmpty()) {
-            Toast.makeText(AjustesCuenta.this, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        UsuariosDB usuariosDB = new UsuariosDB(BD);
-        boolean actualizado = usuariosDB.actualizarAjustesEstudiante(
-                correoUsuario,
-                nuevoNombre,
-                nuevaPassword,
-                idGradoSeleccionado,
-                codigoIdiomaSeleccionado,
-                null
-        );
-
-        if (actualizado) {
-            Toast.makeText(AjustesCuenta.this, "Datos actualizados correctamente", Toast.LENGTH_SHORT).show();
-            etPassword.setText("");
-        } else {
-            Toast.makeText(AjustesCuenta.this, "No se realizaron cambios o error al actualizar", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Cierra la sesión del usuario y limpia la pila de navegación hacia la pantalla de Login.
-     */
     private void cerrarSesion() {
-        // Limpiar SharedPreferences para eliminar la sesión activa
-        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.apply();
+        new AlertDialog.Builder(this)
+                .setTitle("Cerrar sesión")
+                .setMessage("¿Estás seguro de que deseas cerrar sesión?")
+                .setPositiveButton("Sí, salir", (dialog, which) -> {
+                    SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+                    prefs.edit().clear().apply();
 
-        Intent intent = new Intent(AjustesCuenta.this, MenuPrincipal.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+                    Intent intent = new Intent(AjustesCuenta.this, MenuPrincipal.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 }

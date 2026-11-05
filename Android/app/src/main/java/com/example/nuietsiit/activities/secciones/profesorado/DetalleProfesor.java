@@ -19,9 +19,11 @@ import androidx.appcompat.app.AlertDialog;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.TutoriasDB;
 import com.example.nuietsiit.data.UsuariosDB;
+import com.example.nuietsiit.util.RecienteUtil;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -102,6 +104,8 @@ public class DetalleProfesor extends BaseActivity {
             tvNombreProfesor.setText(nombre);
             tvCorreoProfesor.setText(correoProfesor);
             cursor.close();
+
+            RecienteUtil.guardar(this, DetalleProfesor.class, "Profesor: " + nombre, "Profesorado ETSIIT", "CORREO_PROFESOR", correoProfesor, 3);
         }
     }
 
@@ -124,6 +128,7 @@ public class DetalleProfesor extends BaseActivity {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
+                String codigoAsignatura = cursor.getString(cursor.getColumnIndexOrThrow("codigoAsignatura"));
                 String nombreAsignatura = cursor.getString(cursor.getColumnIndexOrThrow("nombreAsignatura"));
                 int diaSemana = cursor.getInt(cursor.getColumnIndexOrThrow("diaSemana"));
                 String horaInicio = cursor.getString(cursor.getColumnIndexOrThrow("horaInicio"));
@@ -132,20 +137,28 @@ public class DetalleProfesor extends BaseActivity {
                 String grupo = cursor.getString(cursor.getColumnIndexOrThrow("grupo"));
 
                 String diaNombre = obtenerNombreDia(diaSemana);
-                String textoClase = nombreAsignatura + " (" + tipoSesion + " " + grupo + ")\n" + diaNombre + " de " + horaInicio + " a " + horaFin;
+                String textoClase = "📚 " + nombreAsignatura + " (" + tipoSesion + " " + grupo + ")\n⏰ " + diaNombre + " de " + horaInicio + " a " + horaFin + " (Toca para ver asignatura)";
 
                 TextView tvClase = new TextView(this);
                 tvClase.setText(textoClase);
                 tvClase.setTextSize(14f);
-                tvClase.setTextColor(Color.DKGRAY);
-                tvClase.setBackgroundColor(Color.parseColor("#F9F9F9"));
-                tvClase.setPadding(20, 16, 20, 16);
+                tvClase.setTextColor(Color.parseColor("#0F172A"));
+                tvClase.setBackgroundColor(Color.parseColor("#F8FAFC"));
+                tvClase.setPadding(24, 16, 24, 16);
 
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
                 );
                 params.setMargins(0, 0, 0, 12);
                 tvClase.setLayoutParams(params);
+
+                if (codigoAsignatura != null) {
+                    tvClase.setOnClickListener(v -> {
+                        Intent intent = new Intent(DetalleProfesor.this, DetalleAsignatura.class);
+                        intent.putExtra("CODIGO_ASIGNATURA", codigoAsignatura);
+                        startActivity(intent);
+                    });
+                }
 
                 contenedorClases.addView(tvClase);
             } while (cursor.moveToNext());

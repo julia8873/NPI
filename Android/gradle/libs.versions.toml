@@ -11,6 +11,7 @@ zxingEmbedded = "4.3.0"
 biometric = "1.1.0"
 generativeai = "0.9.0"
 guava = "33.0.0-android"
+annotation = "1.11.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -24,6 +25,7 @@ zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embe
 biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

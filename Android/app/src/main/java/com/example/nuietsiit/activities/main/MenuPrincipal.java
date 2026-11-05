@@ -1,39 +1,29 @@
 package com.example.nuietsiit.activities.main;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.GradientDrawable;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.view.Gravity;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -41,78 +31,107 @@ import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Asignaturas;
 import com.example.nuietsiit.activities.secciones.Biblioteca;
+import com.example.nuietsiit.activities.secciones.calendario.Calendario;
 import com.example.nuietsiit.activities.secciones.Comedores;
-import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.activities.secciones.Profesorado;
 import com.example.nuietsiit.activities.secciones.Secretaria;
 import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
+import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.ActividadesDB;
+import com.example.nuietsiit.data.AnunciosDB;
+import com.example.nuietsiit.data.AnunciosLeidos;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.UsuariosDB;
+import com.example.nuietsiit.data.modelo.Anuncio;
 import com.example.nuietsiit.data.modelo.EventoCalendario;
-import com.example.nuietsiit.util.DetectorInclinacion;
+import com.example.nuietsiit.util.DetectorInclinacionMenu;
+import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.Notificador;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
+import com.example.nuietsiit.util.RecienteUtil;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Menú principal (rediseño minimalista).
+ *
+ * Inclinando el móvil se va seleccionando una sección de la cuadrícula 3x3 (la bola de la cabecera
+ * muestra la inclinación: inclinar hacia uno mismo baja de fila, alejarlo sube). Para entrar se agita
+ * el móvil. Tocar una ficha también la abre.
+ */
 public class MenuPrincipal extends BaseActivity {
 
-    // Componentes de la interfaz de usuario
-    private TextView tvBienvenida, tvAnteriorNombre, tvSiguienteNombre, tvNombreSeccion;
-    private ImageView ivIcono, ivIconoSeccion;
-    private Button btnSeccionGrande;
-    private ImageButton btnAnteriorSeccion, btnSiguienteSeccion;
-    private DetectorInclinacion detectorInclinacion;
-    private int indiceSeccionActual = 0;
-    private boolean fueDeslizamiento = false;
-    private final String[] nombresSecciones = {
-            "Mapa", "Actividades", "Asignaturas", "Profesorado", "Secretaría", "Comedores", "Biblioteca"
+    /** Mismo orden que HubSeccionesView.SECCIONES. */
+    private static final Class<?>[] DESTINOS = {
+            Noticias.class,
+            Mapa.class,
+            Actividades.class,
+            Profesorado.class,
+            Asignaturas.class,
+            Secretaria.class,
+            Comedores.class,
+            Biblioteca.class,
+            Calendario.class
     };
-    private final int[] iconosSecciones = {
-            R.drawable.ic_seccion_mapa,
-            R.drawable.ic_seccion_actividades,
-            R.drawable.ic_seccion_asignaturas,
-            R.drawable.ic_seccion_profesorado,
-            R.drawable.ic_seccion_secretaria,
-            R.drawable.ic_seccion_comedores,
-            R.drawable.ic_seccion_biblioteca
+    private static final int INDICE_AVISOS = 0;
+
+    // Accesos directos contextuales y páginas recientes
+    private static final String PREF_NAVEGACION = "nui_navegacion";
+    private static final String KEY_ULTIMA_SECCION = "ultima_seccion_vista";
+    private static final String KEY_HISTORIAL_SECCIONES = "historial_secciones";
+
+    private TextView tvHoraEvento, tvTituloEventoHoy, tvSubtituloEventoHoy;
+    private ImageView ivIcono;
+    private View cardMascotaAyudante;
+    private MaterialCardView cardEventoHoy;
+    private HubSeccionesView hub;
+    private NivelInclinacionView nivel;
+    private DetectorInclinacionMenu detector;
+
+    private MaterialCardView cardAccesoDirecto;
+    private TextView tvTituloCabeceraAccesoDirecto;
+    private TextView btnCambiarModoAcceso;
+    private FrameLayout flIconoAccesoDirecto;
+    private ImageView ivIconoAccesoDirecto;
+    private ImageView ivChevronAccesoDirecto;
+    private TextView tvTagAccesoDirecto;
+    private TextView tvSubinfoAccesoDirecto;
+    private TextView tvTituloAccesoDirecto;
+    private TextView tvDescAccesoDirecto;
+
+    private boolean simulacionManualForzada = false;
+    private boolean simulacionManualEsComedor = true;
+
+    private final Handler accesoDirectoHandler = new Handler(Looper.getMainLooper());
+    private final Runnable accesoDirectoRunnable = new Runnable() {
+        @Override
+        public void run() {
+            actualizarAccesoDirecto();
+            accesoDirectoHandler.postDelayed(this, 15000); // Comprueba cada 15s el bloque de 10 min
+        }
     };
 
-    // Componentes del Calendario de Actividades
-    private GridView gvCalendario;
-    private TextView tvMesAno, tvFechaSeleccionada, tvNumEventosFecha, tvSinEventos;
-    private ImageButton btnMesAnterior, btnMesSiguiente;
-    private LinearLayout llEventosContainer;
-    private Button btnAnadirEvento;
     private CalendarioDB calendarioDB;
     private ActividadesDB actividadesDB;
     private SecretariaDB secretariaDB;
-    private final Calendar mesMostradoCal = Calendar.getInstance();
-    private String fechaSeleccionadaStr;
+    private AnunciosDB anunciosDB;
 
-    // Componentes para el slider de noticias
+    private DBHelper BD;
+    private String correoUsuario;
+    private boolean abriendo;
+    private boolean giroscopioHabilitado = true;
     private ViewPager2 vpNoticias;
     private final Handler sliderHandler = new Handler(Looper.getMainLooper());
     private List<Integer> listaNoticias;
-
-    // Helper para la base de datos
-    private DBHelper BD;
-
-    // Variable para almacenar el correo del usuario logueado
-    private String correoUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,54 +140,60 @@ public class MenuPrincipal extends BaseActivity {
 
         comprobarAnimacionOla(getIntent());
 
-        // Inicializar base de datos
         BD = DBHelper.getInstance(this);
+        calendarioDB = new CalendarioDB(BD);
+        actividadesDB = new ActividadesDB(BD);
+        secretariaDB = new SecretariaDB(BD);
+        anunciosDB = new AnunciosDB(BD);
+        secretariaDB.poblarCitasDeEjemploSiVacio();
 
-        // Inicializar vistas
-        tvBienvenida = findViewById(R.id.tvBienvenida);
-        ivIcono = findViewById(R.id.ivIcono);
-        vpNoticias = findViewById(R.id.vpNoticias);
-        tvAnteriorNombre = findViewById(R.id.tvAnteriorNombre);
-        tvSiguienteNombre = findViewById(R.id.tvSiguienteNombre);
+        SharedPreferences prefsConfig = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+        giroscopioHabilitado = prefsConfig.getBoolean("GIROSCOPIO_HABILITADO", true);
 
-        // Configurar sensor de inclinación lateral para cambiar de sección (Derecha = Siguiente, Izquierda = Anterior)
-        detectorInclinacion = new DetectorInclinacion(this, direccion -> {
-            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (direccion == DetectorInclinacion.DERECHA) {
-                siguienteSeccion();
-            } else if (direccion == DetectorInclinacion.IZQUIERDA) {
-                anteriorSeccion();
-            }
-        });
-
-        // Leer sesión de SharedPreferences
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
-        correoUsuario = prefs.getString("CORREO", null); // Si no hay nadie logueado, será null (invitado)
+        correoUsuario = prefs.getString("CORREO", null);
 
-        // Obtención de datos pasados mediante Intent
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("CORREO")) {
             correoUsuario = intent.getStringExtra("CORREO");
             prefs.edit().putString("CORREO", correoUsuario).apply();
         }
 
-        // Cargar y mostrar la bienvenida con el nombre del usuario
-        mostrarBienvenida();
-
-        // Configuración del slider de noticias
+        ivIcono = findViewById(R.id.ivIcono);
+        cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        cardEventoHoy = findViewById(R.id.cardEventoHoy);
+        vpNoticias = findViewById(R.id.vpNoticias);
         configurarSliderNoticias();
 
-        // Vinculación y configuración de eventos de navegación
-        inicializarBotonesNavegacion();
+        tvHoraEvento = findViewById(R.id.tvHoraEvento);
+        tvTituloEventoHoy = findViewById(R.id.tvTituloEventoHoy);
+        tvSubtituloEventoHoy = findViewById(R.id.tvSubtituloEventoHoy);
+        hub = findViewById(R.id.hubSecciones);
+        nivel = findViewById(R.id.nivelInclinacion);
 
-        // Inicializar Calendario y eventos
-        calendarioDB = new CalendarioDB(BD);
-        actividadesDB = new ActividadesDB(BD);
-        secretariaDB = new SecretariaDB(BD);
-        secretariaDB.poblarCitasDeEjemploSiVacio();
-        inicializarCalendario();
+        cardAccesoDirecto = findViewById(R.id.cardAccesoDirecto);
+        tvTituloCabeceraAccesoDirecto = findViewById(R.id.tvTituloCabeceraAccesoDirecto);
+        btnCambiarModoAcceso = findViewById(R.id.btnCambiarModoAcceso);
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setOnClickListener(v -> {
+                vibrarConfirmacion();
+                alternarModoAccesoDirecto();
+            });
+        }
+        flIconoAccesoDirecto = findViewById(R.id.flIconoAccesoDirecto);
+        ivIconoAccesoDirecto = findViewById(R.id.ivIconoAccesoDirecto);
+        ivChevronAccesoDirecto = findViewById(R.id.ivChevronAccesoDirecto);
+        tvTagAccesoDirecto = findViewById(R.id.tvTagAccesoDirecto);
+        tvSubinfoAccesoDirecto = findViewById(R.id.tvSubinfoAccesoDirecto);
+        tvTituloAccesoDirecto = findViewById(R.id.tvTituloAccesoDirecto);
+        tvDescAccesoDirecto = findViewById(R.id.tvDescAccesoDirecto);
 
-        // Notificaciones del sistema: avisos urgentes y actividades de hoy/mañana (Miguel)
+        aplicarMargenesSistema();
+        configurarPerfilClick();
+        configurarMascotaClick();
+        configurarHub();
+        configurarInclinacion();
+
         Notificador.revisarAvisos(this, correoUsuario);
 
         // Configuración del botón flotante (FAB) para el Asistente AI Gemini
@@ -193,204 +218,374 @@ public class MenuPrincipal extends BaseActivity {
 
     private void comprobarAnimacionOla(Intent intent) {
         if (intent != null && intent.getBooleanExtra("START_WAVE_DOWN", false)) {
-            // Limpiamos el extra para no repetirlo innecesariamente
             intent.removeExtra("START_WAVE_DOWN");
-
             WaveView waveView = findViewById(R.id.waveView);
-
             if (waveView != null) {
                 waveView.startWaveDown(null);
             }
         }
     }
-    /**
-     * Obtiene el nombre del usuario según su correo y actualiza la etiqueta de bienvenida.
-     */
-    private void mostrarBienvenida() {
-        if (correoUsuario != null && !correoUsuario.isEmpty()) {
-            UsuariosDB usuariosDB = new UsuariosDB(BD);
-            String nombreUsuario = usuariosDB.obtenerNombreUsuario(correoUsuario);
-            if (nombreUsuario != null && !nombreUsuario.isEmpty()) {
-                tvBienvenida.setText("¡Bienvenido " + nombreUsuario + "!");
-            } else {
-                tvBienvenida.setText("¡Bienvenido " + correoUsuario + "!");
-            }
-        } else {
-            tvBienvenida.setText("¡Bienvenido!");
-        }
+
+    /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
+    private void aplicarMargenesSistema() {
+        View contenido = findViewById(R.id.contenidoMenu);
+        ViewCompat.setOnApplyWindowInsetsListener(contenido, (v, insets) -> {
+            Insets barras = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(contenido);
     }
 
-    private void siguienteSeccion() {
-        indiceSeccionActual = (indiceSeccionActual + 1) % nombresSecciones.length;
-        actualizarBotonSeccion();
-    }
-
-    private void anteriorSeccion() {
-        indiceSeccionActual = (indiceSeccionActual - 1 + nombresSecciones.length) % nombresSecciones.length;
-        actualizarBotonSeccion();
-    }
-
-    private void actualizarBotonSeccion() {
-        if (tvNombreSeccion != null) {
-            tvNombreSeccion.setText(nombresSecciones[indiceSeccionActual]);
-        } else if (btnSeccionGrande != null) {
-            btnSeccionGrande.setText(nombresSecciones[indiceSeccionActual]);
-        }
-
-        if (ivIconoSeccion != null) {
-            ivIconoSeccion.setImageResource(iconosSecciones[indiceSeccionActual]);
-        }
-
-        if (tvAnteriorNombre != null) {
-            int indexAnterior = (indiceSeccionActual - 1 + nombresSecciones.length) % nombresSecciones.length;
-            tvAnteriorNombre.setText(nombresSecciones[indexAnterior]);
-        }
-        if (tvSiguienteNombre != null) {
-            int indexSiguiente = (indiceSeccionActual + 1) % nombresSecciones.length;
-            tvSiguienteNombre.setText(nombresSecciones[indexSiguiente]);
-        }
-    }
-
-    /**
-     * Asigna las vistas y listeners a todos los botones del menú.
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    private void inicializarBotonesNavegacion() {
-        // Clic en la foto/icono de perfil
+    private void configurarPerfilClick() {
         ivIcono.setOnClickListener(v -> {
             if (correoUsuario == null || correoUsuario.isEmpty()) {
-                // Si no ha iniciado sesión / no registrado -> llevar a Login
                 Intent intent = new Intent(MenuPrincipal.this, Login.class);
                 startActivity(intent);
             } else {
-                // Si ya ha iniciado sesión -> llevar a Ajustes de cuenta
                 Intent intent = new Intent(MenuPrincipal.this, AjustesCuenta.class);
                 intent.putExtra("CORREO", correoUsuario);
                 startActivity(intent);
             }
         });
+    }
 
-        btnSeccionGrande = findViewById(R.id.btnSeccionGrande);
-        ivIconoSeccion = findViewById(R.id.ivIconoSeccion);
-        tvNombreSeccion = findViewById(R.id.tvNombreSeccion);
-        btnAnteriorSeccion = findViewById(R.id.btnAnteriorSeccion);
-        btnSiguienteSeccion = findViewById(R.id.btnSiguienteSeccion);
-        View layoutAnterior = findViewById(R.id.layoutAnterior);
-        View layoutSiguiente = findViewById(R.id.layoutSiguiente);
-
-        actualizarBotonSeccion();
-
-        btnAnteriorSeccion.setOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            anteriorSeccion();
-        });
-
-        btnSiguienteSeccion.setOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            siguienteSeccion();
-        });
-
-        if (layoutAnterior != null) {
-            layoutAnterior.setOnClickListener(v -> {
+    private void configurarMascotaClick() {
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                anteriorSeccion();
+                new AlertDialog.Builder(MenuPrincipal.this)
+                        .setIcon(R.drawable.ic_mascota_ayudante)
+                        .setTitle("Asistente Virtual ETSIIT 🤖")
+                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.")
+                        .setPositiveButton("¡Entendido!", null)
+                        .show();
             });
         }
+    }
 
-        if (layoutSiguiente != null) {
-            layoutSiguiente.setOnClickListener(v -> {
-                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                siguienteSeccion();
-            });
-        }
+    // -------------------------------------------------
+    //              HUB + INCLINACIÓN
+    // -------------------------------------------------
 
-        // Detector de gestos táctiles (swipe / deslizar) optimizado
-        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+    private void configurarHub() {
+        hub.setOnSeccionListener(indice -> {
+            // un toque también deja la selección donde se ha tocado
+            detector.fijarSeleccion(indice / 3, indice % 3);
+            nivel.setZona(indice / 3, indice % 3);
+            abrirSeccion(indice);
+        });
+    }
 
-            // Aumentamos los umbrales para evitar falsos positivos (convertidos a dp o valores más seguros)
-            private static final int SWIPE_THRESHOLD = 100; // Distancia mínima en píxeles
-            private static final int SWIPE_VELOCITY_THRESHOLD = 100; // Velocidad mínima
+    private void configurarInclinacion() {
+        nivel.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            mostrarBottomSheetGiroscopio();
+        });
 
+        actualizarEstadoVisualGiroscopio();
+
+        detector = new DetectorInclinacionMenu(this, new DetectorInclinacionMenu.Listener() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                // IMPORTANTE: onDown debe retornar true para que el detector registre los eventos de movimiento posteriores (onFling)
-                return true;
+            public void alMoverBola(float x, float y) {
+                nivel.setInclinacion(x, y);
             }
 
             @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                if (e1 == null || e2 == null) return false;
+            public void alCambiarSeleccion(int fila, int columna) {
+                hub.setSeleccion(fila * 3 + columna, true);
+                nivel.setZona(fila, columna);
+                vibrarSeleccion();
+            }
 
-                float diffX = e2.getX() - e1.getX();
-                float diffY = e2.getY() - e1.getY();
+            @Override
+            public void alEstarListo(boolean listo) {
+                nivel.setListo(listo);
+            }
 
-                // Comprobamos si el movimiento horizontal es mayor que el vertical
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        fueDeslizamiento = true;
-                        btnSeccionGrande.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            @Override
+            public void alConfirmar() {
+                // Desactivado: solo se entra agitando el móvil
+            }
+        });
+    }
 
-                        if (diffX > 0) {
-                            anteriorSeccion(); // Deslizar hacia la derecha -> Anterior
-                        } else {
-                            siguienteSeccion(); // Deslizar hacia la izquierda -> Siguiente
-                        }
-                        return true;
+    @Override
+    protected void onShakeMenuPrincipal() {
+        vibrarConfirmacion();
+        abrirSeccion(hub.getSeleccion());
+    }
+
+    private void mostrarBottomSheetGiroscopio() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_giroscopio, null);
+        dialog.setContentView(view);
+
+        View btnActivado = view.findViewById(R.id.btnGiroscopioActivado);
+        View btnDesactivado = view.findViewById(R.id.btnGiroscopioDesactivado);
+        TextView badgeActivado = view.findViewById(R.id.badgeGiroscopioActivado);
+        TextView badgeDesactivado = view.findViewById(R.id.badgeGiroscopioDesactivado);
+
+        actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
+
+        btnActivado.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            giroscopioHabilitado = true;
+            guardarEstadoGiroscopio(true);
+            actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
+            actualizarEstadoVisualGiroscopio();
+            detector.iniciar();
+            Toast.makeText(this, "🧭 Sensor de inclinación activado", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        btnDesactivado.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            giroscopioHabilitado = false;
+            guardarEstadoGiroscopio(false);
+            actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
+            actualizarEstadoVisualGiroscopio();
+            detector.parar();
+            Toast.makeText(this, "🛑 Sensor de inclinación desactivado", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void actualizarVistasDialogoGiroscopio(View btnActivado, View btnDesactivado, TextView badgeActivado, TextView badgeDesactivado) {
+        if (giroscopioHabilitado) {
+            btnActivado.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
+            badgeActivado.setVisibility(View.VISIBLE);
+            btnDesactivado.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
+            badgeDesactivado.setVisibility(View.GONE);
+        } else {
+            btnDesactivado.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
+            badgeDesactivado.setVisibility(View.VISIBLE);
+            btnActivado.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
+            badgeActivado.setVisibility(View.GONE);
+        }
+    }
+
+    private void actualizarEstadoVisualGiroscopio() {
+        if (nivel != null) {
+            nivel.setAlpha(giroscopioHabilitado ? 1.0f : 0.35f);
+        }
+    }
+
+    private void guardarEstadoGiroscopio(boolean habilitado) {
+        getSharedPreferences("ConfiguracionApp", MODE_PRIVATE)
+                .edit()
+                .putBoolean("GIROSCOPIO_HABILITADO", habilitado)
+                .apply();
+    }
+
+    private void vibrarConfirmacion() {
+        hub.performHapticFeedback(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? HapticFeedbackConstants.CONFIRM
+                : HapticFeedbackConstants.VIRTUAL_KEY);
+    }
+
+    private void vibrarSeleccion() {
+        hub.performHapticFeedback(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                ? HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+                : HapticFeedbackConstants.VIRTUAL_KEY);
+    }
+
+    private void registrarSeccionVisitada(int indice) {
+        if (indice < 0 || indice >= DESTINOS.length) return;
+        SharedPreferences prefs = getSharedPreferences(PREF_NAVEGACION, MODE_PRIVATE);
+        String historial = prefs.getString(KEY_HISTORIAL_SECCIONES, "");
+        List<Integer> lista = new ArrayList<>();
+        lista.add(indice);
+        if (!historial.isEmpty()) {
+            for (String s : historial.split(",")) {
+                try {
+                    int val = Integer.parseInt(s.trim());
+                    if (val != indice && val >= 0 && val < DESTINOS.length && !lista.contains(val)) {
+                        lista.add(val);
                     }
-                }
-                return false;
+                } catch (NumberFormatException ignored) {}
             }
-        });
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Math.min(lista.size(), 5); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(lista.get(i));
+        }
+        prefs.edit()
+                .putInt(KEY_ULTIMA_SECCION, indice)
+                .putString(KEY_HISTORIAL_SECCIONES, sb.toString())
+                .apply();
+    }
 
-        btnSeccionGrande.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                fueDeslizamiento = false;
-            }
-            gestureDetector.onTouchEvent(event);
-            if (event.getAction() == MotionEvent.ACTION_UP && fueDeslizamiento) {
-                return true; // Consume el evento para evitar que salte el click después de deslizar
-            }
-            return false;
-        });
-
-        btnSeccionGrande.setOnClickListener(v -> {
-            if (fueDeslizamiento) return; // Si fue un gesto de deslizar, no abrir la sección
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            Intent intent;
-            switch (indiceSeccionActual) {
-                case 0:
-                    intent = new Intent(MenuPrincipal.this, Mapa.class);
-                    break;
-                case 1:
-                    intent = new Intent(MenuPrincipal.this, Actividades.class);
-                    break;
-                case 2:
-                    intent = new Intent(MenuPrincipal.this, Asignaturas.class);
-                    break;
-                case 3:
-                    intent = new Intent(MenuPrincipal.this, Profesorado.class);
-                    break;
-                case 4:
-                    intent = new Intent(MenuPrincipal.this, Secretaria.class);
-                    break;
-                case 5:
-                    intent = new Intent(MenuPrincipal.this, Comedores.class);
-                    break;
-                case 6:
-                    intent = new Intent(MenuPrincipal.this, Biblioteca.class);
-                    break;
-                default:
-                    return;
-            }
+    private void abrirSeccion(int indice) {
+        if (abriendo || indice < 0 || indice >= DESTINOS.length) return;
+        abriendo = true;
+        registrarSeccionVisitada(indice);
+        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[indice];
+        RecienteUtil.guardar(this, DESTINOS[indice], seccion.titulo, "Sección de la escuela", null, null, indice);
+        hub.setSeleccion(indice, true);
+        hub.animarApertura(indice, () -> {
+            Intent intent = new Intent(MenuPrincipal.this, DESTINOS[indice]);
             intent.putExtra("CORREO", correoUsuario);
             startActivity(intent);
         });
     }
 
-    /**
-     * Configura el ViewPager2 con el adaptador y el cambio automático de páginas.
-     */
+    // -------------------------------------------------
+    //        ACCESOS DIRECTOS Y SIMULACIÓN 10 MIN
+    // -------------------------------------------------
+
+    private void alternarModoAccesoDirecto() {
+        simulacionManualForzada = true;
+        simulacionManualEsComedor = !simulacionManualEsComedor;
+        actualizarAccesoDirecto();
+        String mensaje = simulacionManualEsComedor ? "Mostrando ruta sugerida" : "Mostrando última página vista";
+        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+    }
+
+    private void actualizarAccesoDirecto() {
+        if (cardAccesoDirecto == null) return;
+
+        java.util.Calendar ahora = java.util.Calendar.getInstance();
+        int minuto = ahora.get(java.util.Calendar.MINUTE);
+        // Simulación: cada 10 minutos alterna si no ha sido modificado manualmente
+        boolean esModoComedor;
+        if (simulacionManualForzada) {
+            esModoComedor = simulacionManualEsComedor;
+        } else {
+            esModoComedor = ((minuto / 10) % 2 == 0);
+            simulacionManualEsComedor = esModoComedor;
+        }
+
+        if (esModoComedor) {
+            configurarAccesoDirectoComedor();
+        } else {
+            configurarAccesoDirectoReciente();
+        }
+    }
+
+    private void configurarAccesoDirectoComedor() {
+        tvTituloCabeceraAccesoDirecto.setText("ACCESO RÁPIDO CONTEXTUAL");
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setText("🔄 Cambiar a último visto");
+            btnCambiarModoAcceso.setTextColor(Color.parseColor("#FF7A2F"));
+            btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
+        }
+
+        cardAccesoDirecto.setCardBackgroundColor(Color.parseColor("#FFFBF7"));
+        cardAccesoDirecto.setStrokeColor(Color.parseColor("#FFE7D6"));
+
+        flIconoAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF7A2F")));
+        ivIconoAccesoDirecto.setImageResource(R.drawable.ic_nui_mapa);
+        ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+
+        tvTagAccesoDirecto.setText("🍽️ HORA DE COMER");
+        tvTagAccesoDirecto.setTextColor(Color.parseColor("#FF7A2F"));
+        tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
+
+        if (ivChevronAccesoDirecto != null) {
+            ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.parseColor("#FF7A2F")));
+        }
+
+        tvSubinfoAccesoDirecto.setText("Horario ETSIIT");
+        tvTituloAccesoDirecto.setText("Ruta: Aula 0.7 ➔ Comedor");
+        tvDescAccesoDirecto.setText("Tienes clase en 0.7 · Toca para abrir mapa y ruta guiada");
+
+        cardAccesoDirecto.setOnClickListener(v -> {
+            vibrarConfirmacion();
+            Intent intent = new Intent(MenuPrincipal.this, Mapa.class);
+            intent.putExtra("CORREO", correoUsuario);
+            intent.putExtra("AUTO_RUTA_COMEDOR", true);
+            startActivity(intent);
+        });
+
+        // Alternancia manual con pulsación larga para pruebas rápidas
+        cardAccesoDirecto.setOnLongClickListener(v -> {
+            vibrarConfirmacion();
+            alternarModoAccesoDirecto();
+            return true;
+        });
+    }
+
+    private void configurarAccesoDirectoReciente() {
+        RecienteUtil.DatosRecientes recientes = RecienteUtil.obtener(this);
+        HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[recientes.seccionIndex];
+
+        tvTituloCabeceraAccesoDirecto.setText("PÁGINA RECIENTE");
+        if (btnCambiarModoAcceso != null) {
+            btnCambiarModoAcceso.setText("🔄 Cambiar a sugerido");
+            btnCambiarModoAcceso.setTextColor(seccion.color);
+            int bgTint = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.15f);
+            btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(bgTint));
+        }
+
+        int bgCard = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.08f);
+        int borderCard = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.30f);
+        cardAccesoDirecto.setCardBackgroundColor(bgCard);
+        cardAccesoDirecto.setStrokeColor(borderCard);
+
+        flIconoAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(seccion.color));
+        ivIconoAccesoDirecto.setImageResource(seccion.icono);
+        ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+
+        tvTagAccesoDirecto.setText("🕒 VISTO RECIENTEMENTE");
+        tvTagAccesoDirecto.setTextColor(seccion.color);
+        int bgTag = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.18f);
+        tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(bgTag));
+
+        if (ivChevronAccesoDirecto != null) {
+            ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(seccion.color));
+        }
+
+        tvSubinfoAccesoDirecto.setText("Acceso directo exacto");
+        tvTituloAccesoDirecto.setText(recientes.titulo);
+        tvDescAccesoDirecto.setText(recientes.subtitulo + " · Toca para volver");
+
+        cardAccesoDirecto.setOnClickListener(v -> {
+            vibrarConfirmacion();
+            try {
+                if (recientes.className != null && !recientes.className.isEmpty()) {
+                    Class<?> targetClass = Class.forName(recientes.className);
+                    Intent intent = new Intent(MenuPrincipal.this, targetClass);
+                    intent.putExtra("CORREO", correoUsuario);
+                    if (recientes.extraKey != null && !recientes.extraKey.isEmpty() && recientes.extraVal != null) {
+                        intent.putExtra(recientes.extraKey, recientes.extraVal);
+                    }
+                    startActivity(intent);
+                } else {
+                    abrirSeccion(recientes.seccionIndex);
+                }
+            } catch (Exception e) {
+                abrirSeccion(recientes.seccionIndex);
+            }
+        });
+
+        cardAccesoDirecto.setOnLongClickListener(v -> {
+            vibrarConfirmacion();
+            alternarModoAccesoDirecto();
+            return true;
+        });
+    }
+
+    // -------------------------------------------------
+    //              DATOS DE LA PANTALLA
+    // -------------------------------------------------
+
+    private void actualizarAvisosSinLeer() {
+        List<Anuncio> todos = anunciosDB.obtenerAnunciosGenerales(FechasUtil.ahoraBD());
+        Set<String> leidos = AnunciosLeidos.leidos(this);
+        int sinLeer = 0;
+        for (Anuncio a : todos) {
+            if (!leidos.contains(String.valueOf(a.id))) sinLeer++;
+        }
+        hub.setBadge(INDICE_AVISOS, sinLeer);
+    }
+
     private void configurarSliderNoticias() {
+        if (vpNoticias == null) return;
         listaNoticias = new ArrayList<>();
         listaNoticias.add(R.drawable.noticia1);
         listaNoticias.add(R.drawable.noticia2);
@@ -399,7 +594,6 @@ public class MenuPrincipal extends BaseActivity {
         listaNoticias.add(R.drawable.noticia5);
         listaNoticias.add(R.drawable.noticia6);
 
-        // Adaptador
         vpNoticias.setAdapter(new RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             @NonNull
             @Override
@@ -410,7 +604,6 @@ public class MenuPrincipal extends BaseActivity {
                         ViewGroup.LayoutParams.MATCH_PARENT
                 ));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                // Al pulsar una noticia del carrusel se abre la pantalla de Noticias
                 imageView.setOnClickListener(v -> {
                     Intent intent = new Intent(MenuPrincipal.this, Noticias.class);
                     intent.putExtra("CORREO", correoUsuario);
@@ -430,520 +623,86 @@ public class MenuPrincipal extends BaseActivity {
             }
         });
 
-        // Reinicia el temporizador cuando el usuario cambia manualmente la página
         vpNoticias.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 sliderHandler.removeCallbacks(sliderRunnable);
-                sliderHandler.postDelayed(sliderRunnable, 5000); // 3 segundos
+                sliderHandler.postDelayed(sliderRunnable, 3500);
             }
         });
     }
 
-    /**
-     * Runnable encargado de la transición automática de las noticias en el ViewPager2.
-     */
     private final Runnable sliderRunnable = new Runnable() {
         @Override
         public void run() {
-            if (listaNoticias != null && !listaNoticias.isEmpty()) {
+            if (listaNoticias != null && !listaNoticias.isEmpty() && vpNoticias != null) {
                 int siguientePosicion = (vpNoticias.getCurrentItem() + 1) % listaNoticias.size();
                 vpNoticias.setCurrentItem(siguientePosicion, true);
             }
         }
     };
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Si acepta el permiso de notificaciones, se revisan los avisos (Miguel)
-        Notificador.alResponderPermiso(this, requestCode, grantResults, correoUsuario);
+    private void cargarEventoHoy() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String fechaHoyStr = sdf.format(new Date());
+
+        List<EventoCalendario> eventosUsuario = calendarioDB.obtenerEventosPorFecha(fechaHoyStr, correoUsuario);
+        List<EventoCalendario> actividadesOficiales = actividadesDB.obtenerActividadesPorFecha(fechaHoyStr);
+        List<EventoCalendario> citasSecretaria = secretariaDB.obtenerCitasPorFecha(fechaHoyStr, correoUsuario);
+
+        List<EventoCalendario> todosEventosHoy = new ArrayList<>();
+        todosEventosHoy.addAll(eventosUsuario);
+        todosEventosHoy.addAll(actividadesOficiales);
+        todosEventosHoy.addAll(citasSecretaria);
+
+        tvHoraEvento.setText("HOY");
+        if (!todosEventosHoy.isEmpty()) {
+            EventoCalendario eventoProximo = todosEventosHoy.get(0);
+            boolean hayHora = eventoProximo.hora != null && !eventoProximo.hora.isEmpty();
+            boolean hayDescripcion = eventoProximo.descripcion != null && !eventoProximo.descripcion.isEmpty();
+            tvTituloEventoHoy.setText(eventoProximo.titulo);
+            if (hayHora && hayDescripcion) {
+                tvSubtituloEventoHoy.setText(eventoProximo.hora + " · " + eventoProximo.descripcion);
+            } else if (hayHora) {
+                tvSubtituloEventoHoy.setText(eventoProximo.hora + " · Calendario");
+            } else {
+                tvSubtituloEventoHoy.setText(hayDescripcion ? eventoProximo.descripcion : "Calendario");
+            }
+        } else {
+            tvTituloEventoHoy.setText("Calendario de la ETSIIT");
+            tvSubtituloEventoHoy.setText("Actividades, citas, exámenes y entregas");
+        }
+
+        cardEventoHoy.setOnClickListener(v -> abrirSeccion(DESTINOS.length - 1));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Pausa el slider automático para ahorrar batería y recursos al salir de la pantalla
         sliderHandler.removeCallbacks(sliderRunnable);
-        if (detectorInclinacion != null) {
-            detectorInclinacion.parar();
-        }
+        accesoDirectoHandler.removeCallbacks(accesoDirectoRunnable);
+        detector.parar();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Reanuda la animación del slider cuando la actividad regresa al primer plano
-        sliderHandler.postDelayed(sliderRunnable, 3000);
-        if (detectorInclinacion != null) {
-            detectorInclinacion.iniciar();
-        }
-    }
-
-    /**
-     * Comprueba si el usuario actual ha iniciado sesión (no es invitado ni nulo).
-     */
-    private boolean usuarioEstaRegistrado() {
-        return correoUsuario != null
-                && !correoUsuario.trim().isEmpty()
-                && !"invitado@correo.ugr.es".equalsIgnoreCase(correoUsuario.trim());
-    }
-
-    /**
-     * Muestra aviso de inicio de sesión si es un usuario no registrado/invitado.
-     */
-    private void verificarYMostrarDialogoAnadirEvento() {
-        if (!usuarioEstaRegistrado()) {
-            new AlertDialog.Builder(this)
-                    .setTitle("🔒 Inicio de sesión requerido")
-                    .setMessage("Para añadir o editar tus exámenes, entregas y actividades en el calendario debes iniciar sesión con tu cuenta.")
-                    .setPositiveButton("Iniciar sesión", (dialog, which) -> {
-                        Intent intent = new Intent(MenuPrincipal.this, Login.class);
-                        startActivity(intent);
-                    })
-                    .setNegativeButton("Cancelar", null)
-                    .show();
-            return;
-        }
-        mostrarDialogoAnadirEvento();
-    }
-
-    /**
-     * Configura y gestiona el Calendario de Actividades, Exámenes y Entregas.
-     */
-    private void inicializarCalendario() {
-        btnMesAnterior = findViewById(R.id.btnMesAnterior);
-        btnMesSiguiente = findViewById(R.id.btnMesSiguiente);
-        tvMesAno = findViewById(R.id.tvMesAno);
-        gvCalendario = findViewById(R.id.gvCalendario);
-        tvFechaSeleccionada = findViewById(R.id.tvFechaSeleccionada);
-        tvNumEventosFecha = findViewById(R.id.tvNumEventosFecha);
-        tvSinEventos = findViewById(R.id.tvSinEventos);
-        llEventosContainer = findViewById(R.id.llEventosContainer);
-        btnAnadirEvento = findViewById(R.id.btnAnadirEvento);
-
-        // Fecha seleccionada inicial: HOY (YYYY-MM-DD)
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        Calendar calHoy = Calendar.getInstance();
-        fechaSeleccionadaStr = sdf.format(calHoy.getTime());
-
-        if (btnMesAnterior != null) {
-            btnMesAnterior.setOnClickListener(v -> {
-                mesMostradoCal.add(Calendar.MONTH, -1);
-                actualizarGridCalendario();
-            });
-        }
-
-        if (btnMesSiguiente != null) {
-            btnMesSiguiente.setOnClickListener(v -> {
-                mesMostradoCal.add(Calendar.MONTH, 1);
-                actualizarGridCalendario();
-            });
-        }
-
-        if (btnAnadirEvento != null) {
-            btnAnadirEvento.setOnClickListener(v -> verificarYMostrarDialogoAnadirEvento());
-        }
-
-        actualizarGridCalendario();
-        cargarEventosFechaSeleccionada();
-    }
-
-    /**
-     * Dibuja la matriz del mes en el GridView resaltando en color los días que tienen eventos.
-     */
-    private void actualizarGridCalendario() {
-        if (tvMesAno != null) {
-            SimpleDateFormat sdfMesAno = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
-            String mesAno = sdfMesAno.format(mesMostradoCal.getTime());
-            if (mesAno.length() > 0) {
-                mesAno = mesAno.substring(0, 1).toUpperCase() + mesAno.substring(1);
-            }
-            tvMesAno.setText(mesAno);
-        }
-
-        Calendar calGrid = (Calendar) mesMostradoCal.clone();
-        calGrid.set(Calendar.DAY_OF_MONTH, 1);
-        int primerDiaSemana = calGrid.get(Calendar.DAY_OF_WEEK); // 1 = Dom, 2 = Lun...
-        int offsetLunes = (primerDiaSemana + 5) % 7;
-        calGrid.add(Calendar.DAY_OF_MONTH, -offsetLunes);
-
-        List<Date> listaDias = new ArrayList<>();
-        for (int i = 0; i < 35; i++) {
-            listaDias.add(calGrid.getTime());
-            calGrid.add(Calendar.DAY_OF_MONTH, 1);
-        }
-
-        if (gvCalendario != null) {
-            gvCalendario.setAdapter(new BaseAdapter() {
-                @Override
-                public int getCount() {
-                    return listaDias.size();
-                }
-
-                @Override
-                public Object getItem(int position) {
-                    return listaDias.get(position);
-                }
-
-                @Override
-                public long getItemId(int position) {
-                    return position;
-                }
-
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    View cell = convertView;
-                    if (cell == null) {
-                        cell = getLayoutInflater().inflate(R.layout.item_dia_calendario, parent, false);
-                    }
-
-                    Date date = listaDias.get(position);
-                    Calendar cDia = Calendar.getInstance();
-                    cDia.setTime(date);
-
-                    SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                    String dateStr = sdfIso.format(date);
-
-                    TextView tvNumeroDia = cell.findViewById(R.id.tvNumeroDia);
-                    FrameLayout flCirculoDia = cell.findViewById(R.id.flCirculoDia);
-                    LinearLayout llPuntosIndicadores = cell.findViewById(R.id.llPuntosIndicadores);
-
-                    tvNumeroDia.setText(String.valueOf(cDia.get(Calendar.DAY_OF_MONTH)));
-
-                    boolean esMismoMes = cDia.get(Calendar.MONTH) == mesMostradoCal.get(Calendar.MONTH);
-                    boolean esSeleccionado = dateStr.equals(fechaSeleccionadaStr);
-
-                    // Consultar eventos para esta fecha (Usuario, Actividades Oficiales y Citas de Secretaría)
-                    List<EventoCalendario> evsUser = calendarioDB != null ? calendarioDB.obtenerEventosPorFecha(dateStr, correoUsuario) : new ArrayList<>();
-                    List<EventoCalendario> evsOficiales = actividadesDB != null ? actividadesDB.obtenerActividadesPorFecha(dateStr) : new ArrayList<>();
-                    List<EventoCalendario> evsCitas = secretariaDB != null ? secretariaDB.obtenerCitasPorFecha(dateStr, correoUsuario) : new ArrayList<>();
-                    boolean tieneEventos = !evsUser.isEmpty() || !evsOficiales.isEmpty() || !evsCitas.isEmpty();
-
-                    if (!esMismoMes) {
-                        tvNumeroDia.setTextColor(Color.parseColor("#CCCCCC"));
-                    } else if (esSeleccionado) {
-                        tvNumeroDia.setTextColor(Color.WHITE);
-                    } else {
-                        tvNumeroDia.setTextColor(Color.parseColor("#1A1A1A"));
-                        if (tieneEventos) {
-                            tvNumeroDia.setTypeface(null, Typeface.BOLD);
-                        } else {
-                            tvNumeroDia.setTypeface(null, Typeface.NORMAL);
-                        }
-                    }
-
-                    // Fondo destacado del día
-                    GradientDrawable gdCirculo = new GradientDrawable();
-                    gdCirculo.setShape(GradientDrawable.OVAL);
-
-                    if (esSeleccionado) {
-                        gdCirculo.setColor(Color.parseColor("#FF8C42")); // Naranja primario
-                        flCirculoDia.setBackground(gdCirculo);
-                    } else if (tieneEventos && esMismoMes) {
-                        // ¡RESALTAR DÍAS CON EVENTOS O CITAS! Fondo cálido suave
-                        gdCirculo.setColor(Color.parseColor("#FFE0B2"));
-                        flCirculoDia.setBackground(gdCirculo);
-                    } else {
-                        flCirculoDia.setBackground(null);
-                    }
-
-                    // Puntos indicadores de tipo de evento (Examen, Entrega, Actividad, Cita, Otro)
-                    llPuntosIndicadores.removeAllViews();
-                    if (tieneEventos && esMismoMes) {
-                        Set<String> tipos = new HashSet<>();
-                        for (EventoCalendario e : evsUser) tipos.add(e.tipo);
-                        if (!evsOficiales.isEmpty()) tipos.add("Actividad");
-                        if (!evsCitas.isEmpty()) tipos.add("Cita");
-
-                        for (String t : tipos) {
-                            View dot = new View(MenuPrincipal.this);
-                            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(10, 10);
-                            dotParams.setMargins(2, 0, 2, 0);
-                            dot.setLayoutParams(dotParams);
-
-                            GradientDrawable gdDot = new GradientDrawable();
-                            gdDot.setShape(GradientDrawable.OVAL);
-
-                            int colorDot = Color.parseColor("#FF8C42");
-                            if ("Examen".equalsIgnoreCase(t)) colorDot = Color.parseColor("#E53935");
-                            else if ("Entrega".equalsIgnoreCase(t)) colorDot = Color.parseColor("#FB8C00");
-                            else if ("Actividad".equalsIgnoreCase(t)) colorDot = Color.parseColor("#1E88E5");
-                            else if ("Cita".equalsIgnoreCase(t) || "Cita Secretaría".equalsIgnoreCase(t)) colorDot = Color.parseColor("#8E24AA");
-                            else if ("Otro".equalsIgnoreCase(t)) colorDot = Color.parseColor("#43A047");
-
-                            gdDot.setColor(colorDot);
-                            dot.setBackground(gdDot);
-                            llPuntosIndicadores.addView(dot);
-                        }
-                    }
-
-                    cell.setOnClickListener(v -> {
-                        fechaSeleccionadaStr = dateStr;
-                        actualizarGridCalendario();
-                        cargarEventosFechaSeleccionada();
-                    });
-
-                    return cell;
-                }
-            });
-        }
-    }
-
-    private void cargarEventosFechaSeleccionada() {
-        if (llEventosContainer == null) return;
-        llEventosContainer.removeAllViews();
-
-        String fechaFormateada = fechaSeleccionadaStr;
-        try {
-            SimpleDateFormat sdfIso = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            SimpleDateFormat sdfPretty = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            fechaFormateada = sdfPretty.format(sdfIso.parse(fechaSeleccionadaStr));
-        } catch (Exception ignored) {}
-
-        if (tvFechaSeleccionada != null) {
-            tvFechaSeleccionada.setText("Eventos del " + fechaFormateada);
-        }
-
-        // 1. Obtener eventos guardados por el usuario
-        List<EventoCalendario> eventosUsuario = calendarioDB != null ? calendarioDB.obtenerEventosPorFecha(fechaSeleccionadaStr, correoUsuario) : new ArrayList<>();
-
-        // 2. Obtener actividades oficiales de la sección "Actividades"
-        List<EventoCalendario> actividadesSeccion = actividadesDB != null ? actividadesDB.obtenerActividadesPorFecha(fechaSeleccionadaStr) : new ArrayList<>();
-
-        // 3. Obtener citas activas de la sección "Secretaría"
-        List<EventoCalendario> citasSecretaria = secretariaDB != null ? secretariaDB.obtenerCitasPorFecha(fechaSeleccionadaStr, correoUsuario) : new ArrayList<>();
-
-        List<EventoCalendario> eventos = new ArrayList<>();
-        eventos.addAll(eventosUsuario);
-        eventos.addAll(actividadesSeccion);
-        eventos.addAll(citasSecretaria);
-
-        if (tvNumEventosFecha != null) {
-            tvNumEventosFecha.setText(eventos.size() + (eventos.size() == 1 ? " evento" : " eventos"));
-        }
-
-        if (eventos.isEmpty()) {
-            if (tvSinEventos != null) tvSinEventos.setVisibility(View.VISIBLE);
+        abriendo = false;
+        sliderHandler.removeCallbacks(sliderRunnable);
+        sliderHandler.postDelayed(sliderRunnable, 3500);
+        accesoDirectoHandler.removeCallbacks(accesoDirectoRunnable);
+        accesoDirectoHandler.post(accesoDirectoRunnable);
+        hub.restaurar();
+        nivel.setListo(false);
+        cargarEventoHoy();
+        actualizarAvisosSinLeer();
+        actualizarEstadoVisualGiroscopio();
+        actualizarAccesoDirecto();
+        if (giroscopioHabilitado) {
+            detector.iniciar();
         } else {
-            if (tvSinEventos != null) tvSinEventos.setVisibility(View.GONE);
-
-            for (EventoCalendario ev : eventos) {
-                MaterialCardView card = new MaterialCardView(this);
-                LinearLayout.LayoutParams paramsCard = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                paramsCard.setMargins(0, 0, 0, 16);
-                card.setLayoutParams(paramsCard);
-                card.setRadius(24f);
-                card.setCardElevation(2f);
-                card.setStrokeWidth(1);
-                card.setStrokeColor(Color.parseColor("#EAEAEA"));
-                card.setCardBackgroundColor(Color.WHITE);
-
-                LinearLayout rowLayout = new LinearLayout(this);
-                rowLayout.setOrientation(LinearLayout.HORIZONTAL);
-                rowLayout.setPadding(24, 20, 24, 20);
-                rowLayout.setGravity(Gravity.CENTER_VERTICAL);
-
-                TextView tvBadge = new TextView(this);
-                boolean esActividadOficial = ev.id < 0 && ev.id > -20000;
-                boolean esCitaSecretaria = ev.id <= -20000;
-
-                if (esActividadOficial) {
-                    tvBadge.setText("ACTIVIDAD ETSIIT");
-                } else if (esCitaSecretaria) {
-                    tvBadge.setText("CITA SECRETARÍA");
-                } else {
-                    tvBadge.setText(ev.tipo.toUpperCase());
-                }
-
-                tvBadge.setTextSize(10);
-                tvBadge.setTypeface(null, Typeface.BOLD);
-                tvBadge.setTextColor(Color.WHITE);
-                tvBadge.setPadding(16, 8, 16, 8);
-
-                int colorBadge = Color.parseColor("#FF8C42");
-                if (esCitaSecretaria || "Cita".equalsIgnoreCase(ev.tipo)) {
-                    colorBadge = Color.parseColor("#8E24AA"); // morado
-                } else if (esActividadOficial || "Actividad".equalsIgnoreCase(ev.tipo)) {
-                    colorBadge = Color.parseColor("#1E88E5"); // azul
-                } else if ("Examen".equalsIgnoreCase(ev.tipo)) {
-                    colorBadge = Color.parseColor("#E53935"); // rojo
-                } else if ("Entrega".equalsIgnoreCase(ev.tipo)) {
-                    colorBadge = Color.parseColor("#FB8C00"); // naranja
-                } else if ("Otro".equalsIgnoreCase(ev.tipo)) {
-                    colorBadge = Color.parseColor("#43A047"); // verde
-                }
-
-                GradientDrawable gd = new GradientDrawable();
-                gd.setColor(colorBadge);
-                gd.setCornerRadius(16);
-                tvBadge.setBackground(gd);
-
-                LinearLayout infoCol = new LinearLayout(this);
-                infoCol.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams infoParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-                infoParams.setMargins(20, 0, 16, 0);
-                infoCol.setLayoutParams(infoParams);
-
-                TextView tvTituloEv = new TextView(this);
-                tvTituloEv.setText(ev.titulo);
-                tvTituloEv.setTextSize(14);
-                tvTituloEv.setTypeface(null, Typeface.BOLD);
-                tvTituloEv.setTextColor(Color.parseColor("#1A1A1A"));
-
-                String detalles = "";
-                if (ev.hora != null && !ev.hora.isEmpty()) {
-                    detalles += "🕒 " + ev.hora;
-                }
-                if (ev.descripcion != null && !ev.descripcion.isEmpty()) {
-                    if (!detalles.isEmpty()) detalles += " · ";
-                    detalles += ev.descripcion;
-                }
-
-                infoCol.addView(tvTituloEv);
-                if (!detalles.isEmpty()) {
-                    TextView tvDetallesEv = new TextView(this);
-                    tvDetallesEv.setText(detalles);
-                    tvDetallesEv.setTextSize(12);
-                    tvDetallesEv.setTextColor(Color.parseColor("#666666"));
-                    tvDetallesEv.setPadding(0, 4, 0, 0);
-                    infoCol.addView(tvDetallesEv);
-                }
-
-                ImageButton btnAccion = new ImageButton(this);
-                btnAccion.setBackgroundColor(Color.TRANSPARENT);
-
-                if (esActividadOficial) {
-                    btnAccion.setImageResource(android.R.drawable.ic_menu_info_details);
-                    btnAccion.setColorFilter(Color.parseColor("#1E88E5"));
-                    btnAccion.setContentDescription("Ver actividad");
-                    btnAccion.setOnClickListener(v -> {
-                        Intent intent = new Intent(MenuPrincipal.this, Actividades.class);
-                        intent.putExtra("CORREO", correoUsuario);
-                        startActivity(intent);
-                    });
-                } else if (esCitaSecretaria) {
-                    btnAccion.setImageResource(android.R.drawable.ic_menu_info_details);
-                    btnAccion.setColorFilter(Color.parseColor("#8E24AA"));
-                    btnAccion.setContentDescription("Ver Secretaría");
-                    btnAccion.setOnClickListener(v -> {
-                        Intent intent = new Intent(MenuPrincipal.this, Secretaria.class);
-                        intent.putExtra("CORREO", correoUsuario);
-                        startActivity(intent);
-                    });
-                } else {
-                    btnAccion.setImageResource(android.R.drawable.ic_menu_delete);
-                    btnAccion.setColorFilter(Color.parseColor("#B0BEC5"));
-                    btnAccion.setContentDescription("Eliminar evento");
-                    btnAccion.setOnClickListener(v -> {
-                        if (!usuarioEstaRegistrado()) {
-                            verificarYMostrarDialogoAnadirEvento();
-                            return;
-                        }
-                        new AlertDialog.Builder(MenuPrincipal.this)
-                                .setTitle("Eliminar evento")
-                                .setMessage("¿Deseas borrar '" + ev.titulo + "' de tu calendario?")
-                                .setPositiveButton("Eliminar", (dialog, which) -> {
-                                    calendarioDB.eliminarEvento(ev.id);
-                                    Toast.makeText(MenuPrincipal.this, "Evento eliminado", Toast.LENGTH_SHORT).show();
-                                    actualizarGridCalendario();
-                                    cargarEventosFechaSeleccionada();
-                                })
-                                .setNegativeButton("Cancelar", null)
-                                .show();
-                    });
-                }
-
-                rowLayout.addView(tvBadge);
-                rowLayout.addView(infoCol);
-                rowLayout.addView(btnAccion);
-                card.addView(rowLayout);
-
-                llEventosContainer.addView(card);
-            }
+            detector.parar();
         }
-    }
-
-    private void mostrarDialogoAnadirEvento() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("➕ Añadir evento al Calendario");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 20, 40, 10);
-
-        TextView tvLabelTitulo = new TextView(this);
-        tvLabelTitulo.setText("Título del evento / examen / entrega:");
-        tvLabelTitulo.setTextSize(12);
-        tvLabelTitulo.setTextColor(Color.parseColor("#666666"));
-        tvLabelTitulo.setPadding(0, 8, 0, 4);
-
-        final EditText etTitulo = new EditText(this);
-        etTitulo.setHint("Ej: Examen de NPI, Entrega P1...");
-        etTitulo.setTextSize(14);
-
-        TextView tvLabelTipo = new TextView(this);
-        tvLabelTipo.setText("Tipo:");
-        tvLabelTipo.setTextSize(12);
-        tvLabelTipo.setTextColor(Color.parseColor("#666666"));
-        tvLabelTipo.setPadding(0, 16, 0, 4);
-
-        final Spinner spTipo = new Spinner(this);
-        String[] tipos = {"Examen", "Entrega", "Actividad", "Otro"};
-        ArrayAdapter<String> adapterTipo = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, tipos);
-        spTipo.setAdapter(adapterTipo);
-
-        TextView tvLabelHora = new TextView(this);
-        tvLabelHora.setText("Hora (opcional):");
-        tvLabelHora.setTextSize(12);
-        tvLabelHora.setTextColor(Color.parseColor("#666666"));
-        tvLabelHora.setPadding(0, 16, 0, 4);
-
-        final EditText etHora = new EditText(this);
-        etHora.setHint("Ej: 10:30, 23:59");
-        etHora.setTextSize(14);
-
-        TextView tvLabelDesc = new TextView(this);
-        tvLabelDesc.setText("Lugar o notas (opcional):");
-        tvLabelDesc.setTextSize(12);
-        tvLabelDesc.setTextColor(Color.parseColor("#666666"));
-        tvLabelDesc.setPadding(0, 16, 0, 4);
-
-        final EditText etDesc = new EditText(this);
-        etDesc.setHint("Ej: Aula 1.1, Subir a PRADO...");
-        etDesc.setTextSize(14);
-
-        layout.addView(tvLabelTitulo);
-        layout.addView(etTitulo);
-        layout.addView(tvLabelTipo);
-        layout.addView(spTipo);
-        layout.addView(tvLabelHora);
-        layout.addView(etHora);
-        layout.addView(tvLabelDesc);
-        layout.addView(etDesc);
-
-        builder.setView(layout);
-
-        builder.setPositiveButton("Guardar", (dialog, which) -> {
-            String titulo = etTitulo.getText().toString().trim();
-            if (titulo.isEmpty()) {
-                Toast.makeText(MenuPrincipal.this, "Debes escribir un título para el evento", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            String tipo = spTipo.getSelectedItem().toString();
-            String hora = etHora.getText().toString().trim();
-            String desc = etDesc.getText().toString().trim();
-
-            calendarioDB.insertarEvento(correoUsuario, titulo, tipo, fechaSeleccionadaStr, hora, desc);
-            Toast.makeText(MenuPrincipal.this, "Evento guardado en el calendario", Toast.LENGTH_SHORT).show();
-            actualizarGridCalendario();
-            cargarEventosFechaSeleccionada();
-        });
-
-        builder.setNegativeButton("Cancelar", null);
-        builder.show();
     }
 }

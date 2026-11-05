@@ -8,27 +8,36 @@ import android.hardware.SensorManager;
 import android.os.SystemClock;
 
 /**
- * Detecta cuando el usuario pasa el móvil de posición vertical (sosteniéndolo para leer)
- * a horizontal (tumbándolo hacia adelante) usando el acelerómetro (eje Y y Z).
+ * Detecta cuando el usuario parte de una posición natural de lectura erguida
+ * y tumba el móvil hacia atrás (hacia la posición horizontal boca arriba).
  */
 public class DetectorInclinacionFrontal implements SensorEventListener {
 
     public interface OnInclinacionFrontal {
-        void alTumbarHorizontal();
+        void alInclinarAtras();
     }
 
-    private static final float ALFA = 0.8f;          // Filtro paso bajo
-    private static final float UMBRAL_VERTICAL = 7.0f;   // Y > 7.0 m/s² -> Móvil vertical (esperandoInclinacion)
-    private static final float UMBRAL_HORIZONTAL = 3.0f; // Y < 3.0 m/s² -> Móvil tumbado hacia adelante
-    private static final long ENFRIAMIENTO_MS = 1200;    // Tiempo mínimo entre disparos
+    private static final float ALFA = 0.8f;                 // Filtro paso bajo para suavizar aceleraciones bruscas
+    // Para considerarse en posición erguida o de lectura natural:
+    // El usuario sostiene el móvil de frente (Y >= 4.0 m/s², Z <= 7.5 m/s²)
+    private static final float UMBRAL_REPOSO_Y_MIN = 4.0f;
+    private static final float UMBRAL_REPOSO_Z_MAX = 7.5f;
+
+    // Para considerarse inclinado hacia atrás (hacia la horizontal con pantalla arriba o volteado):
+    // Z aumenta (>= 8.8 m/s²) o Y cae (<= 1.5 m/s²)
+    private static final float UMBRAL_INCLINADO_Z_MIN = 8.8f;
+    private static final float UMBRAL_INCLINADO_Y_MAX = 1.5f;
+
+    private static final long ENFRIAMIENTO_MS = 2000;       // 2s de enfriamiento para evitar cambios accidentales
 
     private final SensorManager sensorManager;
     private final Sensor acelerometro;
     private final OnInclinacionFrontal listener;
 
     private float yFiltrado;
+    private float zFiltrado;
     private boolean primeraLectura;
-    private boolean esperandoInclinacion;
+    private boolean armado;
     private long ultimoDisparo;
 
     public DetectorInclinacionFrontal(Context context, OnInclinacionFrontal listener) {
@@ -44,7 +53,7 @@ public class DetectorInclinacionFrontal implements SensorEventListener {
     public void iniciar() {
         if (acelerometro == null) return;
         primeraLectura = true;
-        esperandoInclinacion = false;
+        armado = false;
         sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_UI);
     }
 
@@ -57,27 +66,34 @@ public class DetectorInclinacionFrontal implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         float yActual = event.values[1]; // Eje Y: vertical a lo largo de la pantalla
+        float zActual = event.values[2]; // Eje Z: perpendicular a la pantalla hacia afuera
 
         if (primeraLectura) {
             yFiltrado = yActual;
+            zFiltrado = zActual;
             primeraLectura = false;
         } else {
             yFiltrado = ALFA * yFiltrado + (1 - ALFA) * yActual;
+            zFiltrado = ALFA * zFiltrado + (1 - ALFA) * zActual;
         }
 
-        // Si el móvil está en posición vertical normal (sosteniéndolo para leer), queda listo para detectar
-        if (yFiltrado > UMBRAL_VERTICAL) {
-            esperandoInclinacion = true;
+        // 1. Armado: el usuario sostiene el móvil en posición de lectura normal
+        if (yFiltrado >= UMBRAL_REPOSO_Y_MIN && zFiltrado <= UMBRAL_REPOSO_Z_MAX) {
+            armado = true;
             return;
         }
 
-        // Si previamente estaba vertical y ahora se tumba hacia adelante a posición horizontal
+        // 2. Disparo: si estaba armado y el usuario lo inclina hacia atrás
         long ahora = SystemClock.elapsedRealtime();
-        if (esperandoInclinacion && yFiltrado < UMBRAL_HORIZONTAL && (ahora - ultimoDisparo > ENFRIAMIENTO_MS)) {
-            esperandoInclinacion = false; // Se reinicia hasta que el usuario vuelva a ponerlo en vertical
+        boolean inclinadoAtras = (zFiltrado >= UMBRAL_INCLINADO_Z_MIN || yFiltrado <= UMBRAL_INCLINADO_Y_MAX)
+                || (zFiltrado < -7.0f) // Volteado hacia abajo
+                || (yFiltrado < -5.0f); // Invertido
+
+        if (armado && inclinadoAtras && (ahora - ultimoDisparo > ENFRIAMIENTO_MS)) {
+            armado = false; // Se desarma hasta que el usuario vuelva a colocarlo en posición de lectura
             ultimoDisparo = ahora;
             if (listener != null) {
-                listener.alTumbarHorizontal();
+                listener.alInclinarAtras();
             }
         }
     }

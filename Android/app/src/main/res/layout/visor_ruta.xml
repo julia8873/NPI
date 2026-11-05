@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="#0F172A"
     android:fitsSystemWindows="true">
 
-    <!-- Foto de la ruta: invisible (negro) hasta que el usuario mire hacia una dirección con foto -->
+    <!-- Foto de la ruta -->
     <ImageView
         android:id="@+id/ivFotoRuta"
         android:layout_width="match_parent"
@@ -14,64 +16,147 @@
         android:contentDescription="Foto de la ruta"
         android:scaleType="centerCrop" />
 
-    <!-- Información de depuración arriba -->
-    <LinearLayout
+    <!-- Capa superior: Módulo de información y estado (HUD Superior) -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:background="#66000000"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="#CC0F172A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:strokeColor="#33FFFFFF"
+        app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/tvRumbo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rumbo: --"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvEstadoFoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#FFB380"
-            android:textSize="13sp" />
-
-        <SeekBar
-            android:id="@+id/sbRumboManual"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:visibility="gone" />
-    </LinearLayout>
+            android:padding="16dp">
 
-    <!-- Trayecto y botón de cierre abajo -->
-    <LinearLayout
-        android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/cardCerrarCruz"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvRumbo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rumbo: --"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="Rumbo: 180° S" />
+
+                <TextView
+                    android:id="@+id/tvEstadoFoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#FDBA74"
+                    android:textSize="14sp"
+                    tools:text="🚶 Avanza 3 pasos al frente" />
+
+                <SeekBar
+                    android:id="@+id/sbRumboManual"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:progressTint="#FF8C42"
+                    android:thumbTint="#FF8C42"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Botón de Cierre -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCerrarCruz"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#FF8C42"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Cerrar"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    app:tint="#FFFFFF" />
+            </com.google.android.material.card.MaterialCardView>
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Capa inferior: Barra de Navegación Flotante Mejorada -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardControles"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="#66000000"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
+        app:cardBackgroundColor="#E60F172A"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="12dp"
+        app:strokeColor="#475569"
+        app:strokeWidth="1.5dp">
 
-        <TextView
-            android:id="@+id/tvTrayecto"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
-
-        <Button
-            android:id="@+id/btnCerrarVisor"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#FF8C42"
-            android:text="Cerrar"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+            <!-- Botón ANTERIOR -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAnterior"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="12dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:visibility="gone"
+                app:backgroundTint="#334155"
+                app:cornerRadius="26dp"
+                app:icon="@android:drawable/ic_media_previous"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="#FFFFFF"
+                app:strokeColor="#64748B"
+                app:strokeWidth="1dp" />
+
+            <!-- Botón SIGUIENTE -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSiguiente"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:visibility="gone"
+                app:backgroundTint="#FF8C42"
+                app:cornerRadius="26dp"
+                app:icon="@android:drawable/ic_media_next"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="#FFFFFF"
+                app:rippleColor="#FFB380"
+                app:strokeColor="#FFB380"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 </FrameLayout>

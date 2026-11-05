@@ -17,6 +17,7 @@ import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.util.RecienteUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 
@@ -39,12 +40,14 @@ public class DetalleTramite extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
-        Tramite tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
+        int idProc = getIntent().getIntExtra("idProcedimiento", -1);
+        Tramite tramite = db.getTramite(idProc);
         if (tramite == null) {
             Toast.makeText(this, "Trámite no encontrado", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+        RecienteUtil.guardar(this, DetalleTramite.class, "Trámite: " + tramite.nombre, "Secretaría ETSIIT", "idProcedimiento", String.valueOf(tramite.id), 5);
         List<Paso> pasos = db.getPasos(tramite.id);
         List<Documento> documentos = db.getDocumentos(tramite.id);
 

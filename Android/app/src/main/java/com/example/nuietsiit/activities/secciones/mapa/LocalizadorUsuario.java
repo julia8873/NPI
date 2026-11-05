@@ -28,8 +28,10 @@ public final class LocalizadorUsuario {
     static {
         AULA_POR_CLASE.put("NPI|teoria", "Aula 2.1");
         AULA_POR_CLASE.put("NPI|practicas", "Aula 0.5");
-        AULA_POR_CLASE.put("PL|teoria", "Aula 2.1");
+        AULA_POR_CLASE.put("PL|teoria", "Aula 1.4");
         AULA_POR_CLASE.put("PL|practicas", "Aula 0.5");
+        AULA_POR_CLASE.put("DAI|teoria", "Aula 0.7");
+        AULA_POR_CLASE.put("DAI|practicas", "Aula 0.7");
     }
 
     private LocalizadorUsuario() {}
