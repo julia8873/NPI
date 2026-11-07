@@ -592,6 +592,12 @@ public class SolicitudTramite extends BaseActivity {
         foco.clearFocus();
     }
 
+    // agitar a mitad de la solicitud volvía al menú y se perdía todo lo rellenado
+    @Override
+    protected boolean usaAgitar() {
+        return false;
+    }
+
     // ---------- Rotación (y que Android cierre la app mientras está abierta la cámara) ----------
 
     @Override

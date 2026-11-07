@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -52,9 +53,11 @@ import java.util.Map;
  */
 public class ApuntarLibros extends BaseActivity {
 
-    // mientras una etiqueta sigue en pantalla, su libro no vuelve a vibrar
-    private static final long ETIQUETA_FIJA_MS = 1500;
-    private static final long ETIQUETA_DESVANECER_MS = 1500;
+    // la etiqueta se va enseguida al dejar de ver el código (si no, parece trabada en el borde),
+    // pero el libro no vuelve a vibrar hasta pasado un rato aunque la cámara lo pierda y lo recupere
+    private static final long ETIQUETA_FIJA_MS = 500;
+    private static final long ETIQUETA_DESVANECER_MS = 300;
+    private static final long VIBRACION_REPOSO_MS = 5000;
     private static final long ETIQUETA_MOVER_MS = 120;
     private static final int ANCHO_ETIQUETA_DP = 240;
     private static final int MARGEN_ETIQUETA_DP = 8;
@@ -67,6 +70,7 @@ public class ApuntarLibros extends BaseActivity {
     private BibliotecaDB db;
     private List<String> misAsignaturas;
     private final Map<String, View> etiquetas = new HashMap<>(); // por ISBN
+    private final Map<String, Long> ultimaVibracion = new HashMap<>(); // por ISBN
 
     private final ActivityResultLauncher<String> pedirCamara =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
@@ -192,7 +196,12 @@ public class ApuntarLibros extends BaseActivity {
             comunes.retainAll(misAsignaturas);
             SenalLibro senal = SenalLibro.de(libro, !comunes.isEmpty());
             color = Color.parseColor(senal.color);
-            vibrar(senal.vibracion);
+            Long ultima = ultimaVibracion.get(isbn);
+            long ahora = SystemClock.elapsedRealtime();
+            if (ultima == null || ahora - ultima > VIBRACION_REPOSO_MS) {
+                ultimaVibracion.put(isbn, ahora);
+                vibrar(senal.vibracion);
+            }
 
             tvTitulo.setText(libro.titulo);
             String estado = LibroAdapter.textoDisponibilidad(libro);
