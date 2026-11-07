@@ -236,7 +236,7 @@ public class CitaPrevia extends BaseActivity {
         actualizarCitaExistente();
         String cuando = textoFechaHora(fechaSeleccionada.atTime(LocalTime.parse(hora)));
         String motivo = nombresMotivos.get(motivoSeleccionado);
-        MaterialAlertDialogBuilder dialogo = new MaterialAlertDialogBuilder(this);
+        MaterialAlertDialogBuilder dialogo = new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria);
         if (citaExistente != null) {
             dialogo.setTitle("¿Cambiar tu cita?")
                     .setMessage(motivo + "\n\nAntes: " + textoFechaHora(citaExistente.fechaHora()) +

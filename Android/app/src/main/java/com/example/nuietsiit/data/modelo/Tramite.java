@@ -68,4 +68,19 @@ public class Tramite {
     public boolean sePuedeSolicitar() {
         return solicitudOnline && (!tienePlazo() || plazoAbierto());
     }
+
+    // pastilla de estado (Detalle y "¿Qué necesitas?"): qué se puede hacer hoy
+    public String textoEstado() {
+        if (!solicitudOnline) return "En ventanilla, con cita";
+        if (!tienePlazo()) return "Puedes solicitarlo ya";
+        if (plazoAbierto()) return "Plazo abierto";
+        return LocalDate.now().isBefore(LocalDate.parse(plazoInicio)) ? "Plazo aún no abierto" : "Plazo cerrado";
+    }
+
+    // verde = se puede solicitar, azul = ventanilla, gris = fuera de plazo
+    public int colorEstado() {
+        if (sePuedeSolicitar()) return 0xFF2E7D32;
+        if (!solicitudOnline) return 0xFF1976D2;
+        return 0xFF7B766F;
+    }
 }

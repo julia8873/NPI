@@ -19,7 +19,6 @@ import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.chip.Chip;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -56,67 +55,82 @@ public class DetalleTramite extends BaseActivity {
 
         ((TextView) findViewById(R.id.tvNombre)).setText(tramite.nombre);
         ((TextView) findViewById(R.id.tvDescripcion)).setText(tramite.descripcion);
-        mostrarSeccion(R.id.tvTituloRequisitos, R.id.tvRequisitos, tramite.requisitos);
-        mostrarSeccion(R.id.tvTituloPlazos, R.id.tvPlazos, tramite.plazosInfo);
-        mostrarChipPlazo(tramite);
+        ((TextView) findViewById(R.id.tvCategoria)).setText(tramite.etiquetaCategoria());
+        mostrarSeccion(R.id.tarjetaRequisitos, R.id.tvRequisitos, tramite.requisitos);
+        mostrarSeccion(R.id.tarjetaPlazos, R.id.tvPlazos, tramite.plazosInfo);
+        Pastilla.pintar(findViewById(R.id.tvEstado), tramite.textoEstado(), tramite.colorEstado());
         mostrarDocumentos(documentos);
 
         String correoUsuario = getIntent().getStringExtra("CORREO");
-        Button btnPasos = findViewById(R.id.btnPasos);
-        btnPasos.setText("Ver pasos (" + pasos.size() + ")");
-        btnPasos.setEnabled(!pasos.isEmpty());
+        View btnPasos = findViewById(R.id.btnPasos);
+        ((TextView) findViewById(R.id.tvPasos)).setText("🪜  Cómo se hace, paso a paso (" + pasos.size() + ")");
+        btnPasos.setVisibility(pasos.isEmpty() ? View.GONE : View.VISIBLE);
         btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
                 .putExtra("CORREO", correoUsuario)));
-        findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(new Intent(this, CitaPrevia.class)
-                .putExtra("idProcedimiento", tramite.id)
-                .putExtra("CORREO", correoUsuario)));
 
-        Button btnSolicitar = findViewById(R.id.btnSolicitar);
-        btnSolicitar.setEnabled(tramite.sePuedeSolicitar());
-        btnSolicitar.setOnClickListener(v -> startActivity(new Intent(this, SolicitudTramite.class)
+        // un solo botón grande con el siguiente paso; la otra opción queda como enlace
+        Intent solicitar = new Intent(this, SolicitudTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
-                .putExtra("CORREO", correoUsuario)));
+                .putExtra("CORREO", correoUsuario);
+        Intent pedirCita = new Intent(this, CitaPrevia.class)
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", correoUsuario);
+        Button btnSiguiente = findViewById(R.id.btnSiguiente);
+        Button btnAlternativa = findViewById(R.id.btnAlternativa);
+        if (tramite.sePuedeSolicitar()) {
+            btnSiguiente.setText("📝 Empezar solicitud");
+            btnSiguiente.setOnClickListener(v -> startActivity(solicitar));
+            btnAlternativa.setText("o pide cita para hacerlo en ventanilla");
+            btnAlternativa.setOnClickListener(v -> startActivity(pedirCita));
+        } else {
+            btnSiguiente.setText(tramite.solicitudOnline ? "📅 Pedir cita para consultarlo" : "📅 Pedir cita en ventanilla");
+            btnSiguiente.setOnClickListener(v -> startActivity(pedirCita));
+            btnAlternativa.setVisibility(View.GONE);
+        }
         String motivo = motivoNoSolicitable(tramite);
         TextView tvMotivo = findViewById(R.id.tvMotivoSolicitar);
         tvMotivo.setVisibility(motivo != null ? View.VISIBLE : View.GONE);
         tvMotivo.setText(motivo);
     }
 
-    // oculta título y texto si el campo es opcional y no existe
-    private void mostrarSeccion(int idTitulo, int idTexto, String texto) {
+    // oculta la tarjeta si el campo es opcional y no existe
+    private void mostrarSeccion(int idTarjeta, int idTexto, String texto) {
         boolean hay = texto != null && !texto.isEmpty();
-        findViewById(idTitulo).setVisibility(hay ? View.VISIBLE : View.GONE);
-        TextView tv = findViewById(idTexto);
-        tv.setVisibility(hay ? View.VISIBLE : View.GONE);
-        tv.setText(texto);
+        findViewById(idTarjeta).setVisibility(hay ? View.VISIBLE : View.GONE);
+        ((TextView) findViewById(idTexto)).setText(texto);
     }
 
-    private void mostrarChipPlazo(Tramite t) {
-        Chip chip = findViewById(R.id.chipPlazo);
-        if (!t.tienePlazo()) return;
-        LocalDate hoy = LocalDate.now();
-        chip.setVisibility(View.VISIBLE);
-        if (t.plazoAbierto()) chip.setText("Plazo abierto");
-        else if (hoy.isBefore(LocalDate.parse(t.plazoInicio))) chip.setText("Plazo aún no abierto");
-        else chip.setText("Plazo cerrado");
-    }
-
+    // una fila por documento: nombre (obligatorio u opcional) y, debajo, cómo tiene que ser
     private void mostrarDocumentos(List<Documento> documentos) {
         LinearLayout lista = findViewById(R.id.llDocumentos);
         if (documentos.isEmpty()) {
-            TextView tv = new TextView(this);
-            tv.setText("No hace falta aportar documentos.");
-            lista.addView(tv);
+            lista.addView(textoDocumento("No hace falta aportar documentos.", false));
             return;
         }
         for (Documento d : documentos) {
-            TextView tv = new TextView(this);
-            tv.setText(d.textoLista());
-            int margen = Math.round(4 * getResources().getDisplayMetrics().density); // 4dp
-            tv.setPadding(0, margen, 0, margen);
-            lista.addView(tv);
+            TextView nombre = textoDocumento((d.obligatorio ? "📄  " : "➕  ") + d.nombre
+                    + (d.obligatorio ? "" : "  · opcional"), true);
+            lista.addView(nombre);
+            if (d.descripcion != null && !d.descripcion.isEmpty()) {
+                TextView detalle = textoDocumento(d.descripcion, false);
+                detalle.setPadding(dp(28), 0, 0, 0);
+                lista.addView(detalle);
+            }
         }
+    }
+
+    private TextView textoDocumento(String texto, boolean titulo) {
+        TextView tv = new TextView(this);
+        tv.setText(texto);
+        tv.setTextSize(titulo ? 15 : 14);
+        tv.setTextColor(getColor(titulo ? R.color.nui_tinta : R.color.nui_apagado));
+        if (titulo) tv.setPadding(0, dp(10), 0, dp(2));
+        return tv;
+    }
+
+    private int dp(int valor) {
+        return Math.round(valor * getResources().getDisplayMetrics().density);
     }
 
     // null si se puede solicitar

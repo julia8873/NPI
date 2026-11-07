@@ -15,116 +15,211 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
+
+            <!-- Cabecera: categoría, nombre y qué se puede hacer hoy -->
+            <TextView
+                android:id="@+id/tvCategoria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.08"
+                android:textAllCaps="true"
+                android:textColor="@color/nui_apagado"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvNombre"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="#000000"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/nui_tinta"
+                android:textSize="26sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPlazo"
-                app:chipBackgroundColor="#FF8C42"
-                android:textColor="#FFFFFF"
+            <TextView
+                android:id="@+id/tvEstado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:clickable="false"
-                android:visibility="gone" />
+                android:layout_marginTop="10dp"
+                android:textSize="13sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvDescripcion"
-                android:textColor="#000000"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="4dp"
+                android:lineSpacingExtra="2dp"
+                android:textColor="@color/nui_tinta"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/tarjetaRequisitos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:textSize="16sp" />
+                android:background="@drawable/fondo_seccion"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tvTituloRequisitos"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Requisitos" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📋  Requisitos"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvRequisitos"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/tvTituloPlazos"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Plazos" />
-
-            <TextView
-                android:id="@+id/tvPlazos"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Documentos necesarios" />
+                <TextView
+                    android:id="@+id/tvRequisitos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp" />
+            </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llDocumentos"
+                android:id="@+id/tarjetaPlazos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_marginTop="12dp"
+                android:background="@drawable/fondo_seccion"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-            <Button
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🗓️  Plazos"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPlazos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:lineSpacingExtra="2dp"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tarjetaDocumentos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/fondo_seccion"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📎  Documentos que necesitas"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/llDocumentos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <!-- Los pasos, uno a uno (PasosTramite) -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btnPasos"
-                android:background="@drawable/boton_redondeado"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/nui_superficie"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/nui_linea"
+                app:strokeWidth="1dp">
 
-            <Button
-                android:id="@+id/btnSolicitar"
-                android:background="@drawable/boton_redondeado"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="@null"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Solicitar" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tvMotivoSolicitar"
-                android:textColor="#000000"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/tvPasos"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/nui_tinta"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnPedirCita"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pedir cita"
-                android:textColor="#FF8C42"
-                app:strokeColor="#FF8C42" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="no"
+                        android:text="›"
+                        android:textColor="@color/nui_apagado"
+                        android:textSize="26sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
+
+    <!-- Siguiente paso: un solo botón grande, siempre a la vista -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvMotivoSolicitar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:textColor="@color/nui_apagado"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnSiguiente"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/boton_redondeado"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <Button
+            android:id="@+id/btnAlternativa"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:textAllCaps="false"
+            android:textColor="@color/nui_apagado" />
+    </LinearLayout>
 </LinearLayout>
