@@ -7,6 +7,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,10 +47,12 @@ import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.LienzoFirma;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -73,6 +76,8 @@ public class SolicitudTramite extends BaseActivity {
 
     private static final String[] TITULOS = {"Tus datos", "Documentos", "Firma", "Resumen"};
     private static final long DURACION_MANTENER = 1500;
+    private static final String PREFS = "secretaria";
+    private static final String PREF_INCLINAR = "inclinarPasos"; // compartida con PasosTramite
     private static final long TAMANO_MAXIMO_ARCHIVO = 10 * 1024 * 1024; // 10 MB
 
     private SecretariaDB db;
@@ -103,6 +108,8 @@ public class SolicitudTramite extends BaseActivity {
     private ImageView ivFirma;
     private CircularProgressIndicator anilloEnviar;
     private Button btnAnterior, btnSiguiente;
+    private MaterialSwitch swInclinar;
+    private DetectorInclinacion detector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +142,7 @@ public class SolicitudTramite extends BaseActivity {
         btnSiguiente = findViewById(R.id.btnSiguiente);
         btnAnterior.setOnClickListener(v -> mostrarPaso(paso - 1));
         btnSiguiente.setOnClickListener(v -> siguiente());
+        configurarInclinacion();
 
         // 1. Datos (solo lectura) + observaciones
         ((TextView) findViewById(R.id.etNombre)).setText(nombreUsuario);
@@ -218,6 +226,36 @@ public class SolicitudTramite extends BaseActivity {
             guardarPng(firma, archivoFirmaEnCurso());
         }
         mostrarPaso(paso + 1);
+    }
+
+    // inclinar a la derecha = Siguiente (con su validación), a la izquierda = Anterior
+    private void configurarInclinacion() {
+        swInclinar = findViewById(R.id.swInclinar);
+        detector = new DetectorInclinacion(this, direccion -> {
+            if (direccion == DetectorInclinacion.DERECHA) {
+                if (paso < vistasPaso.length - 1) siguiente(); // en el Resumen solo se envía manteniendo el botón
+            } else {
+                mostrarPaso(paso - 1);
+            }
+        });
+        if (!detector.disponible()) {
+            swInclinar.setVisibility(View.GONE);
+            return;
+        }
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        // el estado sale de las preferencias (saveEnabled=false), así no salta el listener al rotar
+        swInclinar.setSaveEnabled(false);
+        swInclinar.setChecked(prefs.getBoolean(PREF_INCLINAR, false));
+        swInclinar.setOnCheckedChangeListener((b, activado) -> {
+            prefs.edit().putBoolean(PREF_INCLINAR, activado).apply();
+            if (activado) {
+                detector.iniciar();
+                Toast.makeText(this, "Inclina a la derecha para avanzar y a la izquierda para volver",
+                        Toast.LENGTH_LONG).show();
+            } else {
+                detector.parar();
+            }
+        });
     }
 
     private List<String> documentosQueFaltan() {
@@ -654,8 +692,15 @@ public class SolicitudTramite extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (swInclinar != null && swInclinar.isChecked()) detector.iniciar();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
+        if (detector != null) detector.parar();
         if (!enviando) soltar(); // salir de la app con el dedo puesto no debe enviar
     }
 

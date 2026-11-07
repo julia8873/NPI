@@ -17,6 +17,8 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -33,16 +35,12 @@ import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.DecodeHintType;
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.BarcodeView;
-import com.journeyapps.barcodescanner.DefaultDecoderFactory;
 import com.journeyapps.barcodescanner.Size;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +56,9 @@ public class ApuntarLibros extends BaseActivity {
     private static final long ETIQUETA_FIJA_MS = 500;
     private static final long ETIQUETA_DESVANECER_MS = 300;
     private static final long VIBRACION_REPOSO_MS = 5000;
-    private static final long ETIQUETA_MOVER_MS = 120;
+    private static final long ETIQUETA_MOVER_MS = 80;
+    private static final long LECTURA_PERDIDA_MS = 250; // sin leer el código en este tiempo, la etiqueta sigue sola
+    private static final long VELOCIDAD_CADUCA_MS = 400; // dos lecturas más separadas no dicen hacia dónde va
     private static final int ANCHO_ETIQUETA_DP = 240;
     private static final int MARGEN_ETIQUETA_DP = 8;
     private static final int PUNTA_BORDE_DP = 24;     // las esquinas redondeadas no dejan llevarla más lejos
@@ -69,7 +69,7 @@ public class ApuntarLibros extends BaseActivity {
     private TextView tvPista;
     private BibliotecaDB db;
     private List<String> misAsignaturas;
-    private final Map<String, View> etiquetas = new HashMap<>(); // por ISBN
+    private final Map<String, Seguida> etiquetas = new HashMap<>(); // por ISBN
     private final Map<String, Long> ultimaVibracion = new HashMap<>(); // por ISBN
 
     private final ActivityResultLauncher<String> pedirCamara =
@@ -108,10 +108,8 @@ public class ApuntarLibros extends BaseActivity {
         db = new BibliotecaDB(DBHelper.getInstance(this));
         misAsignaturas = db.getAsignaturasMatriculadas(SesionUtil.correo(getIntent()));
 
-        // TRY_HARDER: lee también el código girado, como cuando el libro está tumbado
-        camara.setDecoderFactory(new DefaultDecoderFactory(
-                Collections.singletonList(BarcodeFormat.EAN_13),
-                Collections.singletonMap(DecodeHintType.TRY_HARDER, true), null, 0));
+        // lee todos los códigos que haya en pantalla, también girados (libro tumbado)
+        camara.setDecoderFactory(DecodificadorVarios.fabrica());
         camara.getCameraSettings().setContinuousFocusEnabled(true);
         // la zona de lectura ocupa toda la pantalla, no solo el cuadrado central
         camara.setFramingRectSize(new Size(10000, 10000));
@@ -156,26 +154,53 @@ public class ApuntarLibros extends BaseActivity {
     protected void onPause() {
         super.onPause();
         camara.pause();
-        for (View etiqueta : etiquetas.values()) etiqueta.animate().cancel();
+        for (Seguida seguida : etiquetas.values()) seguida.parar();
         etiquetas.clear();
         capaEtiquetas.removeAllViews();
     }
 
+    // la etiqueta de un libro mientras se ve su código: recuerda hacia dónde se movía para seguirlo al perderlo
+    private static class Seguida {
+        final View etiqueta;
+        float xCodigo, yCodigo; // en pantalla
+        float vx, vy;           // px/ms
+        float xEtiqueta, yEtiqueta; // a donde va la etiqueta tras la última lectura
+        long ultimaLectura;
+        ObjectAnimator movimiento, deriva;
+
+        Seguida(View etiqueta) {
+            this.etiqueta = etiqueta;
+        }
+
+        void parar() {
+            if (movimiento != null) movimiento.cancel();
+            if (deriva != null) deriva.cancel();
+            etiqueta.animate().cancel();
+        }
+    }
+
     private void alLeerCodigo(BarcodeResult resultado) {
-        String isbn = resultado.getText();
+        Map<String, List<ResultPoint>> codigos =
+                DecodificadorVarios.separar(resultado.getResult(), resultado.getTransformedResultPoints());
+        for (Map.Entry<String, List<ResultPoint>> codigo : codigos.entrySet()) {
+            alLeerCodigo(codigo.getKey(), codigo.getValue());
+        }
+    }
+
+    private void alLeerCodigo(String isbn, List<ResultPoint> puntos) {
         // un EAN-13 de libro siempre empieza por 978 o 979; lo demás (una caja, un bote) se ignora
         if (!isbn.startsWith("978") && !isbn.startsWith("979")) return;
 
-        View etiqueta = etiquetas.get(isbn);
-        boolean nueva = etiqueta == null;
+        Seguida seguida = etiquetas.get(isbn);
+        boolean nueva = seguida == null;
         if (nueva) {
-            etiqueta = crearEtiqueta(isbn);
-            etiquetas.put(isbn, etiqueta);
-            capaEtiquetas.addView(etiqueta);
+            seguida = new Seguida(crearEtiqueta(isbn));
+            etiquetas.put(isbn, seguida);
+            capaEtiquetas.addView(seguida.etiqueta);
             tvPista.setVisibility(View.GONE);
         }
-        colocar(etiqueta, resultado, nueva);
-        programarDesaparicion(isbn, etiqueta);
+        if (!colocar(seguida, puntos, nueva)) return;
+        programarDesaparicion(isbn, seguida);
     }
 
     private View crearEtiqueta(String isbn) {
@@ -216,13 +241,11 @@ public class ApuntarLibros extends BaseActivity {
     }
 
     // la etiqueta queda justo encima del código, sin salirse de la zona libre de la pantalla
-    private void colocar(View etiqueta, BarcodeResult resultado, boolean nueva) {
+    private boolean colocar(Seguida seguida, List<ResultPoint> puntos, boolean nueva) {
         // los puntos vienen en píxeles de la imagen de la cámara: se pasan a píxeles de la pantalla
         Rect enPantalla = camara.getFramingRect();
         Rect enImagen = camara.getPreviewFramingRect();
-        if (enPantalla == null || enImagen == null) return;
-        List<ResultPoint> puntos = resultado.getTransformedResultPoints();
-        if (puntos.isEmpty()) return;
+        if (enPantalla == null || enImagen == null || puntos.isEmpty()) return false;
         float xImagen = 0, yImagen = 0;
         for (ResultPoint p : puntos) {
             xImagen += p.getX() / puntos.size();
@@ -232,6 +255,24 @@ public class ApuntarLibros extends BaseActivity {
         float xCodigo = enPantalla.left + (xImagen - enImagen.left) * escala;
         float yCodigo = enPantalla.top + (yImagen - enImagen.top) * escala;
 
+        // velocidad suavizada del código, para adelantar la etiqueta y para seguirlo cuando se deje de ver
+        long ahora = SystemClock.elapsedRealtime();
+        long dt = ahora - seguida.ultimaLectura;
+        if (nueva || dt > VELOCIDAD_CADUCA_MS) {
+            seguida.vx = 0;
+            seguida.vy = 0;
+        } else if (dt > 0) {
+            seguida.vx = (seguida.vx + (xCodigo - seguida.xCodigo) / dt) / 2;
+            seguida.vy = (seguida.vy + (yCodigo - seguida.yCodigo) / dt) / 2;
+        }
+        seguida.xCodigo = xCodigo;
+        seguida.yCodigo = yCodigo;
+        seguida.ultimaLectura = ahora;
+        // la etiqueta llega a donde estará el código al acabar de moverse, no a donde estaba
+        xCodigo += seguida.vx * ETIQUETA_MOVER_MS;
+        yCodigo += seguida.vy * ETIQUETA_MOVER_MS;
+
+        View etiqueta = seguida.etiqueta;
         etiqueta.measure(
                 View.MeasureSpec.makeMeasureSpec(dp(ANCHO_ETIQUETA_DP), View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -246,31 +287,52 @@ public class ApuntarLibros extends BaseActivity {
         float desvio = xCodigo - (x + mitad);
         etiqueta.findViewById(R.id.tvPuntaEtiqueta).setTranslationX(limitar(desvio, -mitad + dp(PUNTA_BORDE_DP), mitad - dp(PUNTA_BORDE_DP)));
 
+        if (seguida.movimiento != null) seguida.movimiento.cancel();
+        if (seguida.deriva != null) seguida.deriva.cancel();
+        seguida.xEtiqueta = x;
+        seguida.yEtiqueta = y;
         if (nueva) {
             etiqueta.setTranslationX(x);
             etiqueta.setTranslationY(y);
         } else {
-            ObjectAnimator mover = ObjectAnimator.ofPropertyValuesHolder(etiqueta,
+            seguida.movimiento = ObjectAnimator.ofPropertyValuesHolder(etiqueta,
                     PropertyValuesHolder.ofFloat(View.TRANSLATION_X, x),
                     PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, y));
-            mover.setAutoCancel(true); // la cámara lee más rápido de lo que dura: sustituye al movimiento anterior
-            mover.setDuration(ETIQUETA_MOVER_MS).start();
+            seguida.movimiento.setInterpolator(new LinearInterpolator());
+            seguida.movimiento.setDuration(ETIQUETA_MOVER_MS).start();
         }
+        return true;
     }
 
     private static float limitar(float valor, float minimo, float maximo) {
         return Math.max(minimo, Math.min(valor, maximo));
     }
 
-    // cada lectura del mismo código reinicia la cuenta: se va al dejar de apuntarle
-    private void programarDesaparicion(String isbn, View etiqueta) {
+    // cada lectura del mismo código reinicia la cuenta: se va al dejar de apuntarle. Si no se vuelve a leer,
+    // la etiqueta sigue frenando en la dirección en la que iba el código (también fuera de la pantalla)
+    private void programarDesaparicion(String isbn, Seguida seguida) {
+        View etiqueta = seguida.etiqueta;
         etiqueta.animate().cancel();
         etiqueta.setAlpha(1f);
         etiqueta.animate().alpha(0f).setStartDelay(ETIQUETA_FIJA_MS).setDuration(ETIQUETA_DESVANECER_MS)
                 .withEndAction(() -> {
+                    seguida.parar();
                     etiquetas.remove(isbn);
                     ((ViewGroup) etiqueta.getParent()).removeView(etiqueta);
                 }).start();
+
+        if (seguida.vx == 0 && seguida.vy == 0) return;
+        // con DecelerateInterpolator la velocidad inicial es 2·distancia/duración: así arranca a la del código
+        long duracion = ETIQUETA_FIJA_MS + ETIQUETA_DESVANECER_MS - LECTURA_PERDIDA_MS;
+        float dx = seguida.vx * duracion / 2, dy = seguida.vy * duracion / 2;
+        // empieza cuando ya ha acabado el movimiento hacia la última lectura (LECTURA_PERDIDA_MS > ETIQUETA_MOVER_MS)
+        seguida.deriva = ObjectAnimator.ofPropertyValuesHolder(etiqueta,
+                PropertyValuesHolder.ofFloat(View.TRANSLATION_X, seguida.xEtiqueta, seguida.xEtiqueta + dx),
+                PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, seguida.yEtiqueta, seguida.yEtiqueta + dy));
+        seguida.deriva.setInterpolator(new DecelerateInterpolator());
+        seguida.deriva.setStartDelay(LECTURA_PERDIDA_MS);
+        seguida.deriva.setDuration(duracion);
+        seguida.deriva.start();
     }
 
     private void vibrar(long[] patron) {

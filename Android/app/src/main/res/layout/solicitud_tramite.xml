@@ -34,6 +34,15 @@
         android:layout_marginTop="8dp"
         android:textColor="#000000" />
 
+    <!-- la misma preferencia que en PasosTramite: si se activó allí, aquí también -->
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/swInclinar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="Inclinar para pasar"
+        android:textColor="#000000" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
