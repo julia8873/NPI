@@ -110,6 +110,14 @@ public class BaseActivity extends AppCompatActivity {
     protected void onShakeMenuPrincipal() {
     }
 
+    /**
+     * Las pantallas donde mover el móvil es parte del uso (p. ej. barrer una balda con la cámara)
+     * pueden desactivar aquí el agitar.
+     */
+    protected boolean usaAgitar() {
+        return true;
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -149,7 +157,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mSensorManager != null && mAccelerometer != null) {
+        if (usaAgitar() && mSensorManager != null && mAccelerometer != null) {
             mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
     }

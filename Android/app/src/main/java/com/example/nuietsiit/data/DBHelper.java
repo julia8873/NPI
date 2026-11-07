@@ -15,7 +15,7 @@ import com.example.nuietsiit.data.Comedores.TablasComedores;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String NOMBRE_BD = "bd_npi.db";
-    private static final int VERSION_BD = 9; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores · 8: info básica sobre profesorado · 9: modalidad vegetariana en MENU
+    private static final int VERSION_BD = 11; // 3: datos de ejemplo de Actividades y Noticias · 4: comunidades de chat · 5 y 6: info basica de ejemplo para Asignaturas · 7: tuplas de menus de comedores · 8: info básica sobre profesorado · 9: modalidad vegetariana en MENU · 10: libros de NPI · 11: asignaturas de la bibliografía y rama
 
     private static DBHelper instance;
 
@@ -211,6 +211,7 @@ public class DBHelper extends SQLiteOpenHelper {
             "  idGrado          INTEGER NOT NULL," +
             "  curso            INTEGER NOT NULL CHECK (curso BETWEEN 1 AND 6)," +
             "  tipo             TEXT NOT NULL CHECK (tipo IN ('obligatoria','optativa'))," +
+            "  rama             TEXT," +                   // especialidad; NULL = formación común
             "  PRIMARY KEY (codigoAsignatura, idGrado)," +
             "  FOREIGN KEY (codigoAsignatura) REFERENCES ASIGNATURA(codigoAsignatura)," +
             "  FOREIGN KEY (idGrado)          REFERENCES GRADO(idGrado)" +

@@ -3,11 +3,15 @@ package com.example.nuietsiit.data;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.nuietsiit.data.modelo.AsignaturaCatalogo;
 import com.example.nuietsiit.data.modelo.Libro;
+import com.example.nuietsiit.util.ProximaClase;
 import com.example.nuietsiit.util.TextoUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Acceso a datos de Biblioteca: LIBRO, ASIGNATURA_LIBRO.
@@ -69,12 +73,59 @@ public class BibliotecaDB {
         return codigos;
     }
 
-    // todos los códigos con bibliografía (para el selector de asignatura mientras no haya MATRICULA)
-    public List<String> getCodigosAsignatura() {
+    // de cada libro, sus asignaturas y el tipo de bibliografía (filtros y marca "Básica" de la balda)
+    public Map<Integer, Map<String, String>> getBibliografiaPorLibro() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Map<Integer, Map<String, String>> porLibro = new HashMap<>();
+        try (Cursor c = db.rawQuery("SELECT idLibro, codigoAsignatura, tipoBibliografia FROM ASIGNATURA_LIBRO", null)) {
+            while (c.moveToNext()) {
+                porLibro.computeIfAbsent(c.getInt(0), k -> new HashMap<>()).put(c.getString(1), c.getString(2));
+            }
+        }
+        return porLibro;
+    }
+
+    // asignaturas con bibliografía, una fila por grado en el que se imparten (panel Explorar)
+    public List<AsignaturaCatalogo> getCatalogoAsignaturas() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<AsignaturaCatalogo> catalogo = new ArrayList<>();
+        try (Cursor c = db.rawQuery(
+                "SELECT DISTINCT A.codigoAsignatura, A.nombreAsignatura, G.idGrado, G.nombreGrado, AG.curso, AG.rama " +
+                "FROM ASIGNATURA A " +
+                "JOIN ASIGNATURA_LIBRO AL ON AL.codigoAsignatura = A.codigoAsignatura " +
+                "JOIN ASIGNATURA_GRADO AG ON AG.codigoAsignatura = A.codigoAsignatura " +
+                "JOIN GRADO G ON G.idGrado = AG.idGrado " +
+                "ORDER BY A.nombreAsignatura, G.idGrado", null)) {
+            while (c.moveToNext()) {
+                catalogo.add(new AsignaturaCatalogo(c.getString(0), c.getString(1), c.getInt(2), c.getString(3),
+                        c.getInt(4), c.isNull(5) ? null : c.getString(5)));
+            }
+        }
+        return catalogo;
+    }
+
+    // horario del usuario según su matrícula (para saber cuál es su próxima clase)
+    public List<ProximaClase.Sesion> getClasesMatriculadas(String correo) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<ProximaClase.Sesion> sesiones = new ArrayList<>();
+        try (Cursor c = db.rawQuery(
+                "SELECT SC.codigoAsignatura, SC.diaSemana, SC.horaInicio, SC.horaFin FROM SESION_CLASE SC " +
+                "JOIN MATRICULA M ON SC.codigoAsignatura = M.codigoAsignatura " +
+                "  AND SC.grupo = M.grupo AND SC.cursoAcademico = M.cursoAcademico " +
+                "WHERE M.correoEstudiante = ?", new String[]{correo.toLowerCase()})) {
+            while (c.moveToNext()) {
+                sesiones.add(new ProximaClase.Sesion(c.getString(0), c.getInt(1), c.getString(2), c.getString(3)));
+            }
+        }
+        return sesiones;
+    }
+
+    // asignaturas en las que está matriculado un usuario (filtro "Mis asignaturas")
+    public List<String> getAsignaturasMatriculadas(String correo) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<String> codigos = new ArrayList<>();
         try (Cursor c = db.rawQuery(
-                "SELECT DISTINCT codigoAsignatura FROM ASIGNATURA_LIBRO ORDER BY codigoAsignatura", null)) {
+                "SELECT DISTINCT codigoAsignatura FROM MATRICULA WHERE correoEstudiante = ?", new String[]{correo.toLowerCase()})) {
             while (c.moveToNext()) codigos.add(c.getString(0));
         }
         return codigos;

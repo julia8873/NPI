@@ -44,6 +44,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
     private boolean esRutaGuiada = false;
     private boolean esRutaComedor = false;
     private boolean esRutaAula = false;
+    private boolean esRutaBiblioteca = false; // simulada: ruta_biblioteca_N.jpg son imágenes provisionales
     private boolean usaAscensor = false;
     private boolean preguntaAscensorMostrada = false;
     private boolean esperandoLlegadaPlanta = false;
@@ -92,6 +93,9 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
             0f, 0f, 0f, 0f, 0f
     };
 
+    // --- Configuración Ruta 3: Biblioteca (simulada, sin giros con brújula hasta tener las fotos) ---
+    private final int[] pasosPorFotoBiblioteca = {4, 6, 8, 6, 4};
+
     private static final int FOTO_OPCION_ASCENSOR_AULA = 5;
 
     private SensorManager sensorManager;
@@ -116,7 +120,8 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
         esRutaComedor = (origenId != null && origenId.equalsIgnoreCase("comedor"));
         esRutaAula = (origenId != null && origenId.equalsIgnoreCase("aula_0_5"));
-        esRutaGuiada = esRutaComedor || esRutaAula;
+        esRutaBiblioteca = (origenId != null && origenId.equalsIgnoreCase("biblioteca"));
+        esRutaGuiada = esRutaComedor || esRutaAula || esRutaBiblioteca;
 
         if (esRutaGuiada) {
             configurarRutaGuiada(origenId);
@@ -160,8 +165,8 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
             forzarFotoSiguiente();
         });
 
-        String prefijo = esRutaComedor ? "ruta_comedor_" : "ruta_aula_";
-        int maxFotos = esRutaComedor ? 33 : 30;
+        String prefijo = esRutaBiblioteca ? "ruta_biblioteca_" : esRutaComedor ? "ruta_comedor_" : "ruta_aula_";
+        int maxFotos = esRutaBiblioteca ? pasosPorFotoBiblioteca.length : esRutaComedor ? 33 : 30;
 
         for (int i = 1; i <= maxFotos; i++) {
             int id = getResources().getIdentifier(prefijo + i, "drawable", getPackageName());
@@ -235,7 +240,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         indiceRutaActual++;
 
         if (indiceRutaActual > recursosRuta.size()) {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            tvEstadoFoto.setText(mensajeLlegada());
         } else {
             ivFotoRuta.setImageResource(recursosRuta.get(indiceRutaActual - 1));
             configurarNodoRutaActual();
@@ -259,7 +264,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         }
 
         if (preguntaAscensorMostrada) return;
-        int fotoClave = esRutaComedor ? -1 : FOTO_OPCION_ASCENSOR_AULA;
+        int fotoClave = esRutaAula ? FOTO_OPCION_ASCENSOR_AULA : -1;
 
         if (indiceRutaActual == fotoClave) {
             preguntaAscensorMostrada = true;
@@ -364,7 +369,10 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         int[] pasosArray;
         float[] rumbosArray;
 
-        if (esRutaComedor) {
+        if (esRutaBiblioteca) {
+            pasosArray = pasosPorFotoBiblioteca;
+            rumbosArray = new float[0]; // sin nodos de giro
+        } else if (esRutaComedor) {
             pasosArray = usaAscensor ? pasosPorFotoComedorAscensor : pasosPorFotoComedor;
             rumbosArray = usaAscensor ? rumbosGiroComedorAscensor : rumbosGiroComedor;
         } else {
@@ -392,8 +400,12 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         if (indiceRutaActual < recursosRuta.size()) {
             avanzarSiguienteFotoRuta();
         } else {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            tvEstadoFoto.setText(mensajeLlegada());
         }
+    }
+
+    private String mensajeLlegada() {
+        return "🎉 ¡Has llegado " + (esRutaBiblioteca ? "a la " : "al ") + destinoNombre + "!";
     }
 
     private void actualizarTextoRuta() {
@@ -467,7 +479,8 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
     @Override
     public void onRumbo(float grados) {
         if (esRutaGuiada) {
-            if (indiceRutaActual == 1) {
+            // la ruta simulada sale de cualquier sitio: no tiene sentido exigir mirar al sur
+            if (indiceRutaActual == 1 && !esRutaBiblioteca) {
                 float difSur = FotosRuta.diferencia(180f, grados);
                 if (difSur > 35f) {
                     tvEstadoFoto.setText("⚠️ ¡Gira hacia el Sur para iniciar la ruta!");

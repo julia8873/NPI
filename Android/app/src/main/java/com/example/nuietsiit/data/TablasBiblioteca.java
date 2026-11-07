@@ -56,7 +56,7 @@ public final class TablasBiblioteca {
     // -------------------------------------------------
     //              DATOS DE EJEMPLO
     // -------------------------------------------------
-    // Códigos de asignatura PROVISIONALES: sustituir por los que use la tabla ASIGNATURA cuando exista
+    // Códigos de la tabla ASIGNATURA (TablasAcademico)
     private static final String MP = "MP";     // Metodología de la Programación
     private static final String ED = "ED";     // Estructuras de Datos
     private static final String ALG = "ALG";   // Algorítmica
@@ -68,6 +68,7 @@ public final class TablasBiblioteca {
     private static final String IA = "IA";     // Inteligencia Artificial
     private static final String MC = "MC";     // Modelos de Computación
     private static final String PL = "PL";     // Procesadores de Lenguajes
+    private static final String NPI = "NPI";   // Nuevos Paradigmas de Interacción (la cursa el invitado, como PL)
     private static final String AA = "AA";     // Aprendizaje Automático
     private static final String SPSI = "SPSI"; // Seguridad y Protección de Sistemas Informáticos
 
@@ -161,6 +162,18 @@ public final class TablasBiblioteca {
         id = libro(db, "Compilers: Principles, Techniques, and Tools", "Alfred V. Aho; Monica S. Lam; Ravi Sethi; Jeffrey D. Ullman",
                 "9780321486813", "Pearson", 2006, "2ª ed.", 4, 3, "004.4 AHO com", "Planta 2 · Estantería 5");
         asignaturaLibro(db, PL, id, "basica");
+
+        id = libro(db, "The Design of Everyday Things", "Donald A. Norman",
+                "9780465050659", "Basic Books", 2013, "2ª ed.", 3, 2, "004.5 NOR des", "Planta 1 · Estantería 20");
+        asignaturaLibro(db, NPI, id, "basica");
+
+        id = libro(db, "Designing the User Interface", "Ben Shneiderman; Catherine Plaisant; Maxine Cohen; Steven Jacobs; Niklas Elmqvist",
+                "9780134380384", "Pearson", 2016, "6ª ed.", 2, 0, "004.5 SHN des", "Planta 1 · Estantería 20");
+        asignaturaLibro(db, NPI, id, "basica");
+
+        id = libro(db, "Head First Android Development", "Dawn Griffiths; David Griffiths",
+                "9781492076520", "O'Reilly Media", 2021, "3ª ed.", 4, 3, "004.438AND GRI hea", "Planta 1 · Estantería 20");
+        asignaturaLibro(db, NPI, id, "complementaria");
     }
 
     // -------------------------------------------------

@@ -40,7 +40,10 @@ public class DetalleTramite extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
+        // int desde Secretaría; String desde "Página reciente" (RecienteUtil solo guarda Strings)
         int idProc = getIntent().getIntExtra("idProcedimiento", -1);
+        String idReciente = getIntent().getStringExtra("idProcedimiento");
+        if (idReciente != null) idProc = Integer.parseInt(idReciente);
         Tramite tramite = db.getTramite(idProc);
         if (tramite == null) {
             Toast.makeText(this, "Trámite no encontrado", Toast.LENGTH_SHORT).show();

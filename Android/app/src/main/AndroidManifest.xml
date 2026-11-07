@@ -64,6 +64,8 @@
         <activity android:name=".activities.secciones.secretaria.MisGestiones" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
+        <activity android:name=".activities.secciones.biblioteca.DetalleLibro" />
+        <activity android:name=".activities.secciones.biblioteca.ApuntarLibros" />
         <activity
             android:name=".activities.secciones.chat.ChatActivity"
             android:windowSoftInputMode="adjustResize" />

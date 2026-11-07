@@ -36,6 +36,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -90,6 +91,14 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 
 public class Mapa extends BaseActivity {
+
+    private static final String ESTADO_RUTA_DESTINO = "rutaDestino";
+    private static final String ESTADO_ORIGEN_ID = "origenId";
+    private static final String ESTADO_ORIGEN_NOMBRE = "origenNombre";
+    private static final String ESTADO_ORIGEN_PLANTA = "origenPlanta";
+    private static final String ESTADO_ORIGEN_METODO = "origenMetodo";
+    private static final String ESTADO_ORIGEN_X = "origenX";
+    private static final String ESTADO_ORIGEN_Y = "origenY";
 
     public static final OnlineTileSourceBase OPENMAP_TILES = new XYTileSource(
             "OSM_DE",
@@ -265,12 +274,74 @@ public class Mapa extends BaseActivity {
         configurarBuscador();
         configurarPanelRuta();
 
-        preguntaPermisoUbicacion();
+        // con ruta pedida desde otra sección o recuperada tras girar ya pregunta iniciarRuta
+        boolean rutaRecuperada = savedInstanceState != null && savedInstanceState.containsKey(ESTADO_RUTA_DESTINO);
+        if (getIntent().getStringExtra("RUTA_A_MARCADOR") == null && !rutaRecuperada) {
+            preguntaPermisoUbicacion();
+        }
 
         containerPlanoConMarcadores = findViewById(R.id.containerPlanoConMarcadores);
         // Inicializar los marcadores de la aplicación
         registrarMarcadores();
-        comprobarAutoRutaComedor();
+        if (savedInstanceState == null) {
+            comprobarAutoRutaComedor();
+            comprobarRutaAMarcador();
+        } else if (rutaRecuperada) {
+            recuperarRuta(savedInstanceState);
+        }
+    }
+
+    // al girar el móvil la Activity se recrea: se guarda la ruta en curso
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle salida) {
+        super.onSaveInstanceState(salida);
+        if (destinoRuta == null) return;
+        salida.putString(ESTADO_RUTA_DESTINO, destinoRuta.getTitulo());
+        if (origenActual != null && marcadorOrigen != null) {
+            salida.putString(ESTADO_ORIGEN_ID, origenActual.idPunto);
+            salida.putString(ESTADO_ORIGEN_NOMBRE, origenActual.nombre);
+            salida.putString(ESTADO_ORIGEN_PLANTA, origenActual.planta);
+            salida.putString(ESTADO_ORIGEN_METODO, origenActual.metodo.name());
+            salida.putFloat(ESTADO_ORIGEN_X, marcadorOrigen.getXOriginal());
+            salida.putFloat(ESTADO_ORIGEN_Y, marcadorOrigen.getYOriginal());
+        }
+    }
+
+    private void recuperarRuta(Bundle estado) {
+        Marcador destino = null;
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().equals(estado.getString(ESTADO_RUTA_DESTINO))) destino = m;
+        }
+        if (destino == null) return;
+
+        if (toggleGroupModo != null) {
+            toggleGroupModo.check(R.id.btnModoPlanos);
+        }
+        if (!estado.containsKey(ESTADO_ORIGEN_METODO)) {
+            iniciarRuta(destino); // aún no se sabía dónde estaba: se vuelve a preguntar
+            return;
+        }
+        destinoRuta = destino;
+        fijarOrigen(UbicacionUsuario.enPixeles(
+                estado.getString(ESTADO_ORIGEN_ID), estado.getString(ESTADO_ORIGEN_NOMBRE),
+                estado.getString(ESTADO_ORIGEN_PLANTA), estado.getFloat(ESTADO_ORIGEN_X), estado.getFloat(ESTADO_ORIGEN_Y),
+                UbicacionUsuario.Metodo.valueOf(estado.getString(ESTADO_ORIGEN_METODO))), false);
+    }
+
+    // Abrir con ruta desde otra sección: extra RUTA_A_MARCADOR = parte del título del marcador ("Biblioteca")
+    private void comprobarRutaAMarcador() {
+        String buscado = getIntent().getStringExtra("RUTA_A_MARCADOR");
+        if (buscado == null) return;
+
+        if (toggleGroupModo != null) {
+            toggleGroupModo.check(R.id.btnModoPlanos);
+        }
+        for (Marcador m : listaMarcadores) {
+            if (m.getTitulo().contains(buscado)) {
+                iniciarRuta(m);
+                return;
+            }
+        }
     }
 
     private void comprobarAutoRutaComedor() {
@@ -1299,6 +1370,11 @@ public class Mapa extends BaseActivity {
     }
 
     private void fijarOrigen(UbicacionUsuario u) {
+        fijarOrigen(u, true);
+    }
+
+    // avisar = false al recuperar la ruta tras girar: no se ha ubicado a nadie de nuevo
+    private void fijarOrigen(UbicacionUsuario u, boolean avisar) {
         origenActual = u;
 
         int chip = chipIdDePlanta(u.planta);
@@ -1324,7 +1400,7 @@ public class Mapa extends BaseActivity {
 
         actualizarPosicionMarcadores();
         actualizarPanelRuta();
-        Toast.makeText(this, "Te hemos ubicado: " + u.nombre + " (" + u.descripcionMetodo() + ")",
+        if (avisar) Toast.makeText(this, "Te hemos ubicado: " + u.nombre + " (" + u.descripcionMetodo() + ")",
                 Toast.LENGTH_LONG).show();
     }
 
@@ -1384,12 +1460,17 @@ public class Mapa extends BaseActivity {
                 || (origenActual.nombre != null && origenActual.nombre.contains("0.5"));
         boolean esAula14Destino = (destinoRuta.getTitulo() != null && destinoRuta.getTitulo().contains("1.4"));
 
-        if (esAula05Origen && esAula14Destino) {
+        if (destinoRuta.getTitulo().contains("Biblioteca")) {
+            claveRuta = "biblioteca";
+        } else if (esAula05Origen && esAula14Destino) {
             claveRuta = "aula_0_5";
         } else if (origenActual.idPunto != null
                 && (origenActual.idPunto.contains("aula_0_4") || origenActual.idPunto.contains("0_7") || origenActual.idPunto.contains("aula_0_7"))
                 && destinoRuta != null && destinoRuta.getTitulo().toLowerCase(Locale.ROOT).contains("comedor")) {
             claveRuta = "comedor";
+        } else if ("aula_0_5".equalsIgnoreCase(claveRuta)) {
+            // esa clave es la ruta guiada a la 1.4: a otros destinos no debe mostrarla
+            claveRuta = FotosRuta.CLAVE_DEMO;
         }
         Intent i = new Intent(this, VisorRuta.class);
         i.putExtra("ORIGEN_ID", claveRuta);
