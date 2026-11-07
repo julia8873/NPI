@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contenido"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
@@ -107,11 +108,12 @@
             </FrameLayout>
 
             <TextView
+                android:id="@+id/tvAyudaQR"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:text="Enseña este código en la ventanilla de Secretaría.\nPellizca para ampliarlo; doble toque para volver."
+                android:text="Gira el móvil hacia la ventanilla de Secretaría, o toca el código, para enseñarlo a pantalla completa.\nPellizca para ampliarlo; doble toque para volver."
                 android:textColor="#666666"
                 android:textSize="14sp" />
 
