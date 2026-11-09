@@ -52,7 +52,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="?attr/selectableItemBackground"
-                        android:minHeight="40dp"
+                        android:minHeight="48dp"
                         android:gravity="center_vertical"
                         android:text="Cómo llegar"
                         android:textColor="@color/nui_apagado"
@@ -61,21 +61,22 @@
 
                     <ImageButton
                         android:id="@+id/btnRutaExtAyuda"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="Cómo funciona"
-                        android:padding="8dp"
+                        android:padding="12dp"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_help"
                         app:tint="@color/nui_apagado" />
 
                     <ImageButton
                         android:id="@+id/btnRutaExtCerrar"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="Cerrar"
+                        android:padding="6dp"
                         android:src="@android:drawable/ic_menu_close_clear_cancel"
                         app:tint="@color/nui_apagado" />
                 </LinearLayout>

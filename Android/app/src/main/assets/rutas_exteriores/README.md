@@ -6,11 +6,19 @@
 
 ## Fotos de la ruta
 
-Cada paso de la guía enseña una foto del sitio. Mientras no exista, `FotoLugar` genera una tarjeta
-"Foto pendiente" con el nombre del sitio, así que se pueden añadir poco a poco.
+`fotos_ruta.json`: puntos de foto de cada tramo a pie (salida, cada giro, cada ~60 m como mucho y llegada), con
+posición, rumbo (hacia dónde mira la foto), giro e instrucción. Lo genera `osm/puntos_foto.py` (fuera del repo;
+las instrucciones se corrigen allí, en `CORRECCIONES`, y se regenera) y lo lee `FotosRutaExterior`.
+El mismo script crea `osm/fotos_ruta.html` (mapa con los puntos numerados para llevar en el móvil) y `fotos_ruta.gpx`.
 
-Convención: `res/drawable/ruta_ext_<id>_<n>.jpg` (o `.webp`/`.png`), con `n` = 1, 2, 3… si hay varias del mismo
-sitio (la 1 es la principal). Todo en minúsculas. Horizontales 4:3, ~1200 px de ancho como mucho.
+Mientras falte una foto, `FotoLugar` genera una tarjeta provisional (instrucción + flecha del giro, o icono + nombre),
+así que se pueden añadir poco a poco, sin tocar código: basta con copiarlas a `res/drawable/`.
+
+Formato: horizontales 4:3, ~1200 px de ancho como mucho, `.jpg` (o `.webp`/`.png`), todo en minúsculas,
+hechas en el punto y mirando en el sentido de la marcha (la flecha del mapa).
+
+- Puntos del camino: `ruta_ext_<id del punto>.jpg`, p. ej. `ruta_ext_bellasartes_etsiit_03.jpg` (lista en el HTML).
+- Lugares, paradas y bus: `ruta_ext_<id>_<n>.jpg`, con `n` = 1, 2, 3… (la 1 es la principal):
 
 | Foto | `<id>` | Ejemplo de nombre |
 |---|---|---|

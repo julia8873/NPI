@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "¿A dónde vas?" al entrar al mapa (InicioMapa): clase de ahora, sitios, recientes y "Solo ver el mapa" -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/nui_superficie">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="18dp">
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:background="@color/nui_linea" />
+
+        <!-- La mascota explica la pantalla la primera vez -->
+        <LinearLayout
+            android:id="@+id/llInicioMascota"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/nui_suave"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="Mascota"
+                android:src="@drawable/ic_mascota_ayudante" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="¡Hola! Dime a dónde vas y te llevo paso a paso, con fotos del camino. También puedes tocar un edificio en el mapa."
+                android:textColor="@color/nui_tinta"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="¿A dónde vas?"
+            android:textColor="@color/nui_tinta"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvInicioUbicacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="📍 Te busco con el GPS al elegir"
+            android:textColor="@color/nui_apagado"
+            android:textSize="13sp" />
+
+        <!-- Clase en curso o en menos de 2 h -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInicioClase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/nui_tinte"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/nui_acento"
+            app:strokeWidth="1.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:id="@+id/tvInicioClaseTitulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvInicioClaseDetalle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnInicioClaseLlevame"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="10dp"
+                    android:backgroundTint="@color/nui_acento"
+                    android:text="Llévame a clase"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
+                    app:icon="@android:drawable/ic_menu_directions"
+                    app:iconTint="@android:color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tvInicioRecientes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recientes"
+            android:textColor="@color/nui_apagado"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cgInicioRecientes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="Sitios"
+            android:textColor="@color/nui_apagado"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <GridLayout
+            android:id="@+id/glInicioDestinos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnInicioSoloMapa"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="12dp"
+            android:text="Solo ver el mapa"
+            android:textAllCaps="false"
+            android:textColor="@color/nui_tinta"
+            android:textSize="16sp"
+            app:cornerRadius="16dp" />
+
+        <CheckBox
+            android:id="@+id/cbInicioNoPreguntar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="No preguntar más hoy"
+            android:textColor="@color/nui_apagado"
+            android:textSize="14sp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

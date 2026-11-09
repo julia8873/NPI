@@ -223,6 +223,22 @@
                 <!-- Los marcadores se añadirán dinámicamente aquí dentro -->
             </FrameLayout>
 
+            <!-- "¿A dónde vas?" (InicioMapa): vuelve a abrir la pregunta del principio -->
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fabADondeVas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="12dp"
+                android:text="¿A dónde vas?"
+                android:textColor="@color/nui_tinta"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="@android:color/white"
+                app:elevation="4dp"
+                app:icon="@android:drawable/ic_menu_search"
+                app:iconTint="@color/nui_acento" />
+
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/fabComoLlegar"
                 android:layout_width="wrap_content"

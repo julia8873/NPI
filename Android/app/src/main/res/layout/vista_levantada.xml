@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Guía exterior con el móvil levantado: foto a pantalla completa y flecha grande (VistaLevantada) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:clickable="true"
+    android:contentDescription="Vista del camino. Baja el móvil o toca para volver al mapa"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/ivLevantadaFoto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop" />
+
+    <!-- Brújula grande: hacia dónde ir respecto a donde apunta el móvil -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/fondo_brujula_guia"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/ivLevantadaFlecha"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:contentDescription="Dirección a seguir"
+            android:src="@drawable/ic_flecha_guia" />
+
+        <TextView
+            android:id="@+id/tvLevantadaMetros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/degradado_foto_guia"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="64dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:id="@+id/tvLevantadaInstruccion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:alpha="0.8"
+            android:text="📱 Baja el móvil para volver al mapa"
+            android:textColor="@android:color/white"
+            android:textSize="15sp" />
+    </LinearLayout>
+</FrameLayout>

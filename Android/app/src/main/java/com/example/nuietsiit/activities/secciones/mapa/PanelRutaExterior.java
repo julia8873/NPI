@@ -3,10 +3,12 @@ package com.example.nuietsiit.activities.secciones.mapa;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -18,6 +20,7 @@ import android.text.style.RelativeSizeSpan;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -50,8 +53,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -109,6 +114,8 @@ public final class PanelRutaExterior {
     private boolean pintandoChips;
     private Runnable finGuia;
     private int peekNormal;
+    /** Miniaturas ya generadas por clave (el panel se repinta cada poco). */
+    private final Map<String, Bitmap> miniaturas = new HashMap<>();
     /** El origen lo puso la app (no había GPS): en cuanto haya posición se cambia a "Mi ubicación". */
     private boolean desdeProvisional;
 
@@ -295,6 +302,21 @@ public final class PanelRutaExterior {
         abrirCon(idDesde);
     }
 
+    /** Abre el panel hacia un lugar (tocar un edificio → "Llévame aquí") con "Empezar guía" destacado. */
+    public void abrirHacia(String idHasta) {
+        if (finGuia != null) return;
+        pintandoChips = true;
+        marcar(chipsHasta, idHasta);
+        pintandoChips = false;
+        abrir();
+        btnEmpezar.postDelayed(() -> {
+            if (!btnEmpezar.isEnabled()) return;
+            btnEmpezar.animate().scaleX(1.08f).scaleY(1.08f).setDuration(180)
+                    .withEndAction(() -> btnEmpezar.animate().scaleX(1f).scaleY(1f).setDuration(180).start())
+                    .start();
+        }, 700);
+    }
+
     /** Vistas (botones flotantes del mapa) que se esconden mientras el panel está abierto. */
     public void ocultarAlAbrir(View... vistas) {
         ocultas = vistas;
@@ -339,6 +361,7 @@ public final class PanelRutaExterior {
         } else {
             llGuia.removeOnLayoutChangeListener(ajustarPeek);
             hoja.setPeekHeight(peekNormal);
+            mapa.setMapCenterOffset(0, 0);
             if (planActual != null) mostrarPlan(planActual);
             if (estaAbierto()) {
                 handler.postDelayed(refrescar, REFRESCO_MS);
@@ -351,6 +374,8 @@ public final class PanelRutaExterior {
     private void alCambiarGuia(View v, int l, int t, int r, int b, int ol, int ot, int or, int ob) {
         int alto = b + (int) (12 * v.getResources().getDisplayMetrics().density);
         if (alto != hoja.getPeekHeight()) v.post(() -> hoja.setPeekHeight(alto, true));
+        // tu posición (centro del mapa) en medio del trozo de mapa que deja ver el panel
+        mapa.setMapCenterOffset(0, -alto / 2);
     }
 
     public PlanRuta planActual() {
@@ -489,9 +514,13 @@ public final class PanelRutaExterior {
             return;
         }
         String origen = nombreOrigen();
+        // Sin posición no sabemos dónde estás: no decir "no estás en…" (puede que acabes de elegirlo tú)
         AlertDialog.Builder dialogo = new AlertDialog.Builder(act)
-                .setTitle("No estás en " + origen)
-                .setMessage("La guía te sigue con el GPS, y esta ruta sale desde " + origen + ".\n\n"
+                .setTitle(gps == null ? "No te encuentro con el GPS" : "No estás en " + origen)
+                .setMessage(gps == null
+                        ? "La guía te sigue con el GPS. Si empiezas, te irá guiando desde " + origen
+                        + " en cuanto el GPS te encuentre.\n\nTambién puedes simular el trayecto para ver cómo sería."
+                        : "La guía te sigue con el GPS, y esta ruta sale desde " + origen + ".\n\n"
                         + "Puedes simular el trayecto para ver cómo sería, o calcular la ruta desde donde estás.")
                 .setPositiveButton("▶ Simular trayecto", (d, w) -> {
                     alEmpezar.accept(planActual);
@@ -501,6 +530,8 @@ public final class PanelRutaExterior {
                 .setNeutralButton("Cancelar", null);
         if (gps != null) {
             dialogo.setNegativeButton("📍 Desde mi ubicación", (d, w) -> marcar(chipsDesde, DESDE_GPS));
+        } else {
+            dialogo.setNegativeButton("Empezar", (d, w) -> alEmpezar.accept(planActual));
         }
         dialogo.show();
     }
@@ -542,6 +573,8 @@ public final class PanelRutaExterior {
                         + "📷 Toca un paso de la lista para ver una foto del sitio.\n\n"
                         + "▶ «Empezar guía» te acompaña paso a paso: flecha, cuenta atrás y vibración "
                         + "al salir, al llegar el bus y al bajarte.\n\n"
+                        + "📱 Durante la guía, levanta el móvil en vertical para ver la foto del camino en grande "
+                        + "con la flecha; bájalo para volver al mapa. Ponlo boca abajo para silenciar la voz.\n\n"
                         + "Arrastra el panel hacia arriba para ver todo y hacia abajo para ver el mapa.")
                 .setPositiveButton("Entendido", null)
                 .show();
@@ -583,7 +616,7 @@ public final class PanelRutaExterior {
         return a.tipo == b.tipo && a.salida.equals(b.salida) && a.llegada.equals(b.llegada);
     }
 
-    /** Línea de tiempo: salida, una fila por tramo (toque = foto del sitio) y llegada. */
+    /** Línea de tiempo: salida, una fila por tramo (miniatura; toque = fotos del camino) y llegada. */
     private void pintarPasos(PlanRuta plan) {
         llPasos.removeAllViews();
         if (plan.tipo == PlanRuta.Tipo.LEJOS) return;
@@ -646,7 +679,6 @@ public final class PanelRutaExterior {
         if (detalle != null) {
             int ini = sb.length();
             sb.append("\n").append(detalle);
-            if (tramo != null && tramo.idFoto != null) sb.append(" · 📷 ver foto");
             sb.setSpan(new RelativeSizeSpan(0.85f), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(act, R.color.nui_apagado)),
                     ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -657,11 +689,61 @@ public final class PanelRutaExterior {
         tvTexto.setTextSize(14);
         fila.addView(tvTexto, new LinearLayout.LayoutParams(0, -2, 1f));
 
-        if (tramo != null) {
-            fila.setBackgroundResource(fondoSeleccionable());
-            fila.setOnClickListener(v -> verTramo(tramo));
+        List<String> fotos = FotoLugar.delTramo(act, tramo);
+        if (fotos.isEmpty()) return fila;
+        fila.addView(miniatura(fotos.get(0), 64, 48));
+        fila.setBackgroundResource(fondoSeleccionable());
+        fila.setOnClickListener(v -> verTramo(tramo, fotos, 0));
+        if (fotos.size() < 2) return fila;
+
+        // Tira "Ver el camino (8 fotos)": toque en una = visor desde esa
+        LinearLayout bloque = new LinearLayout(act);
+        bloque.setOrientation(LinearLayout.VERTICAL);
+        bloque.addView(fila);
+        int sangria = (int) (82 * dp);
+        TextView titulo = new TextView(act);
+        titulo.setText("Ver el camino (" + fotos.size() + " fotos)");
+        titulo.setTextColor(ContextCompat.getColor(act, R.color.nui_acento));
+        titulo.setTypeface(Typeface.DEFAULT_BOLD);
+        titulo.setTextSize(12);
+        titulo.setPadding(sangria, 0, 0, (int) (4 * dp));
+        bloque.addView(titulo);
+        HorizontalScrollView scroll = new HorizontalScrollView(act);
+        scroll.setHorizontalScrollBarEnabled(false);
+        scroll.setClipToPadding(false);
+        scroll.setPadding(sangria, 0, (int) (8 * dp), (int) (8 * dp));
+        LinearLayout tira = new LinearLayout(act);
+        for (int i = 0; i < fotos.size(); i++) {
+            View mini = miniatura(fotos.get(i), 88, 66);
+            int n = i;
+            mini.setOnClickListener(v -> verTramo(tramo, fotos, n));
+            mini.setContentDescription("Foto " + (i + 1) + ": " + FotoLugar.textoDe(act, fotos.get(i)));
+            tira.addView(mini);
         }
-        return fila;
+        scroll.addView(tira);
+        bloque.addView(scroll);
+        return bloque;
+    }
+
+    /** Foto pequeña con esquinas redondeadas (anchoDp × altoDp, recortada). */
+    private ImageView miniatura(String clave, int anchoDp, int altoDp) {
+        float dp = act.getResources().getDisplayMetrics().density;
+        Bitmap bmp = miniaturas.get(clave);
+        if (bmp == null) {
+            bmp = ((BitmapDrawable) FotoLugar.deClave(act, clave, (int) (anchoDp * dp))).getBitmap();
+            miniaturas.put(clave, bmp);
+        }
+        ImageView iv = new ImageView(act);
+        iv.setImageDrawable(new BitmapDrawable(act.getResources(), bmp));
+        iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        GradientDrawable forma = new GradientDrawable();
+        forma.setCornerRadius(10 * dp);
+        iv.setBackground(forma);
+        iv.setClipToOutline(true);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((int) (anchoDp * dp), (int) (altoDp * dp));
+        lp.setMarginStart((int) (6 * dp));
+        iv.setLayoutParams(lp);
+        return iv;
     }
 
     private int fondoSeleccionable() {
@@ -670,17 +752,10 @@ public final class PanelRutaExterior {
         return tv.resourceId;
     }
 
-    /** Centra el mapa en el tramo y enseña la foto (provisional o real) del sitio. */
-    private void verTramo(PlanRuta.Tramo t) {
+    /** Centra el mapa en el tramo y abre sus fotos a pantalla completa desde la `inicial`. */
+    private void verTramo(PlanRuta.Tramo t, List<String> fotos, int inicial) {
         if (!t.geometria.isEmpty()) mapa.getController().animateTo(geo(t.geometria.get(0)));
-        ImageView foto = new ImageView(act);
-        foto.setAdjustViewBounds(true);
-        foto.setImageDrawable(FotoLugar.para(act, t.idFoto, 1));
-        new AlertDialog.Builder(act)
-                .setTitle(t.instruccion)
-                .setView(foto)
-                .setPositiveButton("Vale", null)
-                .show();
+        VisorFotoExterior.abrir(act, fotos, inicial);
     }
 
     private void activarEmpezar(boolean activo) {

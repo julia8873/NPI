@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Capa del mapa exterior: contornos de la ETSIIT y del Edificio Auxiliar con su etiqueta,
@@ -37,6 +38,7 @@ public final class CapaLugares {
     private static final int PROXIMOS_BUSES = 3;
 
     private static RedTransporte redCargada;
+    private static FotosRutaExterior fotosCargadas;
 
     private CapaLugares() {}
 
@@ -52,8 +54,24 @@ public final class CapaLugares {
         return redCargada;
     }
 
-    /** Añade al mapa los lugares y las paradas. */
-    public static void instalar(MapView mapa, RedTransporte red) {
+    /** Carga (una sola vez) los puntos de foto de los caminos a pie; null si falla. */
+    public static synchronized FotosRutaExterior cargarFotos(Context ctx) {
+        if (fotosCargadas == null) {
+            try (InputStream entrada = ctx.getAssets().open(FotosRutaExterior.ASSET)) {
+                fotosCargadas = FotosRutaExterior.cargar(entrada);
+            } catch (Exception e) {
+                Log.e(TAG, "No se pudieron cargar las fotos de la ruta", e);
+            }
+        }
+        return fotosCargadas;
+    }
+
+    /**
+     * Añade al mapa los lugares y las paradas.
+     *
+     * @param alTocarLugar recibe el id del lugar al tocar su contorno o su etiqueta (null = nada)
+     */
+    public static void instalar(MapView mapa, RedTransporte red, Consumer<String> alTocarLugar) {
         Context ctx = mapa.getContext();
         FolderOverlay contornos = new FolderOverlay();
         FolderOverlay etiquetas = new FolderOverlay();
@@ -63,12 +81,14 @@ public final class CapaLugares {
                 Polygon recinto = poligono(mapa, lugar.recinto,
                         Color.argb(30, 25, 118, 210), Color.argb(90, 25, 118, 210), 2f);
                 recinto.setInfoWindow(null);
+                alTocar(recinto, lugar, alTocarLugar);
                 contornos.add(recinto);
             }
             for (List<Punto> edificio : lugar.edificios) {
                 Polygon p = poligono(mapa, edificio,
                         Color.argb(110, 25, 118, 210), Color.rgb(13, 71, 161), 3f);
                 p.setTitle(lugar.nombre);
+                alTocar(p, lugar, alTocarLugar);
                 contornos.add(p);
             }
             Marker etiqueta = new Marker(mapa);
@@ -78,6 +98,9 @@ public final class CapaLugares {
                     etiquetaBitmap(ctx, lugar.icono + " " + lugar.corto, lugar.destacado)));
             etiqueta.setTitle(lugar.nombre);
             if (lugar.ejemplo) etiqueta.setSnippet("Ubicación de ejemplo");
+            if (alTocarLugar != null) {
+                etiqueta.setOnMarkerClickListener((m, v) -> { alTocarLugar.accept(lugar.id); return true; });
+            }
             etiquetas.add(etiqueta);
         }
 
@@ -138,6 +161,11 @@ public final class CapaLugares {
             textos.add(min <= 0 ? "llegando" : min + " min");
         }
         return String.join(", ", textos);
+    }
+
+    private static void alTocar(Polygon p, RedTransporte.Lugar lugar, Consumer<String> alTocarLugar) {
+        if (alTocarLugar == null) return;
+        p.setOnClickListener((poligono, mapa, punto) -> { alTocarLugar.accept(lugar.id); return true; });
     }
 
     private static Polygon poligono(MapView mapa, List<Punto> puntos, int relleno, int borde, float grosor) {

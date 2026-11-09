@@ -1,0 +1,609 @@
+{
+ "version": 1,
+ "fuente": "osm/puntos_foto.py (regenerar tras corregir)",
+ "tramos": [
+  {
+   "id": "residencia_ronda210",
+   "nombre": "Residencia Livensa → Camino de Ronda 210",
+   "desde": [
+    37.185962,
+    -3.614213
+   ],
+   "hasta": [
+    37.187294,
+    -3.614658
+   ],
+   "metros": 187,
+   "puntos": [
+    {
+     "id": "residencia_ronda210_01",
+     "lat": 37.186196,
+     "lon": -3.61415,
+     "rumbo": 282,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "residencia_ronda210_02",
+     "lat": 37.186243,
+     "lon": -3.614426,
+     "rumbo": 224,
+     "giro": -59,
+     "metros": 25,
+     "instruccion": "Gira un poco a la izquierda"
+    },
+    {
+     "id": "residencia_ronda210_03",
+     "lat": 37.186095,
+     "lon": -3.614616,
+     "rumbo": 341,
+     "giro": 116,
+     "metros": 50,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "residencia_ronda210_04",
+     "lat": 37.186466,
+     "lon": -3.614653,
+     "rumbo": 1,
+     "giro": 0,
+     "metros": 96,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "residencia_ronda210_05",
+     "lat": 37.18687,
+     "lon": -3.614642,
+     "rumbo": 1,
+     "giro": 0,
+     "metros": 141,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "residencia_ronda210_06",
+     "lat": 37.187293,
+     "lon": -3.614626,
+     "rumbo": 2,
+     "giro": 0,
+     "metros": 187,
+     "instruccion": "Ya estás en la parada Camino de Ronda 210"
+    }
+   ]
+  },
+  {
+   "id": "bellasartes_etsiit",
+   "nombre": "Avenida de Andalucía - Facultad Bellas Artes → ETSIIT",
+   "desde": [
+    37.194707,
+    -3.62703
+   ],
+   "hasta": [
+    37.197087,
+    -3.624508
+   ],
+   "metros": 465,
+   "puntos": [
+    {
+     "id": "bellasartes_etsiit_01",
+     "lat": 37.194737,
+     "lon": -3.627007,
+     "rumbo": 306,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "bellasartes_etsiit_02",
+     "lat": 37.194972,
+     "lon": -3.627158,
+     "rumbo": 50,
+     "giro": 85,
+     "metros": 40,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "bellasartes_etsiit_03",
+     "lat": 37.195227,
+     "lon": -3.626712,
+     "rumbo": 56,
+     "giro": 0,
+     "metros": 90,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "bellasartes_etsiit_04",
+     "lat": 37.195478,
+     "lon": -3.626243,
+     "rumbo": 56,
+     "giro": 0,
+     "metros": 140,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "bellasartes_etsiit_05",
+     "lat": 37.195728,
+     "lon": -3.625774,
+     "rumbo": 56,
+     "giro": 0,
+     "metros": 190,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "bellasartes_etsiit_06",
+     "lat": 37.195983,
+     "lon": -3.625311,
+     "rumbo": 2,
+     "giro": -52,
+     "metros": 240,
+     "instruccion": "Gira un poco a la izquierda"
+    },
+    {
+     "id": "bellasartes_etsiit_07",
+     "lat": 37.196437,
+     "lon": -3.62517,
+     "rumbo": 81,
+     "giro": 61,
+     "metros": 295,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "bellasartes_etsiit_08",
+     "lat": 37.196732,
+     "lon": -3.624927,
+     "rumbo": 63,
+     "giro": 75,
+     "metros": 345,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "bellasartes_etsiit_09",
+     "lat": 37.196813,
+     "lon": -3.624726,
+     "rumbo": 337,
+     "giro": -87,
+     "metros": 365,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "bellasartes_etsiit_10",
+     "lat": 37.19725,
+     "lon": -3.624971,
+     "rumbo": 94,
+     "giro": 117,
+     "metros": 420,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "bellasartes_etsiit_11",
+     "lat": 37.197199,
+     "lon": -3.624498,
+     "rumbo": 95,
+     "giro": 0,
+     "metros": 465,
+     "instruccion": "Ya llegas: entrada de ETSIIT"
+    }
+   ]
+  },
+  {
+   "id": "etsiit_auxiliar",
+   "nombre": "ETSIIT → Edificio Auxiliar",
+   "desde": [
+    37.197087,
+    -3.624508
+   ],
+   "hasta": [
+    37.197988,
+    -3.629886
+   ],
+   "metros": 578,
+   "puntos": [
+    {
+     "id": "etsiit_auxiliar_01",
+     "lat": 37.197199,
+     "lon": -3.624498,
+     "rumbo": 276,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "etsiit_auxiliar_02",
+     "lat": 37.197251,
+     "lon": -3.624974,
+     "rumbo": 333,
+     "giro": 58,
+     "metros": 45,
+     "instruccion": "Gira un poco a la derecha"
+    },
+    {
+     "id": "etsiit_auxiliar_03",
+     "lat": 37.197486,
+     "lon": -3.625125,
+     "rumbo": 244,
+     "giro": -89,
+     "metros": 75,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "etsiit_auxiliar_04",
+     "lat": 37.197407,
+     "lon": -3.625328,
+     "rumbo": 335,
+     "giro": 90,
+     "metros": 95,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "etsiit_auxiliar_05",
+     "lat": 37.197554,
+     "lon": -3.625827,
+     "rumbo": 200,
+     "giro": -66,
+     "metros": 150,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "etsiit_auxiliar_06",
+     "lat": 37.19736,
+     "lon": -3.626073,
+     "rumbo": 302,
+     "giro": 58,
+     "metros": 185,
+     "instruccion": "Gira un poco a la derecha"
+    },
+    {
+     "id": "etsiit_auxiliar_07",
+     "lat": 37.197357,
+     "lon": -3.626262,
+     "rumbo": 304,
+     "giro": 65,
+     "metros": 210,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "etsiit_auxiliar_08",
+     "lat": 37.197561,
+     "lon": -3.626491,
+     "rumbo": 264,
+     "giro": -79,
+     "metros": 245,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "etsiit_auxiliar_09",
+     "lat": 37.197508,
+     "lon": -3.627051,
+     "rumbo": 262,
+     "giro": 0,
+     "metros": 295,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "etsiit_auxiliar_10",
+     "lat": 37.197453,
+     "lon": -3.627611,
+     "rumbo": 266,
+     "giro": 0,
+     "metros": 345,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "etsiit_auxiliar_11",
+     "lat": 37.197425,
+     "lon": -3.628174,
+     "rumbo": 266,
+     "giro": 0,
+     "metros": 395,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "etsiit_auxiliar_12",
+     "lat": 37.197526,
+     "lon": -3.628589,
+     "rumbo": 266,
+     "giro": -86,
+     "metros": 445,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "etsiit_auxiliar_13",
+     "lat": 37.197492,
+     "lon": -3.629208,
+     "rumbo": 322,
+     "giro": 55,
+     "metros": 500,
+     "instruccion": "Gira un poco a la derecha"
+    },
+    {
+     "id": "etsiit_auxiliar_14",
+     "lat": 37.197899,
+     "lon": -3.62954,
+     "rumbo": 243,
+     "giro": -86,
+     "metros": 555,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "etsiit_auxiliar_15",
+     "lat": 37.197809,
+     "lon": -3.62975,
+     "rumbo": 239,
+     "giro": 0,
+     "metros": 577,
+     "instruccion": "Ya llegas: entrada de Edificio Auxiliar"
+    }
+   ]
+  },
+  {
+   "id": "auxiliar_etsiit",
+   "nombre": "Edificio Auxiliar → ETSIIT",
+   "desde": [
+    37.197988,
+    -3.629886
+   ],
+   "hasta": [
+    37.197087,
+    -3.624508
+   ],
+   "metros": 578,
+   "puntos": [
+    {
+     "id": "auxiliar_etsiit_01",
+     "lat": 37.197809,
+     "lon": -3.62975,
+     "rumbo": 59,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "auxiliar_etsiit_02",
+     "lat": 37.197902,
+     "lon": -3.629557,
+     "rumbo": 144,
+     "giro": 85,
+     "metros": 20,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "auxiliar_etsiit_03",
+     "lat": 37.197492,
+     "lon": -3.629232,
+     "rumbo": 87,
+     "giro": -62,
+     "metros": 75,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "auxiliar_etsiit_04",
+     "lat": 37.197524,
+     "lon": -3.628613,
+     "rumbo": 167,
+     "giro": 81,
+     "metros": 130,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "auxiliar_etsiit_05",
+     "lat": 37.197423,
+     "lon": -3.628198,
+     "rumbo": 86,
+     "giro": 0,
+     "metros": 181,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "auxiliar_etsiit_06",
+     "lat": 37.197452,
+     "lon": -3.627635,
+     "rumbo": 85,
+     "giro": 0,
+     "metros": 232,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "auxiliar_etsiit_07",
+     "lat": 37.197511,
+     "lon": -3.627019,
+     "rumbo": 83,
+     "giro": 0,
+     "metros": 284,
+     "instruccion": "Sigue recto unos 50 m"
+    },
+    {
+     "id": "auxiliar_etsiit_08",
+     "lat": 37.197551,
+     "lon": -3.626461,
+     "rumbo": 164,
+     "giro": 75,
+     "metros": 335,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "auxiliar_etsiit_09",
+     "lat": 37.197367,
+     "lon": -3.626282,
+     "rumbo": 60,
+     "giro": -64,
+     "metros": 365,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "auxiliar_etsiit_10",
+     "lat": 37.197371,
+     "lon": -3.626043,
+     "rumbo": 64,
+     "giro": 0,
+     "metros": 398,
+     "instruccion": "Sigue recto unos 30 m"
+    },
+    {
+     "id": "auxiliar_etsiit_11",
+     "lat": 37.197573,
+     "lon": -3.625807,
+     "rumbo": 95,
+     "giro": 63,
+     "metros": 430,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "auxiliar_etsiit_12",
+     "lat": 37.197424,
+     "lon": -3.625338,
+     "rumbo": 74,
+     "giro": -80,
+     "metros": 480,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "auxiliar_etsiit_13",
+     "lat": 37.197477,
+     "lon": -3.625146,
+     "rumbo": 143,
+     "giro": 79,
+     "metros": 500,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "auxiliar_etsiit_14",
+     "lat": 37.197264,
+     "lon": -3.624988,
+     "rumbo": 100,
+     "giro": -55,
+     "metros": 530,
+     "instruccion": "Gira un poco a la izquierda"
+    },
+    {
+     "id": "auxiliar_etsiit_15",
+     "lat": 37.197199,
+     "lon": -3.624498,
+     "rumbo": 104,
+     "giro": 0,
+     "metros": 577,
+     "instruccion": "Ya llegas: entrada de ETSIIT"
+    }
+   ]
+  },
+  {
+   "id": "etsiit_gomezmontero",
+   "nombre": "ETSIIT → Periodista Rafael Gómez Montero 3",
+   "desde": [
+    37.197087,
+    -3.624508
+   ],
+   "hasta": [
+    37.19749,
+    -3.624588
+   ],
+   "metros": 125,
+   "puntos": [
+    {
+     "id": "etsiit_gomezmontero_01",
+     "lat": 37.197199,
+     "lon": -3.624498,
+     "rumbo": 276,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "etsiit_gomezmontero_02",
+     "lat": 37.197251,
+     "lon": -3.624974,
+     "rumbo": 333,
+     "giro": 58,
+     "metros": 45,
+     "instruccion": "Gira un poco a la derecha"
+    },
+    {
+     "id": "etsiit_gomezmontero_03",
+     "lat": 37.19749,
+     "lon": -3.625122,
+     "rumbo": 77,
+     "giro": 102,
+     "metros": 75,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "etsiit_gomezmontero_04",
+     "lat": 37.19749,
+     "lon": -3.624588,
+     "rumbo": 95,
+     "giro": 0,
+     "metros": 125,
+     "instruccion": "Ya estás en la parada Periodista Rafael Gómez Montero 3"
+    }
+   ]
+  },
+  {
+   "id": "ronda177_residencia",
+   "nombre": "Camino de Ronda 177 - Estadio de la Juventud → Residencia Livensa",
+   "desde": [
+    37.185382,
+    -3.614917
+   ],
+   "hasta": [
+    37.185962,
+    -3.614213
+   ],
+   "metros": 157,
+   "puntos": [
+    {
+     "id": "ronda177_residencia_01",
+     "lat": 37.185382,
+     "lon": -3.614932,
+     "rumbo": 5,
+     "giro": 0,
+     "metros": 0,
+     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
+    },
+    {
+     "id": "ronda177_residencia_02",
+     "lat": 37.185561,
+     "lon": -3.61491,
+     "rumbo": 82,
+     "giro": 76,
+     "metros": 20,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "ronda177_residencia_03",
+     "lat": 37.185575,
+     "lon": -3.614658,
+     "rumbo": 360,
+     "giro": -92,
+     "metros": 45,
+     "instruccion": "Gira a la izquierda"
+    },
+    {
+     "id": "ronda177_residencia_04",
+     "lat": 37.186069,
+     "lon": -3.61466,
+     "rumbo": 52,
+     "giro": 52,
+     "metros": 100,
+     "instruccion": "Gira un poco a la derecha"
+    },
+    {
+     "id": "ronda177_residencia_05",
+     "lat": 37.186243,
+     "lon": -3.614445,
+     "rumbo": 101,
+     "giro": 62,
+     "metros": 130,
+     "instruccion": "Gira a la derecha"
+    },
+    {
+     "id": "ronda177_residencia_06",
+     "lat": 37.186196,
+     "lon": -3.61415,
+     "rumbo": 102,
+     "giro": 0,
+     "metros": 157,
+     "instruccion": "Ya llegas: entrada de Residencia Livensa"
+    }
+   ]
+  }
+ ]
+}

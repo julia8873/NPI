@@ -21,82 +21,126 @@
         android:textStyle="bold"
         android:visibility="gone" />
 
-    <LinearLayout
+    <!-- Foto grande del camino (alto 4:3, lo fija GuiaRutaExterior; plegada = tira baja).
+         Deslizar izquierda/derecha = otra foto, abajo/arriba = plegar/desplegar, tocar = pantalla completa -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardGuiaFoto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="240dp"
         android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        app:cardBackgroundColor="#263238"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/nui_linea"
-            app:strokeWidth="1dp">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/ivGuiaFoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Foto del sitio"
+                android:contentDescription="Foto del camino. Toca para verla en grande"
                 android:scaleType="centerCrop" />
-        </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
+            <!-- Contador "3/8" -->
             <TextView
-                android:id="@+id/tvGuiaEtapa"
+                android:id="@+id/tvGuiaContador"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/nui_acento"
-                android:textSize="12sp"
+                android:layout_gravity="top|start"
+                android:layout_margin="10dp"
+                android:background="@drawable/fondo_chip_foto_guia"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvGuiaInstruccion"
-                android:layout_width="wrap_content"
+            <!-- Brújula: apunta al siguiente objetivo (parada, bajada o entrada) -->
+            <LinearLayout
+                android:layout_width="64dp"
                 android:layout_height="wrap_content"
-                android:textColor="@color/nui_tinta"
-                android:textSize="16sp" />
-        </LinearLayout>
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:background="@drawable/fondo_brujula_guia"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingVertical="4dp">
 
-        <!-- Brújula: apunta al siguiente objetivo (parada, bajada o entrada) -->
-        <LinearLayout
-            android:layout_width="64dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/ivGuiaFlecha"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="Dirección a seguir"
+                    android:src="@drawable/ic_flecha_guia" />
 
-            <ImageView
-                android:id="@+id/ivGuiaFlecha"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="Dirección a seguir"
-                android:src="@drawable/ic_flecha_guia" />
+                <TextView
+                    android:id="@+id/tvGuiaMetros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/nui_tinta"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvGuiaMetros"
-                android:layout_width="wrap_content"
+            <!-- Instrucción de la foto sobre degradado + puntitos de página -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/nui_apagado"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
+                android:layout_gravity="bottom"
+                android:background="@drawable/degradado_foto_guia"
+                android:orientation="vertical"
+                android:paddingHorizontal="14dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:id="@+id/tvGuiaInstruccion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:shadowColor="#99000000"
+                    android:shadowRadius="4"
+                    android:textColor="@android:color/white"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/llGuiaPuntos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal" />
+            </LinearLayout>
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tvGuiaEtapa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/nui_acento"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <!-- Lo que toca ahora en la ruta ("Camina hasta la parada…") si la foto dice otra cosa -->
+    <TextView
+        android:id="@+id/tvGuiaPaso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/nui_tinta"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
     <!-- Cuenta atrás grande: "Tu bus pasa en 4 min", "Quedan 9 min" -->
     <TextView
         android:id="@+id/tvGuiaCuenta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="2dp"
         android:textColor="@color/nui_tinta"
         android:textSize="28sp"
         android:textStyle="bold" />
@@ -108,6 +152,21 @@
         android:textColor="@color/nui_acento"
         android:textSize="14sp"
         android:textStyle="bold" />
+
+    <!-- ¿Llego a tiempo? (solo con hora límite: clase). Rojo y tocable si hay un bus mejor -->
+    <TextView
+        android:id="@+id/tvGuiaPuntualidad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:minHeight="32dp"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -123,10 +182,27 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:backgroundTint="@color/nui_suave"
-            android:text="▶ Simular ×10"
+            android:text="▶ Simular"
             android:textAllCaps="false"
             android:textColor="@color/nui_tinta"
             android:textStyle="bold"
+            app:cornerRadius="14dp"
+            app:strokeColor="#FFE3D1"
+            app:strokeWidth="1dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGuiaVoz"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="56dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="@color/nui_suave"
+            android:contentDescription="Voz de la guía"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:padding="0dp"
+            android:text="🔊"
+            android:textSize="18sp"
             app:cornerRadius="14dp"
             app:strokeColor="#FFE3D1"
             app:strokeWidth="1dp" />
