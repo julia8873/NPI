@@ -51,6 +51,7 @@ public class BaseActivity extends AppCompatActivity {
 
         mShakeDetector = new ShakeDetector();
         mShakeDetector.setOnShakeListener(() -> {
+            if (!usaAgitar()) return; // puede cambiar sin pasar por onResume (p. ej. guía del mapa)
             if (!(BaseActivity.this instanceof MenuPrincipal)) {
                 if (isFinishing() || isDestroyed()) return;
 

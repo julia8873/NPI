@@ -137,6 +137,9 @@ public class Mapa extends BaseActivity {
 
     // Coordenadas de la ETSIIT UGR (Granada)
     private final GeoPoint etsiitPoint = new GeoPoint(37.197087, -3.624508);
+    private RedTransporte redTransporte;
+    private PanelRutaExterior panelRutaExterior; // "Cómo llegar" a pie y en bus
+    private GuiaRutaExterior guiaRutaExterior; // "Empezar": guía con GPS, brújula y avisos
 
     private FrameLayout containerPlanoConMarcadores;
     private final List<Marcador> listaMarcadores = new ArrayList<>();
@@ -341,6 +344,35 @@ public class Mapa extends BaseActivity {
                 iniciarRuta(m);
                 return;
             }
+        }
+    }
+
+    // Llegada con la guía exterior a la ETSIIT o al Auxiliar: enlace con la ruta interior
+    private void alLlegarAEdificio(String idLugar, java.time.LocalDateTime hora) {
+        Calendar ahora = java.util.GregorianCalendar.from(hora.atZone(java.time.ZoneId.systemDefault()));
+        List<String> titulos = new ArrayList<>();
+        for (Marcador m : listaMarcadores) titulos.add(m.getTitulo());
+        LlegadaEdificio.mostrar(this, idLugar, ProximaClase.de(this, SesionUtil.correo(getIntent()), ahora),
+                ahora, titulos, new LlegadaEdificio.Acciones() {
+                    @Override public void rutaInterior(String buscado) { rutaInteriorDesdeEntrada(buscado); }
+
+                    @Override public void rutaExterior(String idDesde, String idHasta) {
+                        guiaRutaExterior.terminar();
+                        panelRutaExterior.abrirEntre(idDesde, idHasta);
+                        PlanRuta plan = panelRutaExterior.planActual();
+                        if (plan != null && plan.tipo != PlanRuta.Tipo.LEJOS) guiaRutaExterior.empezar(plan);
+                    }
+                });
+    }
+
+    private void rutaInteriorDesdeEntrada(String buscado) {
+        for (Marcador m : listaMarcadores) {
+            if (!m.getTitulo().contains(buscado)) continue;
+            if (panelRutaExterior != null) panelRutaExterior.cerrar(); // también termina la guía
+            if (toggleGroupModo != null) toggleGroupModo.check(R.id.btnModoPlanos);
+            destinoRuta = m;
+            fijarOrigen(RegistroPuntosQR.entrada());
+            return;
         }
     }
 
@@ -550,6 +582,7 @@ public class Mapa extends BaseActivity {
                 }
                 if (fabMiUbicacion != null) fabMiUbicacion.setVisibility(View.GONE);
                 if (fabComoLlegar != null) fabComoLlegar.setVisibility(View.GONE);
+                if (panelRutaExterior != null) panelRutaExterior.cerrar();
 
                 if (containerPlanoConMarcadores != null) containerPlanoConMarcadores.setVisibility(View.VISIBLE);
                 if (cardBuscadorMapa != null) cardBuscadorMapa.setVisibility(View.VISIBLE);
@@ -825,12 +858,34 @@ public class Mapa extends BaseActivity {
         mapView.getController().setZoom(18.0);
         mapView.getController().setCenter(etsiitPoint);
 
-        Marker etsiitMarker = new Marker(mapView);
-        etsiitMarker.setPosition(etsiitPoint);
-        etsiitMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        etsiitMarker.setTitle("ETSIIT - UGR");
-        etsiitMarker.setSnippet("Escuela Técnica Superior de Ingenierías Informática y de Telecomunicación");
-        mapView.getOverlays().add(etsiitMarker);
+        // Contornos de la ETSIIT y del Auxiliar, residencia y paradas del bus (rutas exteriores)
+        redTransporte = CapaLugares.cargarRed(this);
+        if (redTransporte != null) {
+            CapaLugares.instalar(mapView, redTransporte);
+            java.util.function.Supplier<Calendar> reloj =
+                    () -> ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
+            panelRutaExterior = new PanelRutaExterior(this, findViewById(R.id.flContenedorMapa), mapView,
+                    redTransporte, SesionUtil.correo(getIntent()), reloj,
+                    () -> myLocationOverlay != null ? myLocationOverlay.getMyLocation() : null,
+                    () -> {
+                        if (tienePermisoUbicacion()) activarUbicacionUsuario();
+                        else preguntaPermisoUbicacion();
+                    });
+            panelRutaExterior.ocultarAlAbrir(fabComoLlegar, fabMiUbicacion);
+            guiaRutaExterior = new GuiaRutaExterior(this, findViewById(R.id.flContenedorMapa), mapView,
+                    panelRutaExterior, reloj);
+            panelRutaExterior.alEmpezar(guiaRutaExterior::empezar);
+            // Al llegar se deja ver "Has llegado" un momento y se pregunta a dónde vas dentro
+            guiaRutaExterior.alLlegar((idLugar, hora) -> handler.postDelayed(
+                    () -> alLlegarAEdificio(idLugar, hora), 1500));
+        } else {
+            Marker etsiitMarker = new Marker(mapView);
+            etsiitMarker.setPosition(etsiitPoint);
+            etsiitMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            etsiitMarker.setTitle("ETSIIT - UGR");
+            etsiitMarker.setSnippet("Escuela Técnica Superior de Ingenierías Informática y de Telecomunicación");
+            mapView.getOverlays().add(etsiitMarker);
+        }
 
         if (fabMiUbicacion != null) {
             fabMiUbicacion.setOnClickListener(v -> {
@@ -850,6 +905,10 @@ public class Mapa extends BaseActivity {
 
         if (fabComoLlegar != null) {
             fabComoLlegar.setOnClickListener(v -> {
+                if (panelRutaExterior != null) {
+                    panelRutaExterior.abrir();
+                    return;
+                }
                 if (!tienePermisoUbicacion()) {
                     preguntaPermisoUbicacion();
                     return;
@@ -1032,6 +1091,11 @@ public class Mapa extends BaseActivity {
         myLocationOverlay.enableFollowLocation();
 
         myLocationOverlay.runOnFirstFix(() -> runOnUiThread(() -> {
+            // Con "Cómo llegar" abierto el mapa ya está encuadrado en la ruta: no moverlo
+            if (panelRutaExterior != null && panelRutaExterior.estaAbierto()) {
+                myLocationOverlay.disableFollowLocation();
+                return;
+            }
             if (myLocationOverlay != null && myLocationOverlay.getMyLocation() != null) {
                 mapView.getController().animateTo(myLocationOverlay.getMyLocation());
                 mapView.getController().setZoom(17.0);
@@ -1485,6 +1549,12 @@ public class Mapa extends BaseActivity {
             mapView.getController().animateTo(etsiitPoint);
             mapView.getController().setZoom(18.0);
         }
+    }
+
+    /** Durante la guía exterior no se vuelve al menú al agitar (se anda o se va en bus con el móvil). */
+    @Override
+    protected boolean usaAgitar() {
+        return guiaRutaExterior == null || !guiaRutaExterior.activa();
     }
 
     @Override

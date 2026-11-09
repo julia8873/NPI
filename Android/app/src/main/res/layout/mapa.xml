@@ -339,6 +339,9 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Panel "Cómo llegar" a pie y en bus (modo mapa) -->
+            <include layout="@layout/panel_ruta_exterior" />
         </FrameLayout>
     </com.google.android.material.card.MaterialCardView>
 
