@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Un día en Pedir cita: hoja de taco de calendario (banda granada, número grande, mes).
+     Elegido = setSelected(true): sombra naranja del papel. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:background="@drawable/nui_papel_estado"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingEnd="@dimen/nui_sombra_papel"
+    android:paddingBottom="@dimen/nui_espacio_xs">
+
+    <TextView
+        android:id="@+id/tvSemana"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/nui_granada"
+        android:gravity="center"
+        android:paddingVertical="2dp"
+        android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
+        android:textColor="@color/nui_superficie" />
+
+    <TextView
+        android:id="@+id/tvNumero"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Nui.Titular" />
+
+    <TextView
+        android:id="@+id/tvMes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Nui.Codigo"
+        android:textColor="@color/nui_apagado"
+        android:textSize="@dimen/nui_texto_etiqueta" />
+</LinearLayout>

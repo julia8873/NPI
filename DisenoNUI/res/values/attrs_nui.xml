@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Atributos de las vistas del design system NUI (ver DESIGN.md). -->
+<resources>
+    <declare-styleable name="TramaAzulejo">
+        <!-- Tesela que se repite. Por defecto @drawable/nui_azulejo; para la arquería @drawable/nui_arqueria -->
+        <attr name="tesela" format="reference" />
+    </declare-styleable>
+</resources>

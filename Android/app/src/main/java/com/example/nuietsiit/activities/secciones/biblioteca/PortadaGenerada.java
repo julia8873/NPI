@@ -1,7 +1,7 @@
 package com.example.nuietsiit.activities.secciones.biblioteca;
 
+import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -13,16 +13,21 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Libro;
 
 /**
  * Portada dibujada con el título y el autor: se ve mientras llega la real o si no hay red.
+ * Tela de los colores del design system NUI y título en la fuente de titulares (Zilla Slab).
  */
 public class PortadaGenerada extends Drawable {
 
+    // colores fuertes de la paleta (todos con texto blanco legible encima)
     private static final int[] COLORES = {
-            0xFF1F4E79, 0xFF7B2D26, 0xFF2F5D50, 0xFF5B3A78, 0xFF8A5A00, 0xFF37474F, 0xFF9C3D54, 0xFF00626E};
+            R.color.nui_cobalto, R.color.nui_granada, R.color.nui_arrayan, R.color.nui_madera,
+            R.color.nui_acento_profundo, R.color.nui_madera_oscura, R.color.nui_resaltado, R.color.nui_tinta};
 
     private final String titulo, autor;
     private final int color;
@@ -32,13 +37,17 @@ public class PortadaGenerada extends Drawable {
     private StaticLayout bloqueTitulo, bloqueAutor; // null si no caben; se recalculan solo al cambiar de tamaño
     private int xTexto, yTitulo, yAutor;
 
-    public PortadaGenerada(Libro libro) {
+    public PortadaGenerada(Context ctx, Libro libro) {
         titulo = libro.titulo;
         autor = libro.autores.split(";")[0]; // solo el primero
-        color = COLORES[Math.floorMod(libro.isbn.hashCode(), COLORES.length)];
-        pinturaTitulo.setColor(Color.WHITE);
-        pinturaTitulo.setTypeface(Typeface.DEFAULT_BOLD);
-        pinturaAutor.setColor(Color.WHITE);
+        color = ctx.getColor(COLORES[Math.floorMod(libro.isbn.hashCode(), COLORES.length)]);
+        int texto = ctx.getColor(R.color.nui_sobre_resaltado);
+        pinturaTitulo.setColor(texto);
+        Typeface titular = ResourcesCompat.getFont(ctx, R.font.nui_titular);
+        pinturaTitulo.setTypeface(titular != null ? titular : Typeface.DEFAULT_BOLD);
+        pinturaAutor.setColor(texto);
+        Typeface cuerpo = ResourcesCompat.getFont(ctx, R.font.nui_texto);
+        if (cuerpo != null) pinturaAutor.setTypeface(cuerpo);
     }
 
     @Override

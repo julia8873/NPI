@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Detalle de un trámite: su ficha de catálogo, los papeles con lo que hace falta y el siguiente paso. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
+    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
 
-    <ScrollView
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
+
+    <com.example.nuietsiit.ui.HojasPaginadas
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -22,117 +29,105 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingBottom="16dp">
+            android:padding="@dimen/nui_espacio_l">
 
-            <!-- Cabecera: categoría, nombre y qué se puede hacer hoy -->
-            <TextView
-                android:id="@+id/tvCategoria"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:textAllCaps="true"
-                android:textColor="@color/nui_apagado"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvNombre"
+            <!-- Ficha del trámite: categoría en la cabecera, nombre, estado y descripción -->
+            <LinearLayout
+                style="@style/Widget.Nui.Ficha"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/nui_tinta"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvEstado"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tvCategoria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:gravity="center_vertical"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
-            <TextView
-                android:id="@+id/tvDescripcion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:layout_marginBottom="4dp"
-                android:lineSpacingExtra="2dp"
-                android:textColor="@color/nui_tinta"
-                android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/tvNombre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular" />
+
+                <TextView
+                    android:id="@+id/tvEstado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_s"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
+                    android:textAllCaps="false" />
+
+                <TextView
+                    android:id="@+id/tvDescripcion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tarjetaRequisitos"
+                style="@style/Widget.Nui.Papel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/fondo_seccion"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📋  Requisitos"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:accessibilityHeading="true"
+                    android:text="Requisitos"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <TextView
                     android:id="@+id/tvRequisitos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:lineSpacingExtra="2dp"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="15sp" />
+                    android:layout_marginTop="@dimen/nui_espacio_xs"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tarjetaPlazos"
+                style="@style/Widget.Nui.Papel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/fondo_seccion"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🗓️  Plazos"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:accessibilityHeading="true"
+                    android:text="Plazos"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <TextView
                     android:id="@+id/tvPlazos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:lineSpacingExtra="2dp"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="15sp" />
+                    android:layout_marginTop="@dimen/nui_espacio_xs"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/tarjetaDocumentos"
+                style="@style/Widget.Nui.Papel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/fondo_seccion"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📎  Documentos que necesitas"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:accessibilityHeading="true"
+                    android:text="Documentos que necesitas"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <LinearLayout
                     android:id="@+id/llDocumentos"
@@ -142,84 +137,79 @@
             </LinearLayout>
 
             <!-- Los pasos, uno a uno (PasosTramite) -->
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:id="@+id/btnPasos"
+                style="@style/Widget.Nui.Papel.Pulsable"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@color/nui_superficie"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/nui_linea"
-                app:strokeWidth="1dp">
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/nui_toque_min"
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tvPasos"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
 
-                    <TextView
-                        android:id="@+id/tvPasos"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textColor="@color/nui_tinta"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:importantForAccessibility="no"
-                        android:text="›"
-                        android:textColor="@color/nui_apagado"
-                        android:textSize="26sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:importantForAccessibility="no"
+                    android:text="›"
+                    android:textColor="@color/nui_apagado"
+                    android:textSize="@dimen/nui_texto_xl" />
+            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
+    </com.example.nuietsiit.ui.HojasPaginadas>
 
-    <!-- Siguiente paso: un solo botón grande, siempre a la vista -->
+    <!-- Siguiente paso: un solo botón grande, siempre a la vista, sobre el mostrador -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_borde"
+        android:background="@color/nui_papel_sombra" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:elevation="8dp"
+        android:background="@color/nui_suave"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp">
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingTop="@dimen/nui_espacio_m"
+        android:paddingBottom="@dimen/nui_espacio_xs">
 
         <TextView
             android:id="@+id/tvMotivoSolicitar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="@dimen/nui_espacio_s"
             android:gravity="center"
-            android:textColor="@color/nui_apagado"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
             android:visibility="gone" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSiguiente"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="@drawable/boton_redondeado"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:layout_height="wrap_content"
+            android:minHeight="56dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAlternativa"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Nui.Boton.Texto"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:textAllCaps="false"
-            android:textColor="@color/nui_apagado" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Medidas propias de la Biblioteca (design system NUI: nada de dp sueltos en los layouts) -->
+    <dimen name="biblio_libro_grande_ancho">160dp</dimen>   <!-- libro ojeado y libro del detalle (3:4) -->
+    <dimen name="biblio_libro_grande_alto">213dp</dimen>
+    <dimen name="biblio_tarjeta_ojear">280dp</dimen>
+    <dimen name="biblio_chip_explorar_max">150dp</dimen>
+    <dimen name="biblio_flotante_alto">56dp</dimen>
+    <dimen name="biblio_elevacion_ojear">8dp</dimen>
+    <dimen name="biblio_filete">2dp</dimen>                 <!-- filete de oro sobre el zócalo -->
+    <dimen name="biblio_marca_vertical">2dp</dimen>
+    <dimen name="biblio_nombre_dato">96dp</dimen>
+    <dimen name="biblio_punta_etiqueta">12dp</dimen>
+
     <style name="TituloExplorar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:layout_marginTop">@dimen/nui_espacio_l</item>
+        <item name="android:layout_marginBottom">@dimen/nui_espacio_xs</item>
         <item name="android:accessibilityHeading">true</item>
-        <item name="android:textColor">#666666</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textAppearance">@style/TextAppearance.Nui.Etiqueta</item>
+    </style>
+
+    <!-- Fila "dato: valor" de las fichas del detalle de un libro -->
+    <style name="DatoLibro">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/nui_espacio_s</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:baselineAligned">true</item>
+    </style>
+    <style name="NombreDatoLibro">
+        <item name="android:layout_width">@dimen/biblio_nombre_dato</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Nui.Etiqueta</item>
+        <item name="android:textColor">@color/nui_apagado</item>
     </style>
 </resources>

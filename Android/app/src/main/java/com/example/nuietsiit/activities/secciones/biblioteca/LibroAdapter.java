@@ -1,6 +1,5 @@
 package com.example.nuietsiit.activities.secciones.biblioteca;
 
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.view.LayoutInflater;
@@ -57,10 +56,17 @@ public class LibroAdapter extends RecyclerView.Adapter<LibroAdapter.Holder> {
         cambios.dispatchUpdatesTo(this);
     }
 
+    // al pasar de estante los libros cambian todos de golpe: sin la animación de recolocarse
+    public void mostrar(List<Libro> nuevos, Set<Integer> nuevosBasicos) {
+        basicos = nuevosBasicos;
+        libros = nuevos;
+        notifyDataSetChanged();
+    }
+
     // también en DetalleLibro y al ojear un libro
     public static void mostrarDisponibilidad(TextView tv, Libro libro) {
         tv.setText(textoDisponibilidad(libro));
-        tv.setTextColor(Color.parseColor(libro.disponible() ? "#2E7D32" : "#C62828"));
+        tv.setTextColor(tv.getContext().getColor(libro.disponible() ? R.color.nui_ok : R.color.nui_error));
     }
 
     static String textoDisponibilidad(Libro libro) {
@@ -71,8 +77,15 @@ public class LibroAdapter extends RecyclerView.Adapter<LibroAdapter.Holder> {
 
     // la portada generada queda debajo hasta que llega la real
     public static void mostrarPortada(ImageView portada, Libro libro) {
-        portada.setImageDrawable(new PortadaGenerada(libro));
+        portada.setImageDrawable(new PortadaGenerada(portada.getContext(), libro));
         CargadorPortadas.cargar(portada, libro.isbn);
+    }
+
+    // libro sin ejemplares: portada en gris
+    static void apagarPortada(ImageView portada) {
+        ColorMatrix gris = new ColorMatrix();
+        gris.setSaturation(0);
+        portada.setColorFilter(new ColorMatrixColorFilter(gris));
     }
 
     @NonNull
@@ -90,9 +103,7 @@ public class LibroAdapter extends RecyclerView.Adapter<LibroAdapter.Holder> {
             h.ivPortada.clearColorFilter();
             h.tvPrestado.setVisibility(View.GONE);
         } else {
-            ColorMatrix gris = new ColorMatrix();
-            gris.setSaturation(0);
-            h.ivPortada.setColorFilter(new ColorMatrixColorFilter(gris));
+            apagarPortada(h.ivPortada);
             h.tvPrestado.setVisibility(View.VISIBLE);
         }
         mostrarBasica(h, l);

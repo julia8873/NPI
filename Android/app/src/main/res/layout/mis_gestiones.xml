@@ -1,29 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mis gestiones: la carpeta con tus citas y solicitudes, cada una en su ficha -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
+    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
 
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
+
+    <!-- Pestañas de la carpeta -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:tabIndicatorColor="#FF8C42"
-        app:tabSelectedTextColor="#FF8C42"
-        app:tabTextColor="#666666" />
+        android:background="@color/nui_superficie"
+        app:tabIndicatorColor="@color/nui_resaltado"
+        app:tabIndicatorHeight="3dp"
+        app:tabRippleColor="@color/nui_resalte"
+        app:tabSelectedTextColor="@color/nui_tinta"
+        app:tabTextAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+        app:tabTextColor="@color/nui_apagado" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_borde"
+        android:background="@color/nui_papel_sombra" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vpGestiones"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

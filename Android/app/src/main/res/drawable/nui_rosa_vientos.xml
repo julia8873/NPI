@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rosa de los vientos de 8 puntas: "¿Qué necesitas?" (te orienta). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="@color/nui_cobalto" android:pathData="M24,2L29,19L46,24L29,29L24,46L19,29L2,24L19,19Z" />
+    <group android:rotation="45" android:pivotX="24" android:pivotY="24">
+        <path android:fillColor="@color/nui_resaltado" android:pathData="M24,10L27,21L38,24L27,27L24,38L21,27L10,24L21,21Z" />
+    </group>
+    <path android:fillColor="@color/nui_papel" android:pathData="M24,20.5a3.5,3.5 0,1 0,0.01 0Z" />
+</vector>

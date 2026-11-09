@@ -1,5 +1,7 @@
 package com.example.nuietsiit.data.modelo;
 
+import com.example.nuietsiit.R;
+
 import java.time.LocalDate;
 
 /**
@@ -46,6 +48,23 @@ public class Tramite {
         return nombre + " " + (palabrasClave != null ? palabrasClave : "") + " " + (descripcion != null ? descripcion : "");
     }
 
+    // color de la categoría (tokens nui_tema_*): etiqueta de la ficha y tinta del catálogo
+    public int colorCategoria() {
+        return colorCategoria(categoria);
+    }
+
+    // también para las pestañas del fichero, que no tienen un trámite concreto
+    public static int colorCategoria(String categoria) {
+        switch (categoria) {
+            case "matricula": return R.color.nui_tema_matricula;
+            case "titulos": return R.color.nui_tema_titulos;
+            case "reconocimiento_creditos": return R.color.nui_tema_creditos;
+            case "convocatorias": return R.color.nui_tema_examenes;
+            case "certificados": return R.color.nui_tema_certificados;
+            default: return R.color.nui_tema_otros;
+        }
+    }
+
     public String etiquetaCategoria() {
         for (String[] c : CATEGORIAS) {
             if (c[0].equals(categoria)) return c[1];
@@ -77,10 +96,10 @@ public class Tramite {
         return LocalDate.now().isBefore(LocalDate.parse(plazoInicio)) ? "Plazo aún no abierto" : "Plazo cerrado";
     }
 
-    // verde = se puede solicitar, azul = ventanilla, gris = fuera de plazo
+    // recurso de color: nui_ok = se puede solicitar, nui_info = ventanilla, nui_apagado = fuera de plazo
     public int colorEstado() {
-        if (sePuedeSolicitar()) return 0xFF2E7D32;
-        if (!solicitudOnline) return 0xFF1976D2;
-        return 0xFF7B766F;
+        if (sePuedeSolicitar()) return R.color.nui_ok;
+        if (!solicitudOnline) return R.color.nui_info;
+        return R.color.nui_apagado;
     }
 }

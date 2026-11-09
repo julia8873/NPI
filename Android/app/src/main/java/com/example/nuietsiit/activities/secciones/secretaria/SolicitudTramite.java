@@ -53,7 +53,6 @@ import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.UsuariosDB;
@@ -86,7 +85,7 @@ import java.util.Set;
  * en la tapa (o con la huella), se sella manteniendo el dedo y se lanza hacia arriba para enviarla.
  * Al enviar guarda la SOLICITUD y abre su justificante.
  */
-public class SolicitudTramite extends BaseActivity {
+public class SolicitudTramite extends PantallaSecretaria {
 
     // fases: documentos fuera → carpeta cerrada (firma y sello) → sellada (lanzar)
     private static final int DOCUMENTOS = 0, FIRMA = 1, LANZAR = 2;
@@ -171,6 +170,8 @@ public class SolicitudTramite extends BaseActivity {
         tvAyuda = findViewById(R.id.tvAyuda);
         mesaScroll = findViewById(R.id.mesaScroll);
         mesa = findViewById(R.id.mesa);
+        // cada vez que cambian las tarjetas o el ancho: que quepan todas
+        mesaScroll.addOnLayoutChangeListener((v, l, t, r, b, l0, t0, r0, b0) -> ajustarMesa());
         carpeta = findViewById(R.id.carpeta);
         zonaSoltar = findViewById(R.id.zonaSoltar);
         papeles = findViewById(R.id.papeles);
@@ -329,7 +330,7 @@ public class SolicitudTramite extends BaseActivity {
                     "Con el dedo, en el recuadro" + (hayHuella ? " · o usa tu huella" : ""));
         } else if (fase == FIRMA) {
             paso = 3;
-            ponerTextos("Mantén el dedo sobre el sello 🔏", "Hasta que se complete el anillo y suene el «clac»");
+            ponerTextos("Mantén el dedo sobre el sello", "Hasta que se complete el anillo y suene el «clac»");
         } else {
             paso = 4;
             ponerTextos("Lanza la carpeta hacia arriba", "Arrástrala y suéltala con un gesto rápido para enviarla");
@@ -386,6 +387,23 @@ public class SolicitudTramite extends BaseActivity {
             vacia.setTextColor(getColor(R.color.nui_apagado));
             vacia.setText("La mesa está vacía\n\nArrastra aquí una hoja de la carpeta para sacarla");
             mesa.addView(vacia);
+        }
+    }
+
+    // sin scroll lateral: si no caben todas las tarjetas, se estrechan hasta caber
+    private void ajustarMesa() {
+        int libre = mesaScroll.getWidth() - mesaScroll.getPaddingLeft() - mesaScroll.getPaddingRight();
+        int n = mesa.getChildCount();
+        if (libre <= 0 || n == 0) return;
+        int ancho = Math.min(dp(124), libre / n - dp(12));
+        for (int i = 0; i < n; i++) {
+            View tarjeta = mesa.getChildAt(i);
+            ViewGroup.LayoutParams lp = tarjeta.getLayoutParams();
+            if (lp.width == dp(260)) continue; // la mesa vacía
+            if (lp.width != ancho) {
+                lp.width = ancho;
+                tarjeta.setLayoutParams(lp);
+            }
         }
     }
 
@@ -583,12 +601,11 @@ public class SolicitudTramite extends BaseActivity {
             nombre.setTextColor(getColor(R.color.nui_tinta));
             nombre.setMaxLines(2);
             nombre.setGravity(Gravity.CENTER);
-            nombre.setBackgroundColor(0xE6FFFFFF);
+            nombre.setBackgroundColor(getColor(R.color.nui_papel));
             nombre.setPadding(dp(3), dp(2), dp(3), dp(2));
             hoja.addView(nombre, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
             hoja.setRotation(i % 2 == 0 ? -3f : 3f);
-            hoja.setElevation(dp(1));
             hoja.setContentDescription(d.nombre + ", dentro de la carpeta. Toca para cambiarlo o sacarlo");
             hoja.setOnClickListener(v -> opcionesHoja(d));
             ViewCompat.addAccessibilityAction(hoja, "Sacar de la carpeta", (v, args) -> {
@@ -699,8 +716,8 @@ public class SolicitudTramite extends BaseActivity {
         if (fase != DOCUMENTOS) return;
         boolean lleno = archivos.containsKey(d.id);
         String[] opciones = lleno
-                ? new String[]{"👁 Verlo en grande", "📷 Hacer otra foto", "📁 Elegir otro archivo", "🗑 Quitar"}
-                : new String[]{"📷 Hacer una foto", "📁 Subir un archivo (imagen o PDF)"};
+                ? new String[]{"Verlo en grande", "Hacer otra foto", "Elegir otro archivo", "Quitar"}
+                : new String[]{"Hacer una foto", "Subir un archivo (imagen o PDF)"};
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
                 .setTitle(d.nombre)
                 .setItems(opciones, (dlg, i) -> {
@@ -717,8 +734,8 @@ public class SolicitudTramite extends BaseActivity {
         if (fase != DOCUMENTOS) return;
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
                 .setTitle(d.nombre)
-                .setItems(new String[]{"👁 Verlo en grande", "📷 Hacer otra foto", "📁 Elegir otro archivo",
-                        "↩ Sacar de la carpeta"}, (dlg, i) -> {
+                .setItems(new String[]{"Verlo en grande", "Hacer otra foto", "Elegir otro archivo",
+                        "Sacar de la carpeta"}, (dlg, i) -> {
                     if (i == 0) verDocumento(d);
                     else if (i == 1) hacerFoto(d.id);
                     else if (i == 2) elegirArchivo(d.id);
@@ -746,7 +763,7 @@ public class SolicitudTramite extends BaseActivity {
                 .setTitle(d.nombre)
                 .setView(iv)
                 .setPositiveButton("Cerrar", null)
-                .setNeutralButton("📷 Repetir foto", (dlg, w) -> hacerFoto(d.id)));
+                .setNeutralButton("Repetir foto", (dlg, w) -> hacerFoto(d.id)));
     }
 
     private void sacarDeCarpeta(int idDocumento) {
@@ -1178,7 +1195,7 @@ public class SolicitudTramite extends BaseActivity {
     }
 
     private void animarFlecha(boolean arriba) {
-        String texto = arriba ? "⬆" : "⬇";
+        String texto = arriba ? "↑" : "↓";
         if (animFlecha == null || !texto.contentEquals(tvFlecha.getText())) {
             if (animFlecha != null) animFlecha.cancel();
             tvFlecha.setText(texto);

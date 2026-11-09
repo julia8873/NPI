@@ -4,15 +4,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.AsignaturaCatalogo;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.example.nuietsiit.ui.PestanasPapel;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,8 +32,7 @@ public class PanelExplorar {
     private final List<String> plantas;
     private final ToIntFunction<FiltroExplorar> contarLibros;
     private final Consumer<FiltroExplorar> alAplicar;
-    private final ChipGroup chipsGrado, chipsCurso, chipsRama, chipsPlanta;
-    private final ViewGroup listaAsignaturas;
+    private final PestanasPapel chipsGrado, chipsCurso, chipsRama, chipsPlanta, listaAsignaturas;
     private final MaterialButton btnVer;
 
     public PanelExplorar(Context ctx, FiltroExplorar actual, List<AsignaturaCatalogo> catalogo, List<String> plantas,
@@ -64,6 +61,14 @@ public class PanelExplorar {
         dialogo.setContentView(vista);
         dialogo.getBehavior().setState(BottomSheetBehavior.STATE_EXPANDED);
         dialogo.getBehavior().setSkipCollapsed(true);
+        // a toda la altura: las hojas necesitan saber cuánto sitio tienen
+        dialogo.setOnShowListener(d -> {
+            View hoja = dialogo.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (hoja != null) {
+                hoja.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                hoja.requestLayout();
+            }
+        });
         pintar();
     }
 
@@ -102,19 +107,19 @@ public class PanelExplorar {
             asignaturas.put(a.codigo, a.nombre);
         }
 
-        chipsGrado.removeAllViews();
+        vaciar(chipsGrado, 0);
         for (Map.Entry<Integer, String> g : grados.entrySet()) {
             anadirOpcion(chipsGrado, g.getValue(), Objects.equals(borrador.idGrado, g.getKey()), f -> f.idGrado = g.getKey(), f -> f.idGrado = null);
         }
-        chipsCurso.removeAllViews();
+        vaciar(chipsCurso, 0);
         for (Map.Entry<Integer, String> c : cursos.entrySet()) {
             anadirOpcion(chipsCurso, c.getValue(), Objects.equals(borrador.curso, c.getKey()), f -> f.curso = c.getKey(), f -> f.curso = null);
         }
-        chipsRama.removeAllViews();
+        vaciar(chipsRama, 2);
         for (String r : ramas.keySet()) {
             anadirOpcion(chipsRama, r, r.equals(borrador.rama), f -> f.rama = r, f -> f.rama = null);
         }
-        chipsPlanta.removeAllViews();
+        vaciar(chipsPlanta, 0);
         for (String p : plantas) {
             anadirOpcion(chipsPlanta, p, p.equals(borrador.planta), f -> f.planta = p, f -> f.planta = null);
         }
@@ -124,57 +129,62 @@ public class PanelExplorar {
         ocultarSiVacio(chipsRama);
         ocultarSiVacio(chipsPlanta);
 
-        listaAsignaturas.removeAllViews();
+        // asignaturas: rejilla de 2, como tejuelos; elegir una ya enseña sus libros
+        vaciar(listaAsignaturas, 2);
         for (Map.Entry<String, String> a : asignaturas.entrySet()) {
             FiltroExplorar conEsta = borrador.copia();
             conEsta.asignatura = a.getKey();
             int libros = contarLibros.applyAsInt(conEsta);
             if (libros == 0) continue;
-            TextView fila = (TextView) LayoutInflater.from(listaAsignaturas.getContext())
-                    .inflate(R.layout.item_asignatura_explorar, listaAsignaturas, false);
-            fila.setText(a.getValue() + " · " + textoLibros(libros));
-            fila.setOnClickListener(v -> {
+            nuevaFilaSiLlena(listaAsignaturas);
+            listaAsignaturas.anadir(a.getKey(), a.getValue(), textoLibros(libros), 0, 0).setOnClickListener(v -> {
+                v.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK);
                 borrador.asignatura = a.getKey();
                 aplicar();
             });
-            listaAsignaturas.addView(fila);
         }
+        listaAsignaturas.completarFila(2);
+        ocultarSiVacio(listaAsignaturas);
 
         btnVer.setText("Ver " + textoLibros(contarLibros.applyAsInt(borrador)));
     }
 
+    // porFila 0 = todas en una fila; si no, filas de porFila pestañas
+    private void vaciar(PestanasPapel grupo, int porFila) {
+        grupo.vaciar();
+        grupo.setTag(porFila);
+    }
+
+    private static void nuevaFilaSiLlena(PestanasPapel grupo) {
+        int porFila = (int) grupo.getTag();
+        int n = grupo.getPestanas().size();
+        if (n == 0 || (porFila > 0 && n % porFila == 0)) grupo.nuevaFila();
+    }
+
     // sin opciones sobra también el título, que es la vista anterior del grupo
-    private static void ocultarSiVacio(ChipGroup grupo) {
-        int visibilidad = grupo.getChildCount() == 0 ? View.GONE : View.VISIBLE;
+    private static void ocultarSiVacio(PestanasPapel grupo) {
+        int visibilidad = grupo.getPestanas().isEmpty() ? View.GONE : View.VISIBLE;
         ViewGroup padre = (ViewGroup) grupo.getParent();
         padre.getChildAt(padre.indexOfChild(grupo) - 1).setVisibility(visibilidad);
         grupo.setVisibility(visibilidad);
     }
 
-    private void anadirOpcion(ChipGroup grupo, String texto, boolean marcada, Consumer<FiltroExplorar> elegir, Consumer<FiltroExplorar> quitar) {
+    private void anadirOpcion(PestanasPapel grupo, String texto, boolean marcada, Consumer<FiltroExplorar> elegir, Consumer<FiltroExplorar> quitar) {
         FiltroExplorar conEsta = borrador.copia();
         elegir.accept(conEsta);
         int libros = contarLibros.applyAsInt(conEsta);
         if (libros == 0 && !marcada) return;
 
-        Chip chip = crearChip(grupo.getContext(), texto + " (" + libros + ")");
-        chip.setChecked(marcada);
-        chip.setOnClickListener(v -> {
+        nuevaFilaSiLlena(grupo);
+        View pestana = grupo.anadir(texto, texto, textoLibros(libros), 0, 0);
+        pestana.setSelected(marcada);
+        // tocar la elegida la quita (los filtros de Explorar son opcionales)
+        pestana.setOnClickListener(v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK);
             if (marcada) quitar.accept(borrador);
             else elegir.accept(borrador);
             pintar();
         });
-        grupo.addView(chip);
-    }
-
-    public static Chip crearChip(Context ctx, String texto) {
-        Chip chip = new Chip(ctx, null, com.google.android.material.R.attr.chipStyle);
-        chip.setText(texto);
-        chip.setCheckable(true);
-        chip.setChipBackgroundColorResource(R.color.chip_fondo);
-        chip.setTextColor(ctx.getColorStateList(R.color.chip_texto));
-        chip.setCheckedIconVisible(false);
-        return chip;
     }
 
     public static String textoLibros(int libros) {

@@ -5,22 +5,26 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.HapticFeedbackConstants;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.app.SharedElementCallback;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.secciones.biblioteca.PantallaBiblioteca;
 import com.example.nuietsiit.activities.secciones.biblioteca.ApuntarLibros;
 import com.example.nuietsiit.activities.secciones.biblioteca.BaldaDecoration;
 import com.example.nuietsiit.activities.secciones.biblioteca.DetalleLibro;
@@ -36,7 +40,8 @@ import com.example.nuietsiit.util.ProximaClase;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.ui.PestanasPapel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,11 +56,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
-public class Biblioteca extends BaseActivity {
+public class Biblioteca extends PantallaBiblioteca {
 
     private static final float UMBRAL_PELLIZCO = 1.3f; // cuánto hay que abrir o cerrar los dedos para cambiar de tamaño
     private static final int UMBRAL_SACAR_DP = 80;     // cuánto hay que subir el dedo para abrir el libro que se ojea
-    private static final int UMBRAL_DESLIZAR_DP = 80;  // cuánto hay que deslizar en horizontal para cambiar de asignatura
+    private static final int UMBRAL_DESLIZAR_DP = 80;  // cuánto hay que deslizar en horizontal para pasar de estante
     private static final float ARRASTRE_DESLIZAR = 0.35f; // las baldas siguen al dedo más despacio que él
 
     // la vista es el tag del chip marcado: una de estas o un código de asignatura
@@ -64,11 +69,25 @@ public class Biblioteca extends BaseActivity {
 
     private EditText etBuscar;
     private TextView tvMostrandoPara, tvVacio, tvContador;
-    private Chip chipSugerencia, chipDisponibles, chipExplorar;
-    private ChipGroup chipsVista;
-    private HorizontalScrollView scrollVistas;
+    private Chip chipSugerencia, chipDisponibles;
+    private PestanasPapel pestanasVista;
+    private final List<String> vistas = new ArrayList<>(); // en el orden de las pestañas (sin Explorar)
+    private String vistaActual;                            // null = manda el filtro de Explorar
+    private static final String EXPLORAR = "explorar";
     private LibroAdapter adaptador;
     private GridLayoutManager rejilla;
+    private RecyclerView rvLibros;
+    private BaldaDecoration baldas;
+
+    // sin scroll: los libros de la vista se reparten en estantes (lo que cabe en pantalla) que se pasan
+    // deslizando de lado o inclinando el móvil; tras el último estante viene la siguiente pestaña
+    private List<Libro> librosVista = new ArrayList<>();
+    private Set<Integer> basicosVista = Collections.emptySet();
+    private int estante, librosPorEstante;
+    private String textoContador = "";
+    private boolean irAlUltimoEstante; // al volver a la pestaña anterior se entra por su último estante
+    private boolean pasandoEstante;    // el cambio de vista viene de pasar: sin animación de recolocar
+    private InclinarParaPasar inclinar;
     private BuscadorTolerante.Indice<Libro> indice;
     private List<Libro> libros;
     private Map<Integer, Map<String, String>> bibliografia; // idLibro -> asignatura -> tipo
@@ -88,6 +107,9 @@ public class Biblioteca extends BaseActivity {
     private float yInicioDedo;
     private boolean dedoEnBaldas;
     private boolean sobreUmbralSacar;
+    private static final float GIRO_OJEAR = -3f;       // el libro sacado flota un poco torcido
+    private ImageView portadaRetorno;                   // a dónde vuelve la portada al cerrar el detalle
+    private boolean abriendoDetalle;
 
     // deslizar en horizontal sobre las baldas: cambiar de asignatura
     private float xInicioDedo;
@@ -104,15 +126,23 @@ public class Biblioteca extends BaseActivity {
         getSupportActionBar().setTitle("Biblioteca");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // al volver del detalle, la portada regresa a su libro de la balda (el panel de ojear ya no está)
+        setExitSharedElementCallback(new SharedElementCallback() {
+            @Override
+            public void onMapSharedElements(List<String> nombres, Map<String, View> vistas) {
+                if (portadaRetorno != null && panelOjear.getVisibility() != View.VISIBLE) {
+                    for (String nombre : nombres) vistas.put(nombre, portadaRetorno);
+                }
+            }
+        });
+
         etBuscar = findViewById(R.id.etBuscar);
         tvMostrandoPara = findViewById(R.id.tvMostrandoPara);
         tvVacio = findViewById(R.id.tvVacio);
         tvContador = findViewById(R.id.tvContador);
         chipSugerencia = findViewById(R.id.chipSugerencia);
         chipDisponibles = findViewById(R.id.chipDisponibles);
-        chipExplorar = findViewById(R.id.chipExplorar);
-        chipsVista = findViewById(R.id.chipsVista);
-        scrollVistas = findViewById(R.id.scrollVistas);
+        pestanasVista = findViewById(R.id.pestanasVista);
         panelOjear = findViewById(R.id.panelOjear);
         tarjetaOjear = findViewById(R.id.tarjetaOjear);
 
@@ -156,11 +186,23 @@ public class Biblioteca extends BaseActivity {
                 else abrirDetalle(libro, portada);
             }
         });
-        rejilla = new GridLayoutManager(this, columnas);
+        rejilla = new GridLayoutManager(this, columnas) {
+            @Override
+            public boolean canScrollVertically() {
+                return false; // sin scroll: se pasa de estante
+            }
+        };
         RecyclerView rv = findViewById(R.id.rvLibros);
+        rvLibros = rv;
         rv.setLayoutManager(rejilla);
         rv.setAdapter(adaptador);
-        rv.addItemDecoration(new BaldaDecoration(this));
+        baldas = new BaldaDecoration(this);
+        rv.addItemDecoration(baldas);
+        // al abrir el teclado o girar la pantalla caben otros libros por estante
+        rv.addOnLayoutChangeListener((v, l, t, r, b, lViejo, tViejo, rViejo, bViejo) -> {
+            if (r - l != rViejo - lViejo || b - t != bViejo - tViejo) v.post(() -> repartirEstantes(false));
+        });
+        inclinar = new InclinarParaPasar(rv, this::pasar, () -> numEstantes() > 1 || vistas.size() > 1);
 
         ScaleGestureDetector pellizco = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             private float acumulado = 1f;
@@ -227,6 +269,18 @@ public class Biblioteca extends BaseActivity {
         if (libroOjeado != null) terminarOjear();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // el detalle ya tapa la pantalla: se recoge el panel sin animación y el hueco vuelve a tener su libro
+        if (abriendoDetalle) {
+            abriendoDetalle = false;
+            panelOjear.setVisibility(View.GONE);
+            restaurarTarjeta();
+            if (portadaRetorno != null) portadaRetorno.setAlpha(1f);
+        }
+    }
+
     // si el dedo va claramente de lado, las baldas se lo quedan: así no se abre el libro que había debajo
     private boolean empezarDeslizar(RecyclerView rv, MotionEvent e) {
         if (e.getActionMasked() != MotionEvent.ACTION_MOVE || rv.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) return false;
@@ -244,29 +298,99 @@ public class Biblioteca extends BaseActivity {
             rv.setTranslationX(dx * ARRASTRE_DESLIZAR);
         } else if (e.getActionMasked() == MotionEvent.ACTION_UP || abandonado) {
             deslizando = false;
-            rv.animate().translationX(0).setDuration(160).start();
             float umbral = UMBRAL_DESLIZAR_DP * getResources().getDisplayMetrics().density;
-            if (!abandonado && Math.abs(dx) > umbral) cambiarVista(dx < 0 ? 1 : -1);
+            if (!abandonado && Math.abs(dx) > umbral) pasar(dx < 0 ? 1 : -1);
+            else rv.animate().translationX(0).setDuration(160).start();
         }
     }
 
-    // deslizar hacia la izquierda = siguiente chip, como pasar de página
-    private void cambiarVista(int sentido) {
-        int actual = -1;
-        for (int i = 0; i < chipsVista.getChildCount(); i++) {
-            if (((Chip) chipsVista.getChildAt(i)).isChecked()) actual = i;
+    // ---------- estantes: lo que cabe en pantalla, sin scroll ----------
+
+    // mide un libro con el ancho de su columna: cada fila es el libro más su balda;
+    // los libros tienen que quedar por encima del botón flotante (su balda puede quedar detrás)
+    private int calcularLibrosPorEstante() {
+        int ancho = rvLibros.getWidth() - rvLibros.getPaddingLeft() - rvLibros.getPaddingRight();
+        int alto = findViewById(R.id.btnApuntar).getTop() - rvLibros.getPaddingTop() + baldas.altoBalda();
+        if (ancho <= 0 || alto <= 0) return 0;
+        int columnas = rejilla.getSpanCount();
+        View muestra = LayoutInflater.from(this).inflate(R.layout.item_libro, rvLibros, false);
+        muestra.measure(View.MeasureSpec.makeMeasureSpec(ancho / columnas, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int altoFila = muestra.getMeasuredHeight() + baldas.altoExtra();
+        return columnas * Math.max(1, alto / altoFila);
+    }
+
+    private int numEstantes() {
+        if (librosPorEstante <= 0) return 1;
+        return Math.max(1, (librosVista.size() + librosPorEstante - 1) / librosPorEstante);
+    }
+
+    // pone en las baldas los libros del estante actual
+    private void repartirEstantes(boolean animar) {
+        librosPorEstante = calcularLibrosPorEstante();
+        if (irAlUltimoEstante) {
+            estante = Integer.MAX_VALUE;
+            irAlUltimoEstante = false;
         }
+        estante = Math.max(0, Math.min(estante, numEstantes() - 1));
+        List<Libro> enBaldas = librosVista;
+        if (librosPorEstante > 0) {
+            int desde = estante * librosPorEstante;
+            enBaldas = new ArrayList<>(librosVista.subList(desde, Math.min(librosVista.size(), desde + librosPorEstante)));
+        }
+        if (animar) adaptador.setLibros(enBaldas, basicosVista);
+        else adaptador.mostrar(enBaldas, basicosVista);
+
+        int estantes = numEstantes();
+        tvContador.setText(estantes > 1
+                ? textoContador + " · estante " + (estante + 1) + " de " + estantes
+                : textoContador);
+        inclinar.actualizar();
+    }
+
+    // deslizar o inclinar hacia la izquierda = siguiente estante; tras el último, la pestaña siguiente
+    private void pasar(int sentido) {
+        if (libroOjeado != null) return; // con un libro en la mano no se pasa
+        int nuevo = estante + sentido;
+        boolean hayEstante = nuevo >= 0 && nuevo < numEstantes();
+        int vecina = vistaVecina(sentido);
+        if (!hayEstante && vecina < 0) {
+            rvLibros.animate().translationX(0).setDuration(160).start(); // tope: vuelve a su sitio
+            return;
+        }
+        rvLibros.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        float ancho = rvLibros.getWidth();
+        rvLibros.animate().translationX(-sentido * ancho).alpha(0f).setDuration(140).withEndAction(() -> {
+            if (hayEstante) {
+                estante = nuevo;
+                repartirEstantes(false);
+            } else {
+                irAlUltimoEstante = sentido < 0;
+                pasandoEstante = true;
+                elegirVista(vistas.get(vecina));
+                pasandoEstante = false;
+            }
+            rvLibros.setTranslationX(sentido * ancho * 0.4f);
+            rvLibros.animate().translationX(0).alpha(1f).setDuration(180).start();
+        }).start();
+    }
+
+    // índice de la pestaña de al lado, o -1 si no hay (desde Explorar se va a la primera)
+    private int vistaVecina(int sentido) {
+        int actual = vistas.indexOf(vistaActual);
         int nueva = actual < 0 ? 0 : actual + sentido;
-        if (nueva < 0 || nueva >= chipsVista.getChildCount()) return;
-        chipsVista.check(chipsVista.getChildAt(nueva).getId());
-        chipsVista.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        return nueva >= 0 && nueva < vistas.size() ? nueva : -1;
     }
 
+    // al pellizcar se sigue viendo el mismo primer libro, aunque cambie cuántos caben por estante
     private void cambiarColumnas(RecyclerView rv, int cambio) {
         int nuevas = rejilla.getSpanCount() + cambio;
         if (nuevas < columnasMin || nuevas > columnasMax) return;
+        int primero = estante * librosPorEstante;
         rejilla.setSpanCount(nuevas);
-        adaptador.notifyItemRangeChanged(0, adaptador.getItemCount());
+        int caben = calcularLibrosPorEstante();
+        estante = caben > 0 ? primero / caben : 0;
+        repartirEstantes(false);
         rv.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
     }
 
@@ -282,13 +406,58 @@ public class Biblioteca extends BaseActivity {
         LibroAdapter.mostrarDisponibilidad(findViewById(R.id.tvDisponibilidadOjear), libro);
         ((TextView) findViewById(R.id.tvUbicacionOjear)).setText(libro.ubicacion);
 
-        tarjetaOjear.setTranslationY(0);
+        // el libro sale de la balda: la tarjeta nace encima de la portada y vuela al centro
+        // girándose; en la balda queda el hueco (portada casi transparente)
+        restaurarTarjeta();
         panelOjear.setAlpha(0f);
         panelOjear.setVisibility(View.VISIBLE);
-        panelOjear.animate().alpha(1f).setDuration(120).start();
-        tarjetaOjear.setScaleX(0.85f);
-        tarjetaOjear.setScaleY(0.85f);
-        tarjetaOjear.animate().scaleX(1f).scaleY(1f).setDuration(160).start();
+        panelOjear.animate().alpha(1f).setStartDelay(0).setDuration(200).start();
+        portada.animate().alpha(0.15f).setStartDelay(0).setDuration(200).start();
+        tarjetaOjear.setAlpha(0f);
+        // tras el primer layout del panel, para poder medir dónde está todo
+        OneShotPreDrawListener.add(tarjetaOjear, () -> {
+            if (libroOjeado == null) return;
+            colocarSobrePortada(portada);
+            tarjetaOjear.setAlpha(1f);
+            tarjetaOjear.animate().translationX(0f).translationY(0f).scaleX(1f).scaleY(1f)
+                    .rotation(GIRO_OJEAR).setDuration(260)
+                    .setInterpolator(new DecelerateInterpolator(1.6f)).start();
+        });
+    }
+
+    // pone la tarjeta (sin animar) de forma que su portada tape justo la portada de la balda
+    private void colocarSobrePortada(View portada) {
+        View portadaTarjeta = findViewById(R.id.ivPortadaOjear);
+        tarjetaOjear.animate().cancel();
+        tarjetaOjear.setRotation(0f);
+        tarjetaOjear.setTranslationX(0f);
+        tarjetaOjear.setTranslationY(0f);
+        tarjetaOjear.setScaleX(1f);
+        tarjetaOjear.setScaleY(1f);
+        int[] enBalda = new int[2], enTarjeta = new int[2], tarjeta = new int[2];
+        portada.getLocationOnScreen(enBalda);
+        portadaTarjeta.getLocationOnScreen(enTarjeta);
+        tarjetaOjear.getLocationOnScreen(tarjeta);
+        // pivote = centro de la portada de la tarjeta: así escalar no la mueve
+        float pivoteX = enTarjeta[0] - tarjeta[0] + portadaTarjeta.getWidth() / 2f;
+        float pivoteY = enTarjeta[1] - tarjeta[1] + portadaTarjeta.getHeight() / 2f;
+        tarjetaOjear.setPivotX(pivoteX);
+        tarjetaOjear.setPivotY(pivoteY);
+        float escala = portada.getWidth() / (float) Math.max(1, portadaTarjeta.getWidth());
+        tarjetaOjear.setScaleX(escala);
+        tarjetaOjear.setScaleY(escala);
+        tarjetaOjear.setTranslationX(enBalda[0] + portada.getWidth() / 2f - (tarjeta[0] + pivoteX));
+        tarjetaOjear.setTranslationY(enBalda[1] + portada.getHeight() / 2f - (tarjeta[1] + pivoteY));
+    }
+
+    private void restaurarTarjeta() {
+        tarjetaOjear.animate().cancel();
+        tarjetaOjear.setTranslationX(0f);
+        tarjetaOjear.setTranslationY(0f);
+        tarjetaOjear.setScaleX(1f);
+        tarjetaOjear.setScaleY(1f);
+        tarjetaOjear.setRotation(GIRO_OJEAR);
+        tarjetaOjear.setAlpha(1f);
     }
 
     // la tarjeta sigue al dedo hacia arriba; al soltar se abre si ha pasado el umbral
@@ -301,13 +470,15 @@ public class Biblioteca extends BaseActivity {
                 if ((subido > umbral) != sobreUmbralSacar) {
                     sobreUmbralSacar = subido > umbral;
                     tarjetaOjear.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                    // pasado el umbral el libro se endereza y crece un poco: "suelta y se abre"
+                    tarjetaOjear.animate().rotation(sobreUmbralSacar ? 0f : GIRO_OJEAR)
+                            .scaleX(sobreUmbralSacar ? 1.04f : 1f).scaleY(sobreUmbralSacar ? 1.04f : 1f)
+                            .setDuration(150).start();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                Libro libro = libroOjeado;
-                ImageView portada = portadaOjeada;
-                terminarOjear();
-                if (subido > umbral) abrirDetalle(libro, portada);
+                if (subido > umbral) abrirDesdeOjear();
+                else terminarOjear();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 terminarOjear();
@@ -317,11 +488,40 @@ public class Biblioteca extends BaseActivity {
         }
     }
 
+    // soltar: el libro vuelve a su hueco de la balda y el velo se va
     private void terminarOjear() {
+        View portada = portadaOjeada;
         libroOjeado = null;
         portadaOjeada = null;
-        panelOjear.animate().alpha(0f).setDuration(120)
-                .withEndAction(() -> panelOjear.setVisibility(View.GONE)).start();
+        if (portada != null && portada.isAttachedToWindow()) {
+            View portadaTarjeta = findViewById(R.id.ivPortadaOjear);
+            int[] enBalda = new int[2], enTarjeta = new int[2];
+            portada.getLocationOnScreen(enBalda);
+            portadaTarjeta.getLocationOnScreen(enTarjeta);
+            float escala = portada.getWidth() / (float) Math.max(1, portadaTarjeta.getWidth() * tarjetaOjear.getScaleX());
+            // mover el centro de la portada de la tarjeta al centro de la de la balda
+            float dx = enBalda[0] + portada.getWidth() / 2f - (enTarjeta[0] + portadaTarjeta.getWidth() * tarjetaOjear.getScaleX() / 2f);
+            float dy = enBalda[1] + portada.getHeight() / 2f - (enTarjeta[1] + portadaTarjeta.getHeight() * tarjetaOjear.getScaleY() / 2f);
+            tarjetaOjear.animate().translationXBy(dx).translationYBy(dy)
+                    .scaleX(tarjetaOjear.getScaleX() * escala).scaleY(tarjetaOjear.getScaleY() * escala)
+                    .rotation(0f).setDuration(220).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            portada.animate().alpha(1f).setStartDelay(180).setDuration(60).start();
+        }
+        panelOjear.animate().alpha(0f).setStartDelay(80).setDuration(160)
+                .withEndAction(() -> {
+                    panelOjear.setVisibility(View.GONE);
+                    restaurarTarjeta();
+                }).start();
+    }
+
+    // deslizar arriba: la portada de la tarjeta viaja hasta el detalle; el panel se recoge en onStop
+    private void abrirDesdeOjear() {
+        Libro libro = libroOjeado;
+        portadaRetorno = portadaOjeada;
+        libroOjeado = null;
+        portadaOjeada = null;
+        abriendoDetalle = true;
+        abrirDetalle(libro, findViewById(R.id.ivPortadaOjear));
     }
 
     private void crearChipsVista(BibliotecaDB db, Bundle guardado) {
@@ -338,37 +538,31 @@ public class Biblioteca extends BaseActivity {
         }
         proximaClase = ProximaClase.de(clases, LocalDateTime.now());
 
-        if (!misAsignaturas.isEmpty()) anadirChipVista("Mías", VISTA_MIS);
+        // una sola fila: mis asignaturas, la próxima clase, todo y Explorar (cada asignatura suelta, en Explorar)
+        pestanasVista.nuevaFila();
+        if (!misAsignaturas.isEmpty()) anadirVista(VISTA_MIS, "Mías", null, R.drawable.ic_nui_asignaturas);
         if (proximaClase != null) {
-            anadirChipVista(proximaClase.codigo + " · " + proximaClase.cuando, proximaClase.codigo);
+            anadirVista(proximaClase.codigo, proximaClase.codigo, proximaClase.cuando, R.drawable.ic_nui_calendario);
         }
-        for (String codigo : misAsignaturas) {
-            if (proximaClase == null || !codigo.equals(proximaClase.codigo)) anadirChipVista(codigo, codigo);
-        }
-        anadirChipVista("Todos", VISTA_TODOS);
-
-        chipsVista.setOnCheckedStateChangeListener((grupo, ids) -> {
-            if (!ids.isEmpty()) {
-                filtro.limpiar();
-                pintarChipExplorar();
-                View marcado = grupo.findViewById(ids.get(0));
-                scrollVistas.smoothScrollTo(marcado.getLeft() - scrollVistas.getPaddingLeft(), 0);
+        anadirVista(VISTA_TODOS, "Todos", null, R.drawable.ic_nui_biblioteca);
+        pestanasVista.anadir(EXPLORAR, "Explorar", null, android.R.drawable.ic_menu_sort_by_size, R.color.nui_cobalto);
+        pestanasVista.setOnElegir(clave -> {
+            if (EXPLORAR.equals(clave)) {
+                // su marca depende de lo elegido en el panel, no del toque
+                pestanasVista.marcar(filtro.activo() ? EXPLORAR : vistaActual);
+                abrirPanelExplorar(filtro);
+            } else {
+                elegirVista((String) clave);
             }
-            aplicarFiltro();
         });
-
-        // tocar el chip marcaría/desmarcaría por sí solo: su estado depende de lo elegido en el panel
-        chipExplorar.setOnClickListener(v -> {
-            chipExplorar.setChecked(filtro.activo());
-            abrirPanelExplorar(filtro);
-        });
-        chipExplorar.setOnCloseIconClickListener(v -> marcarVistaInicial());
 
         if (guardado == null) {
             marcarVistaInicial();
         } else {
             leerFiltro(guardado, filtro, "");
-            pintarChipExplorar();
+            vistaActual = filtro.activo() ? null : guardado.getString("vista", vistas.get(0));
+            pintarExplorar();
+            aplicarFiltro();
         }
     }
 
@@ -376,6 +570,7 @@ public class Biblioteca extends BaseActivity {
     protected void onSaveInstanceState(@NonNull Bundle estado) {
         super.onSaveInstanceState(estado);
         guardarFiltro(estado, filtro, "");
+        estado.putString("vista", vistaActual);
         if (panelExplorar != null && panelExplorar.estaAbierto()) {
             estado.putBoolean("panelAbierto", true);
             guardarFiltro(estado, panelExplorar.borrador(), "panel_");
@@ -415,25 +610,28 @@ public class Biblioteca extends BaseActivity {
         f.planta = estado.getString(prefijo + "planta");
     }
 
-    private void anadirChipVista(String texto, String vista) {
-        Chip chip = PanelExplorar.crearChip(this, texto);
-        chip.setId(2000 + chipsVista.getChildCount()); // ids fijos para que sobrevivan a la rotación
-        chip.setTag(vista);
-        chipsVista.addView(chip);
+    private void anadirVista(String vista, String texto, String detalle, int icono) {
+        vistas.add(vista);
+        pestanasVista.anadir(vista, texto, detalle, icono, R.color.nui_tinta);
+    }
+
+    private void elegirVista(String vista) {
+        filtro.limpiar();
+        vistaActual = vista;
+        pintarExplorar();
+        aplicarFiltro();
     }
 
     // sin matrícula no hay "Mis asignaturas": se empieza por todo el catálogo
     private void marcarVistaInicial() {
-        filtro.limpiar();
-        pintarChipExplorar();
-        chipsVista.check(chipsVista.getChildAt(0).getId());
+        elegirVista(vistas.get(0));
     }
 
-    private void pintarChipExplorar() {
+    // con un filtro de Explorar, su pestaña dice qué se está viendo
+    private void pintarExplorar() {
         boolean activo = filtro.activo();
-        chipExplorar.setChecked(activo);
-        chipExplorar.setText(activo ? filtro.resumen() : "Explorar");
-        chipExplorar.setCloseIconVisible(activo);
+        pestanasVista.setTexto(EXPLORAR, activo ? filtro.resumen() : "Explorar");
+        pestanasVista.marcar(activo ? EXPLORAR : vistaActual);
     }
 
     private void abrirPanelExplorar(FiltroExplorar inicial) {
@@ -446,9 +644,9 @@ public class Biblioteca extends BaseActivity {
             boolean habiaFiltro = filtro.activo();
             filtro.copiarDe(elegido);
             if (filtro.activo()) {
-                pintarChipExplorar();
-                chipsVista.clearCheck();
-                aplicarFiltro(); // si ya no había chip marcado, clearCheck no avisa
+                vistaActual = null;
+                pintarExplorar();
+                aplicarFiltro();
             } else if (habiaFiltro) {
                 marcarVistaInicial();
             }
@@ -480,8 +678,7 @@ public class Biblioteca extends BaseActivity {
     }
 
     private String vistaMarcada() {
-        Chip marcado = chipsVista.findViewById(chipsVista.getCheckedChipId());
-        return marcado != null ? (String) marcado.getTag() : null;
+        return vistaActual;
     }
 
     private boolean estaEnLaVista(Libro libro, String vista, BiPredicate<Collection<String>, String> admite) {
@@ -546,12 +743,15 @@ public class Biblioteca extends BaseActivity {
                     .thenComparing(l -> !basicos.contains(l.id))
                     .thenComparing(l -> !l.disponible()));
         }
-        adaptador.setLibros(visibles, basicos);
-
         String cuantos = PanelExplorar.textoLibros(visibles.size());
-        tvContador.setText(ampliado
+        textoContador = ampliado
                 ? "No está en " + nombreDeLaVista(vista) + ". En todo el catálogo: " + cuantos
-                : nombreDeLaVista(vista) + " · " + cuantos);
+                : nombreDeLaVista(vista) + " · " + cuantos;
+        // otro filtro u otra pestaña: se empieza por el primer estante
+        librosVista = visibles;
+        basicosVista = basicos;
+        estante = 0;
+        repartirEstantes(!pasandoEstante);
         tvMostrandoPara.setVisibility(r.mostrandoPara != null ? View.VISIBLE : View.GONE);
         if (r.mostrandoPara != null) {
             tvMostrandoPara.setText("Mostrando resultados para «" + r.mostrandoPara + "»");
@@ -565,10 +765,12 @@ public class Biblioteca extends BaseActivity {
     }
 
     private void abrirDetalle(Libro libro, ImageView portada) {
+        if (portada.getId() == R.id.ivPortada) portadaRetorno = portada;
         // String, igual que los extras de RecienteUtil
         Intent intent = new Intent(this, DetalleLibro.class)
                 .putExtra("idLibro", String.valueOf(libro.id))
-                .putExtra("CORREO", getIntent().getStringExtra("CORREO"));
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO"))
+                .putExtra(PantallaBiblioteca.EXTRA_DESDE_BALDA, true);
         startActivity(intent, ActivityOptionsCompat.makeSceneTransitionAnimation(this, portada, "portada").toBundle());
     }
 

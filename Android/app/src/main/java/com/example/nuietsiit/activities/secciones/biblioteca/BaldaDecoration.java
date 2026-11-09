@@ -9,6 +9,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.nuietsiit.R;
+
 /**
  * Dibuja las baldas de madera bajo cada fila de libros y sigue con baldas vacías hasta llenar la pantalla.
  */
@@ -26,9 +28,19 @@ public class BaldaDecoration extends RecyclerView.ItemDecoration {
         sombra = (int) (6 * d);
         hueco = (int) (16 * d);
         altoFila = (int) (220 * d);
-        madera.setColor(0xFFA9713D);
-        cantoOscuro.setColor(0xFF7C4F27);
-        pinturaSombra.setColor(0x33000000);
+        madera.setColor(contexto.getColor(R.color.nui_madera));
+        cantoOscuro.setColor(contexto.getColor(R.color.nui_madera_oscura));
+        pinturaSombra.setColor(contexto.getColor(R.color.nui_sombra_libro)); // sombra dura, sin difuminar
+    }
+
+    /** Lo que añade cada fila al alto del libro: hueco encima, balda y su sombra. */
+    public int altoExtra() {
+        return hueco + grosor + sombra;
+    }
+
+    /** Alto de la balda con su sombra (puede quedar tapada por el botón flotante, los libros no). */
+    public int altoBalda() {
+        return grosor + sombra;
     }
 
     @Override

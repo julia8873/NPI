@@ -1,6 +1,5 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
-import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.util.FechasUtil;
-import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +27,7 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         public final int id;
         public final boolean cancelable; // solo citas activas y futuras
         final String codigo, titulo, detalle, estado;
-        final int colorEstado;
+        final int colorEstado; // recurso de color
 
         private Gestion(boolean esCita, int id, boolean cancelable, String codigo, String titulo,
                         String detalle, String estado, int colorEstado) {
@@ -47,7 +45,7 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
             boolean futura = c.esFutura();
             String detalle = FechasUtil.capitalizar(FechasUtil.diaLargo(c.fechaHora())) + " · " + c.hora;
             return new Gestion(true, c.id, futura, c.codigo(), c.motivo(), detalle,
-                    futura ? "Activa" : "Pasada", futura ? 0xFFFF8C42 : 0xFF9E9E9E);
+                    futura ? "Activa" : "Pasada", futura ? R.color.nui_acento_profundo : R.color.nui_apagado);
         }
 
         public static Gestion deSolicitud(Solicitud s) {
@@ -95,8 +93,8 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         h.tvCodigo.setText(g.codigo);
         h.tvTitulo.setText(g.titulo);
         h.tvDetalle.setText(g.detalle);
-        h.chipEstado.setText(g.estado);
-        h.chipEstado.setChipBackgroundColor(ColorStateList.valueOf(g.colorEstado));
+        // el estado es un sello estampado en la ficha, del color del estado
+        Pastilla.sellar(h.tvEstado, g.estado, g.colorEstado);
         h.itemView.setOnClickListener(v -> listener.alPulsar(g));
     }
 
@@ -107,14 +105,14 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
 
     static class Holder extends RecyclerView.ViewHolder {
         final TextView tvCodigo, tvTitulo, tvDetalle;
-        final Chip chipEstado;
+        final TextView tvEstado;
 
         Holder(View v) {
             super(v);
             tvCodigo = v.findViewById(R.id.tvCodigo);
             tvTitulo = v.findViewById(R.id.tvTitulo);
             tvDetalle = v.findViewById(R.id.tvDetalle);
-            chipEstado = v.findViewById(R.id.chipEstado);
+            tvEstado = v.findViewById(R.id.tvEstado);
         }
     }
 }

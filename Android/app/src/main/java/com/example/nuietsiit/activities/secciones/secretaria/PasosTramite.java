@@ -1,7 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
@@ -14,23 +13,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.List;
 
-public class PasosTramite extends BaseActivity {
+public class PasosTramite extends PantallaSecretaria {
 
-    private static final String PREFS = "secretaria";
-    private static final String PREF_INCLINAR = "inclinarPasos";
-    private static final int NARANJA = 0xFFFF8C42;
-    private static final int GRIS = 0xFFCCCCCC;
 
     private ViewPager2 vpPasos;
     private LinearLayout llPuntos;
@@ -57,7 +52,8 @@ public class PasosTramite extends BaseActivity {
             finish();
             return;
         }
-        getSupportActionBar().setTitle(tramite.nombre);
+        getSupportActionBar().setTitle("Paso a paso");
+        getSupportActionBar().setSubtitle(tramite.nombre);
         numPasos = pasos.size();
 
         String textoFinal = tramite.sePuedeSolicitar() ? "Solicitar ahora" : "Pedir cita";
@@ -70,6 +66,14 @@ public class PasosTramite extends BaseActivity {
                         .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
         vpPasos = findViewById(R.id.vpPasos);
         vpPasos.setAdapter(new PasoAdapter(pasos, textoFinal, accionFinal));
+        // se pasa una ficha del fichero: la que se va se inclina y baja un poco
+        float baja = getResources().getDimension(R.dimen.nui_espacio_l);
+        vpPasos.setPageTransformer((pagina, posicion) -> {
+            float p = Math.max(-1f, Math.min(1f, posicion));
+            pagina.setRotation(-4f * p);
+            pagina.setTranslationY(Math.abs(p) * baja);
+            pagina.setAlpha(1f - 0.3f * Math.abs(p));
+        });
 
         llPuntos = findViewById(R.id.llPuntos);
         crearPuntos();
@@ -107,12 +111,11 @@ public class PasosTramite extends BaseActivity {
             swInclinar.setVisibility(View.GONE);
             return;
         }
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         // el estado sale de las preferencias (saveEnabled=false), así no salta el listener al rotar
         swInclinar.setSaveEnabled(false);
-        swInclinar.setChecked(prefs.getBoolean(PREF_INCLINAR, false));
+        swInclinar.setChecked(InclinarParaPasar.activado(this)); // la misma preferencia que pasar hojas y fichas
         swInclinar.setOnCheckedChangeListener((b, activado) -> {
-            prefs.edit().putBoolean(PREF_INCLINAR, activado).apply();
+            InclinarParaPasar.setActivado(this, activado);
             if (activado) {
                 detector.iniciar();
                 Toast.makeText(this, "Inclina a la derecha para avanzar y a la izquierda para volver",
@@ -128,22 +131,26 @@ public class PasosTramite extends BaseActivity {
     }
 
     private void crearPuntos() {
-        int tam = (int) (10 * getResources().getDisplayMetrics().density);
+        // rombos de azulejo: teselas cuadradas giradas 45°
+        int tam = getResources().getDimensionPixelSize(R.dimen.nui_espacio_s);
         for (int i = 0; i < numPasos; i++) {
             View punto = new View(this);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tam, tam);
-            lp.setMargins(tam / 2, 0, tam / 2, 0);
+            lp.setMargins(tam / 2, tam / 2, tam / 2, tam / 2);
             punto.setLayoutParams(lp);
-            GradientDrawable circulo = new GradientDrawable();
-            circulo.setShape(GradientDrawable.OVAL);
-            punto.setBackground(circulo);
+            punto.setRotation(45f);
+            punto.setBackground(new GradientDrawable());
             llPuntos.addView(punto);
         }
     }
 
     private void actualizarIndicadores(int pagina) {
         for (int i = 0; i < numPasos; i++) {
-            ((GradientDrawable) llPuntos.getChildAt(i).getBackground()).setColor(i == pagina ? NARANJA : GRIS);
+            View punto = llPuntos.getChildAt(i);
+            ((GradientDrawable) punto.getBackground()).setColor(getColor(i == pagina ? R.color.nui_resaltado
+                    : i < pagina ? R.color.nui_oro : R.color.nui_papel_sombra));
+            float escala = i == pagina ? 1.4f : 1f;
+            punto.animate().scaleX(escala).scaleY(escala).setDuration(150).start();
         }
         btnAnterior.setEnabled(pagina > 0);
         btnSiguiente.setEnabled(pagina < numPasos - 1);

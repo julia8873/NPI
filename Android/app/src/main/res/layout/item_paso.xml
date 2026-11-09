@@ -1,66 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Página del ViewPager2: tiene que ocupar todo (match_parent) -->
+<!-- Página del ViewPager2 (tiene que ocupar todo, match_parent): un paso = una ficha del fichero -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="@dimen/nui_espacio_l">
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
+        style="@style/Widget.Nui.Ficha"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="2dp"
-        app:strokeColor="#FF8C42"
-        app:strokeWidth="1dp">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- Cabecera de la ficha: "Paso 2 de 5" -->
+        <TextView
+            android:id="@+id/tvNumero"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/TextAppearance.Nui.Codigo"
+            android:textColor="@color/nui_granada" />
+
+        <TextView
+            android:id="@+id/tvTitulo"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_l"
+            android:accessibilityHeading="true"
+            android:textAppearance="@style/TextAppearance.Nui.Titular" />
 
-            <TextView
-                android:id="@+id/tvNumero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#FF8C42"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+        <!-- Sin scroll: si el texto es largo, la letra se reduce hasta que quepa -->
+        <TextView
+            android:id="@+id/tvDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:layout_weight="1"
+            android:autoSizeMaxTextSize="@dimen/nui_texto_cuerpo"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
-            <TextView
-                android:id="@+id/tvTitulo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="#000000"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="12dp"
-                android:layout_weight="1">
-
-                <TextView
-                    android:id="@+id/tvDescripcion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:lineSpacingExtra="4dp"
-                    android:textColor="#333333"
-                    android:textSize="17sp" />
-            </ScrollView>
-
-            <Button
-                android:id="@+id/btnAccionFinal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:backgroundTint="#FF8C42"
-                android:textColor="#FFFFFF"
-                android:visibility="gone" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAccionFinal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:visibility="gone" />
+    </LinearLayout>
 </FrameLayout>

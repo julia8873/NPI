@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Una franja de 10 min en la rejilla de CitaPrevia -->
+<!-- Una franja de 10 min en la rejilla de CitaPrevia: un número de turno (colores en FranjaAdapter) -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp">
+    android:padding="@dimen/nui_espacio_xs">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFranja"
-        style="@style/Widget.Material3.Button.OutlinedButton"
+        style="@style/Widget.Nui.Boton.Secundario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/nui_codigo"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:paddingHorizontal="0dp"
-        android:textSize="15sp" />
+        android:textSize="@dimen/nui_texto_s" />
 </FrameLayout>

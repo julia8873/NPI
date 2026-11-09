@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
@@ -25,8 +26,6 @@ public class FranjaAdapter extends RecyclerView.Adapter<FranjaAdapter.Holder> {
     public static final int OCUPADA = 1;
     public static final int TUYA = 2;
 
-    private static final int NARANJA = 0xFFFF8C42;
-    private static final int GRIS = 0xFFBBBBBB;
 
     public interface OnFranjaPulsada {
         void alPulsar(String hora);
@@ -72,9 +71,13 @@ public class FranjaAdapter extends RecyclerView.Adapter<FranjaAdapter.Holder> {
         b.setPaintFlags(tachada ? b.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
                 : b.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
         b.setEnabled(estado == LIBRE);
-        b.setTextColor(estado == TUYA ? 0xFFFFFFFF : tachada ? GRIS : NARANJA);
-        b.setBackgroundTintList(ColorStateList.valueOf(estado == TUYA ? NARANJA : 0x00000000));
-        b.setStrokeColor(ColorStateList.valueOf(tachada ? GRIS : NARANJA));
+        // número de turno: libre = papel con borde de tinta; tuya = almagra; ocupada = apagada y tachada
+        Context ctx = b.getContext();
+        b.setTextColor(ctx.getColor(tachada ? R.color.nui_apagado
+                : estado == TUYA ? R.color.nui_sobre_resaltado : R.color.nui_tinta));
+        b.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(
+                estado == TUYA ? R.color.nui_resaltado : tachada ? R.color.nui_transparente : R.color.nui_papel)));
+        b.setStrokeColor(ColorStateList.valueOf(ctx.getColor(tachada ? R.color.nui_linea : R.color.nui_tinta)));
         b.setContentDescription(hora + (estado == OCUPADA ? ", ocupada" : estado == TUYA ? ", tu cita" : ", libre"));
         b.setOnClickListener(v -> listener.alPulsar(hora));
     }

@@ -2,11 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#FFFFFF"
+    android:layout_height="match_parent"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
-    <androidx.core.widget.NestedScrollView
+    <!-- Cabecera de sala en pequeño: yesería con el título y arquería debajo -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:background="@color/nui_yeseria"
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingTop="@dimen/nui_espacio_xl"
+        android:paddingBottom="@dimen/nui_espacio_s"
+        android:text="Explorar la biblioteca"
+        android:textAppearance="@style/TextAppearance.Nui.Titular" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
+
+    <!-- Sin scroll: si no cabe todo, hojas que se pasan deslizando o inclinando -->
+    <com.example.nuietsiit.ui.HojasPaginadas
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -15,22 +34,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:accessibilityHeading="true"
-                android:text="Explorar la biblioteca"
-                android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+            android:paddingHorizontal="@dimen/nui_espacio_l"
+            android:paddingBottom="@dimen/nui_espacio_l">
 
             <TextView
                 style="@style/TituloExplorar"
                 android:text="Grado" />
 
-            <com.google.android.material.chip.ChipGroup
+            <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsGrado"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -39,7 +50,7 @@
                 style="@style/TituloExplorar"
                 android:text="Curso" />
 
-            <com.google.android.material.chip.ChipGroup
+            <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsCurso"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -48,7 +59,7 @@
                 style="@style/TituloExplorar"
                 android:text="Rama" />
 
-            <com.google.android.material.chip.ChipGroup
+            <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsRama"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -57,7 +68,7 @@
                 style="@style/TituloExplorar"
                 android:text="Planta" />
 
-            <com.google.android.material.chip.ChipGroup
+            <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsPlanta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -66,35 +77,38 @@
                 style="@style/TituloExplorar"
                 android:text="Asignatura" />
 
-            <LinearLayout
+            <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/listaAsignaturas"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </com.example.nuietsiit.ui.HojasPaginadas>
+
+    <!-- Pie: filete de oro sobre yesería -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/biblio_filete"
+        android:background="@color/nui_oro" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:background="@color/nui_yeseria"
+        android:padding="@dimen/nui_espacio_m">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLimpiar"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Nui.Boton.Texto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Limpiar"
-            android:textColor="#000000" />
+            android:layout_marginEnd="@dimen/nui_espacio_s"
+            android:text="Limpiar" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVerLibros"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#000000"
-            app:backgroundTint="#FF8C42" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>

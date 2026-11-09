@@ -1,20 +1,25 @@
 package com.example.nuietsiit.activities.secciones.biblioteca;
 
+import androidx.annotation.ColorRes;
+
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Libro;
 
 /**
  * Lo que se nota al apuntar a un libro: cada estado tiene su color y su vibración,
- * para enterarse sin mirar la pantalla.
+ * para enterarse sin mirar la pantalla. Colores del design system NUI (la leyenda de
+ * apuntar_libros.xml usa los mismos).
  */
 public enum SenalLibro {
-    DISPONIBLE("#2E7D32", new long[]{0, 70}),                 // 1 corto
-    DE_TU_ASIGNATURA("#BF4A00", new long[]{0, 70, 110, 70}),  // 2 cortos
-    SIN_EJEMPLARES("#C62828", new long[]{0, 450});            // 1 largo
+    DISPONIBLE(R.color.nui_arrayan, new long[]{0, 70}),                 // 1 corto
+    DE_TU_ASIGNATURA(R.color.nui_resaltado, new long[]{0, 70, 110, 70}),  // 2 cortos
+    SIN_EJEMPLARES(R.color.nui_granada, new long[]{0, 450});            // 1 largo
 
-    public final String color;
+    @ColorRes
+    public final int color;
     public final long[] vibracion;
 
-    SenalLibro(String color, long[] vibracion) {
+    SenalLibro(@ColorRes int color, long[] vibracion) {
         this.color = color;
         this.vibracion = vibracion;
     }

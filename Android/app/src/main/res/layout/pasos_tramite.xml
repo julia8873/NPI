@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Cómo se hace un trámite: fichas que se pasan (deslizar, botones o inclinar el móvil) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
+    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vpPasos"
@@ -19,12 +26,13 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- puntos de página: se rellenan en código -->
+    <!-- rombos de página: se rellenan en código -->
     <LinearLayout
         android:id="@+id/llPuntos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:importantForAccessibility="no"
         android:orientation="horizontal" />
 
     <LinearLayout
@@ -32,34 +40,43 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingVertical="@dimen/nui_espacio_s">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAnterior"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="Paso anterior"
-            android:text="◀"
-            android:textColor="#FF8C42" />
+            android:text="◀" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swInclinar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="@dimen/nui_espacio_m"
             android:layout_weight="1"
             android:text="Inclinar para pasar"
-            android:textColor="#000000" />
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSiguiente"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="Paso siguiente"
-            android:text="▶"
-            android:textColor="#FF8C42" />
+            android:text="▶" />
     </LinearLayout>
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

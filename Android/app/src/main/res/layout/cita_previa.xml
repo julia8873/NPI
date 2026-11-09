@@ -1,96 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pedir cita: motivo, día y hora. Cada hora es un número de turno. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
+    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
 
     <!-- 1. Motivo -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilMotivo"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        style="@style/Widget.Nui.TextInputLayout.Desplegable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:hint="Motivo de la cita"
-        app:boxStrokeColor="#FF8C42"
-        app:hintTextColor="#FF8C42">
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_m"
+        android:hint="Motivo de la cita">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/actvMotivo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            android:textColor="#000000" />
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- aviso si ya hay una cita para este motivo -->
     <TextView
         android:id="@+id/tvCitaExistente"
+        style="@style/Widget.Nui.Papel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:background="#FFF3E9"
-        android:padding="10dp"
-        android:textColor="#000000"
-        android:textSize="14sp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+        android:textSize="@dimen/nui_texto_s"
         android:visibility="gone" />
 
     <!-- 2. Día -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_l"
         android:accessibilityHeading="true"
         android:text="Elige el día"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
-    <HorizontalScrollView
+    <!-- Hojas de taco: dos semanas laborables, cinco por fila (se rellenan en CitaPrevia) -->
+    <LinearLayout
+        android:id="@+id/llDias"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="12dp"
-        android:scrollbars="none">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipsDias"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:selectionRequired="true"
-            app:singleLine="true"
-            app:singleSelection="true" />
-    </HorizontalScrollView>
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:orientation="vertical" />
 
     <!-- 3. Hora -->
     <TextView
         android:id="@+id/tvTituloHoras"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_m"
         android:accessibilityHeading="true"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="Las horas tachadas ya están ocupadas"
-        android:textColor="#666666"
-        android:textSize="13sp" />
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:text="Las horas tachadas ya están ocupadas. Desliza o inclina el móvil para cambiar de hora"
+        android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+    <!-- Una pestaña por hora (9 a 13) con cuántos huecos quedan; debajo, sus seis franjas -->
+    <com.example.nuietsiit.ui.PestanasPapel
+        android:id="@+id/pestanasHoras"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_s" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFranjas"
@@ -98,5 +100,16 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="12dp" />
+        android:padding="@dimen/nui_espacio_m" />
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:clipChildren="false"
     android:orientation="vertical">
 
@@ -12,74 +12,74 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
+
+    <!-- Arquería bajo la cabecera de yesería. Sin zócalo: aquí la carpeta necesita todo el alto -->
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
 
     <!-- Progreso: "Paso 1 de 4 · Documentos" -->
     <TextView
         android:id="@+id/tvPaso"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:letterSpacing="0.08"
-        android:textAllCaps="true"
-        android:textColor="@color/nui_apagado"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progreso"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_xs"
         android:max="4"
-        app:indicatorColor="@color/nui_acento"
-        app:trackColor="@color/nui_linea"
-        app:trackCornerRadius="4dp"
-        app:trackThickness="6dp" />
+        app:indicatorColor="@color/nui_resaltado"
+        app:trackColor="@color/nui_papel_sombra"
+        app:trackCornerRadius="0dp"
+        app:trackThickness="@dimen/nui_espacio_s" />
 
     <!-- Qué hacer ahora, en una frase -->
     <TextView
         android:id="@+id/tvInstruccion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_m"
         android:accessibilityLiveRegion="polite"
-        android:textColor="@color/nui_tinta"
-        android:textSize="21sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
 
     <TextView
         android:id="@+id/tvAyuda"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="4dp"
-        android:textColor="@color/nui_apagado"
-        android:textSize="14sp" />
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_xs"
+        android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
 
     <!-- La mesa: documentos todavía fuera de la carpeta -->
-    <HorizontalScrollView
+    <FrameLayout
         android:id="@+id/mesaScroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/nui_espacio_m"
         android:clipToPadding="false"
-        android:fillViewport="true"
         android:paddingHorizontal="10dp"
-        android:scrollbars="none">
+        android:clipChildren="false">
 
-        <!-- centrada si caben todas; si no, se desplaza -->
+        <!-- centrada; si no caben, las tarjetas se estrechan (SolicitudTramite.ajustarMesa) -->
         <LinearLayout
             android:id="@+id/mesa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:orientation="horizontal"
-            android:paddingVertical="8dp" />
-    </HorizontalScrollView>
+            android:paddingVertical="@dimen/nui_espacio_s" />
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -94,9 +94,9 @@
             android:layout_gravity="top|center_horizontal"
             android:layout_marginTop="4dp"
             android:importantForAccessibility="no"
-            android:text="⬆"
-            android:textColor="@color/nui_acento"
-            android:textSize="40sp"
+            android:text="↑"
+            android:textAppearance="@style/TextAppearance.Nui.Titular.XL"
+            android:textColor="@color/nui_acento_profundo"
             android:visibility="gone" />
 
         <!-- La carpeta -->
@@ -105,8 +105,8 @@
             android:layout_width="match_parent"
             android:layout_height="380dp"
             android:layout_gravity="bottom"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:layout_marginBottom="@dimen/nui_espacio_m"
             android:clipChildren="false">
 
             <View
@@ -140,10 +140,9 @@
                 android:background="@drawable/fondo_zona_soltar"
                 android:gravity="center"
                 android:importantForAccessibility="no"
-                android:text="⬇  Suelta aquí los documentos"
-                android:textColor="#7A5420"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:text="↓  Suelta aquí los documentos"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                android:textColor="@color/nui_madera_oscura" />
 
             <!-- Tapa delantera: se estira hasta arriba al cerrarse -->
             <FrameLayout
@@ -152,33 +151,31 @@
                 android:layout_height="230dp"
                 android:layout_gravity="bottom"
                 android:background="@drawable/fondo_carpeta_tapa"
-                android:elevation="4dp">
+                android:elevation="4dp"
+                android:outlineProvider="none"><!-- elevation solo para quedar encima de las hojas; sin sombra difuminada -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="@dimen/nui_espacio_l">
 
                     <!-- Etiqueta de papel pegada en la tapa -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/fondo_papel"
-                        android:elevation="1dp"
                         android:orientation="vertical"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp">
+                        android:paddingHorizontal="@dimen/nui_espacio_m"
+                        android:paddingVertical="@dimen/nui_espacio_s"
+                        android:rotation="-1">
 
                         <TextView
                             android:id="@+id/tvTituloCarpeta"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:textColor="@color/nui_tinta"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:maxLines="2"
+                            android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
 
                         <TextView
                             android:id="@+id/tvContador"
@@ -186,8 +183,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
                             android:accessibilityLiveRegion="polite"
-                            android:textColor="@color/nui_apagado"
-                            android:textSize="13sp" />
+                            android:textAppearance="@style/TextAppearance.Nui.Codigo"
+                            android:textColor="@color/nui_apagado" />
                     </LinearLayout>
 
                     <!-- Firma (con la carpeta cerrada) -->
@@ -195,7 +192,7 @@
                         android:id="@+id/zonaFirma"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginTop="@dimen/nui_espacio_m"
                         android:orientation="vertical"
                         android:visibility="gone">
 
@@ -216,9 +213,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:importantForAccessibility="no"
-                                android:text="✍ Firma aquí"
-                                android:textColor="#BBBBBB"
-                                android:textSize="16sp" />
+                                android:text="Firma aquí"
+                                android:textAppearance="@style/TextAppearance.Nui.Titular.M"
+                                android:textColor="@color/nui_apagado" />
 
                             <TextView
                                 android:id="@+id/tvFirmadoHuella"
@@ -226,10 +223,8 @@
                                 android:layout_height="match_parent"
                                 android:background="@drawable/fondo_papel"
                                 android:gravity="center"
-                                android:text="🔒 Firmado con tu huella"
-                                android:textColor="@color/nui_tinta"
-                                android:textSize="15sp"
-                                android:textStyle="bold"
+                                android:text="Firmado con tu huella"
+                                android:textAppearance="@style/TextAppearance.Nui.Titular.M"
                                 android:visibility="gone" />
                         </FrameLayout>
 
@@ -239,26 +234,26 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnBorrarFirma"
-                                style="@style/Widget.Material3.Button.TextButton"
+                                style="@style/Widget.Nui.Boton.Texto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="20dp"
+                                android:layout_marginEnd="@dimen/nui_espacio_xl"
                                 android:minWidth="0dp"
                                 android:paddingHorizontal="0dp"
-                                android:text="✕ Borrar firma"
-                                android:textColor="#7A5420" />
+                                android:text="Borrar firma"
+                                android:textColor="@color/nui_madera_oscura" />
 
-                            <Button
+                            <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnFirmarHuella"
-                                style="@style/Widget.Material3.Button.TextButton"
+                                style="@style/Widget.Nui.Boton.Texto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minWidth="0dp"
                                 android:paddingHorizontal="0dp"
-                                android:text="👆 Usar mi huella"
-                                android:textColor="#7A5420"
+                                android:text="Usar mi huella"
+                                android:textColor="@color/nui_madera_oscura"
                                 android:visibility="gone" />
                         </LinearLayout>
                     </LinearLayout>
@@ -267,13 +262,14 @@
                         android:id="@+id/tvNota"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="@dimen/nui_espacio_xs"
                         android:background="?attr/selectableItemBackground"
                         android:gravity="center_vertical"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:textColor="#7A5420"
-                        android:textSize="14sp" />
+                        android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+                        android:textColor="@color/nui_madera_oscura"
+                        android:textSize="@dimen/nui_texto_s" />
                 </LinearLayout>
 
                 <!-- Sello: mantener el dedo hasta el "clac" -->
@@ -282,13 +278,14 @@
                     android:layout_width="84dp"
                     android:layout_height="84dp"
                     android:layout_gravity="bottom|end"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginEnd="@dimen/nui_espacio_l"
+                    android:layout_marginBottom="@dimen/nui_espacio_l"
                     android:background="@drawable/fondo_sello"
                     android:clickable="true"
                     android:contentDescription="Sello: mantén el dedo para sellar"
                     android:elevation="3dp"
                     android:focusable="true"
+                    android:outlineProvider="none"
                     android:visibility="gone">
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -296,10 +293,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:max="1000"
-                        app:indicatorColor="#C62828"
+                        app:indicatorColor="@color/nui_granada"
                         app:indicatorInset="0dp"
                         app:indicatorSize="84dp"
-                        app:trackColor="#33C62828"
+                        app:trackColor="@color/nui_granada_tinte"
                         app:trackThickness="6dp" />
 
                     <LinearLayout
@@ -310,38 +307,30 @@
                         android:importantForAccessibility="no"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🔏"
-                            android:textSize="26sp" />
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/nui_ic_granada"
+                            android:tint="@color/nui_granada" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:letterSpacing="0.06"
-                            android:text="MANTÉN"
-                            android:textColor="#C62828"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
+                            android:text="Mantén"
+                            android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
+                            android:textColor="@color/nui_granada" />
                     </LinearLayout>
                 </FrameLayout>
 
                 <!-- Marca que deja el sello -->
                 <TextView
                     android:id="@+id/marcaSello"
+                    style="@style/Widget.Nui.Sello"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|end"
                     android:layout_margin="18dp"
-                    android:background="@drawable/fondo_marca_sello"
-                    android:gravity="center"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
                     android:rotation="-12"
-                    android:textColor="#C62828"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
                     android:visibility="gone" />
             </FrameLayout>
 
@@ -358,39 +347,34 @@
         </FrameLayout>
     </FrameLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCerrarCarpeta"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.Nui.Boton.Texto"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
         android:text="Cerrar la carpeta sin los opcionales"
-        android:textColor="@color/nui_acento"
         android:visibility="gone" />
 
     <!-- Con la carpeta cerrada: volver a abrirla para ver o cambiar los documentos -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAbrirCarpeta"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.Nui.Boton.Texto"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginHorizontal="16dp"
-        android:text="📂 Abrir la carpeta para revisar los documentos"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:text="Abrir la carpeta para revisar los documentos"
         android:textColor="@color/nui_apagado"
         android:visibility="gone" />
 
     <!-- Alternativa sin gesto: aparece unos segundos después de sellar -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnEnviar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/boton_redondeado"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginBottom="@dimen/nui_espacio_m"
+        android:minHeight="56dp"
         android:text="Enviar sin lanzar"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:visibility="gone"
-        app:backgroundTint="@null" />
+        android:visibility="gone" />
 </LinearLayout>

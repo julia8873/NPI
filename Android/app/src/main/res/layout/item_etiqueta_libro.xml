@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Etiqueta que sigue a un libro en la cámara: un papel con una banda del color de su estado
+     (ver SenalLibro) y una punta que señala el código -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
@@ -9,34 +12,50 @@
         android:id="@+id/cuerpoEtiqueta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/boton_redondeado"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:background="@drawable/nui_papel"
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/nui_sombra_papel"
+        android:paddingBottom="@dimen/nui_sombra_papel">
 
-        <TextView
-            android:id="@+id/tvTituloEtiqueta"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
+        <!-- Banda del estado: el código la tiñe -->
+        <View
+            android:id="@+id/bandaEtiqueta"
+            android:layout_width="@dimen/nui_espacio_s"
+            android:layout_height="match_parent"
+            android:background="@color/nui_apagado"
+            android:importantForAccessibility="no" />
 
-        <TextView
-            android:id="@+id/tvEstadoEtiqueta"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="@dimen/nui_espacio_m">
+
+            <TextView
+                android:id="@+id/tvTituloEtiqueta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+            <TextView
+                android:id="@+id/tvEstadoEtiqueta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xs"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Punta que señala el código -->
-    <TextView
-        android:id="@+id/tvPuntaEtiqueta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-6dp"
+    <!-- Punta que señala el código (del color del estado) -->
+    <View
+        android:id="@+id/puntaEtiqueta"
+        android:layout_width="@dimen/biblio_punta_etiqueta"
+        android:layout_height="@dimen/biblio_punta_etiqueta"
+        android:layout_marginTop="@dimen/nui_espacio_xs"
+        android:background="@color/nui_apagado"
         android:importantForAccessibility="no"
-        android:text="▼"
-        android:textSize="14sp" />
+        android:rotation="45" />
 </LinearLayout>

@@ -7,7 +7,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
@@ -15,7 +14,7 @@ import com.example.nuietsiit.data.modelo.Libro;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 
-public class DetalleLibro extends BaseActivity {
+public class DetalleLibro extends PantallaBiblioteca {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,34 +38,37 @@ public class DetalleLibro extends BaseActivity {
         RecienteUtil.guardar(this, DetalleLibro.class, "Libro: " + libro.titulo, "Biblioteca ETSIIT", "idLibro", idLibro, 7);
 
         LibroAdapter.mostrarPortada(findViewById(R.id.ivPortada), libro);
+        if (!libro.disponible()) {
+            // igual que en la balda: portada apagada y la marca PRESTADO encima
+            LibroAdapter.apagarPortada(findViewById(R.id.ivPortada));
+            findViewById(R.id.tvPrestado).setVisibility(View.VISIBLE);
+        }
+        ((TextView) findViewById(R.id.tvSignatura)).setText(
+                libro.signatura == null || libro.signatura.isEmpty() ? "Sin signatura" : libro.signatura);
         ((TextView) findViewById(R.id.tvTitulo)).setText(libro.titulo);
         ((TextView) findViewById(R.id.tvAutores)).setText(libro.autores);
         LibroAdapter.mostrarDisponibilidad(findViewById(R.id.tvDisponibilidad), libro);
-        mostrarDato(R.id.tvUbicacion, "Ubicación: ", libro.ubicacion);
-        mostrarDato(R.id.tvSignatura, "Signatura: ", libro.signatura);
-        mostrarDato(R.id.tvEditorial, "Editorial: ", libro.editorial);
-        mostrarDato(R.id.tvEdicion, "Edición: ", libro.edicion);
-        mostrarDato(R.id.tvAnio, "Año: ", libro.anioPublicacion != null ? String.valueOf(libro.anioPublicacion) : null);
-        mostrarDato(R.id.tvIsbn, "ISBN: ", libro.isbn);
+        mostrarDato(R.id.filaUbicacion, R.id.tvUbicacion, libro.ubicacion);
+        boolean hayEdicion = mostrarDato(R.id.filaEditorial, R.id.tvEditorial, libro.editorial)
+                | mostrarDato(R.id.filaEdicion, R.id.tvEdicion, libro.edicion)
+                | mostrarDato(R.id.filaAnio, R.id.tvAnio, libro.anioPublicacion != null ? String.valueOf(libro.anioPublicacion) : null)
+                | mostrarDato(R.id.filaIsbn, R.id.tvIsbn, libro.isbn);
+        if (!hayEdicion) {
+            findViewById(R.id.papelEdicion).setVisibility(View.GONE);
+        }
 
         findViewById(R.id.btnComoLlegar).setOnClickListener(v -> startActivity(new Intent(this, Mapa.class)
                 .putExtra("RUTA_A_MARCADOR", "Biblioteca")
                 .putExtra("CORREO", getIntent().getStringExtra("CORREO"))));
     }
 
-    // oculta la línea si el dato no está
-    private void mostrarDato(int idVista, String etiqueta, String valor) {
-        TextView tv = findViewById(idVista);
+    // oculta la fila si el dato no está; devuelve si se ve
+    private boolean mostrarDato(int idFila, int idValor, String valor) {
         if (valor == null || valor.isEmpty()) {
-            tv.setVisibility(View.GONE);
-        } else {
-            tv.setText(etiqueta + valor);
+            findViewById(idFila).setVisibility(View.GONE);
+            return false;
         }
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
+        ((TextView) findViewById(idValor)).setText(valor);
         return true;
     }
 }

@@ -5,8 +5,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,7 +27,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
@@ -49,7 +46,7 @@ import java.util.Map;
  * Pasar la cámara por los libros sin pulsar nada: encima de cada código de barras aparece una etiqueta
  * con su estado, y cada estado vibra distinto (ver SenalLibro).
  */
-public class ApuntarLibros extends BaseActivity {
+public class ApuntarLibros extends PantallaBiblioteca {
 
     // la etiqueta se va enseguida al dejar de ver el código (si no, parece trabada en el borde),
     // pero el libro no vuelve a vibrar hasta pasado un rato aunque la cámara lo pierda y lo recupere
@@ -85,23 +82,28 @@ public class ApuntarLibros extends BaseActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Apuntar a los libros");
+        getSupportActionBar().setTitle("Escanear estantería");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        barra = toolbar;
+        barra = findViewById(R.id.cabecera); // yesería + arquería: las etiquetas no pasan por debajo
+        View zocalo = findViewById(R.id.zocalo);
+        int altoZocalo = zocalo.getLayoutParams().height;
+        int altoToolbar = toolbar.getLayoutParams().height;
         camara = findViewById(R.id.camara);
         capaEtiquetas = findViewById(R.id.capaEtiquetas);
         panelInferior = findViewById(R.id.panelInferior);
         panelPermiso = findViewById(R.id.panelPermiso);
         tvPista = findViewById(R.id.tvPista);
 
-        // la cámara llega hasta los bordes; la barra y la leyenda se apartan de las barras del sistema
-        int rellenoInferior = panelInferior.getPaddingBottom();
+        // la cámara llega hasta los bordes; la cabecera y el zócalo crecen bajo las barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets sistema = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            barra.setPadding(0, sistema.top, 0, 0);
-            panelInferior.setPadding(panelInferior.getPaddingLeft(), panelInferior.getPaddingTop(),
-                    panelInferior.getPaddingRight(), rellenoInferior + sistema.bottom);
+            // la yesería sube hasta la barra de estado; la arquería sigue dejando ver la cámara
+            toolbar.getLayoutParams().height = altoToolbar + sistema.top;
+            toolbar.setPadding(0, sistema.top, 0, 0);
+            toolbar.requestLayout();
+            zocalo.getLayoutParams().height = altoZocalo + sistema.bottom;
+            zocalo.requestLayout();
             return insets;
         });
 
@@ -213,14 +215,14 @@ public class ApuntarLibros extends BaseActivity {
         Libro libro = db.getLibroPorIsbn(isbn);
         if (libro == null) {
             // no vibra, pero se ve que lo ha leído
-            color = Color.parseColor("#616161");
+            color = getColor(R.color.nui_apagado);
             tvTitulo.setText("No está en el catálogo");
             tvEstado.setText("ISBN " + isbn);
         } else {
             List<String> comunes = new ArrayList<>(db.getAsignaturasDeLibro(libro.id));
             comunes.retainAll(misAsignaturas);
             SenalLibro senal = SenalLibro.de(libro, !comunes.isEmpty());
-            color = Color.parseColor(senal.color);
+            color = getColor(senal.color);
             Long ultima = ultimaVibracion.get(isbn);
             long ahora = SystemClock.elapsedRealtime();
             if (ultima == null || ahora - ultima > VIBRACION_REPOSO_MS) {
@@ -235,8 +237,8 @@ public class ApuntarLibros extends BaseActivity {
             etiqueta.setOnClickListener(v -> abrirDetalle(libro));
         }
 
-        etiqueta.findViewById(R.id.cuerpoEtiqueta).setBackgroundTintList(ColorStateList.valueOf(color));
-        ((TextView) etiqueta.findViewById(R.id.tvPuntaEtiqueta)).setTextColor(color);
+        etiqueta.findViewById(R.id.bandaEtiqueta).setBackgroundColor(color);
+        etiqueta.findViewById(R.id.puntaEtiqueta).setBackgroundColor(color);
         return etiqueta;
     }
 
@@ -285,7 +287,7 @@ public class ApuntarLibros extends BaseActivity {
         // si la etiqueta choca con el borde, la punta se desplaza para seguir señalando el código
         float mitad = etiqueta.getMeasuredWidth() / 2f;
         float desvio = xCodigo - (x + mitad);
-        etiqueta.findViewById(R.id.tvPuntaEtiqueta).setTranslationX(limitar(desvio, -mitad + dp(PUNTA_BORDE_DP), mitad - dp(PUNTA_BORDE_DP)));
+        etiqueta.findViewById(R.id.puntaEtiqueta).setTranslationX(limitar(desvio, -mitad + dp(PUNTA_BORDE_DP), mitad - dp(PUNTA_BORDE_DP)));
 
         if (seguida.movimiento != null) seguida.movimiento.cancel();
         if (seguida.deriva != null) seguida.deriva.cancel();

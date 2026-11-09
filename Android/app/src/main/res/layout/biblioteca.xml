@@ -3,93 +3,79 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/nui_superficie">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#FFFFFF"
-            app:titleTextColor="#000000" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:hint="Título, autor, editorial o ISBN"
-            app:startIconDrawable="@android:drawable/ic_menu_search">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBuscar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:textColor="#000000" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- Asignaturas a un deslizamiento; Explorar queda siempre a la vista -->
+        <!-- Cabecera de sala: yesería con toolbar y buscador -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingEnd="16dp">
+            android:background="@color/nui_yeseria"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/nui_espacio_xs">
 
-            <HorizontalScrollView
-                android:id="@+id/scrollVistas"
-                android:fadingEdgeLength="24dp"
-                android:requiresFadingEdge="horizontal"
-                android:layout_width="0dp"
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/nui_yeseria"
+                app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:paddingStart="16dp"
-                android:scrollbars="none">
+                android:layout_marginHorizontal="@dimen/nui_espacio_l"
+                android:hint="Título, autor, editorial o ISBN"
+                app:boxBackgroundColor="@color/nui_superficie"
+                app:boxStrokeColor="@color/nui_oro"
+                app:boxStrokeWidth="@dimen/nui_borde"
+                app:hintEnabled="false"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:startIconTint="@color/nui_apagado">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipsVista"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBuscar"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:selectionRequired="true"
-                    app:singleLine="true"
-                    app:singleSelection="true" />
-            </HorizontalScrollView>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipExplorar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checkable="true"
-                android:maxWidth="150dp"
-                android:text="Explorar"
-                android:textColor="@color/chip_texto"
-                app:checkedIconVisible="false"
-                app:chipBackgroundColor="@color/chip_fondo"
-                app:chipIcon="@android:drawable/ic_menu_sort_by_size"
-                app:chipIconVisible="true" />
+                    android:hint="Título, autor, editorial o ISBN"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+                    android:textColorHint="@color/nui_apagado" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
+
+        <com.example.nuietsiit.ui.TramaAzulejo
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nui_arqueria"
+            android:importantForAccessibility="no"
+            app:tesela="@drawable/nui_arqueria" />
+
+        <!-- Vistas de la estantería: pestañas de papel, todas a la vista (Biblioteca.crearPestanasVista) -->
+        <com.example.nuietsiit.ui.PestanasPapel
+            android:id="@+id/pestanasVista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:layout_marginBottom="@dimen/nui_espacio_xs" />
 
         <TextView
             android:id="@+id/tvMostrandoPara"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:textColor="#000000"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
             android:visibility="gone" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipSugerencia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
             android:visibility="gone" />
 
         <LinearLayout
@@ -97,65 +83,95 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
+            android:paddingHorizontal="@dimen/nui_espacio_l">
 
             <TextView
                 android:id="@+id/tvContador"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="@dimen/nui_espacio_s"
                 android:layout_weight="1"
                 android:accessibilityLiveRegion="polite"
-                android:textColor="#666666"
-                android:textSize="12sp" />
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDisponibles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Disponibles"
-                android:textColor="@color/chip_texto"
-                app:checkedIconVisible="false"
-                app:chipBackgroundColor="@color/chip_fondo" />
+                android:text="Solo disponibles" />
         </LinearLayout>
 
+        <!-- Estantería: marco de madera; las baldas las pinta BaldaDecoration -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/nui_espacio_m"
+            android:layout_marginTop="@dimen/nui_espacio_xs"
             android:layout_weight="1">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvLibros"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#EAD9C2"
+                android:background="@drawable/nui_estanteria"
                 android:clipToPadding="false"
-                android:paddingHorizontal="8dp"
-                android:paddingBottom="72dp" />
+                android:paddingHorizontal="@dimen/nui_espacio_xs" />
 
             <TextView
                 android:id="@+id/tvVacio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="48dp"
+                android:layout_marginTop="@dimen/nui_espacio_xxl"
                 android:gravity="center"
                 android:text="No hay libros en estas baldas."
-                android:textColor="#000000"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                 android:visibility="gone" />
 
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            <!-- Flotante: sombra dura de tinta -->
+            <LinearLayout
                 android:id="@+id/btnApuntar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:text="Apuntar a los libros"
-                android:textColor="#000000"
-                app:backgroundTint="#FF8C42"
-                app:icon="@android:drawable/ic_menu_camera"
-                app:iconTint="#000000" />
+                android:layout_margin="@dimen/nui_espacio_m"
+                android:background="@drawable/nui_flotante"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/biblio_flotante_alto"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/nui_espacio_l"
+                android:paddingEnd="@dimen/nui_espacio_xl">
+
+                <ImageView
+                    android:layout_width="@dimen/nui_icono"
+                    android:layout_height="@dimen/nui_icono"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/nui_ic_escaner"
+                    app:tint="@color/nui_sobre_resaltado" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/nui_espacio_s"
+                    android:text="Escanear estantería"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                    android:textColor="@color/nui_sobre_resaltado" />
+            </LinearLayout>
         </FrameLayout>
+
+        <!-- Zócalo: filete de oro + alicatado -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/biblio_filete"
+            android:background="@color/nui_oro" />
+
+        <com.example.nuietsiit.ui.TramaAzulejo
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nui_zocalo"
+            android:importantForAccessibility="no" />
     </LinearLayout>
 
     <!-- Ojear: el libro sacado de la balda mientras se mantiene el dedo -->
@@ -163,68 +179,85 @@
         android:id="@+id/panelOjear"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#B3000000"
-        android:elevation="8dp"
+        android:background="@color/nui_velo"
+        android:clipChildren="false"
+        android:elevation="@dimen/biblio_elevacion_ojear"
         android:visibility="gone">
 
+        <!-- sin recortar: la tarjeta girada, escalada o subida sobresale de este contenedor -->
         <LinearLayout
-            android:id="@+id/tarjetaOjear"
-            android:layout_width="280dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/boton_redondeado"
-            android:backgroundTint="#FFFFFF"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/ivPortadaOjear"
-                android:layout_width="180dp"
-                android:layout_height="240dp"
-                android:importantForAccessibility="no"
-                android:scaleType="centerCrop" />
+            <LinearLayout
+                android:id="@+id/tarjetaOjear"
+                style="@style/Widget.Nui.Papel"
+                android:layout_width="@dimen/biblio_tarjeta_ojear"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:rotation="-3">
+
+                <ImageView
+                    android:id="@+id/ivPortadaOjear"
+                    android:layout_width="@dimen/biblio_libro_grande_ancho"
+                    android:layout_height="@dimen/biblio_libro_grande_alto"
+                    android:background="@drawable/nui_libro"
+                    android:importantForAccessibility="no"
+                    android:paddingStart="@dimen/nui_borde_sello"
+                    android:paddingTop="@dimen/nui_borde_sello"
+                    android:paddingEnd="@dimen/nui_libro_canto"
+                    android:paddingBottom="@dimen/nui_libro_canto"
+                    android:scaleType="centerCrop"
+                    android:transitionName="portadaOjear" />
+
+                <TextView
+                    android:id="@+id/tvTituloOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+                <TextView
+                    android:id="@+id/tvAutoresOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+                <TextView
+                    android:id="@+id/tvDisponibilidadOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_s"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
+
+                <TextView
+                    android:id="@+id/tvUbicacionOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_xs"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Codigo" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvTituloOjear"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvAutoresOjear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textColor="#666666" />
-
-            <TextView
-                android:id="@+id/tvDisponibilidadOjear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvUbicacionOjear"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textColor="#000000" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
+                android:layout_marginTop="@dimen/nui_espacio_xl"
+                android:background="@drawable/nui_tesela"
+                android:paddingHorizontal="@dimen/nui_espacio_m"
+                android:paddingVertical="@dimen/nui_espacio_xs"
                 android:text="Suelta para devolverlo · Desliza arriba para abrirlo"
-                android:textColor="#666666"
-                android:textSize="12sp" />
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                android:textColor="@color/nui_tinta" />
         </LinearLayout>
     </FrameLayout>
 </FrameLayout>

@@ -1,35 +1,38 @@
 package com.example.nuietsiit.activities.secciones;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.OneShotPreDrawListener;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.secciones.secretaria.PantallaSecretaria;
 import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
 import com.example.nuietsiit.activities.secciones.secretaria.DetalleTramite;
+import com.example.nuietsiit.activities.secciones.secretaria.FicheroPaginado;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.activities.secciones.secretaria.Justificante;
 import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
 import com.example.nuietsiit.activities.secciones.secretaria.QueNecesitas;
 import com.example.nuietsiit.activities.secciones.secretaria.TramiteAdapter;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
@@ -37,9 +40,7 @@ import com.example.nuietsiit.util.BuscadorTolerante;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -51,7 +52,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class Secretaria extends BaseActivity {
+public class Secretaria extends PantallaSecretaria {
 
     private static final String ESTADO_CATEGORIA = "categoria";
     private static final String ESTADO_CATALOGO = "catalogo";
@@ -63,11 +64,13 @@ public class Secretaria extends BaseActivity {
     private String categoriaSeleccionada; // null = todas
 
     private EditText etBuscar;
-    private ChipGroup chipsCategorias;
+    private PestanasPapel pestanasCategorias;
+    private FicheroPaginado fichero;
+    private InclinarParaPasar inclinar;
     private TextView tvMostrandoPara, tvVacio;
     private Chip chipSugerencia;
-    private Button btnMisGestiones;
-    private ViewGroup contenedorLoTuyo, grupoCatalogo;
+    private TextView tvMisGestiones;
+    private ViewGroup contenedorLoTuyo, grupoCatalogo, grupoMostrador;
     private TextView tvVerTodos;
     private boolean animarEntrada;
     private boolean tecladoPendiente; // abrir el teclado cuando la ventana recupere el foco
@@ -94,10 +97,6 @@ public class Secretaria extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         correoUsuario = SesionUtil.correo(getIntent());
-        String nombre = new UsuariosDB(DBHelper.getInstance(this)).obtenerNombreUsuario(correoUsuario);
-        if (nombre != null && !nombre.trim().isEmpty()) {
-            ((TextView) findViewById(R.id.tvSaludo)).setText("Hola, " + nombre.trim().split("\\s+")[0]);
-        }
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
         boolean catalogoVisible = false;
         if (savedInstanceState != null) {
@@ -107,21 +106,39 @@ public class Secretaria extends BaseActivity {
         animarEntrada = savedInstanceState == null;
 
         etBuscar = findViewById(R.id.etBuscar);
-        chipsCategorias = findViewById(R.id.chipsCategorias);
+        pestanasCategorias = findViewById(R.id.pestanasCategorias);
         tvMostrandoPara = findViewById(R.id.tvMostrandoPara);
         tvVacio = findViewById(R.id.tvVacio);
         chipSugerencia = findViewById(R.id.chipSugerencia);
-        btnMisGestiones = findViewById(R.id.btnMisGestiones);
+        tvMisGestiones = findViewById(R.id.tvMisGestiones);
         contenedorLoTuyo = findViewById(R.id.contenedorLoTuyo);
         grupoCatalogo = findViewById(R.id.grupoCatalogo);
+        grupoMostrador = findViewById(R.id.grupoMostrador);
         tvVerTodos = findViewById(R.id.tvVerTodos);
 
         adaptador = new TramiteAdapter(this::abrirDetalle);
-        RecyclerView rv = findViewById(R.id.rvTramites);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adaptador);
+        fichero = findViewById(R.id.fichero);
+        View grupoPaginas = findViewById(R.id.grupoPaginas);
+        TextView tvPagina = findViewById(R.id.tvPagina);
+        fichero.setAdaptador(adaptador, (pagina, paginas) -> {
+            int n = adaptador.getItemCount();
+            String cuantos = n == 1 ? "1 trámite" : n + " trámites";
+            boolean varias = paginas > 1;
+            tvPagina.setText(varias ? cuantos + " · " + (pagina + 1) + " de " + paginas + " · desliza o inclina" : cuantos);
+            View atras = findViewById(R.id.btnFichasAtras), adelante = findViewById(R.id.btnFichasAdelante);
+            atras.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
+            adelante.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
+            atras.setAlpha(pagina > 0 ? 1f : 0.3f);
+            adelante.setAlpha(pagina < paginas - 1 ? 1f : 0.3f);
+            grupoPaginas.setVisibility(View.VISIBLE);
+            if (inclinar != null) inclinar.actualizar();
+        });
+        // inclinar el móvil pasa las fichas, como en los pasos de un trámite
+        inclinar = new InclinarParaPasar(fichero, fichero::pasar, () -> fichero.getPaginas() > 1);
+        findViewById(R.id.btnFichasAtras).setOnClickListener(v -> fichero.pasar(-1));
+        findViewById(R.id.btnFichasAdelante).setOnClickListener(v -> fichero.pasar(1));
 
-        crearChipsCategorias();
+        crearPestanas();
 
         etBuscar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
@@ -132,7 +149,7 @@ public class Secretaria extends BaseActivity {
 
         findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(
                 new Intent(this, CitaPrevia.class).putExtra("CORREO", correoUsuario)));
-        btnMisGestiones.setOnClickListener(v -> startActivity(
+        findViewById(R.id.btnMisGestiones).setOnClickListener(v -> startActivity(
                 new Intent(this, MisGestiones.class).putExtra("CORREO", correoUsuario)));
 
         tvVerTodos.setOnClickListener(v -> mostrarCatalogo(grupoCatalogo.getVisibility() != View.VISIBLE));
@@ -158,13 +175,19 @@ public class Secretaria extends BaseActivity {
     }
 
     private void mostrarCatalogo(boolean visible) {
-        grupoCatalogo.setVisibility(visible ? View.VISIBLE : View.GONE);
-        tvVerTodos.setText(visible ? "Ocultar el catálogo ▴" : "Ver todos los trámites ▾");
-        if (visible) {
-            // baja hasta el catálogo para que se vea que se ha abierto
-            NestedScrollView scroll = findViewById(R.id.scroll);
-            scroll.post(() -> scroll.smoothScrollTo(0, tvVerTodos.getTop()));
+        // el cajón se abre deslizando, no aparece de golpe
+        if (visible != (grupoCatalogo.getVisibility() == View.VISIBLE) && grupoCatalogo.isLaidOut()) {
+            TransitionManager.beginDelayedTransition((ViewGroup) grupoCatalogo.getParent(),
+                    new AutoTransition().setDuration(220));
         }
+        boolean cerrando = !visible && grupoCatalogo.getVisibility() == View.VISIBLE;
+        // el catálogo ocupa el sitio de «lo tuyo» y del mostrador: así nunca hace falta scroll
+        grupoCatalogo.setVisibility(visible ? View.VISIBLE : View.GONE);
+        contenedorLoTuyo.setVisibility(visible ? View.GONE : View.VISIBLE);
+        grupoMostrador.setVisibility(visible ? View.GONE : View.VISIBLE);
+        tvVerTodos.setText(visible ? "Cerrar el catálogo ▾" : "Ver todos los trámites ▴");
+        if (inclinar != null) inclinar.actualizar(); // solo se escucha con el catálogo abierto
+        if (cerrando) mostrarLoTuyo(); // con el catálogo abierto no se pudo medir qué tarjetas caben
     }
 
     private void abrirBuscador() {
@@ -193,10 +216,11 @@ public class Secretaria extends BaseActivity {
         if (cita != null) {
             LocalDateTime cuando = cita.fechaHora();
             boolean hoy = FechasUtil.diasHasta(cuando.toLocalDate()) == 0;
-            MaterialCardView tarjeta = anadirTarjeta("📅", "Tu próxima cita",
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_cita, R.color.nui_cobalto_tinte, R.color.nui_cobalto,
+                    "Tu próxima cita",
                     FechasUtil.cuando(cuando) + " a las " + FechasUtil.hora(cuando),
                     cita.motivo(),
-                    "📱 En Secretaría, gira el móvil para enseñar el QR",
+                    "En Secretaría, gira el móvil para enseñar el QR",
                     v -> startActivity(new Intent(this, Justificante.class)
                             .putExtra("idCita", cita.id).putExtra("CORREO", correoUsuario)));
             if (hoy) resaltar(tarjeta);
@@ -213,35 +237,57 @@ public class Secretaria extends BaseActivity {
             if (resuelta && Duration.between(envio, LocalDateTime.now()).toHours() >= 24) continue;
             if (!resuelta) tramitesEnCurso.add(s.idProcedimiento);
 
-            MaterialCardView tarjeta = anadirTarjeta(resuelta ? "✅" : "📨",
-                    "Solicitud · " + estado, s.nombreTramite,
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_sobre,
+                    resuelta ? R.color.nui_arrayan_tinte : R.color.nui_granada_tinte,
+                    resuelta ? R.color.nui_arrayan : R.color.nui_granada,
+                    "Solicitud", s.nombreTramite,
                     "Enviada " + FechasUtil.hace(envio), null,
                     v -> startActivity(new Intent(this, Justificante.class)
                             .putExtra("idSolicitud", s.id).putExtra("CORREO", correoUsuario)));
-            ((TextView) tarjeta.findViewById(R.id.tvEtiqueta)).setTextColor(Solicitud.colorEstado(estado));
+            TextView sello = tarjeta.findViewById(R.id.tvSello);
+            sello.setText(estado);
+            sello.setVisibility(View.VISIBLE);
             nSolicitudes++;
         }
 
         for (Tramite t : plazosAbiertos(tramitesEnCurso)) {
             long dias = FechasUtil.diasHasta(LocalDate.parse(t.plazoFin));
             String queda = dias == 0 ? "Último día" : dias == 1 ? "Queda 1 día" : "Quedan " + dias + " días";
-            MaterialCardView tarjeta = anadirTarjeta("⏳", "Plazo abierto", t.nombre,
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_reloj_arena, R.color.nui_resaltado_tinte, R.color.nui_acento_profundo,
+                    "Plazo abierto", t.nombre,
                     queda + " · hasta el " + FechasUtil.diaCorto(LocalDate.parse(t.plazoFin)), null,
                     v -> abrirDetalle(t));
             if (dias <= 3) resaltar(tarjeta);
         }
 
         if (contenedorLoTuyo.getChildCount() == 0) {
-            MaterialCardView tarjeta = anadirTarjeta("🌿", "Todo en orden",
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_hoja, R.color.nui_arrayan_tinte, R.color.nui_arrayan,
+                    "Todo en orden",
                     "No tienes nada pendiente", "Ni citas, ni solicitudes, ni plazos que se acaben",
                     "Si necesitas algo, pulsa «¿Qué necesitas?»", null);
             tarjeta.setClickable(false);
             tarjeta.findViewById(R.id.tvChevron).setVisibility(View.GONE);
         }
 
-        if (animarEntrada) {
-            animarEntrada = false;
-            animarTarjetas();
+        // antes de pintarlas se quitan las que no caben; después entran animadas
+        OneShotPreDrawListener.add(contenedorLoTuyo, () -> {
+            recortarLoTuyo();
+            if (animarEntrada) {
+                animarEntrada = false;
+                animarTarjetas();
+            }
+        });
+    }
+
+    // sin scroll: si en el hueco no caben todas las tarjetas, se quitan las últimas (lo menos urgente).
+    // Las solicitudes siguen en «Mis gestiones» y los plazos en el catálogo
+    private void recortarLoTuyo() {
+        int alto = contenedorLoTuyo.getHeight() - contenedorLoTuyo.getPaddingBottom();
+        // con el catálogo abierto no se ve: ya se recortará al cerrarlo
+        if (contenedorLoTuyo.getVisibility() != View.VISIBLE || alto <= 0) return;
+        for (int i = contenedorLoTuyo.getChildCount() - 1; i > 0; i--) {
+            if (contenedorLoTuyo.getChildAt(i).getBottom() <= alto) break;
+            contenedorLoTuyo.removeViewAt(i);
         }
     }
 
@@ -261,11 +307,19 @@ public class Secretaria extends BaseActivity {
         return abiertos.size() > MAX_PLAZOS ? abiertos.subList(0, MAX_PLAZOS) : abiertos;
     }
 
-    private MaterialCardView anadirTarjeta(String icono, String etiqueta, String titulo, String detalle,
-                                           String accion, View.OnClickListener alTocar) {
-        MaterialCardView tarjeta = (MaterialCardView) LayoutInflater.from(this)
+    // icono dibujado sobre una tesela del color del tipo de papel
+    private View anadirTarjeta(int icono, int tinte, int color, String etiqueta, String titulo, String detalle,
+                               String accion, View.OnClickListener alTocar) {
+        View tarjeta = LayoutInflater.from(this)
                 .inflate(R.layout.item_tarjeta_lo_tuyo, contenedorLoTuyo, false);
-        ((TextView) tarjeta.findViewById(R.id.tvIcono)).setText(icono);
+        ImageView ivIcono = tarjeta.findViewById(R.id.ivIcono);
+        ivIcono.setImageResource(icono);
+        ivIcono.setImageTintList(ColorStateList.valueOf(getColor(color)));
+        ivIcono.setBackgroundTintList(ColorStateList.valueOf(getColor(tinte)));
+        ivIcono.setVisibility(View.VISIBLE);
+        tarjeta.findViewById(R.id.tvIcono).setVisibility(View.GONE);
+        // papeles sobre la mesa: cada uno un poco girado, alternando
+        tarjeta.setRotation(contenedorLoTuyo.getChildCount() % 2 == 0 ? -0.6f : 0.5f);
         ((TextView) tarjeta.findViewById(R.id.tvEtiqueta)).setText(etiqueta);
         ((TextView) tarjeta.findViewById(R.id.tvTitulo)).setText(titulo);
         ((TextView) tarjeta.findViewById(R.id.tvDetalle)).setText(detalle);
@@ -277,10 +331,9 @@ public class Secretaria extends BaseActivity {
         return tarjeta;
     }
 
-    // lo urgente (cita hoy, plazo que se acaba) con fondo y borde de acento
-    private void resaltar(MaterialCardView tarjeta) {
-        tarjeta.setCardBackgroundColor(getColor(R.color.nui_tinte));
-        tarjeta.setStrokeColor(getColor(R.color.nui_acento));
+    // lo urgente (cita hoy, plazo que se acaba): papel naranja (nui_papel_estado seleccionado)
+    private void resaltar(View tarjeta) {
+        tarjeta.setSelected(true);
     }
 
     // entran de abajo una tras otra, para que se vea que son "lo tuyo" de ahora
@@ -294,31 +347,29 @@ public class Secretaria extends BaseActivity {
         }
     }
 
-    private void crearChipsCategorias() {
-        anadirChip(1000, null, "Todas");
-        for (int i = 0; i < Tramite.CATEGORIAS.length; i++) {
-            anadirChip(1001 + i, Tramite.CATEGORIAS[i][0], Tramite.CATEGORIAS[i][1]);
-        }
-        chipsCategorias.setOnCheckedStateChangeListener((grupo, ids) -> {
-            if (ids.isEmpty()) return;
-            categoriaSeleccionada = (String) grupo.findViewById(ids.get(0)).getTag();
+    // dos filas del mismo ancho: los nombres cortos arriba y los largos abajo, para que todos se lean enteros
+    private void crearPestanas() {
+        pestanasCategorias.nuevaFila();
+        pestanasCategorias.anadir(null, "Todas", null, R.drawable.nui_ic_granada, R.color.nui_granada);
+        anadirPestana("matricula", R.drawable.nui_ic_matricula);
+        anadirPestana("titulos", R.drawable.nui_ic_titulo);
+        anadirPestana("otro", R.drawable.nui_ic_consulta);
+        pestanasCategorias.nuevaFila();
+        anadirPestana("reconocimiento_creditos", R.drawable.nui_ic_creditos);
+        anadirPestana("convocatorias", R.drawable.nui_ic_examen);
+        anadirPestana("certificados", R.drawable.nui_ic_sobre);
+        pestanasCategorias.marcar(categoriaSeleccionada);
+        pestanasCategorias.setOnElegir(clave -> {
+            categoriaSeleccionada = (String) clave;
             cargarCategoria();
         });
     }
 
-    private void anadirChip(int id, String clave, String etiqueta) {
-        Chip chip = new Chip(this, null, com.google.android.material.R.attr.chipStyle);
-        chip.setId(id); // ids fijos para que sobrevivan a la rotación
-        chip.setText(etiqueta);
-        chip.setTag(clave);
-        chip.setCheckable(true);
-        chip.setChipBackgroundColorResource(R.color.chip_fondo);
-        chip.setTextColor(getColorStateList(R.color.chip_texto));
-        chip.setCheckedIconVisible(false);
-        chipsCategorias.addView(chip);
-        if (clave == null ? categoriaSeleccionada == null : clave.equals(categoriaSeleccionada)) {
-            chip.setChecked(true);
-        }
+    private void anadirPestana(String clave, int icono) {
+        String nombre = clave;
+        for (String[] c : Tramite.CATEGORIAS) if (c[0].equals(clave)) nombre = c[1];
+        if (clave.equals("reconocimiento_creditos")) nombre = "Créditos"; // «Reconocimiento de créditos» no cabe
+        pestanasCategorias.anadir(clave, nombre, null, icono, Tramite.colorCategoria(clave));
     }
 
     private void cargarCategoria() {
@@ -346,7 +397,7 @@ public class Secretaria extends BaseActivity {
 
     private void actualizarContadorGestiones() {
         int n = secretariaDB.contarCitasActivas(correoUsuario);
-        btnMisGestiones.setText(n > 0 ? "📂 Mis gestiones (" + n + ")" : "📂 Mis gestiones");
+        tvMisGestiones.setText(n > 0 ? "Mis gestiones (" + n + ")" : "Mis gestiones");
     }
 
     private void abrirDetalle(Tramite tramite) {

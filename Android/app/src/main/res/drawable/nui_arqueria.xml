@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TESELA DE ARQUERÍA (26x22): yesería con un arco apuntado recortado en el color de la pantalla.
+     Se repite en horizontal con TramaAzulejo app:tesela="@drawable/nui_arqueria", justo bajo una cabecera nui_yeseria. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="26dp" android:height="22dp"
+    android:viewportWidth="26" android:viewportHeight="22">
+    <path android:fillColor="@color/nui_yeseria" android:pathData="M0,0 L26,0 L26,22 L0,22 Z" />
+    <path android:fillColor="@color/nui_superficie"
+        android:pathData="M4,22 L4,13 C4,8 8,5 13,2 C18,5 22,8 22,13 L22,22 Z" />
+</vector>

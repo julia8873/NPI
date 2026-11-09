@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Documento;
@@ -24,7 +23,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class DetalleTramite extends BaseActivity {
+public class DetalleTramite extends PantallaSecretaria {
 
     private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -55,7 +54,9 @@ public class DetalleTramite extends BaseActivity {
 
         ((TextView) findViewById(R.id.tvNombre)).setText(tramite.nombre);
         ((TextView) findViewById(R.id.tvDescripcion)).setText(tramite.descripcion);
-        ((TextView) findViewById(R.id.tvCategoria)).setText(tramite.etiquetaCategoria());
+        TextView tvCategoria = findViewById(R.id.tvCategoria);
+        tvCategoria.setText(tramite.etiquetaCategoria());
+        tvCategoria.setTextColor(getColor(tramite.colorCategoria()));
         mostrarSeccion(R.id.tarjetaRequisitos, R.id.tvRequisitos, tramite.requisitos);
         mostrarSeccion(R.id.tarjetaPlazos, R.id.tvPlazos, tramite.plazosInfo);
         Pastilla.pintar(findViewById(R.id.tvEstado), tramite.textoEstado(), tramite.colorEstado());
@@ -63,7 +64,7 @@ public class DetalleTramite extends BaseActivity {
 
         String correoUsuario = getIntent().getStringExtra("CORREO");
         View btnPasos = findViewById(R.id.btnPasos);
-        ((TextView) findViewById(R.id.tvPasos)).setText("🪜  Cómo se hace, paso a paso (" + pasos.size() + ")");
+        ((TextView) findViewById(R.id.tvPasos)).setText("Cómo se hace, paso a paso (" + pasos.size() + ")");
         btnPasos.setVisibility(pasos.isEmpty() ? View.GONE : View.VISIBLE);
         btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
@@ -79,12 +80,12 @@ public class DetalleTramite extends BaseActivity {
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         Button btnAlternativa = findViewById(R.id.btnAlternativa);
         if (tramite.sePuedeSolicitar()) {
-            btnSiguiente.setText("📝 Empezar solicitud");
+            btnSiguiente.setText("Empezar solicitud");
             btnSiguiente.setOnClickListener(v -> startActivity(solicitar));
             btnAlternativa.setText("o pide cita para hacerlo en ventanilla");
             btnAlternativa.setOnClickListener(v -> startActivity(pedirCita));
         } else {
-            btnSiguiente.setText(tramite.solicitudOnline ? "📅 Pedir cita para consultarlo" : "📅 Pedir cita en ventanilla");
+            btnSiguiente.setText(tramite.solicitudOnline ? "Pedir cita para consultarlo" : "Pedir cita en ventanilla");
             btnSiguiente.setOnClickListener(v -> startActivity(pedirCita));
             btnAlternativa.setVisibility(View.GONE);
         }
@@ -109,12 +110,12 @@ public class DetalleTramite extends BaseActivity {
             return;
         }
         for (Documento d : documentos) {
-            TextView nombre = textoDocumento((d.obligatorio ? "📄  " : "➕  ") + d.nombre
+            TextView nombre = textoDocumento(d.nombre
                     + (d.obligatorio ? "" : "  · opcional"), true);
             lista.addView(nombre);
             if (d.descripcion != null && !d.descripcion.isEmpty()) {
                 TextView detalle = textoDocumento(d.descripcion, false);
-                detalle.setPadding(dp(28), 0, 0, 0);
+                detalle.setPadding(0, 0, 0, dp(2));
                 lista.addView(detalle);
             }
         }
@@ -123,8 +124,7 @@ public class DetalleTramite extends BaseActivity {
     private TextView textoDocumento(String texto, boolean titulo) {
         TextView tv = new TextView(this);
         tv.setText(texto);
-        tv.setTextSize(titulo ? 15 : 14);
-        tv.setTextColor(getColor(titulo ? R.color.nui_tinta : R.color.nui_apagado));
+        tv.setTextAppearance(titulo ? R.style.TextAppearance_Nui_Cuerpo_Fuerte : R.style.TextAppearance_Nui_Cuerpo_Secundario);
         if (titulo) tv.setPadding(0, dp(10), 0, dp(2));
         return tv;
     }

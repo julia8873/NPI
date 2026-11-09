@@ -1,91 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tarjeta grande del inicio de Secretaría ("lo tuyo"): qué es y qué hacer con ella -->
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<!-- Papel sobre la mesa de Secretaría ("lo tuyo"): qué es y qué hacer con él.
+     Secretaria lo gira un poco y lo marca con setSelected(true) cuando es urgente. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Nui.Papel.Pulsable"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardBackgroundColor="@color/nui_superficie"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/nui_linea"
-    app:strokeWidth="1dp">
+    android:layout_marginBottom="@dimen/nui_espacio_m"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingEnd="11dp">
+
+    <!-- Icono dibujado (Secretaría) o emoji de la opción (¿Qué necesitas?) -->
+    <ImageView
+        android:id="@+id/ivIcono"
+        android:layout_width="@dimen/nui_toque_min"
+        android:layout_height="@dimen/nui_toque_min"
+        android:layout_gravity="top"
+        android:background="@drawable/nui_tesela"
+        android:importantForAccessibility="no"
+        android:padding="@dimen/nui_espacio_m"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvIcono"
+        android:layout_width="@dimen/nui_toque_min"
+        android:layout_height="@dimen/nui_toque_min"
+        android:layout_gravity="top"
+        android:background="@drawable/nui_tesela"
+        android:backgroundTint="@color/nui_resaltado_tinte"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:textSize="@dimen/nui_texto_l" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="8dp">
+        android:layout_marginStart="@dimen/nui_espacio_m"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvIcono"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/fondo_circulo"
-            android:backgroundTint="@color/nui_tinte"
-            android:gravity="center"
-            android:importantForAccessibility="no"
-            android:textSize="26sp" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvEtiqueta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.08"
-                android:textAllCaps="true"
-                android:textColor="@color/nui_apagado"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvTitulo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/nui_tinta"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvDetalle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/nui_apagado"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvAccion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/nui_acento"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Se puede tocar -->
-        <TextView
-            android:id="@+id/tvChevron"
+            android:id="@+id/tvEtiqueta"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="4dp"
-            android:importantForAccessibility="no"
-            android:paddingHorizontal="4dp"
-            android:text="›"
-            android:textColor="@color/nui_apagado"
-            android:textSize="28sp" />
+            android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
+
+        <TextView
+            android:id="@+id/tvTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+        <TextView
+            android:id="@+id/tvDetalle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+        <TextView
+            android:id="@+id/tvAccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_s"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+            android:textColor="@color/nui_acento_profundo"
+            android:textSize="@dimen/nui_texto_s" />
+
+        <!-- Estado de una solicitud, como un sello de registro -->
+        <TextView
+            android:id="@+id/tvSello"
+            style="@style/Widget.Nui.Sello"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_s"
+            android:layout_marginBottom="@dimen/nui_espacio_xs"
+            android:textSize="@dimen/nui_texto_etiqueta"
+            android:visibility="gone" />
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+
+    <!-- Se puede tocar -->
+    <TextView
+        android:id="@+id/tvChevron"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/nui_espacio_xs"
+        android:importantForAccessibility="no"
+        android:paddingHorizontal="@dimen/nui_espacio_xs"
+        android:text="›"
+        android:textColor="@color/nui_apagado"
+        android:textSize="@dimen/nui_texto_xl" />
+</LinearLayout>

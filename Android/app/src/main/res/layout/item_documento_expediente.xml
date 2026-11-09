@@ -15,7 +15,7 @@
         android:importantForAccessibility="no"
         android:scaleType="centerCrop" />
 
-    <!-- Vacío: cámara grande y qué hacer -->
+    <!-- Vacío: cámara y qué hacer -->
     <LinearLayout
         android:id="@+id/grupoVacio"
         android:layout_width="match_parent"
@@ -25,51 +25,47 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:layout_width="@dimen/nui_toque_min"
+            android:layout_height="@dimen/nui_toque_min"
+            android:background="@drawable/nui_tesela"
+            android:backgroundTint="@color/nui_papel_sombra"
             android:importantForAccessibility="no"
-            android:text="📷"
-            android:textSize="34sp" />
+            android:padding="@dimen/nui_espacio_m"
+            android:src="@drawable/nui_ic_camara"
+            android:tint="@color/nui_tinta" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/nui_espacio_xs"
             android:gravity="center"
             android:text="Toca para\nfotografiar"
-            android:textColor="@color/nui_apagado"
-            android:textSize="12sp" />
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+            android:textSize="@dimen/nui_texto_etiqueta" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tvOpcional"
+        style="@style/Widget.Nui.Etiqueta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_margin="6dp"
         android:background="@drawable/fondo_papel"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="1dp"
         android:text="Opcional"
         android:textColor="@color/nui_apagado"
-        android:textSize="11sp"
         android:visibility="gone" />
 
     <!-- Lleno: indica hacia dónde llevarlo -->
     <TextView
         android:id="@+id/tvALaCarpeta"
+        style="@style/Widget.Nui.Etiqueta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/boton_redondeado"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="3dp"
-        android:text="⬇ A la carpeta"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:text="↓ A la carpeta"
         android:visibility="gone" />
 
     <TextView
@@ -77,12 +73,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#E6FFFFFF"
+        android:background="@color/nui_papel"
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="2"
         android:padding="6dp"
-        android:textColor="@color/nui_tinta"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+        android:textSize="@dimen/nui_texto_etiqueta" />
 </FrameLayout>

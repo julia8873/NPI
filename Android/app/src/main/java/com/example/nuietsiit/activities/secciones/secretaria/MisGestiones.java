@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,11 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
+import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -40,7 +41,7 @@ import java.util.List;
  * Mis citas y solicitudes con su estado. Pestañas "Citas" y "Solicitudes".
  * Citas: deslizar a la izquierda = cancelar (con "Deshacer"). Tocar cualquiera = justificante.
  */
-public class MisGestiones extends BaseActivity {
+public class MisGestiones extends PantallaSecretaria {
 
     private static final int PAGINA_CITAS = 0;
     private static final int PAGINA_SOLICITUDES = 1;
@@ -51,6 +52,7 @@ public class MisGestiones extends BaseActivity {
     private final View[] paginas = new View[2]; // se rellenan al crear cada página (PaginasAdapter)
     private GestionAdapter citasAdapter, solicitudesAdapter;
     private ItemTouchHelper deslizarParaCancelar;
+    private InclinarParaPasar inclinar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,13 @@ public class MisGestiones extends BaseActivity {
         TabLayout tabs = findViewById(R.id.tabs);
         new TabLayoutMediator(tabs, vp,
                 (tab, pos) -> tab.setText(pos == PAGINA_CITAS ? "Citas" : "Solicitudes")).attach();
+        // el arrastre lateral es para las citas: de pestaña también se cambia inclinando el móvil (como los pasos)
+        inclinar = new InclinarParaPasar(vp, sentido -> {
+            int nueva = vp.getCurrentItem() + sentido;
+            if (nueva < 0 || nueva >= paginas.length) return;
+            vp.setCurrentItem(nueva, true);
+            vp.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        }, () -> true);
     }
 
     @Override
@@ -118,7 +127,7 @@ public class MisGestiones extends BaseActivity {
         boolean vacia = (pagina == PAGINA_CITAS ? citasAdapter : solicitudesAdapter).getItemCount() == 0;
         TextView tvVacio = paginas[pagina].findViewById(R.id.tvVacio);
         tvVacio.setText(pagina == PAGINA_CITAS
-                ? "No tienes citas.\nPídela con «📅 Pedir cita» en Secretaría."
+                ? "No tienes citas.\nPídela con «Pedir cita» en Secretaría."
                 : "Todavía no has enviado ninguna solicitud.");
         tvVacio.setVisibility(vacia ? View.VISIBLE : View.GONE);
     }
@@ -149,6 +158,9 @@ public class MisGestiones extends BaseActivity {
                         "Cita " + g.codigo + " cancelada. Si la añadiste a tu calendario, bórrala también.",
                         Snackbar.LENGTH_LONG)
                 .setAction("Deshacer", v -> deshacerCancelacion(g.id))
+                .setBackgroundTint(getColor(R.color.nui_tinta))
+                .setTextColor(getColor(R.color.nui_superficie))
+                .setActionTextColor(getColor(R.color.nui_resaltado))
                 .show();
     }
 
@@ -165,7 +177,7 @@ public class MisGestiones extends BaseActivity {
         cargarCitas();
     }
 
-    /** Deslizar una cita activa y futura a la izquierda la cancela; fondo rojo con 🗑 debajo. */
+    /** Deslizar una cita activa y futura a la izquierda la cancela; debajo asoma la tinta granada con "Cancelar cita". */
     private class DeslizarParaCancelar extends ItemTouchHelper.SimpleCallback {
         private final Paint fondo = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint texto = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -173,10 +185,10 @@ public class MisGestiones extends BaseActivity {
 
         DeslizarParaCancelar() {
             super(0, ItemTouchHelper.LEFT);
-            fondo.setColor(0xFFD32F2F);
-            texto.setColor(0xFFFFFFFF);
-            texto.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, getResources().getDisplayMetrics()));
-            texto.setFakeBoldText(true);
+            fondo.setColor(getColor(R.color.nui_granada));
+            texto.setColor(getColor(R.color.nui_superficie));
+            texto.setTextSize(getResources().getDimension(R.dimen.nui_texto_cuerpo));
+            texto.setTypeface(Typeface.create(ResourcesCompat.getFont(MisGestiones.this, R.font.nui_texto), Typeface.BOLD));
             texto.setTextAlign(Paint.Align.RIGHT);
         }
 
@@ -204,10 +216,10 @@ public class MisGestiones extends BaseActivity {
                                 float dX, float dY, int estado, boolean activo) {
             if (estado == ItemTouchHelper.ACTION_STATE_SWIPE && dX < 0) {
                 View v = vh.itemView;
-                float radio = 20 * densidad; // mismo radio que la tarjeta
+                float radio = getResources().getDimension(R.dimen.nui_radio_ficha); // mismo radio que la ficha
                 c.drawRoundRect(new RectF(v.getLeft(), v.getTop(), v.getRight(), v.getBottom()), radio, radio, fondo);
                 float y = (v.getTop() + v.getBottom()) / 2f - (texto.descent() + texto.ascent()) / 2f;
-                c.drawText("🗑 Cancelar", v.getRight() - 24 * densidad, y, texto);
+                c.drawText("Cancelar cita", v.getRight() - 24 * densidad, y, texto);
             }
             super.onChildDraw(c, rv, vh, dX, dY, estado, activo);
         }

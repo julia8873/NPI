@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TESELA DE AZULEJO (48x48): estrella de 8 puntas nazarí. Al repetirse, las esquinas granada
+     forman rombos completos entre teselas. Se repite con la vista TramaAzulejo (paquete ui). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="48" android:viewportHeight="48">
+    <!-- estrella = cuadrado + rombo superpuestos -->
+    <path android:fillColor="@color/nui_cobalto"
+        android:pathData="M24,5 L42.5,23.5 L42.5,24.5 L24,43 L5.5,24.5 L5.5,23.5 Z" />
+    <path android:fillColor="@color/nui_cobalto"
+        android:pathData="M10.9,10.9 L37.1,10.9 L37.1,37.1 L10.9,37.1 Z" />
+    <!-- corazón de la estrella -->
+    <path android:fillColor="@color/nui_papel"
+        android:pathData="M24,14 L34,24 L24,34 L14,24 Z" />
+    <path android:fillColor="@color/nui_resaltado"
+        android:pathData="M24,19 L29,24 L24,29 L19,24 Z" />
+    <!-- cuartos de rombo en las esquinas -->
+    <path android:fillColor="@color/nui_granada" android:pathData="M0,0 L6,0 L0,6 Z" />
+    <path android:fillColor="@color/nui_granada" android:pathData="M48,0 L42,0 L48,6 Z" />
+    <path android:fillColor="@color/nui_granada" android:pathData="M0,48 L6,48 L0,42 Z" />
+    <path android:fillColor="@color/nui_granada" android:pathData="M48,48 L42,48 L48,42 Z" />
+</vector>

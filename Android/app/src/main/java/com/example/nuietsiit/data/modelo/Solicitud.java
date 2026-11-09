@@ -1,5 +1,7 @@
 package com.example.nuietsiit.data.modelo;
 
+import com.example.nuietsiit.R;
+
 import com.example.nuietsiit.util.FechasUtil;
 
 import java.time.Duration;
@@ -53,12 +55,12 @@ public class Solicitud {
         return RESUELTA;
     }
 
-    // color del chip/texto de estado (Mis gestiones y Justificante)
+    // recurso de color del estado (Mis gestiones y Justificante)
     public static int colorEstado(String estado) {
         switch (estado) {
-            case ENVIADA: return 0xFF1976D2;
-            case EN_REVISION: return 0xFFF9A825;
-            default: return 0xFF388E3C; // Resuelta
+            case ENVIADA: return R.color.nui_info;
+            case EN_REVISION: return R.color.nui_aviso;
+            default: return R.color.nui_ok; // Resuelta
         }
     }
 }

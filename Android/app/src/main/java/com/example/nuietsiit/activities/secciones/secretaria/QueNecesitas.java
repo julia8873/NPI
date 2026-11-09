@@ -1,23 +1,24 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
  * "¿Qué necesitas?": dos preguntas con opciones grandes que acaban en un trámite,
  * para no tener que buscar en el catálogo. Paso 3 = el trámite encontrado.
  */
-public class QueNecesitas extends BaseActivity {
+public class QueNecesitas extends PantallaSecretaria {
 
     // resultado para Secretaria: abrir el catálogo con el buscador
     public static final String EXTRA_VER_CATALOGO = "verCatalogo";
@@ -41,20 +42,19 @@ public class QueNecesitas extends BaseActivity {
     // ------------------------------------------------------------
 
     private static class Opcion {
-        final String icono, texto, detalle;
+        final String texto, detalle;
         final Pregunta siguiente; // null = acaba en destino
         final String destino;
 
-        Opcion(String icono, String texto, String detalle, Pregunta siguiente) {
-            this(icono, texto, detalle, siguiente, null);
+        Opcion(String texto, String detalle, Pregunta siguiente) {
+            this(texto, detalle, siguiente, null);
         }
 
-        Opcion(String icono, String texto, String detalle, String destino) {
-            this(icono, texto, detalle, null, destino);
+        Opcion(String texto, String detalle, String destino) {
+            this(texto, detalle, null, destino);
         }
 
-        private Opcion(String icono, String texto, String detalle, Pregunta siguiente, String destino) {
-            this.icono = icono;
+        private Opcion(String texto, String detalle, Pregunta siguiente, String destino) {
             this.texto = texto;
             this.detalle = detalle;
             this.siguiente = siguiente;
@@ -73,48 +73,57 @@ public class QueNecesitas extends BaseActivity {
     }
 
     private static final Pregunta RAIZ = new Pregunta("¿Sobre qué es?",
-            new Opcion("📝", "Mi matrícula", "Matricularme, cambiarla o anularla",
+            new Opcion("Mi matrícula", "Matricularme, cambiarla o anularla",
                     new Pregunta("¿Qué quieres hacer con tu matrícula?",
-                            new Opcion("✍️", "Matricularme este curso", "Elegir las asignaturas del curso",
+                            new Opcion("Matricularme este curso", "Elegir las asignaturas del curso",
                                     "Automatrícula"),
-                            new Opcion("🔄", "Cambiar o añadir asignaturas", "Dentro del plazo oficial",
+                            new Opcion("Cambiar o añadir asignaturas", "Dentro del plazo oficial",
                                     "Modificación y ampliación de matrícula"),
-                            new Opcion("❌", "Anularla", "Toda o solo una parte",
+                            new Opcion("Anularla", "Toda o solo una parte",
                                     "Anulación de matrícula"),
-                            new Opcion("👥", "Cambiarme de grupo", "De teoría o de prácticas",
+                            new Opcion("Cambiarme de grupo", "De teoría o de prácticas",
                                     "Cambio de grupo"))),
-            new Opcion("🧪", "Mis exámenes", "Cómo y cuándo me examino",
+            new Opcion("Mis exámenes", "Cómo y cuándo me examino",
                     new Pregunta("¿Qué te pasa con los exámenes?",
-                            new Opcion("📄", "Quiero hacer solo el examen final", "Sin evaluación continua",
+                            new Opcion("Quiero hacer solo el examen final", "Sin evaluación continua",
                                     "Evaluación única final"),
-                            new Opcion("🏁", "Me queda poco para acabar", "Una convocatoria extra",
+                            new Opcion("Me queda poco para acabar", "Una convocatoria extra",
                                     "Convocatoria especial"))),
-            new Opcion("🔁", "Créditos que ya tengo", "Convalidar lo que hiciste en otro sitio",
+            new Opcion("Créditos que ya tengo", "Convalidar lo que hiciste en otro sitio",
                     new Pregunta("¿De dónde vienen esos créditos?",
-                            new Opcion("🏫", "De otros estudios", "Otra carrera o FP superior",
+                            new Opcion("De otros estudios", "Otra carrera o FP superior",
                                     "Reconocimiento y transferencia de créditos"),
-                            new Opcion("⚽", "De actividades", "Culturales, deportivas, solidarias…",
+                            new Opcion("De actividades", "Culturales, deportivas, solidarias…",
                                     "Créditos por actividades universitarias"))),
-            new Opcion("🎓", "Un papel oficial", "Certificados y el título",
+            new Opcion("Un papel oficial", "Certificados y el título",
                     new Pregunta("¿Qué papel necesitas?",
-                            new Opcion("📊", "Mis notas y la nota media", "Certificado académico",
+                            new Opcion("Mis notas y la nota media", "Certificado académico",
                                     "Certificado académico personal"),
-                            new Opcion("🎓", "El título", "Porque ya he terminado",
+                            new Opcion("El título", "Porque ya he terminado",
                                     "Solicitud del título de grado y SET"))),
-            new Opcion("💬", "Otra cosa", "No lo veo aquí",
+            new Opcion("Otra cosa", "No lo veo aquí",
                     new Pregunta("¿Cómo seguimos?",
-                            new Opcion("🙋", "Hablarlo en Secretaría", "Pide una cita de consulta general",
+                            new Opcion("Hablarlo en Secretaría", "Pide una cita de consulta general",
                                     DESTINO_CITA),
-                            new Opcion("🔍", "Buscarlo yo", "Ver todos los trámites",
+                            new Opcion("Buscarlo yo", "Ver todos los trámites",
                                     DESTINO_CATALOGO))));
 
     // ------------------------------------------------------------
+
+    // icono, color y tinte de cada tema de la primera pregunta (sus opciones heredan los del tema)
+    private static final int[] ICONOS = {R.drawable.nui_ic_matricula, R.drawable.nui_ic_examen,
+            R.drawable.nui_ic_creditos, R.drawable.nui_ic_titulo, R.drawable.nui_ic_consulta};
+    private static final int[] COLORES = {R.color.nui_tema_matricula, R.color.nui_tema_examenes,
+            R.color.nui_tema_creditos, R.color.nui_tema_titulos, R.color.nui_tema_certificados};
+    private static final int[] TINTES = {R.color.nui_tema_matricula_tinte, R.color.nui_tema_examenes_tinte,
+            R.color.nui_tema_creditos_tinte, R.color.nui_tema_titulos_tinte, R.color.nui_tema_certificados_tinte};
 
     private SecretariaDB secretariaDB;
     private String correoUsuario;
     private ArrayList<Integer> camino = new ArrayList<>(); // índices elegidos desde la raíz
 
     private TextView tvPaso, tvPregunta;
+    private ImageView ivRosa;
     private LinearProgressIndicator progreso;
     private LinearLayout contenedorOpciones;
     private Button btnIrTramite, btnVolver;
@@ -137,6 +146,7 @@ public class QueNecesitas extends BaseActivity {
 
         tvPaso = findViewById(R.id.tvPaso);
         tvPregunta = findViewById(R.id.tvPregunta);
+        ivRosa = findViewById(R.id.ivRosa);
         progreso = findViewById(R.id.progreso);
         contenedorOpciones = findViewById(R.id.contenedorOpciones);
         btnIrTramite = findViewById(R.id.btnIrTramite);
@@ -195,7 +205,7 @@ public class QueNecesitas extends BaseActivity {
             for (int i = 0; i < pregunta.opciones.length; i++) {
                 Opcion o = pregunta.opciones[i];
                 int indice = i;
-                anadirTarjeta(o.icono, null, o.texto, o.detalle, null).setOnClickListener(v -> elegir(indice));
+                anadirTarjeta(camino.isEmpty() ? i : camino.get(0), null, o.texto, o.detalle, null).setOnClickListener(v -> elegir(indice));
             }
         }
         animarEntrada(direccion);
@@ -204,6 +214,9 @@ public class QueNecesitas extends BaseActivity {
     private void mostrarPaso(int paso) {
         tvPaso.setText("Paso " + paso + " de " + PASOS);
         progreso.setProgressCompat(paso, true);
+        // la rosa de los vientos se orienta un rumbo (45°) con cada respuesta
+        ivRosa.animate().rotation(45f * (paso - 1)).setDuration(400)
+                .setInterpolator(new OvershootInterpolator()).start();
     }
 
     // destinos especiales salen de aquí; un trámite se enseña como paso 3. false = ya no hay nada que mostrar
@@ -228,7 +241,7 @@ public class QueNecesitas extends BaseActivity {
         Intent detalle = new Intent(this, DetalleTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
                 .putExtra("CORREO", correoUsuario);
-        mostrarResultado(tramite, RAIZ.opciones[camino.get(0)].icono).setOnClickListener(v -> startActivity(detalle));
+        mostrarResultado(tramite, camino.get(0)).setOnClickListener(v -> startActivity(detalle));
         btnIrTramite.setText(tramite.sePuedeSolicitar() ? "Ver qué necesito y empezar" : "Ver detalles y pedir cita");
         btnIrTramite.setVisibility(View.VISIBLE);
         btnIrTramite.setOnClickListener(v -> startActivity(detalle));
@@ -242,33 +255,46 @@ public class QueNecesitas extends BaseActivity {
         return null;
     }
 
-    // icono = el de la opción elegida en la primera pregunta
-    private View mostrarResultado(Tramite t, String icono) {
+    // tema = la opción elegida en la primera pregunta (da icono y color)
+    private View mostrarResultado(Tramite t, int tema) {
         View tarjeta = LayoutInflater.from(this).inflate(R.layout.item_resultado_tramite, contenedorOpciones, false);
-        ((TextView) tarjeta.findViewById(R.id.tvIcono)).setText(icono);
-        ((TextView) tarjeta.findViewById(R.id.tvCategoria)).setText(t.etiquetaCategoria());
+        ponerIcono(tarjeta.findViewById(R.id.ivIcono), tema);
+        TextView categoria = tarjeta.findViewById(R.id.tvCategoria);
+        categoria.setText(t.etiquetaCategoria());
+        categoria.setTextColor(getColor(t.colorCategoria()));
         ((TextView) tarjeta.findViewById(R.id.tvNombre)).setText(t.nombre);
         ((TextView) tarjeta.findViewById(R.id.tvDescripcion)).setText(t.descripcion);
         Pastilla.pintar(tarjeta.findViewById(R.id.tvEstado), t.textoEstado(), t.colorEstado());
         int documentos = secretariaDB.getDocumentos(t.id).size();
         int pasos = secretariaDB.getPasos(t.id).size();
         ((TextView) tarjeta.findViewById(R.id.tvResumen)).setText(
-                "📎 " + (documentos == 0 ? "Sin documentos" : documentos == 1 ? "1 documento" : documentos + " documentos")
-                + "     🪜 " + pasos + (pasos == 1 ? " paso" : " pasos"));
+                (documentos == 0 ? "Sin documentos" : documentos == 1 ? "1 documento" : documentos + " documentos")
+                + " · " + pasos + (pasos == 1 ? " paso" : " pasos"));
         contenedorOpciones.addView(tarjeta);
         return tarjeta;
     }
 
-    private MaterialCardView anadirTarjeta(String icono, String etiqueta, String titulo, String detalle, String accion) {
-        MaterialCardView tarjeta = (MaterialCardView) LayoutInflater.from(this)
+    private View anadirTarjeta(int tema, String etiqueta, String titulo, String detalle, String accion) {
+        View tarjeta = LayoutInflater.from(this)
                 .inflate(R.layout.item_tarjeta_lo_tuyo, contenedorOpciones, false);
-        ((TextView) tarjeta.findViewById(R.id.tvIcono)).setText(icono);
+        ImageView ivIcono = tarjeta.findViewById(R.id.ivIcono);
+        ivIcono.setBackgroundResource(R.drawable.nui_tesela_estrella);
+        ponerIcono(ivIcono, tema);
+        ivIcono.setVisibility(View.VISIBLE);
+        tarjeta.findViewById(R.id.tvIcono).setVisibility(View.GONE);
         ponerTexto(tarjeta.findViewById(R.id.tvEtiqueta), etiqueta);
         ponerTexto(tarjeta.findViewById(R.id.tvTitulo), titulo);
         ponerTexto(tarjeta.findViewById(R.id.tvDetalle), detalle);
         ponerTexto(tarjeta.findViewById(R.id.tvAccion), accion);
         contenedorOpciones.addView(tarjeta);
         return tarjeta;
+    }
+
+    // icono del tema dibujado sobre una estrella nazarí de su color
+    private void ponerIcono(ImageView iv, int tema) {
+        iv.setImageResource(ICONOS[tema]);
+        iv.setImageTintList(ColorStateList.valueOf(getColor(COLORES[tema])));
+        iv.setBackgroundTintList(ColorStateList.valueOf(getColor(TINTES[tema])));
     }
 
     private static void ponerTexto(TextView tv, String texto) {

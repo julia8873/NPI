@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TESELA ESTRELLA: estrella nazarí de 8 puntas (dos cuadrados girados 45°). Fondo de icono; se tiñe con backgroundTint (*_tinte). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="@color/nui_superficie" android:pathData="M10,10h28v28h-28z" />
+    <path android:fillColor="@color/nui_superficie" android:pathData="M24,4.2L43.8,24L24,43.8L4.2,24z" />
+</vector>

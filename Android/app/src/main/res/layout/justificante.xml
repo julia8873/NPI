@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Justificante: resguardo de papel. Arriba los datos, troquel, y abajo la matriz con el QR. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/contenido"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
+    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="@color/nui_yeseria" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
 
     <!-- clipChildren="false": el QR ampliado con pinch puede salirse de su sitio (lo recorta la pantalla) -->
-    <ScrollView
+    <com.example.nuietsiit.ui.HojasPaginadas
         android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipChildren="false">
 
         <LinearLayout
@@ -27,117 +35,128 @@
             android:clipChildren="false"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="@dimen/nui_espacio_l">
 
-            <com.google.android.material.card.MaterialCardView
+            <!-- El resguardo -->
+            <LinearLayout
+                style="@style/Widget.Nui.Papel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#FF8C42"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:id="@+id/tvCodigo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:accessibilityHeading="true"
-                        android:textColor="#FF8C42"
-                        android:textSize="28sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvEstado"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/tvMotivo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center"
-                        android:textColor="#000000"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/tvFecha"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center"
-                        android:textColor="#000000"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tvHora"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#000000"
-                        android:textSize="32sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- el contenedor recibe los toques del pinch: el QR ampliado no altera sus coordenadas -->
-            <FrameLayout
-                android:id="@+id/flQR"
-                android:layout_width="260dp"
-                android:layout_height="260dp"
-                android:layout_marginTop="16dp"
                 android:clipChildren="false"
-                android:translationZ="8dp">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/ivQR"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resguardo · Secretaría ETSIIT"
+                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
+
+                <!-- Número del resguardo, como un número de turno -->
+                <TextView
+                    android:id="@+id/tvCodigo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_s"
+                    android:accessibilityHeading="true"
+                    android:textAppearance="@style/TextAppearance.Nui.Codigo"
+                    android:textColor="@color/nui_granada"
+                    android:textSize="@dimen/nui_texto_l" />
+
+                <TextView
+                    android:id="@+id/tvMotivo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+                <TextView
+                    android:id="@+id/tvFecha"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_s"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+
+                <TextView
+                    android:id="@+id/tvHora"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular.XL" />
+
+                <!-- Cancelada / pasada / estado de la solicitud: sello estampado -->
+                <TextView
+                    android:id="@+id/tvEstado"
+                    style="@style/Widget.Nui.Sello"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:visibility="gone" />
+
+                <!-- Troquel: aquí empieza la matriz que se enseña en ventanilla -->
+                <View
+                    style="@style/Widget.Nui.Troquel"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter" />
-            </FrameLayout>
+                    android:layout_marginTop="@dimen/nui_espacio_l" />
 
-            <TextView
-                android:id="@+id/tvAyudaQR"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="Gira el móvil hacia la ventanilla de Secretaría, o toca el código, para enseñarlo a pantalla completa.\nPellizca para ampliarlo; doble toque para volver."
-                android:textColor="#666666"
-                android:textSize="14sp" />
+                <!-- el contenedor recibe los toques del pinch: el QR ampliado no altera sus coordenadas -->
+                <FrameLayout
+                    android:id="@+id/flQR"
+                    android:layout_width="240dp"
+                    android:layout_height="240dp"
+                    android:layout_marginTop="@dimen/nui_espacio_l"
+                    android:clipChildren="false"
+                    android:translationZ="8dp">
+
+                    <ImageView
+                        android:id="@+id/ivQR"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/nui_superficie"
+                        android:scaleType="fitCenter" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvAyudaQR"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:gravity="center"
+                    android:text="Gira el móvil hacia la ventanilla de Secretaría, o toca el código, para enseñarlo a pantalla completa.\nPellizca para ampliarlo; doble toque para volver."
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvAvisoCalendario"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/nui_espacio_l"
                 android:gravity="center"
                 android:text="Has cambiado la cita: actualiza también tu calendario"
-                android:textColor="#D32F2F"
-                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                android:textColor="@color/nui_error"
                 android:visibility="gone" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCalendario"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/boton_redondeado"
-                android:text="📅 Añadir al calendario"
-                android:textColor="#FFFFFF"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:text="Añadir al calendario"
                 android:visibility="gone"
-                app:backgroundTint="@null" />
+                app:icon="@drawable/nui_ic_cita" />
         </LinearLayout>
-    </ScrollView>
+    </com.example.nuietsiit.ui.HojasPaginadas>
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

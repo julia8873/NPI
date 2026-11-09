@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Recuadro blanco con borde gris donde se firma (SolicitudTramite) -->
+<!-- Recuadro de papel con borde discontinuo donde se firma (SolicitudTramite) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#FFFFFF" />
+    <solid android:color="@color/nui_papel" />
     <stroke
-        android:width="2dp"
-        android:color="#CCCCCC"
+        android:width="@dimen/nui_borde_sello"
+        android:color="@color/nui_apagado"
         android:dashWidth="8dp"
         android:dashGap="4dp" />
-    <corners android:radius="12dp" />
+    <corners android:radius="@dimen/nui_radio_ficha" />
 </shape>

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- QR a pantalla completa por encima de todo el justificante (ver Justificante.mostrarCapaQR) -->
+<!-- QR a pantalla completa por encima de todo el justificante (ver Justificante.mostrarCapaQR).
+     Fondo blanco liso: lo tiene que leer el lector de la ventanilla. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingBottom="16dp"
+    android:paddingBottom="@dimen/nui_espacio_l"
     android:visibility="gone">
 
     <ImageView
@@ -24,15 +25,14 @@
         android:id="@+id/tvCapaCodigo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#000000"
-        android:textSize="28sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Codigo"
+        android:textSize="@dimen/nui_texto_xl" />
 
     <TextView
         android:id="@+id/tvCapaEstado"
+        style="@style/Widget.Nui.Sello"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:layout_marginTop="@dimen/nui_espacio_s"
         android:visibility="gone" />
 </LinearLayout>

@@ -24,12 +24,12 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.util.CalendarioUtil;
+import com.example.nuietsiit.ui.HojasPaginadas;
 import com.example.nuietsiit.util.DetectorEnsenar;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.GeneradorQR;
@@ -45,7 +45,7 @@ import com.google.android.material.appbar.MaterialToolbar;
  * Enseñar: girar el móvil hacia la ventanilla (o tocar el QR) lo muestra a pantalla completa. Se quita al
  * tocarlo, con atrás o, tras haberlo girado, al inclinarlo hacia uno mismo. No en citas canceladas o pasadas.
  */
-public class Justificante extends BaseActivity {
+public class Justificante extends PantallaSecretaria {
 
     private static final float ESCALA_MIN = 1f;
     private static final float ESCALA_MAX = 3f;
@@ -57,7 +57,7 @@ public class Justificante extends BaseActivity {
     private float escalaQR = ESCALA_MIN;
     private String codigoQR;
     private String estadoCapa;
-    private int colorEstadoCapa;
+    private int colorEstadoCapa; // recurso de color
     private View capaQR;
     private ImageView ivCapaQR;
     private DetectorEnsenar detectorEnsenar;
@@ -67,6 +67,8 @@ public class Justificante extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.justificante);
+        // aquí girar el móvil es enseñar el QR: las hojas solo se pasan deslizando o tocando el pie
+        ((HojasPaginadas) findViewById(R.id.scroll)).setPermitirInclinar(false);
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
@@ -101,9 +103,9 @@ public class Justificante extends BaseActivity {
         TextView tvEstado = findViewById(R.id.tvEstado);
         boolean vigente = false;
         if (Cita.CANCELADA.equals(cita.estado)) {
-            mostrarEstado(tvEstado, "Cita cancelada", 0xFFD32F2F);
+            mostrarEstado(tvEstado, "Cancelada", R.color.nui_error);
         } else if (!cita.esFutura()) {
-            mostrarEstado(tvEstado, "Cita pasada", 0xFF666666);
+            mostrarEstado(tvEstado, "Pasada", R.color.nui_apagado);
         } else {
             mostrarBotonCalendario(cita);
             vigente = true;
@@ -124,17 +126,17 @@ public class Justificante extends BaseActivity {
         findViewById(R.id.tvHora).setVisibility(View.GONE);
 
         String estado = solicitud.estado();
-        estadoCapa = "Estado: " + estado;
+        estadoCapa = estado;
         colorEstadoCapa = Solicitud.colorEstado(estado);
         mostrarEstado(findViewById(R.id.tvEstado), estadoCapa, colorEstadoCapa);
 
         mostrarQR(solicitud.codigo());
     }
 
-    private void mostrarEstado(TextView tv, String texto, int color) {
+    // el estado es un sello estampado sobre el resguardo, del color del estado
+    private void mostrarEstado(TextView tv, String texto, int colorRes) {
         tv.setVisibility(View.VISIBLE);
-        tv.setText(texto);
-        tv.setTextColor(color);
+        Pastilla.sellar(tv, texto, colorRes);
     }
 
     // solo citas activas y futuras. Se abre la app de calendario para que el usuario confirme
@@ -224,7 +226,7 @@ public class Justificante extends BaseActivity {
         ((TextView) capaQR.findViewById(R.id.tvCapaCodigo)).setText(codigoQR);
         if (estadoCapa != null) mostrarEstado(capaQR.findViewById(R.id.tvCapaEstado), estadoCapa, colorEstadoCapa);
         capaQR.setContentDescription("Código QR a pantalla completa, " + codigoQR
-                + (estadoCapa != null ? ", " + estadoCapa : "") + ". Toca para volver.");
+                + (estadoCapa != null ? ", estado: " + estadoCapa : "") + ". Toca para volver.");
         capaQR.setOnClickListener(v -> ocultarCapaQR());
         addContentView(capaQR, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
