@@ -158,7 +158,8 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (usaAgitar() && mSensorManager != null && mAccelerometer != null) {
+        // siempre se registra: usaAgitar() se mira al agitar porque puede cambiar sin pasar por aquí
+        if (mSensorManager != null && mAccelerometer != null) {
             mSensorManager.registerListener(mShakeDetector, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         }
     }

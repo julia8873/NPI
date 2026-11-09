@@ -304,11 +304,21 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
     private void escucharGps(boolean escuchar) {
         if (gps == null) return;
         gps.removeUpdates(this);
-        if (!escuchar || ContextCompat.checkSelfPermission(act, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) return;
+        if (!escuchar) return;
+        // con ubicación precisa el GPS; si solo dieron la aproximada, la de red (peor, pero no se queda buscando)
+        String proveedor;
+        if (ContextCompat.checkSelfPermission(act, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            proveedor = LocationManager.GPS_PROVIDER;
+        } else if (ContextCompat.checkSelfPermission(act, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            proveedor = LocationManager.NETWORK_PROVIDER;
+        } else {
+            return;
+        }
         try {
-            gps.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this, Looper.getMainLooper());
-            Location ultima = gps.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            gps.requestLocationUpdates(proveedor, 1000, 0, this, Looper.getMainLooper());
+            Location ultima = gps.getLastKnownLocation(proveedor);
             if (ultima != null && posicion == null) onLocationChanged(ultima);
         } catch (IllegalArgumentException | SecurityException e) {
             // sin proveedor GPS: queda la simulación

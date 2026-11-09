@@ -41,7 +41,10 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".activities.main.AjustesCuenta" />
         <activity android:name=".activities.secciones.Noticias" />
-        <activity android:name=".activities.secciones.mapa.Mapa" />
+        <!-- Al girar el móvil no se recrea: se mantienen la guía, el panel de ruta y el viaje -->
+        <activity
+            android:name=".activities.secciones.mapa.Mapa"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden" />
         <!-- Visor de ruta: foto según hacia dónde mire el usuario (brújula) -->
         <activity
             android:name=".activities.secciones.mapa.VisorRuta"

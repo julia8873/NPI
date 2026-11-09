@@ -8,6 +8,7 @@ import com.example.nuietsiit.data.DBHelper;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -56,7 +57,7 @@ public final class ProximaClase {
     public static ProximaClase de(Context ctx, String correo, Calendar ahora) {
         if (correo == null || correo.isEmpty()) return null;
         int dia = ((ahora.get(Calendar.DAY_OF_WEEK) + 5) % 7) + 1; // 1 = lunes ... 7 = domingo
-        String hora = String.format("%02d:%02d", ahora.get(Calendar.HOUR_OF_DAY), ahora.get(Calendar.MINUTE));
+        String hora = String.format(Locale.ROOT, "%02d:%02d", ahora.get(Calendar.HOUR_OF_DAY), ahora.get(Calendar.MINUTE));
 
         AcademicoDB academico = new AcademicoDB(DBHelper.getInstance(ctx));
         try (Cursor c = academico.listarSesionesDe(correo, LocalizadorUsuario.cursoAcademico(ahora))) {

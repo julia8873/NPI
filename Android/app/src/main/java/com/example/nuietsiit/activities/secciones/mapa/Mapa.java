@@ -186,6 +186,11 @@ public class Mapa extends BaseActivity {
 
     // --- "¿A dónde vas?" (InicioMapa): destino del viaje y espera del GPS ---
     private DestinoViaje viaje;
+    private boolean sinPedirUbicacion = false; // "En otro sitio": ya eligió a mano, el panel no pide la ubicación
+    private Runnable llegadaPendiente;         // "Has llegado" → seguir dentro (se cancela si cierra la guía)
+    // hora de la app: la simulada si se ha cambiado, si no la real
+    private final java.util.function.Supplier<Calendar> reloj =
+            () -> ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
     private boolean viajePendientePermiso = false;
     private static final int ESPERA_GPS_VIAJE_MS = 5000;
     private static final int PASO_GPS_VIAJE_MS = 500;
@@ -435,12 +440,15 @@ public class Mapa extends BaseActivity {
 
     private void mostrarInicio() {
         if (guiaRutaExterior != null && guiaRutaExterior.activa()) return;
-        Calendar ahora = ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
+        Calendar ahora = reloj.get();
         InicioMapa.mostrar(this, ProximaClase.de(this, SesionUtil.correo(getIntent()), ahora), ahora,
                 titulosMarcadores(), tienePermisoUbicacion(), new InicioMapa.Acciones() {
                     @Override public void ir(DestinoViaje destino) { viajar(destino); }
 
-                    @Override public void soloMapa() {}
+                    // como antes de "¿A dónde vas?": se ofrece la ubicación al quedarse en el mapa
+                    @Override public void soloMapa() {
+                        if (!tienePermisoUbicacion()) preguntaPermisoUbicacion();
+                    }
                 });
     }
 
@@ -537,7 +545,9 @@ public class Mapa extends BaseActivity {
         if (panelRutaExterior != null) {
             textos.add("📍 En otro sitio (mantén pulsado en el mapa)");
             opciones.add(() -> {
+                sinPedirUbicacion = true;
                 panelRutaExterior.abrirHacia(destino.idEdificio);
+                sinPedirUbicacion = false;
                 Toast.makeText(this, "Mantén pulsado en el mapa el sitio donde estás", Toast.LENGTH_LONG).show();
             });
         }
@@ -545,12 +555,20 @@ public class Mapa extends BaseActivity {
                 .setTitle("No te encuentro · ¿dónde estás?")
                 .setItems(textos.toArray(new String[0]), (d, i) -> opciones.get(i).run())
                 .setNegativeButton("Cancelar", (d, w) -> viaje = null)
+                .setOnCancelListener(d -> viaje = null) // tocar fuera o atrás también lo descarta
                 .show();
     }
 
+    /** Marcador cuyo título lleva ese sitio entero ("Aula 1.1" no casa con "Aula 1.10"). */
     private Marcador marcadorQueContiene(String buscado) {
         for (Marcador m : listaMarcadores) {
-            if (m.getTitulo().contains(buscado)) return m;
+            String titulo = m.getTitulo();
+            int i = titulo.indexOf(buscado);
+            int fin = i + buscado.length();
+            if (i >= 0 && (fin == titulo.length()
+                    || !(Character.isDigit(titulo.charAt(fin)) || titulo.charAt(fin) == '.'))) {
+                return m;
+            }
         }
         return null;
     }
@@ -562,19 +580,16 @@ public class Mapa extends BaseActivity {
     }
 
     private java.time.LocalDateTime horaActual() {
-        Calendar ahora = ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
-        return java.time.LocalDateTime.ofInstant(ahora.toInstant(), java.time.ZoneId.systemDefault());
+        return java.time.LocalDateTime.ofInstant(reloj.get().toInstant(), java.time.ZoneId.systemDefault());
     }
 
     private void rutaInteriorDesdeEntrada(String buscado) {
-        for (Marcador m : listaMarcadores) {
-            if (!m.getTitulo().contains(buscado)) continue;
-            if (panelRutaExterior != null) panelRutaExterior.cerrar(); // también termina la guía
-            if (toggleGroupModo != null) toggleGroupModo.check(R.id.btnModoPlanos);
-            destinoRuta = m;
-            fijarOrigen(RegistroPuntosQR.entrada());
-            return;
-        }
+        Marcador m = marcadorQueContiene(buscado);
+        if (m == null) return;
+        if (panelRutaExterior != null) panelRutaExterior.cerrar(); // también termina la guía
+        if (toggleGroupModo != null) toggleGroupModo.check(R.id.btnModoPlanos);
+        destinoRuta = m;
+        fijarOrigen(RegistroPuntosQR.entrada());
     }
 
     private void comprobarAutoRutaComedor() {
@@ -1068,12 +1083,11 @@ public class Mapa extends BaseActivity {
         redTransporte = CapaLugares.cargarRed(this);
         if (redTransporte != null) {
             CapaLugares.instalar(mapView, redTransporte, this::alTocarLugar);
-            java.util.function.Supplier<Calendar> reloj =
-                    () -> ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
             panelRutaExterior = new PanelRutaExterior(this, findViewById(R.id.flContenedorMapa), mapView,
                     redTransporte, SesionUtil.correo(getIntent()), reloj,
                     () -> myLocationOverlay != null ? myLocationOverlay.getMyLocation() : null,
                     () -> {
+                        if (sinPedirUbicacion) return;
                         if (tienePermisoUbicacion()) activarUbicacionUsuario();
                         else preguntaPermisoUbicacion();
                     });
@@ -1083,8 +1097,14 @@ public class Mapa extends BaseActivity {
             guiaRutaExterior.conPlanificador(new PlanificadorRuta(redTransporte));
             panelRutaExterior.alEmpezar(plan -> guiaRutaExterior.empezar(plan, viajeHacia(plan.destino.id)));
             // Al llegar se deja ver "Has llegado" un momento y se sigue al sitio de dentro (o se pregunta)
-            guiaRutaExterior.alLlegar((idLugar, hora) -> handler.postDelayed(
-                    () -> alLlegarConGuia(idLugar, hora), 1500));
+            // (si mientras tanto cierra la guía, ya no se sigue)
+            guiaRutaExterior.alLlegar((idLugar, hora) -> {
+                handler.removeCallbacks(llegadaPendiente);
+                llegadaPendiente = () -> {
+                    if (!isFinishing() && guiaRutaExterior.activa()) alLlegarConGuia(idLugar, hora);
+                };
+                handler.postDelayed(llegadaPendiente, 1500);
+            });
         } else {
             Marker etsiitMarker = new Marker(mapView);
             etsiitMarker.setPosition(etsiitPoint);
@@ -1804,6 +1824,13 @@ public class Mapa extends BaseActivity {
             myLocationOverlay.disableMyLocation();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null); // esperas del GPS, llegada de la guía…
+        super.onDestroy();
+    }
+
     private String obtenerCorreoUsuarioActual() {
         if (getIntent() != null && getIntent().hasExtra("CORREO")) {
             String c = getIntent().getStringExtra("CORREO");
