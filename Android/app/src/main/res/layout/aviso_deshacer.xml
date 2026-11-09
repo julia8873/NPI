@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aviso de Deshacer (AvisoDeshacer): nota de papel flotante con la mecha del tiempo que queda -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Nui.Aviso"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/ivAvisoIcono"
+            android:layout_width="@dimen/nui_toque_min"
+            android:layout_height="@dimen/nui_toque_min"
+            android:background="@drawable/nui_tesela"
+            android:backgroundTint="@color/nui_granada_tinte"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/nui_espacio_m"
+            android:src="@drawable/nui_ic_cita"
+            android:tint="@color/nui_granada" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAvisoEtiqueta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
+                android:textColor="@color/nui_granada" />
+
+            <TextView
+                android:id="@+id/tvAvisoTexto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xs"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                android:textColor="@color/nui_tinta" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Mecha que se consume hacia el botón mientras se puede deshacer -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/vAvisoMecha"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/nui_mecha"
+            android:layout_marginEnd="@dimen/nui_espacio_m"
+            android:layout_weight="1"
+            android:background="@color/nui_resaltado"
+            android:importantForAccessibility="no" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAvisoDeshacer"
+            style="@style/Widget.Nui.Boton.Secundario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/nui_toque_min"
+            android:text="Deshacer" />
+    </LinearLayout>
+</LinearLayout>

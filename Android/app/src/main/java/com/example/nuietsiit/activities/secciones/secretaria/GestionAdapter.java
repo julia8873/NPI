@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
@@ -59,11 +61,31 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         void alPulsar(Gestion gestion);
     }
 
+    /** El resguardo de una cita se ha rasgado del todo: hay que cancelarla. */
+    public interface OnRasgar {
+        void alRasgar(int posicion, View vista);
+    }
+
     private List<Gestion> gestiones = new ArrayList<>();
     private final OnGestionClick listener;
+    @Nullable private final OnRasgar alRasgar;
+    private boolean ensenarTijeras; // la primera cita cancelable que se pinte enseña el gesto
 
-    public GestionAdapter(OnGestionClick listener) {
+    public GestionAdapter(OnGestionClick listener, @Nullable OnRasgar alRasgar) {
         this.listener = listener;
+        this.alRasgar = alRasgar;
+    }
+
+    /** Las tijeras recorrerán la línea de la próxima cita cancelable que se pinte (una sola vez). */
+    public void ensenarTijeras() {
+        ensenarTijeras = true;
+        notifyDataSetChanged();
+    }
+
+    /** ¿Hay alguna cita con resguardo que rasgar? */
+    public boolean hayCancelables() {
+        for (Gestion g : gestiones) if (g.cancelable) return true;
+        return false;
     }
 
     public void setGestiones(List<Gestion> nuevas) {
@@ -95,7 +117,26 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         h.tvDetalle.setText(g.detalle);
         // el estado es un sello estampado en la ficha, del color del estado
         Pastilla.sellar(h.tvEstado, g.estado, g.colorEstado);
-        h.itemView.setOnClickListener(v -> listener.alPulsar(g));
+        h.ficha.setOnClickListener(v -> listener.alPulsar(g));
+
+        boolean rasgable = g.cancelable && alRasgar != null;
+        h.resguardo.reiniciar();
+        h.resguardo.setVisibility(rasgable ? View.VISIBLE : View.GONE);
+        h.resguardo.alRasgar(rasgable ? () -> {
+            int pos = h.getAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) alRasgar.alRasgar(pos, h.itemView);
+        } : null);
+        if (h.accionCancelar != View.NO_ID) ViewCompat.removeAccessibilityAction(h.ficha, h.accionCancelar);
+        h.accionCancelar = rasgable
+                ? ViewCompat.addAccessibilityAction(h.ficha, "Cancelar cita (rasgar el resguardo)", (v, a) -> {
+                    h.resguardo.completar();
+                    return true;
+                })
+                : View.NO_ID;
+        if (rasgable && ensenarTijeras) {
+            ensenarTijeras = false;
+            h.resguardo.ensenarTijeras();
+        }
     }
 
     @Override
@@ -106,9 +147,14 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
     static class Holder extends RecyclerView.ViewHolder {
         final TextView tvCodigo, tvTitulo, tvDetalle;
         final TextView tvEstado;
+        final View ficha;
+        final ResguardoRasgable resguardo;
+        int accionCancelar = View.NO_ID;
 
         Holder(View v) {
             super(v);
+            ficha = v.findViewById(R.id.ficha);
+            resguardo = v.findViewById(R.id.resguardo);
             tvCodigo = v.findViewById(R.id.tvCodigo);
             tvTitulo = v.findViewById(R.id.tvTitulo);
             tvDetalle = v.findViewById(R.id.tvDetalle);

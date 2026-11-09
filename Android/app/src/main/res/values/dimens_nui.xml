@@ -28,6 +28,7 @@
     <dimen name="nui_libro_canto">5dp</dimen>   <!-- padding fin/abajo de un libro: filete 2dp + sombra 3dp -->
     <dimen name="nui_icono_objeto">44dp</dimen> <!-- ilustraciones de objetos (rosa, carpeta, turno) -->
     <dimen name="nui_sombra_flotante">3dp</dimen> <!-- sombra dura de tinta en flotantes y elegidos -->
+    <dimen name="nui_mecha">3dp</dimen> <!-- barra de tiempo que se consume en un aviso (Deshacer) -->
 
     <!-- Escala tipográfica -->
     <dimen name="nui_texto_xl">32sp</dimen>     <!-- título de sección -->

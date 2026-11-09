@@ -127,6 +127,14 @@
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
             </LinearLayout>
 
+            <!-- Resguardo con línea perforada (solo citas vigentes): rasgarlo cancela la cita -->
+            <com.example.nuietsiit.activities.secciones.secretaria.ResguardoRasgable
+                android:id="@+id/resguardo"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="-6dp"
+                android:visibility="gone" />
+
             <TextView
                 android:id="@+id/tvAvisoCalendario"
                 android:layout_width="wrap_content"

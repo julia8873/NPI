@@ -242,4 +242,13 @@
         <item name="android:layerType">software</item><!-- las líneas discontinuas no se pintan con aceleración -->
         <item name="android:importantForAccessibility">no</item>
     </style>
+
+    <!-- Aviso: nota de papel flotante (Deshacer). Lo monta AvisoDeshacer dentro de un Snackbar. -->
+    <style name="Widget.Nui.Aviso">
+        <item name="android:background">@drawable/nui_aviso</item>
+        <item name="android:paddingStart">@dimen/nui_espacio_m</item>
+        <item name="android:paddingTop">@dimen/nui_espacio_m</item>
+        <item name="android:paddingEnd">15dp</item><!-- +3dp de la sombra -->
+        <item name="android:paddingBottom">15dp</item>
+    </style>
 </resources>

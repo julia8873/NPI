@@ -1,10 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
@@ -14,9 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -30,7 +23,6 @@ import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -39,19 +31,19 @@ import java.util.List;
 
 /**
  * Mis citas y solicitudes con su estado. Pestañas "Citas" y "Solicitudes".
- * Citas: deslizar a la izquierda = cancelar (con "Deshacer"). Tocar cualquiera = justificante.
+ * Citas: rasgar el resguardo por la línea perforada = cancelar (con "Deshacer" y su tiempo). Tocar cualquiera = justificante.
  */
 public class MisGestiones extends PantallaSecretaria {
 
     private static final int PAGINA_CITAS = 0;
     private static final int PAGINA_SOLICITUDES = 1;
+    static final int DURACION_DESHACER = 8000; // ms
 
     private SecretariaDB db;
     private String correoUsuario;
 
     private final View[] paginas = new View[2]; // se rellenan al crear cada página (PaginasAdapter)
     private GestionAdapter citasAdapter, solicitudesAdapter;
-    private ItemTouchHelper deslizarParaCancelar;
     private InclinarParaPasar inclinar;
 
     @Override
@@ -68,19 +60,18 @@ public class MisGestiones extends PantallaSecretaria {
         correoUsuario = SesionUtil.correo(getIntent());
         RecienteUtil.guardar(this, MisGestiones.class, "Mis Gestiones", "Citas y solicitudes", null, null, 5);
 
-        citasAdapter = new GestionAdapter(this::abrirJustificante);
-        solicitudesAdapter = new GestionAdapter(this::abrirJustificante);
-        deslizarParaCancelar = new ItemTouchHelper(new DeslizarParaCancelar());
+        citasAdapter = new GestionAdapter(this::abrirJustificante, this::cancelarCita);
+        solicitudesAdapter = new GestionAdapter(this::abrirJustificante, null);
 
         ViewPager2 vp = findViewById(R.id.vpGestiones);
         vp.setAdapter(new PaginasAdapter());
         vp.setOffscreenPageLimit(1);
-        // el deslizamiento horizontal se reserva para cancelar citas; las pestañas se cambian tocándolas
+        // el arrastre horizontal se reserva para rasgar resguardos; las pestañas se cambian tocándolas
         vp.setUserInputEnabled(false);
         TabLayout tabs = findViewById(R.id.tabs);
         new TabLayoutMediator(tabs, vp,
                 (tab, pos) -> tab.setText(pos == PAGINA_CITAS ? "Citas" : "Solicitudes")).attach();
-        // el arrastre lateral es para las citas: de pestaña también se cambia inclinando el móvil (como los pasos)
+        // como el arrastre es para rasgar, de pestaña también se cambia inclinando el móvil (como los pasos)
         inclinar = new InclinarParaPasar(vp, sentido -> {
             int nueva = vp.getCurrentItem() + sentido;
             if (nueva < 0 || nueva >= paginas.length) return;
@@ -102,7 +93,6 @@ public class MisGestiones extends PantallaSecretaria {
         RecyclerView rv = vista.findViewById(R.id.rvGestiones);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(pagina == PAGINA_CITAS ? citasAdapter : solicitudesAdapter);
-        if (pagina == PAGINA_CITAS) deslizarParaCancelar.attachToRecyclerView(rv);
         paginas[pagina] = vista;
         actualizarVacio(pagina);
         return vista;
@@ -113,6 +103,8 @@ public class MisGestiones extends PantallaSecretaria {
         for (Cita c : db.getCitas(correoUsuario)) lista.add(GestionAdapter.Gestion.deCita(c));
         citasAdapter.setGestiones(lista);
         actualizarVacio(PAGINA_CITAS);
+        // la primera vez que hay algo que rasgar, las tijeras enseñan el gesto recorriendo la línea
+        if (citasAdapter.hayCancelables() && ResguardoRasgable.primeraVez(this)) citasAdapter.ensenarTijeras();
     }
 
     private void cargarSolicitudes() {
@@ -148,81 +140,22 @@ public class MisGestiones extends PantallaSecretaria {
             return;
         }
         if (!db.cancelarCita(g.id)) {
-            citasAdapter.notifyItemChanged(posicion); // vuelve a su sitio
+            citasAdapter.notifyItemChanged(posicion); // el resguardo vuelve entero
             return;
         }
-        vista.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         citasAdapter.quitar(posicion);
         actualizarVacio(PAGINA_CITAS);
-        Snackbar.make(findViewById(R.id.vpGestiones),
-                        "Cita " + g.codigo + " cancelada. Si la añadiste a tu calendario, bórrala también.",
-                        Snackbar.LENGTH_LONG)
-                .setAction("Deshacer", v -> deshacerCancelacion(g.id))
-                .setBackgroundTint(getColor(R.color.nui_tinta))
-                .setTextColor(getColor(R.color.nui_superficie))
-                .setActionTextColor(getColor(R.color.nui_resaltado))
-                .show();
+        AvisoDeshacer.mostrar(findViewById(R.id.vpGestiones), "Cita cancelada",
+                g.codigo + " · Si la añadiste a tu calendario, bórrala también.",
+                DURACION_DESHACER, () -> deshacerCancelacion(g.id));
     }
 
-    // mismas comprobaciones que al pedir cita: futura, franja libre y sin otra cita para ese motivo
     private void deshacerCancelacion(int idCita) {
-        Cita cita = db.getCita(idCita);
-        boolean recuperable = cita != null && cita.esFutura()
-                && !db.getHorasOcupadas(cita.fecha).contains(cita.hora)
-                && db.getCitaActiva(correoUsuario, cita.idProcedimiento) == null;
-        if (!recuperable || !db.reactivarCita(idCita)) {
+        if (!db.recuperarCita(correoUsuario, idCita)) {
             Toast.makeText(this, "Ya no se puede recuperar la cita", Toast.LENGTH_SHORT).show();
             return;
         }
         cargarCitas();
-    }
-
-    /** Deslizar una cita activa y futura a la izquierda la cancela; debajo asoma la tinta granada con "Cancelar cita". */
-    private class DeslizarParaCancelar extends ItemTouchHelper.SimpleCallback {
-        private final Paint fondo = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint texto = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final float densidad = getResources().getDisplayMetrics().density;
-
-        DeslizarParaCancelar() {
-            super(0, ItemTouchHelper.LEFT);
-            fondo.setColor(getColor(R.color.nui_granada));
-            texto.setColor(getColor(R.color.nui_superficie));
-            texto.setTextSize(getResources().getDimension(R.dimen.nui_texto_cuerpo));
-            texto.setTypeface(Typeface.create(ResourcesCompat.getFont(MisGestiones.this, R.font.nui_texto), Typeface.BOLD));
-            texto.setTextAlign(Paint.Align.RIGHT);
-        }
-
-        @Override
-        public int getSwipeDirs(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh) {
-            int pos = vh.getAdapterPosition();
-            if (pos == RecyclerView.NO_POSITION || !citasAdapter.get(pos).cancelable) return 0;
-            return super.getSwipeDirs(rv, vh);
-        }
-
-        @Override
-        public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                              @NonNull RecyclerView.ViewHolder destino) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direccion) {
-            int pos = vh.getAdapterPosition();
-            if (pos != RecyclerView.NO_POSITION) cancelarCita(pos, vh.itemView);
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                                float dX, float dY, int estado, boolean activo) {
-            if (estado == ItemTouchHelper.ACTION_STATE_SWIPE && dX < 0) {
-                View v = vh.itemView;
-                float radio = getResources().getDimension(R.dimen.nui_radio_ficha); // mismo radio que la ficha
-                c.drawRoundRect(new RectF(v.getLeft(), v.getTop(), v.getRight(), v.getBottom()), radio, radio, fondo);
-                float y = (v.getTop() + v.getBottom()) / 2f - (texto.descent() + texto.ascent()) / 2f;
-                c.drawText("Cancelar cita", v.getRight() - 24 * densidad, y, texto);
-            }
-            super.onChildDraw(c, rv, vh, dX, dY, estado, activo);
-        }
     }
 
     /** Página 0 = citas, 1 = solicitudes; cada posición tiene su propio tipo de vista. */

@@ -1,52 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Una cita o solicitud en Mis gestiones: ficha con su número en la cabecera y el estado sellado -->
+<!-- Una cita o solicitud en Mis gestiones: ficha con su número en la cabecera y el estado sellado.
+     Las citas que se pueden cancelar llevan debajo el resguardo con la línea perforada (rasgarlo = cancelar). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.Nui.Ficha"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="@dimen/nui_espacio_xs"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    android:orientation="horizontal">
+    android:clipChildren="false"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/ficha"
+        style="@style/Widget.Nui.Ficha"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:orientation="horizontal">
 
-        <!-- Cabecera de la ficha: número de cita o de solicitud -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Cabecera de la ficha: número de cita o de solicitud -->
+            <TextView
+                android:id="@+id/tvCodigo"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Nui.Codigo"
+                android:textColor="@color/nui_granada" />
+
+            <TextView
+                android:id="@+id/tvTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+            <TextView
+                android:id="@+id/tvDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+        </LinearLayout>
+
+        <!-- Estado: sello del color del estado (GestionAdapter) -->
         <TextView
-            android:id="@+id/tvCodigo"
+            android:id="@+id/tvEstado"
+            style="@style/Widget.Nui.Sello"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/TextAppearance.Nui.Codigo"
-            android:textColor="@color/nui_granada" />
-
-        <TextView
-            android:id="@+id/tvTitulo"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_m"
-            android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
-
-        <TextView
-            android:id="@+id/tvDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+            android:layout_gravity="bottom"
+            android:layout_marginStart="@dimen/nui_espacio_s"
+            android:textSize="@dimen/nui_texto_etiqueta" />
     </LinearLayout>
 
-    <!-- Estado: sello del color del estado (GestionAdapter) -->
-    <TextView
-        android:id="@+id/tvEstado"
-        style="@style/Widget.Nui.Sello"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginStart="@dimen/nui_espacio_s"
-        android:textSize="@dimen/nui_texto_etiqueta" />
+    <!-- Resguardo con línea perforada: arrastrar el dedo por ella lo rasga y cancela la cita -->
+    <com.example.nuietsiit.activities.secciones.secretaria.ResguardoRasgable
+        android:id="@+id/resguardo"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="-6dp"
+        android:visibility="gone" />
 </LinearLayout>

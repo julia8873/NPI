@@ -176,9 +176,19 @@ public class SecretariaDB {
         return cambiarEstadoCita(idCita, Cita.CANCELADA);
     }
 
-    // "Deshacer" tras cancelar deslizando
+    // "Deshacer" tras cancelar rasgando el resguardo
     public boolean reactivarCita(int idCita) {
         return cambiarEstadoCita(idCita, Cita.ACTIVA);
+    }
+
+    /** Deshacer una cancelación con las mismas comprobaciones que al pedir cita: futura, franja libre y sin
+     *  otra cita activa para ese motivo. false = ya no se puede recuperar. */
+    public boolean recuperarCita(String correoUsuario, int idCita) {
+        Cita cita = getCita(idCita);
+        boolean recuperable = cita != null && correoUsuario.equals(cita.correoUsuario) && cita.esFutura()
+                && !getHorasOcupadas(cita.fecha).contains(cita.hora)
+                && getCitaActiva(correoUsuario, cita.idProcedimiento) == null;
+        return recuperable && reactivarCita(idCita);
     }
 
     // citas activas del usuario: futuras primero (la más próxima arriba), después las pasadas

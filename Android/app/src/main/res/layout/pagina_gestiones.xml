@@ -8,6 +8,7 @@
         android:id="@+id/rvGestiones"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="false"
         android:clipToPadding="false"
         android:paddingHorizontal="@dimen/nui_espacio_l"
         android:paddingVertical="@dimen/nui_espacio_m" />

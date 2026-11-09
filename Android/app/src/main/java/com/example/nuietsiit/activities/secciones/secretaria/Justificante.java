@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -44,6 +45,7 @@ import com.google.android.material.appbar.MaterialToolbar;
  * QR: pellizcar amplía de 1× a 3× (sin pasar del ancho de pantalla), doble toque vuelve a 1×.
  * Enseñar: girar el móvil hacia la ventanilla (o tocar el QR) lo muestra a pantalla completa. Se quita al
  * tocarlo, con atrás o, tras haberlo girado, al inclinarlo hacia uno mismo. No en citas canceladas o pasadas.
+ * Citas vigentes: rasgar el resguardo de abajo por la línea perforada = cancelar (con Deshacer).
  */
 public class Justificante extends PantallaSecretaria {
 
@@ -62,6 +64,9 @@ public class Justificante extends PantallaSecretaria {
     private ImageView ivCapaQR;
     private DetectorEnsenar detectorEnsenar;
     private OnBackPressedCallback atrasCierraCapa;
+    private boolean qrAnulado; // la cita se acaba de cancelar aquí: el QR ya no vale
+    private SecretariaDB db;
+    private String correoUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,10 +80,10 @@ public class Justificante extends PantallaSecretaria {
         getSupportActionBar().setTitle("Justificante");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String correoUsuario = SesionUtil.correo(getIntent());
+        correoUsuario = SesionUtil.correo(getIntent());
 
         // solo se enseñan justificantes del usuario que los pide
-        SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
+        db = new SecretariaDB(DBHelper.getInstance(this));
         Cita cita = db.getCita(getIntent().getIntExtra("idCita", -1));
         Solicitud solicitud = db.getSolicitud(getIntent().getIntExtra("idSolicitud", -1));
         if (cita != null && correoUsuario.equals(cita.correoUsuario)) {
@@ -108,6 +113,7 @@ public class Justificante extends PantallaSecretaria {
             mostrarEstado(tvEstado, "Pasada", R.color.nui_apagado);
         } else {
             mostrarBotonCalendario(cita);
+            prepararResguardo(cita);
             vigente = true;
         }
 
@@ -156,6 +162,43 @@ public class Justificante extends PantallaSecretaria {
         if (getIntent().getBooleanExtra("citaCambiada", false)) {
             findViewById(R.id.tvAvisoCalendario).setVisibility(View.VISIBLE);
         }
+    }
+
+    private void prepararResguardo(Cita cita) {
+        ResguardoRasgable resguardo = findViewById(R.id.resguardo);
+        resguardo.setVisibility(View.VISIBLE);
+        resguardo.alRasgar(() -> cancelarCita(cita));
+        // TalkBack: el resguardo se anuncia y se cancela con una acción, sin gesto
+        resguardo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        resguardo.setContentDescription("Resguardo de la cita. Rásgalo por la línea perforada para cancelarla.");
+        ViewCompat.addAccessibilityAction(resguardo, "Cancelar cita", (v, a) -> {
+            resguardo.completar();
+            return true;
+        });
+        if (ResguardoRasgable.primeraVez(this)) resguardo.post(resguardo::ensenarTijeras);
+    }
+
+    private void cancelarCita(Cita cita) {
+        Cita actual = db.getCita(cita.id);
+        if (actual == null || !actual.esFutura() || !db.cancelarCita(cita.id)) {
+            Toast.makeText(this, "Esta cita ya no se puede cancelar", Toast.LENGTH_SHORT).show();
+            recreate();
+            return;
+        }
+        // el QR deja de parecer válido en el acto: apagado, sello de cancelada y sin enseñarlo a pantalla completa
+        qrAnulado = true;
+        ocultarCapaQR();
+        mostrarEstado(findViewById(R.id.tvEstado), "Cancelada", R.color.nui_error);
+        findViewById(R.id.btnCalendario).setVisibility(View.GONE);
+        findViewById(R.id.tvAvisoCalendario).setVisibility(View.GONE);
+        if (ivQR != null) ivQR.animate().alpha(0.15f).setDuration(300).start();
+        ((TextView) findViewById(R.id.tvAyudaQR)).setText("Cita cancelada: este código ya no vale.");
+        AvisoDeshacer.mostrar(findViewById(R.id.scroll), "Cita cancelada",
+                cita.codigo() + " · Si la añadiste a tu calendario, bórrala también.",
+                MisGestiones.DURACION_DESHACER, () -> {
+                    if (db.recuperarCita(correoUsuario, cita.id)) recreate(); // vuelve el justificante vigente
+                    else Toast.makeText(this, "Ya no se puede recuperar la cita", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void mostrarQR(String codigo) {
@@ -256,7 +299,7 @@ public class Justificante extends PantallaSecretaria {
     }
 
     private void mostrarCapaQR() {
-        if (capaQR.getVisibility() == View.VISIBLE) return;
+        if (qrAnulado || capaQR.getVisibility() == View.VISIBLE) return;
         // el toque simple se confirma con retraso: puede llegar cuando ya se ha salido de la pantalla
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) return;
         if (ivCapaQR.getDrawable() == null) {
