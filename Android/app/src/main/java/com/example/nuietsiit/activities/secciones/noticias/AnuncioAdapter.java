@@ -17,7 +17,7 @@ import com.google.android.material.card.MaterialCardView;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Pinta cada anuncio con el diseño de item_anuncio.xml */
+/** Páginas del carrusel de Noticias (pagina_anuncio.xml), una por anuncio. */
 public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> {
 
     public interface OnAnuncioClick {
@@ -46,7 +46,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_anuncio, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.pagina_anuncio, parent, false);
         return new Holder(v);
     }
 
@@ -63,12 +63,11 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         // Urgentes: borde rojo más grueso y etiqueta
         h.tvUrgente.setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
         h.card.setStrokeColor(a.esUrgente() ? ROJO : NARANJA);
-        h.card.setStrokeWidth(Math.round((a.esUrgente() ? 2 : 1) * densidad));
+        h.card.setStrokeWidth(Math.round((a.esUrgente() ? 3 : 1) * densidad));
 
-        // No leídos: título en negrita + puntito naranja. Leídos: algo más apagados
+        // No leídos: puntito naranja. Leídos: título normal
         h.tvTitulo.setTypeface(null, a.leido ? Typeface.NORMAL : Typeface.BOLD);
-        h.vNoLeido.setVisibility(a.leido ? View.GONE : View.VISIBLE);
-        h.itemView.setAlpha(a.leido ? 0.7f : 1f);
+        h.vNoLeido.setVisibility(a.leido ? View.INVISIBLE : View.VISIBLE);
 
         h.itemView.setOnClickListener(v -> listener.alPulsar(a));
     }

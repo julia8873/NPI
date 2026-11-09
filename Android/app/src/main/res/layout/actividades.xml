@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Actividades sin scroll: una tarjeta grande cada vez (mazo), con botones ✕ / ✓ debajo -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -33,7 +34,7 @@
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:scrollbars="none">
 
             <com.google.android.material.chip.ChipGroup
@@ -46,29 +47,254 @@
         </HorizontalScrollView>
     </LinearLayout>
 
+    <!-- Zona del mazo: ocupa el espacio que queda libre -->
     <FrameLayout
+        android:id="@+id/zonaMazo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="8dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvActividades"
+        <!-- La carta actual (se rellena por código con la actividad que toque) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/carta"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="16dp" />
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="6dp"
+            app:strokeColor="#FFE0CC"
+            app:strokeWidth="1dp">
 
-        <TextView
-            android:id="@+id/tvVacio"
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <!-- Cabecera del color del tipo de actividad -->
+                    <LinearLayout
+                        android:id="@+id/cabeceraCarta"
+                        android:layout_width="match_parent"
+                        android:layout_height="130dp"
+                        android:background="#FF8C42"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvEmojiCarta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="48sp" />
+
+                        <TextView
+                            android:id="@+id/tvTipoCarta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:id="@+id/tvCuandoCarta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#FF8C42"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvTituloCarta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:ellipsize="end"
+                            android:maxLines="3"
+                            android:textColor="#000000"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvDescCarta"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:lineSpacingExtra="3dp"
+                            android:textColor="#333333"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvExtraCarta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/tvInscritoCarta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="✓ Estás apuntado"
+                            android:textColor="#2E7D32"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center"
+                            android:text="Toca la tarjeta para ver todos los detalles"
+                            android:textColor="#999999"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- "Sellos" que aparecen al arrastrar la carta -->
+                <TextView
+                    android:id="@+id/selloSi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="24dp"
+                    android:alpha="0"
+                    android:background="@drawable/sello"
+                    android:backgroundTint="#2E7D32"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:rotation="-15"
+                    android:text="ME APUNTO"
+                    android:textColor="#2E7D32"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/selloNo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="24dp"
+                    android:alpha="0"
+                    android:background="@drawable/sello"
+                    android:backgroundTint="#757575"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:rotation="15"
+                    android:text="PASO"
+                    android:textColor="#757575"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Cuando no hay cartas (filtro vacío o se han visto todas) -->
+        <LinearLayout
+            android:id="@+id/vacio"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:paddingHorizontal="32dp"
-            android:text="No hay actividades que coincidan."
-            android:textColor="#000000"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvVacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingHorizontal="24dp"
+                android:textColor="#000000"
+                android:textSize="16sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReiniciar"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="↺ Volver a empezar"
+                android:textColor="#FF8C42"
+                app:strokeColor="#FF8C42" />
+        </LinearLayout>
     </FrameLayout>
+
+    <!-- Botonera: anterior · paso · me apunto -->
+    <LinearLayout
+        android:id="@+id/botonera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAnterior"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Actividad anterior"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="↺"
+            android:textColor="#FF8C42"
+            android:textSize="20sp"
+            app:backgroundTint="#FFF1E6"
+            app:cornerRadius="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPasar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginHorizontal="24dp"
+            android:contentDescription="Pasar"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="✕"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            app:backgroundTint="#9E9E9E"
+            app:cornerRadius="32dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnApuntar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="Apuntarme"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="✓"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            app:backgroundTint="#2E7D32"
+            app:cornerRadius="32dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvContador"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:textColor="#999999"
+        android:textSize="12sp" />
 </LinearLayout>

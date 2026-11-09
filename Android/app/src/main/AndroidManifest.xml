@@ -88,6 +88,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/rutas_archivos" />
         </provider>
+        <!-- Alarma de "sal ya para llegar a clase" (Miguel) -->
+        <receiver
+            android:name=".util.AvisoSalidaClase$Receptor"
+            android:exported="false" />
     </application>
 
 </manifest>

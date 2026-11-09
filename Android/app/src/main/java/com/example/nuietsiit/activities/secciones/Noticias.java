@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -31,25 +31,30 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Pantalla de Noticias: anuncios generales ordenados por prioridad y fecha.
- * - Los urgentes salen arriba con borde rojo.
- * - Se recuerda qué avisos has leído.
+ * Pantalla de Noticias SIN SCROLL: carrusel horizontal con una tarjeta grande por aviso.
+ * - Los urgentes van primero, con borde rojo.
+ * - Un aviso cuenta como leído si te quedas en él un momento o lo abres entero.
+ * - Tocar la tarjeta = aviso completo en una hoja (con su enlace si tiene).
  */
 public class Noticias extends BaseActivity {
 
     private static final String FILTRO_NO_LEIDOS = "__noleidos";
     private static final int ROJO = 0xFFD32F2F;
     private static final int NARANJA = 0xFFFF8C42;
+    /** Tiempo mirando una tarjeta para que cuente como leída. */
+    private static final long MS_PARA_LEIDO = 1500;
 
     private AnunciosDB anunciosDB;
     private List<Anuncio> todos = new ArrayList<>();
+    private List<Anuncio> visibles = new ArrayList<>();
     private String filtroSeleccionado; // null = todos
 
     private View raiz;
-    private RecyclerView rv;
+    private ViewPager2 vpAnuncios;
     private AnuncioAdapter adaptador;
-    private TextView tvSinLeer, tvMarcarTodo, tvVacio;
-    private BottomSheetDialog hojaAbierta;
+    private TextView tvSinLeer, tvMarcarTodo, tvVacio, tvPagina;
+    private final Handler reloj = new Handler(Looper.getMainLooper());
+    private Runnable marcarPendiente;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +72,29 @@ public class Noticias extends BaseActivity {
         tvSinLeer = findViewById(R.id.tvSinLeer);
         tvMarcarTodo = findViewById(R.id.tvMarcarTodo);
         tvVacio = findViewById(R.id.tvVacio);
+        tvPagina = findViewById(R.id.tvPagina);
 
+        // Carrusel: se ve un trozo de la tarjeta anterior y la siguiente
         adaptador = new AnuncioAdapter(this::mostrarDetalle);
-        rv = findViewById(R.id.rvAnuncios);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adaptador);
+        vpAnuncios = findViewById(R.id.vpAnuncios);
+        vpAnuncios.setAdapter(adaptador);
+        vpAnuncios.setOffscreenPageLimit(1);
+        View interior = vpAnuncios.getChildAt(0); // el RecyclerView de dentro del ViewPager2
+        if (interior instanceof androidx.recyclerview.widget.RecyclerView) {
+            ((androidx.recyclerview.widget.RecyclerView) interior).setClipToPadding(false);
+        }
+        // Las tarjetas de los lados se ven un poco más pequeñas
+        vpAnuncios.setPageTransformer((pagina, posicion) -> {
+            float escala = 1f - 0.08f * Math.min(1f, Math.abs(posicion));
+            pagina.setScaleY(escala);
+        });
+        vpAnuncios.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int posicion) {
+                actualizarPagina();
+                programarLeido(posicion);
+            }
+        });
 
         crearChips();
 
@@ -79,10 +102,18 @@ public class Noticias extends BaseActivity {
             List<Integer> ids = new ArrayList<>();
             for (Anuncio a : todos) ids.add(a.id);
             AnunciosLeidos.marcarVarios(this, ids);
-            cargarAnuncios();
+            for (Anuncio a : todos) a.leido = true;
+            adaptador.notifyDataSetChanged();
+            actualizarContador();
         });
 
         cargarAnuncios();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (marcarPendiente != null) reloj.removeCallbacks(marcarPendiente);
     }
 
     // -------------------------------------------------
@@ -126,7 +157,7 @@ public class Noticias extends BaseActivity {
     }
 
     private void aplicarFiltro() {
-        List<Anuncio> visibles = new ArrayList<>();
+        visibles = new ArrayList<>();
         for (Anuncio a : todos) {
             if (filtroSeleccionado == null
                     || (FILTRO_NO_LEIDOS.equals(filtroSeleccionado) && !a.leido)
@@ -135,8 +166,11 @@ public class Noticias extends BaseActivity {
             }
         }
         adaptador.setAnuncios(visibles);
+        vpAnuncios.setCurrentItem(0, false);
         tvVacio.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
         actualizarContador();
+        actualizarPagina();
+        if (!visibles.isEmpty()) programarLeido(0);
     }
 
     private void actualizarContador() {
@@ -150,13 +184,46 @@ public class Noticias extends BaseActivity {
         tvMarcarTodo.setVisibility(sinLeer > 0 ? View.VISIBLE : View.GONE);
     }
 
+    // "← 2 de 8 →"
+    private void actualizarPagina() {
+        if (visibles.isEmpty()) {
+            tvPagina.setText("");
+            return;
+        }
+        int actual = vpAnuncios.getCurrentItem();
+        tvPagina.setText((actual > 0 ? "← " : "   ") + (actual + 1) + " de " + visibles.size()
+                + (actual < visibles.size() - 1 ? " →" : "   "));
+    }
+
+    // -------------------------------------------------
+    //              LEÍDOS
+    // -------------------------------------------------
+
+    /** Si el usuario se queda mirando la tarjeta un momento, cuenta como leída. */
+    private void programarLeido(int posicion) {
+        if (marcarPendiente != null) reloj.removeCallbacks(marcarPendiente);
+        marcarPendiente = () -> {
+            if (posicion < visibles.size() && vpAnuncios.getCurrentItem() == posicion) {
+                marcarLeido(visibles.get(posicion));
+            }
+        };
+        reloj.postDelayed(marcarPendiente, MS_PARA_LEIDO);
+    }
+
+    private void marcarLeido(Anuncio a) {
+        if (a.leido) return;
+        AnunciosLeidos.marcar(this, a.id);
+        a.leido = true;
+        int pos = visibles.indexOf(a);
+        if (pos >= 0) adaptador.notifyItemChanged(pos);
+        actualizarContador();
+    }
+
     // -------------------------------------------------
     //              DETALLE (hoja inferior)
     // -------------------------------------------------
 
     private void mostrarDetalle(Anuncio a) {
-        if (hojaAbierta != null && hojaAbierta.isShowing()) hojaAbierta.dismiss();
-
         BottomSheetDialog hoja = new BottomSheetDialog(this);
         View v = getLayoutInflater().inflate(R.layout.detalle_anuncio, null);
         hoja.setContentView(v);
@@ -189,16 +256,8 @@ public class Noticias extends BaseActivity {
             });
         }
 
-        hojaAbierta = hoja;
         hoja.show();
-
-        // Al abrirlo cuenta como leído
-        if (!a.leido) {
-            AnunciosLeidos.marcar(this, a.id);
-            a.leido = true;
-            adaptador.notifyDataSetChanged();
-            actualizarContador();
-        }
+        marcarLeido(a); // abrirlo entero también cuenta como leído
     }
 
     @Override

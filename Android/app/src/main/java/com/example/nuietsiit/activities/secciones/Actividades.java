@@ -1,27 +1,20 @@
 package com.example.nuietsiit.activities.secciones;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
-import com.example.nuietsiit.activities.secciones.actividades.ActividadAdapter;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.DBHelper;
@@ -30,37 +23,39 @@ import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.FechasUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Pantalla de Actividades: lista de actividades y cursos AbiertaUGR con filtros.
+ * Pantalla de Actividades SIN SCROLL: un "mazo" con una tarjeta grande cada vez.
+ * - Deslizar a la derecha (o botón ✓) = me apunto y pasa a la siguiente.
+ * - Deslizar a la izquierda (o botón ✕) = paso, siguiente.
+ * - ↺ = volver a la anterior. Tocar la tarjeta = detalle completo (apuntarse, calendario, más info).
  * - Sin sesión iniciada se pueden ver, pero no apuntarse.
- * - Deslizar una tarjeta a la derecha = apuntarse. A la izquierda = ocultarla (con "Deshacer").
- * - Pulsar una tarjeta = detalle con botones de apuntarse, añadir al calendario y más info.
  */
 public class Actividades extends BaseActivity {
 
     private static final String FILTRO_APUNTADO = "__apuntado"; // chip "Mis actividades"
     private static final int NARANJA = 0xFFFF8C42;
     private static final int ROJO = 0xFFD32F2F;
+    private static final int AZUL = 0xFF1565C0;
 
     private ActividadesDB actividadesDB;
-    private String correoUsuario;                     // null = no hay sesión iniciada
-    private String filtroSeleccionado;                // null = todas
-    private final Set<Integer> ocultas = new HashSet<>(); // las descartadas deslizando a la izquierda
+    private String correoUsuario;          // null = no hay sesión iniciada
+    private String filtroSeleccionado;     // null = todas
     private List<Actividad> todas = new ArrayList<>();
+    private List<Actividad> mazo = new ArrayList<>(); // las del filtro actual
+    private int posicion;                  // carta que se ve ahora
 
-    private View raiz;
+    private View raiz, botonera, vacio;
+    private MaterialCardView carta;
     private ChipGroup chipsTipos;
-    private TextView tvVacio;
-    private ActividadAdapter adaptador;
+    private TextView tvVacio, tvContador, selloSi, selloNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,23 +73,27 @@ public class Actividades extends BaseActivity {
         actividadesDB = new ActividadesDB(DBHelper.getInstance(this));
 
         raiz = findViewById(android.R.id.content);
+        botonera = findViewById(R.id.botonera);
+        vacio = findViewById(R.id.vacio);
+        carta = findViewById(R.id.carta);
+        chipsTipos = findViewById(R.id.chipsTipos);
+        tvVacio = findViewById(R.id.tvVacio);
+        tvContador = findViewById(R.id.tvContador);
+        selloSi = findViewById(R.id.selloSi);
+        selloNo = findViewById(R.id.selloNo);
 
         // Botón de comunidades de chat (grupos de WhatsApp/Telegram/Discord simulados)
         findViewById(R.id.btnComunidades).setOnClickListener(
                 v -> HojaComunidades.mostrar(this, correoUsuario));
-        chipsTipos = findViewById(R.id.chipsTipos);
-        tvVacio = findViewById(R.id.tvVacio);
 
-        adaptador = new ActividadAdapter(this::mostrarDetalle);
-        RecyclerView rv = findViewById(R.id.rvActividades);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adaptador);
-
-        // Gesto de deslizar tipo "Tinder"
-        new ItemTouchHelper(new GestoDeslizar()).attachToRecyclerView(rv);
+        // Botonera y gesto de arrastrar la carta
+        findViewById(R.id.btnPasar).setOnClickListener(v -> decidir(-1));
+        findViewById(R.id.btnApuntar).setOnClickListener(v -> decidir(+1));
+        findViewById(R.id.btnAnterior).setOnClickListener(v -> anterior());
+        findViewById(R.id.btnReiniciar).setOnClickListener(v -> { posicion = 0; mostrarCarta(); });
+        carta.setOnTouchListener(new ArrastrarCarta());
 
         crearChips();
-
         cargarActividades();
     }
 
@@ -151,26 +150,158 @@ public class Actividades extends BaseActivity {
         if (clave == null) chip.setChecked(true);
     }
 
-    // filtro del chip seleccionado
+    // Prepara el mazo con las actividades del chip seleccionado y vuelve a la primera
     private void aplicarFiltro() {
-        List<Actividad> visibles = new ArrayList<>();
+        mazo = new ArrayList<>();
         for (Actividad a : todas) {
-            if (ocultas.contains(a.id)) continue;
             if (filtroSeleccionado == null
                     || (FILTRO_APUNTADO.equals(filtroSeleccionado) && a.inscrito)
                     || filtroSeleccionado.equals(a.tipo)) {
-                visibles.add(a);
+                mazo.add(a);
             }
         }
-        adaptador.setActividades(visibles);
+        posicion = 0;
+        mostrarCarta();
+    }
 
-        tvVacio.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
-        if (!FILTRO_APUNTADO.equals(filtroSeleccionado)) {
-            tvVacio.setText("No hay actividades de este tipo.");
-        } else if (correoUsuario == null) {
-            tvVacio.setText("Inicia sesión para ver las actividades a las que te apuntes.");
+    // -------------------------------------------------
+    //              LA CARTA
+    // -------------------------------------------------
+
+    /** Pinta la carta de la posición actual, o el mensaje de "no hay" / "has visto todas". */
+    private void mostrarCarta() {
+        carta.setTranslationX(0);
+        carta.setRotation(0);
+        selloSi.setAlpha(0);
+        selloNo.setAlpha(0);
+
+        boolean hayCarta = posicion < mazo.size();
+        carta.setVisibility(hayCarta ? View.VISIBLE : View.INVISIBLE);
+        vacio.setVisibility(hayCarta ? View.GONE : View.VISIBLE);
+        findViewById(R.id.btnPasar).setEnabled(hayCarta);
+        findViewById(R.id.btnApuntar).setEnabled(hayCarta);
+        findViewById(R.id.btnAnterior).setEnabled(posicion > 0);
+
+        if (!hayCarta) {
+            boolean visteTodas = !mazo.isEmpty();
+            findViewById(R.id.btnReiniciar).setVisibility(visteTodas ? View.VISIBLE : View.GONE);
+            tvContador.setText("");
+            if (visteTodas) {
+                tvVacio.setText("🎉 ¡Has visto todas!");
+            } else if (!FILTRO_APUNTADO.equals(filtroSeleccionado)) {
+                tvVacio.setText("No hay actividades de este tipo.");
+            } else if (correoUsuario == null) {
+                tvVacio.setText("🔒 Inicia sesión para ver las actividades a las que te apuntes.");
+            } else {
+                tvVacio.setText("Todavía no te has apuntado a nada.");
+            }
+            return;
+        }
+
+        Actividad a = mazo.get(posicion);
+        findViewById(R.id.cabeceraCarta).setBackgroundColor(Actividad.color(a.tipo));
+        ((TextView) findViewById(R.id.tvEmojiCarta)).setText(Actividad.emoji(a.tipo));
+        ((TextView) findViewById(R.id.tvTipoCarta)).setText(Actividad.nombreTipo(a.tipo));
+        ((TextView) findViewById(R.id.tvCuandoCarta)).setText(
+                "📅 " + FechasUtil.cuando(a.inicio) + " · " + FechasUtil.hora(a.inicio));
+        ((TextView) findViewById(R.id.tvTituloCarta)).setText(a.titulo);
+        ((TextView) findViewById(R.id.tvDescCarta)).setText(a.descripcion);
+
+        TextView tvExtra = findViewById(R.id.tvExtraCarta);
+        if (a.esAbiertaUGR()) {
+            tvExtra.setVisibility(View.VISIBLE);
+            tvExtra.setText("🎓 " + a.creditosTexto() + " · " + a.estadoInscripcion());
+            tvExtra.setTextColor(a.inscripcionUrgente() ? ROJO : AZUL);
         } else {
-            tvVacio.setText("Todavía no te has apuntado a nada.");
+            tvExtra.setVisibility(View.GONE);
+        }
+        findViewById(R.id.tvInscritoCarta).setVisibility(a.inscrito ? View.VISIBLE : View.GONE);
+        tvContador.setText((posicion + 1) + " de " + mazo.size());
+    }
+
+    /**
+     * Botones ✕ / ✓ y final del gesto. direccion: +1 = me apunto, -1 = paso.
+     * Si no se puede apuntar (sin sesión, plazo cerrado…) la carta vuelve a su sitio con un aviso.
+     */
+    private void decidir(int direccion) {
+        if (posicion >= mazo.size()) return;
+        Actividad a = mazo.get(posicion);
+        if (direccion > 0 && !puedeApuntarse(a)) {
+            volverAlCentro();
+            return;
+        }
+        // La carta sale volando hacia ese lado y aparece la siguiente
+        float ancho = raiz.getWidth();
+        carta.animate().translationX(direccion * ancho * 1.5f).rotation(direccion * 25f)
+                .setDuration(220)
+                .withEndAction(() -> {
+                    if (direccion > 0) apuntar(a);
+                    posicion++;
+                    mostrarCarta();
+                    // pequeña entrada de la nueva carta
+                    carta.setScaleX(0.92f);
+                    carta.setScaleY(0.92f);
+                    carta.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                })
+                .start();
+    }
+
+    private void anterior() {
+        if (posicion == 0) return;
+        posicion--;
+        mostrarCarta();
+        carta.setTranslationX(-raiz.getWidth());
+        carta.animate().translationX(0).setDuration(220).start();
+    }
+
+    private void volverAlCentro() {
+        carta.animate().translationX(0).rotation(0).setDuration(200).start();
+        selloSi.animate().alpha(0).setDuration(200).start();
+        selloNo.animate().alpha(0).setDuration(200).start();
+    }
+
+    /**
+     * Arrastrar la carta con el dedo: se mueve e inclina, y se van viendo los sellos ME APUNTO / PASO.
+     * Si se suelta pasado un tercio de la pantalla, cuenta como decisión; si apenas se ha movido, es un toque.
+     */
+    private class ArrastrarCarta implements View.OnTouchListener {
+        private float xInicial;
+        private final int umbralToque = ViewConfiguration.get(Actividades.this).getScaledTouchSlop();
+
+        @SuppressLint("ClickableViewAccessibility") // el toque se gestiona aquí (abre el detalle)
+        @Override
+        public boolean onTouch(View v, MotionEvent e) {
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    xInicial = e.getRawX();
+                    return true;
+                case MotionEvent.ACTION_MOVE: {
+                    float dX = e.getRawX() - xInicial;
+                    float ancho = raiz.getWidth();
+                    carta.setTranslationX(dX);
+                    carta.setRotation(15f * dX / ancho);
+                    selloSi.setAlpha(Math.max(0f, Math.min(1f, dX / (ancho * 0.3f))));
+                    selloNo.setAlpha(Math.max(0f, Math.min(1f, -dX / (ancho * 0.3f))));
+                    return true;
+                }
+                case MotionEvent.ACTION_UP: {
+                    float dX = e.getRawX() - xInicial;
+                    if (Math.abs(dX) < umbralToque) {
+                        volverAlCentro();
+                        if (posicion < mazo.size()) mostrarDetalle(mazo.get(posicion));
+                    } else if (Math.abs(dX) > raiz.getWidth() * 0.3f) {
+                        decidir(dX > 0 ? +1 : -1);
+                    } else {
+                        volverAlCentro();
+                    }
+                    return true;
+                }
+                case MotionEvent.ACTION_CANCEL:
+                    volverAlCentro();
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 
@@ -178,29 +309,38 @@ public class Actividades extends BaseActivity {
     //              APUNTARSE / DESAPUNTARSE
     // -------------------------------------------------
 
-    private void apuntar(Actividad a) {
+    /** Comprueba si se puede apuntar; si no, enseña el motivo. */
+    private boolean puedeApuntarse(Actividad a) {
         if (correoUsuario == null) {
             pedirSesion("apuntarte");
-            return;
+            return false;
         }
-        if (a.inscrito) {
-            avisar("Ya estabas apuntado a «" + a.titulo + "»");
-            return;
-        }
+        if (a.inscrito) return true; // ya lo estaba: simplemente pasa a la siguiente
         if (!a.plazoAbierto()) {
             avisar("El plazo de inscripción no está abierto: " + a.estadoInscripcion());
-            return;
+            return false;
         }
         if (a.completa()) {
             avisar("No quedan plazas 😢");
+            return false;
+        }
+        return true;
+    }
+
+    private void apuntar(Actividad a) {
+        if (a.inscrito) {
+            avisar("Ya estabas apuntado a «" + a.titulo + "»");
             return;
         }
         if (!actividadesDB.insertarInscripcion(correoUsuario, a.id, FechasUtil.ahoraBD())) {
             avisar("No se ha podido completar la inscripción");
             return;
         }
-        cargarActividades();
+        a.inscrito = true;
+        a.inscritos++;
+        mostrarCarta();
         Snackbar.make(raiz, "🎉 Te has apuntado a «" + a.titulo + "»", Snackbar.LENGTH_LONG)
+                .setAnchorView(botonera)
                 .setAction("📅 Calendario", v -> anadirACalendario(a))
                 .setActionTextColor(NARANJA)
                 .show();
@@ -208,23 +348,29 @@ public class Actividades extends BaseActivity {
 
     private void desapuntar(Actividad a) {
         actividadesDB.borrarInscripcion(correoUsuario, a.id);
-        cargarActividades();
+        a.inscrito = false;
+        a.inscritos--;
+        mostrarCarta();
         Snackbar.make(raiz, "Ya no estás apuntado a «" + a.titulo + "»", Snackbar.LENGTH_LONG)
+                .setAnchorView(botonera)
                 .setAction("Deshacer", v -> {
                     actividadesDB.insertarInscripcion(correoUsuario, a.id, FechasUtil.ahoraBD());
-                    cargarActividades();
+                    a.inscrito = true;
+                    a.inscritos++;
+                    mostrarCarta();
                 })
                 .setActionTextColor(NARANJA)
                 .show();
     }
 
     private void avisar(String texto) {
-        Snackbar.make(raiz, texto, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(raiz, texto, Snackbar.LENGTH_SHORT).setAnchorView(botonera).show();
     }
 
     /** Aviso de que hace falta iniciar sesión, con botón para ir al login. */
     private void pedirSesion(String accion) {
         Snackbar.make(raiz, "🔒 Inicia sesión para " + accion, Snackbar.LENGTH_LONG)
+                .setAnchorView(botonera)
                 .setAction("Iniciar sesión", v -> startActivity(new Intent(this, Login.class)))
                 .setActionTextColor(NARANJA)
                 .show();
@@ -314,7 +460,7 @@ public class Actividades extends BaseActivity {
     //              CALENDARIO Y ENLACES
     // -------------------------------------------------
 
-    /** Abre la app de calendario con el evento ya relleno (el usuario solo pulsa Guardar). */
+    /** Abre la app de calendario con el evento ya relleno (CalendarioUtil, de Izaro). */
     private void anadirACalendario(Actividad a) {
         // Si dura varios días (cursos) se añade solo la primera sesión
         boolean mismoDia = a.fin != null && a.fin.toLocalDate().equals(a.inicio.toLocalDate());
@@ -328,91 +474,6 @@ public class Actividades extends BaseActivity {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         } catch (ActivityNotFoundException e) {
             avisar("No hay navegador para abrir el enlace");
-        }
-    }
-
-    // -------------------------------------------------
-    //              GESTO DE DESLIZAR
-    // -------------------------------------------------
-
-    /**
-     * Derecha = apuntarse (fondo verde), izquierda = ocultar (fondo gris).
-     * Mientras se arrastra, la tarjeta se inclina un poco, como en Tinder.
-     */
-    private class GestoDeslizar extends ItemTouchHelper.SimpleCallback {
-
-        private final Paint fondo = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint texto = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final float radio = 20 * getResources().getDisplayMetrics().density;
-        private final float margen = 24 * getResources().getDisplayMetrics().density;
-
-        GestoDeslizar() {
-            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-            texto.setColor(0xFFFFFFFF);
-            texto.setFakeBoldText(true);
-            texto.setTextSize(16 * getResources().getDisplayMetrics().scaledDensity);
-        }
-
-        @Override
-        public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                              @NonNull RecyclerView.ViewHolder destino) {
-            return false; // no se reordena
-        }
-
-        @Override
-        public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder vh) {
-            return 0.35f; // basta con arrastrar un tercio
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direccion) {
-            int pos = vh.getAdapterPosition();
-            if (pos == RecyclerView.NO_POSITION) return;
-            Actividad a = adaptador.get(pos);
-
-            if (direccion == ItemTouchHelper.RIGHT) {
-                adaptador.notifyItemChanged(pos); // la tarjeta vuelve a su sitio
-                apuntar(a);
-            } else {
-                ocultas.add(a.id);
-                aplicarFiltro();
-                Snackbar.make(raiz, "Has ocultado «" + a.titulo + "»", Snackbar.LENGTH_LONG)
-                        .setAction("Deshacer", v -> { ocultas.remove(a.id); aplicarFiltro(); })
-                        .setActionTextColor(NARANJA)
-                        .show();
-            }
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                                float dX, float dY, int estado, boolean activo) {
-            View item = vh.itemView;
-            if (estado == ItemTouchHelper.ACTION_STATE_SWIPE && dX != 0) {
-                boolean derecha = dX > 0;
-                fondo.setColor(derecha ? 0xFF2E7D32 : 0xFF9E9E9E);
-                RectF zona = derecha
-                        ? new RectF(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom())
-                        : new RectF(item.getRight() + dX, item.getTop(), item.getRight(), item.getBottom());
-                c.drawRoundRect(zona, radio, radio, fondo);
-
-                float y = item.getTop() + item.getHeight() / 2f + texto.getTextSize() / 3f;
-                if (derecha) {
-                    texto.setTextAlign(Paint.Align.LEFT);
-                    c.drawText("✓ Apuntarme", item.getLeft() + margen, y, texto);
-                } else {
-                    texto.setTextAlign(Paint.Align.RIGHT);
-                    c.drawText("Ocultar ✕", item.getRight() - margen, y, texto);
-                }
-                // inclinación proporcional a lo que se ha arrastrado
-                item.setRotation(8f * dX / item.getWidth());
-            }
-            super.onChildDraw(c, rv, vh, dX, dY, estado, activo);
-        }
-
-        @Override
-        public void clearView(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh) {
-            super.clearView(rv, vh);
-            vh.itemView.setRotation(0f);
         }
     }
 

@@ -35,6 +35,7 @@ import java.util.Set;
  * Notificaciones reales del sistema (las que salen arriba en el móvil):
  *  - Avisos urgentes que aún no has leído.
  *  - Actividades a las que estás apuntado que son hoy o mañana.
+ *  - Cuándo salir para llegar a la próxima clase (AvisoSalidaClase).
  * Cada aviso se notifica una sola vez. Se llama desde MenuPrincipal al abrir la app.
  * Los recordatorios de actividades solo salen si hay sesión iniciada.
  */
@@ -92,6 +93,9 @@ public final class Notificador {
         }
 
         prefs.edit().putStringSet(CLAVE, enviadas).apply();
+
+        // 3) "Sal ya para llegar a clase" (avisa ahora o programa el aviso)
+        AvisoSalidaClase.revisar(act);
     }
 
     /** Llamar desde onRequestPermissionsResult de la Activity. */
@@ -102,7 +106,7 @@ public final class Notificador {
         }
     }
 
-    private static void crearCanal(Context c) {
+    static void crearCanal(Context c) {
         NotificationChannel canal = new NotificationChannel(CANAL, "Avisos de la ETSIIT",
                 NotificationManager.IMPORTANCE_HIGH);
         canal.setDescription("Avisos urgentes y recordatorios de actividades");
@@ -110,7 +114,7 @@ public final class Notificador {
     }
 
     @SuppressLint("MissingPermission") // el permiso se comprueba en revisarAvisos
-    private static void mostrar(Context c, int id, String titulo, String texto, Intent intent) {
+    static void mostrar(Context c, int id, String titulo, String texto, Intent intent) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pi = PendingIntent.getActivity(c, id, intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
