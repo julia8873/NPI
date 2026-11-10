@@ -131,6 +131,7 @@ public final class TablasAcademico {
         // NPI: Lunes de 08:30 a 10:30 (Teoría) y Miércoles de 10:30 a 12:30 (Prácticas)
         sesionClase(db, "NPI", 1, "08:30", "10:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
         sesionClase(db, "NPI", 3, "10:30", "12:30", "A", "practicas", "juan.perez@ugr.es", cursoAcademico);
+        sesionClase(db, "NPI", 2, "16:30", "18:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
 
         // PL: Lunes de 10:30 a 12:30 (Teoría) y Jueves de 08:30 a 10:30 (Prácticas)
         sesionClase(db, "PL", 1, "10:30", "12:30", "A", "teoria", "maria.garcia@ugr.es", cursoAcademico);

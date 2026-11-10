@@ -75,6 +75,24 @@ public class GeminiTools {
                 Collections.emptyList()
         ));
 
+        // 9. consultarAsignatura
+        Schema p1Asig = new Schema("STRING", "Nombre o código de la asignatura", null, null, null, null, null, null, null);
+        funciones.add(new FunctionDeclaration(
+                "consultarAsignatura",
+                "Obtiene detalles de una asignatura por su nombre o código (créditos, cuatrimestre, profesores)",
+                (List) Collections.singletonList(p1Asig),
+                Collections.singletonList("query")
+        ));
+
+        // 10. consultarBaseGeneral
+        Schema p1Gen = new Schema("STRING", "Término de búsqueda general para trámites, biblioteca o asignaturas", null, null, null, null, null, null, null);
+        funciones.add(new FunctionDeclaration(
+                "consultarBaseGeneral",
+                "Busca en toda la base de datos de la ETSIIT (asignaturas, biblioteca, secretaría, etc.)",
+                (List) Collections.singletonList(p1Asig),
+                Collections.singletonList("query")
+        ));
+
         // 7. buscarLibroBiblioteca
         Schema p1Libro = new Schema("STRING", "Título, autor o código ISBN del libro a buscar en la biblioteca", null, null, null, null, null, null, null);
         funciones.add(new FunctionDeclaration(

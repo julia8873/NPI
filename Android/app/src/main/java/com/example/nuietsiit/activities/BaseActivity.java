@@ -25,6 +25,7 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.activities.main.ShakeDetector;
 import com.example.nuietsiit.activities.main.WaveView;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.util.DetectorBocaAbajo;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -118,12 +119,8 @@ public class BaseActivity extends AppCompatActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new AlertDialog.Builder(this)
-                        .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones.")
-                        .setPositiveButton("¡Entendido!", null)
-                        .show();
+                Intent intent = new Intent(this, ChatActivity.class);
+                startActivity(intent);
             });
         }
 
