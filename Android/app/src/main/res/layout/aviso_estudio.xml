@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "¿Vas a estudiar?" (SugerenciaEstudio): en la balda y al llegar a la biblioteca con la ruta -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/avisoEstudio"
+    style="@style/Widget.Nui.Papel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layout_marginHorizontal="@dimen/nui_espacio_s"
+    android:layout_marginBottom="@dimen/biblio_aviso_abajo"
+    android:accessibilityLiveRegion="polite"
+    android:clickable="true"
+    android:elevation="@dimen/biblio_elevacion_ojear"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:visibility="gone">
+
+    <FrameLayout
+        android:layout_width="@dimen/biblio_anillo_aviso"
+        android:layout_height="@dimen/biblio_anillo_aviso">
+
+        <com.example.nuietsiit.activities.secciones.biblioteca.AnilloEstudio
+            android:id="@+id/anilloAviso"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:layout_width="@dimen/nui_icono"
+            android:layout_height="@dimen/nui_icono"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/nui_ic_reloj_arena"
+            app:tint="@color/nui_cobalto" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/nui_espacio_m"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTituloAviso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
+
+        <TextView
+            android:id="@+id/tvDetalleAviso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+        <TextView
+            android:id="@+id/btnAhoraNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:minHeight="@dimen/nui_toque_min"
+            android:text="Ahora no"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+            android:textColor="@color/nui_cobalto" />
+    </LinearLayout>
+</LinearLayout>

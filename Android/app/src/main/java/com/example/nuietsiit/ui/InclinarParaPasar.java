@@ -13,14 +13,12 @@ import java.util.function.IntConsumer;
 /**
  * Inclinar el móvil para pasar de página (la misma interacción que los pasos de un trámite), atada a una vista:
  * escucha el acelerómetro solo mientras la vista está en una ventana con el foco y hay a dónde pasar.
- * Mientras escucha, Secretaría y Biblioteca no hacen caso de agitar (inclinar con fuerza contaba como agitar).
+ * Agitar sigue volviendo al menú: el giro para pasar es suave y la sacudida, fuerte.
  */
 public class InclinarParaPasar implements View.OnAttachStateChangeListener, ViewTreeObserver.OnWindowFocusChangeListener {
 
     private static final String PREFS = "secretaria";
     private static final String PREF_INCLINAR = "inclinarPasos";
-
-    private static int escuchando = 0; // detectores activos en este momento (todos en el hilo principal)
 
     private final View vista;
     private final DetectorInclinacion detector;
@@ -46,11 +44,6 @@ public class InclinarParaPasar implements View.OnAttachStateChangeListener, View
         prefs(ctx).edit().putBoolean(PREF_INCLINAR, si).apply();
     }
 
-    /** true si alguna pantalla está escuchando la inclinación (entonces agitar no saca al menú). */
-    public static boolean hayActivo() {
-        return escuchando > 0;
-    }
-
     private static SharedPreferences prefs(Context ctx) {
         return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
@@ -63,10 +56,8 @@ public class InclinarParaPasar implements View.OnAttachStateChangeListener, View
         activo = debe;
         if (debe) {
             detector.iniciar();
-            escuchando++;
         } else {
             detector.parar();
-            escuchando--;
         }
     }
 

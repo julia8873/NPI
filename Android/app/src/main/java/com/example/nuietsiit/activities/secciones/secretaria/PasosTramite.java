@@ -168,12 +168,6 @@ public class PasosTramite extends PantallaSecretaria {
         if (detector != null) detector.parar();
     }
 
-    // inclinar con fuerza para pasar de paso contaba como agitar y sacaba al menú
-    @Override
-    protected boolean usaAgitar() {
-        return false;
-    }
-
     @Override
     public boolean onSupportNavigateUp() {
         finish();

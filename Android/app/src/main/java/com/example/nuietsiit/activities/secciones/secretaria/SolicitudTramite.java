@@ -1274,17 +1274,22 @@ public class SolicitudTramite extends PantallaSecretaria {
     // ------------------------------------------------------------
 
     private void salir() {
+        salir("¿Salir sin enviar?", "Salir", this::finish);
+    }
+
+    // atrás y agitar: si hay algo rellenado, confirmar antes de tirarlo
+    private void salir(String titulo, String boton, Runnable accion) {
         boolean hayAlgo = !archivos.isEmpty() || observaciones != null || fase == LANZAR
                 || firmaConHuella || lienzoFirma.tieneFirma();
         if (enviando) return; // la carpeta va volando: el envío ya está en marcha
         if (!hayAlgo) {
-            finish();
+            accion.run();
             return;
         }
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
-                .setTitle("¿Salir sin enviar?")
+                .setTitle(titulo)
                 .setMessage("Se perderán las fotos y la firma.")
-                .setPositiveButton("Salir", (d, w) -> finish())
+                .setPositiveButton(boton, (d, w) -> accion.run())
                 .setNegativeButton("Seguir", null));
     }
 
@@ -1307,10 +1312,11 @@ public class SolicitudTramite extends PantallaSecretaria {
         return Math.round(valor * getResources().getDisplayMetrics().density);
     }
 
-    // agitar a mitad de la solicitud volvía al menú y se perdía todo lo rellenado
+    // agitar a mitad de la solicitud no tira lo rellenado sin preguntar
     @Override
-    protected boolean usaAgitar() {
-        return false;
+    protected void alAgitar() {
+        if (dialogo != null && dialogo.isShowing()) return; // ya hay una pregunta abierta
+        salir("¿Volver al menú sin enviar?", "Volver al menú", this::volverAlMenu);
     }
 
     // ------------------------------------------------------------

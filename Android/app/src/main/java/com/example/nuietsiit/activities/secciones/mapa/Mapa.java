@@ -365,12 +365,10 @@ public class Mapa extends BaseActivity {
         String buscado = getIntent().getStringExtra("RUTA_A_MARCADOR");
         if (buscado == null) return;
 
-        if (toggleGroupModo != null) {
-            toggleGroupModo.check(R.id.btnModoPlanos);
-        }
+        // como "¿A dónde vas?": dentro de la ETSIIT, ruta interior; fuera, ruta exterior y al llegar se sigue dentro
         for (Marcador m : listaMarcadores) {
             if (m.getTitulo().contains(buscado)) {
-                iniciarRuta(m);
+                viajar(new DestinoViaje(ProximaClase.ETSIIT, buscado, m.getTitulo(), null));
                 return;
             }
         }
@@ -1756,9 +1754,7 @@ public class Mapa extends BaseActivity {
                 || (origenActual.nombre != null && origenActual.nombre.contains("0.5"));
         boolean esAula14Destino = (destinoRuta.getTitulo() != null && destinoRuta.getTitulo().contains("1.4"));
 
-        if (destinoRuta.getTitulo().contains("Biblioteca")) {
-            claveRuta = "biblioteca";
-        } else if (esAula05Origen && esAula14Destino) {
+        if (esAula05Origen && esAula14Destino) {
             claveRuta = "aula_0_5";
         } else if (origenActual.idPunto != null
                 && (origenActual.idPunto.contains("aula_0_4") || origenActual.idPunto.contains("0_7") || origenActual.idPunto.contains("aula_0_7"))

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modo estudio (ModoEstudio): dejar el móvil sobre la mesa llena el anillo y empieza el Pomodoro -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nui_superficie"
+    android:keepScreenOn="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/nui_yeseria"
+            app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+
+        <com.example.nuietsiit.ui.TramaAzulejo
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nui_arqueria"
+            android:importantForAccessibility="no"
+            app:tesela="@drawable/nui_arqueria" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/nui_espacio_xl">
+
+            <FrameLayout
+                android:layout_width="@dimen/biblio_anillo_estudio"
+                android:layout_height="@dimen/biblio_anillo_estudio">
+
+                <com.example.nuietsiit.activities.secciones.biblioteca.AnilloEstudio
+                    android:id="@+id/anillo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- se tumba en bucle: "déjalo sobre la mesa" -->
+                <ImageView
+                    android:id="@+id/ivMovil"
+                    android:layout_width="@dimen/biblio_movil_estudio"
+                    android:layout_height="@dimen/biblio_movil_estudio"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/nui_ic_movil"
+                    app:tint="@color/nui_tinta" />
+
+                <TextView
+                    android:id="@+id/tvTiempo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFeatureSettings="tnum"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular.XL"
+                    android:textSize="@dimen/biblio_tiempo_estudio"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xl"
+                android:accessibilityLiveRegion="polite"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+            <TextView
+                android:id="@+id/tvDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+            <TextView
+                android:id="@+id/tvRondas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:textAppearance="@style/TextAppearance.Nui.Codigo"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/nui_espacio_l"
+            android:paddingBottom="@dimen/nui_espacio_l">
+
+            <!-- sin permiso de No molestar el móvil solo se pone en vibración -->
+            <TextView
+                android:id="@+id/btnNoMolestar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/nui_espacio_s"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:minHeight="@dimen/nui_toque_min"
+                android:text="🔕 Para silenciarlo del todo, permite «No molestar» ›"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+                android:textColor="@color/nui_cobalto"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPrincipal"
+                style="@style/Widget.Nui.Boton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSecundario"
+                style="@style/Widget.Nui.Boton.Secundario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/biblio_filete"
+            android:background="@color/nui_oro" />
+
+        <com.example.nuietsiit.ui.TramaAzulejo
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nui_zocalo"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <!-- Estudiando: pantalla negra y atenuada con el tiempo; tocar o levantar el móvil = pausa -->
+    <LinearLayout
+        android:id="@+id/capaEstudio"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvTiempoEstudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:accessibilityLiveRegion="none"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.Nui.Titular.XL"
+            android:textColor="@color/biblio_estudio_texto"
+            android:textSize="@dimen/biblio_tiempo_estudiando" />
+
+        <TextView
+            android:id="@+id/tvNoMolestarEstudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+            android:textColor="@color/biblio_estudio_texto" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_xxl"
+            android:text="Levanta el móvil o toca para hacer una pausa"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+            android:textColor="@color/biblio_estudio_texto_suave" />
+    </LinearLayout>
+</FrameLayout>

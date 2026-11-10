@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <application
         android:allowBackup="true"
@@ -72,6 +73,9 @@
         <activity android:name=".activities.secciones.Biblioteca" />
         <activity android:name=".activities.secciones.biblioteca.DetalleLibro" />
         <activity android:name=".activities.secciones.biblioteca.ApuntarLibros" />
+        <activity
+            android:name=".activities.secciones.biblioteca.ModoEstudio"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.secciones.chat.ChatActivity"
             android:windowSoftInputMode="adjustResize" />

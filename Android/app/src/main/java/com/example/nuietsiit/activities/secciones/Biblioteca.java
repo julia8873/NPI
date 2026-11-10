@@ -29,6 +29,9 @@ import com.example.nuietsiit.activities.secciones.biblioteca.ApuntarLibros;
 import com.example.nuietsiit.activities.secciones.biblioteca.BaldaDecoration;
 import com.example.nuietsiit.activities.secciones.biblioteca.DetalleLibro;
 import com.example.nuietsiit.activities.secciones.biblioteca.FiltroExplorar;
+import com.example.nuietsiit.activities.secciones.biblioteca.GravedadBalda;
+import com.example.nuietsiit.activities.secciones.biblioteca.SugerenciaEstudio;
+import com.example.nuietsiit.activities.secciones.biblioteca.ModoEstudio;
 import com.example.nuietsiit.activities.secciones.biblioteca.LibroAdapter;
 import com.example.nuietsiit.activities.secciones.biblioteca.PanelExplorar;
 import com.example.nuietsiit.data.BibliotecaDB;
@@ -88,6 +91,9 @@ public class Biblioteca extends PantallaBiblioteca {
     private boolean irAlUltimoEstante; // al volver a la pestaña anterior se entra por su último estante
     private boolean pasandoEstante;    // el cambio de vista viene de pasar: sin animación de recolocar
     private InclinarParaPasar inclinar;
+    private GravedadBalda gravedad;
+
+    private SugerenciaEstudio sugerencia; // móvil dejado sobre la mesa con la balda abierta: ¿vas a estudiar?
     private BuscadorTolerante.Indice<Libro> indice;
     private List<Libro> libros;
     private Map<Integer, Map<String, String>> bibliografia; // idLibro -> asignatura -> tipo
@@ -166,8 +172,12 @@ public class Biblioteca extends PantallaBiblioteca {
         chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
         findViewById(R.id.btnApuntar).setOnClickListener(v -> startActivity(new Intent(this, ApuntarLibros.class)
                 .putExtra("CORREO", getIntent().getStringExtra("CORREO"))));
+        findViewById(R.id.btnModoEstudio).setOnClickListener(v -> abrirModoEstudio());
+        sugerencia = SugerenciaEstudio.enLaBalda(this, findViewById(R.id.marcoBalda), () -> libroOjeado != null);
 
         aplicarFiltro();
+        // al entrar, los libros se balancean un poco: están sueltos y se mueven al inclinar el móvil
+        if (savedInstanceState == null) rvLibros.postDelayed(() -> gravedad.balancear(), 450);
     }
 
     private void configurarBaldas() {
@@ -203,6 +213,7 @@ public class Biblioteca extends PantallaBiblioteca {
             if (r - l != rViejo - lViejo || b - t != bViejo - tViejo) v.post(() -> repartirEstantes(false));
         });
         inclinar = new InclinarParaPasar(rv, this::pasar, () -> numEstantes() > 1 || vistas.size() > 1);
+        gravedad = new GravedadBalda(rv);
 
         ScaleGestureDetector pellizco = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
             private float acumulado = 1f;
@@ -255,11 +266,31 @@ public class Biblioteca extends PantallaBiblioteca {
         int accion = e.getActionMasked();
         if (accion == MotionEvent.ACTION_DOWN) {
             dedoEnBaldas = true;
+            gravedad.setPausada(true); // con el dedo encima, los libros se quedan derechos
             yInicioDedo = e.getRawY();
             xInicioDedo = e.getRawX();
         } else if (accion == MotionEvent.ACTION_UP || accion == MotionEvent.ACTION_CANCEL) {
             dedoEnBaldas = false;
+            gravedad.setPausada(false);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gravedad.iniciar();
+    }
+
+    private void abrirModoEstudio() {
+        startActivity(new Intent(this, ModoEstudio.class)
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
+    }
+
+    // tocar la pantalla = se está usando la balda: descarta el "¿Vas a estudiar?" (salvo si se toca el aviso)
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent e) {
+        sugerencia.alTocar(e);
+        return super.dispatchTouchEvent(e);
     }
 
     @Override
@@ -267,6 +298,7 @@ public class Biblioteca extends PantallaBiblioteca {
         super.onPause();
         // si otra pantalla se pone delante, no llegará el evento de soltar
         if (libroOjeado != null) terminarOjear();
+        gravedad.parar();
     }
 
     @Override
@@ -398,6 +430,7 @@ public class Biblioteca extends PantallaBiblioteca {
         libroOjeado = libro;
         portadaOjeada = portada;
         sobreUmbralSacar = false;
+        gravedad.enderezar(); // la tarjeta nace encima de la portada: tiene que estar en su sitio
         portada.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
         LibroAdapter.mostrarPortada(findViewById(R.id.ivPortadaOjear), libro);
@@ -766,6 +799,7 @@ public class Biblioteca extends PantallaBiblioteca {
 
     private void abrirDetalle(Libro libro, ImageView portada) {
         if (portada.getId() == R.id.ivPortada) portadaRetorno = portada;
+        gravedad.enderezar();
         // String, igual que los extras de RecienteUtil
         Intent intent = new Intent(this, DetalleLibro.class)
                 .putExtra("idLibro", String.valueOf(libro.id))

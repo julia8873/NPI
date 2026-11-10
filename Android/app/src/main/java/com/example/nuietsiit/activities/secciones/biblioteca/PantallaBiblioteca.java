@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
-import com.example.nuietsiit.ui.InclinarParaPasar;
 
 /**
  * Base de las pantallas de Biblioteca: cada pantalla es un papel que se pone encima
@@ -39,11 +38,5 @@ public abstract class PantallaBiblioteca extends BaseActivity {
 
     private boolean desdeBalda() {
         return getIntent().getBooleanExtra(EXTRA_DESDE_BALDA, false);
-    }
-
-    // mientras se pasan hojas inclinando el móvil, agitar no saca al menú (inclinar con fuerza contaba como agitar)
-    @Override
-    protected boolean usaAgitar() {
-        return !InclinarParaPasar.hayActivo();
     }
 }

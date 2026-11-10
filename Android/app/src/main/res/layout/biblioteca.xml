@@ -104,6 +104,7 @@
 
         <!-- Estantería: marco de madera; las baldas las pinta BaldaDecoration -->
         <FrameLayout
+            android:id="@+id/marcoBalda"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginHorizontal="@dimen/nui_espacio_m"
@@ -127,6 +128,41 @@
                 android:text="No hay libros en estas baldas."
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                 android:visibility="gone" />
+
+            <!-- Modo estudio: dejar el móvil sobre la mesa = Pomodoro + No molestar -->
+            <LinearLayout
+                android:id="@+id/btnModoEstudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="@dimen/nui_espacio_m"
+                android:background="@drawable/nui_flotante_cobalto"
+                android:clickable="true"
+                android:contentDescription="Modo estudio: deja el móvil sobre la mesa para concentrarte 25 minutos"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/biblio_flotante_alto"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/nui_espacio_m"
+                android:paddingEnd="@dimen/nui_espacio_l">
+
+                <ImageView
+                    android:layout_width="@dimen/nui_icono"
+                    android:layout_height="@dimen/nui_icono"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/nui_ic_reloj_arena"
+                    app:tint="@color/nui_sobre_resaltado" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/nui_espacio_xs"
+                    android:importantForAccessibility="no"
+                    android:text="Estudiar"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                    android:textColor="@color/nui_sobre_resaltado" />
+            </LinearLayout>
 
             <!-- Flotante: sombra dura de tinta -->
             <LinearLayout
@@ -156,7 +192,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/nui_espacio_s"
-                    android:text="Escanear estantería"
+                    android:text="Escanear"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
                     android:textColor="@color/nui_sobre_resaltado" />
             </LinearLayout>

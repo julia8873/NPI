@@ -12,6 +12,17 @@
     <dimen name="biblio_nombre_dato">96dp</dimen>
     <dimen name="biblio_punta_etiqueta">12dp</dimen>
 
+    <!-- Modo estudio: el anillo que se llena y la pantalla negra mientras se estudia -->
+    <dimen name="biblio_anillo_estudio">240dp</dimen>
+    <dimen name="biblio_movil_estudio">72dp</dimen>
+    <dimen name="biblio_anillo_aviso">48dp</dimen>
+    <dimen name="biblio_aviso_abajo">@dimen/nui_espacio_s</dimen>
+    <dimen name="biblio_aviso_arriba">104dp</dimen>            <!-- bajo la barra del visor de la ruta -->
+    <dimen name="biblio_tiempo_estudio">48sp</dimen>
+    <dimen name="biblio_tiempo_estudiando">72sp</dimen>
+    <color name="biblio_estudio_texto">#FF8C8C8C</color>        <!-- tenue sobre negro: no deslumbra -->
+    <color name="biblio_estudio_texto_suave">#FF555555</color>
+
     <style name="TituloExplorar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
