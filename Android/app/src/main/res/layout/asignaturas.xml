@@ -82,7 +82,6 @@
             android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
             android:contentDescription="Perfil"
-            android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
             android:src="@drawable/ic_nui_usuario"
@@ -91,10 +90,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
 
         <!-- Recuadro expansible para el horario/estado del usuario -->
         <androidx.cardview.widget.CardView
@@ -149,20 +151,19 @@
                         android:id="@+id/tvUserWelcome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="8dp"
                         android:text="Tu horario semanal:"
                         android:textColor="#000000"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <!-- Doble Scroll para la cuadrícula -->
                     <ScrollView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
                         <HorizontalScrollView
                             android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:fillViewport="true">
 
                             <!-- La tabla que llenaremos desde la BD -->
@@ -185,11 +186,11 @@
             android:id="@+id/btnVerMasAsignaturas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
-            android:padding="16dp"
+            android:layout_marginTop="16dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
             android:text="¿Quieres ver más asignaturas?"
-            android:textSize="16sp"
+            android:textSize="15sp"
             app:cornerRadius="24dp" />
 
     </LinearLayout>

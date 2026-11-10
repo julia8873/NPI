@@ -115,11 +115,8 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Simulación: Iniciar en el martes 3 de noviembre de 2026
+        // Iniciar con la fecha de hoy
         calendarioSeleccionado = Calendar.getInstance();
-        calendarioSeleccionado.set(Calendar.YEAR, 2026);
-        calendarioSeleccionado.set(Calendar.MONTH, Calendar.NOVEMBER);
-        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 3);
         limpiarHora(calendarioSeleccionado);
 
         // Enlazar vistas del layout XML
@@ -156,6 +153,16 @@ public class Comedores extends BaseActivity {
         btnDiaX = findViewById(R.id.btnDiaX);
         btnDiaJ = findViewById(R.id.btnDiaJ);
         btnDiaV = findViewById(R.id.btnDiaV);
+
+        TextView tvTituloSeleccionDia = findViewById(R.id.tvTituloSeleccionDia);
+        if (tvTituloSeleccionDia != null) {
+            SimpleDateFormat sdfSemana = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Calendar inicio = (Calendar) calendarioSeleccionado.clone();
+            inicio.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            Calendar fin = (Calendar) calendarioSeleccionado.clone();
+            fin.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+            tvTituloSeleccionDia.setText("📅 SEMANA: " + sdfSemana.format(inicio.getTime()) + " - " + sdfSemana.format(fin.getTime()));
+        }
 
         btnHorario.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);

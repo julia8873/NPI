@@ -116,17 +116,24 @@ public class CalendarioDB {
                 c1.close();
             }
 
-            // 2. ACTIVIDAD (La columna de fecha es fechaInicio)
-            Cursor c2 = db.rawQuery("SELECT DISTINCT fechaInicio FROM ACTIVIDAD WHERE fechaInicio IS NOT NULL AND fechaInicio != ''", null);
-            if (c2 != null) {
-                while (c2.moveToNext()) {
-                    String f = c2.getString(0);
-                    if (f != null && !f.isEmpty()) {
-                        if (f.length() >= 10) f = f.substring(0, 10);
-                        fechas.add(f);
+            // 2. ACTIVIDAD (Solo las actividades a las que el usuario esté apuntado)
+            if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                Cursor c2 = db.rawQuery(
+                        "SELECT DISTINCT A.fechaInicio FROM ACTIVIDAD A " +
+                        "JOIN INSCRIPCION_ACTIVIDAD IA ON A.idActividad = IA.idActividad " +
+                        "WHERE A.fechaInicio IS NOT NULL AND A.fechaInicio != '' " +
+                        "AND LOWER(IA.correoEstudiante) = ?",
+                        new String[]{correoUsuario.toLowerCase()});
+                if (c2 != null) {
+                    while (c2.moveToNext()) {
+                        String f = c2.getString(0);
+                        if (f != null && !f.isEmpty()) {
+                            if (f.length() >= 10) f = f.substring(0, 10);
+                            fechas.add(f);
+                        }
                     }
+                    c2.close();
                 }
-                c2.close();
             }
 
             // 3. CITA

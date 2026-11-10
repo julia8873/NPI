@@ -94,7 +94,7 @@ public class CalendarGridView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = (int) (width * 0.85f);
+        int height = (int) (width * 1.12f); // Amplio y cómodo
         setMeasuredDimension(width, height);
     }
 
@@ -106,25 +106,38 @@ public class CalendarGridView extends View {
         float h = getHeight();
 
         float cellW = w / 7f;
-        float headerH = h * 0.18f;
+        float headerH = h * 0.24f; // Separación holgada de la cabecera
         float bodyH = h - headerH;
         float rowH = bodyH / 6f;
 
-        paintTexto.setTextSize(cellW * 0.35f);
+        paintTexto.setTextSize(cellW * 0.36f);
         paintTextoDiaSemana.setTextSize(cellW * 0.28f);
-        paintHeader.setTextSize(cellW * 0.40f);
+        paintHeader.setTextSize(cellW * 0.42f);
 
-        // 1. Dibujar Mes y Año actual
+        // 1. Dibujar Mes y Año actual con flechas ‹  Mes y Año  ›
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
         String mesAno = sdf.format(calendarActual.getTime());
         mesAno = mesAno.substring(0, 1).toUpperCase() + mesAno.substring(1);
-        canvas.drawText(mesAno, w / 2f, headerH * 0.6f, paintHeader);
 
-        // 2. Días de la semana
+        float titleY = headerH * 0.38f;
+        canvas.drawText(mesAno, w / 2f, titleY, paintHeader);
+
+        // Flechitas visibles e interactivas para cambiar de mes
+        Paint paintFlecha = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintFlecha.setColor(Color.parseColor("#FF8C42"));
+        paintFlecha.setTextSize(cellW * 0.60f);
+        paintFlecha.setTextAlign(Paint.Align.CENTER);
+        paintFlecha.setFakeBoldText(true);
+
+        canvas.drawText("‹", w * 0.12f, titleY + cellW * 0.08f, paintFlecha);
+        canvas.drawText("›", w * 0.88f, titleY + cellW * 0.08f, paintFlecha);
+
+        // 2. Días de la semana con mayor separación
+        float diasSemanaY = headerH * 0.82f;
         String[] diasSemana = {"L", "M", "X", "J", "V", "S", "D"};
         for (int i = 0; i < 7; i++) {
             float cx = (i + 0.5f) * cellW;
-            canvas.drawText(diasSemana[i], cx, headerH * 0.95f, paintTextoDiaSemana);
+            canvas.drawText(diasSemana[i], cx, diasSemanaY, paintTextoDiaSemana);
         }
 
         // 3. Calcular días del mes
@@ -153,21 +166,24 @@ public class CalendarGridView extends View {
             if (day == selectedDay) {
                 canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintSeleccion);
                 paintTexto.setColor(Color.WHITE);
+            } else if (fechasConEventos.contains(fechaStr)) {
+                Paint paintEventBg = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paintEventBg.setColor(Color.parseColor("#FFE0B2")); // Naranja suave clarito
+                paintEventBg.setStyle(Paint.Style.FILL);
+                canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintEventBg);
+
+                Paint paintEventBorder = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paintEventBorder.setColor(Color.parseColor("#FF8C42")); // Borde naranja vivo
+                paintEventBorder.setStyle(Paint.Style.STROKE);
+                paintEventBorder.setStrokeWidth(3f);
+                canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintEventBorder);
+
+                paintTexto.setColor(Color.parseColor("#C2410C"));
             } else {
                 paintTexto.setColor(Color.parseColor("#0F172A"));
             }
 
             canvas.drawText(String.valueOf(day), cx, cy + (paintTexto.getTextSize() / 3f), paintTexto);
-
-            // Resaltar días con eventos mediante punto naranja
-            if (fechasConEventos.contains(fechaStr)) {
-                if (day != selectedDay) {
-                    paintDot.setColor(Color.parseColor("#FF8C42"));
-                } else {
-                    paintDot.setColor(Color.WHITE);
-                }
-                canvas.drawCircle(cx, cy + cellW * 0.28f, cellW * 0.09f, paintDot);
-            }
         }
     }
 
@@ -179,12 +195,12 @@ public class CalendarGridView extends View {
 
             float w = getWidth();
             float h = getHeight();
-            float headerH = h * 0.18f;
+            float headerH = h * 0.24f;
 
             if (y < headerH) {
-                if (x < w * 0.3f) {
+                if (x < w * 0.35f) {
                     cambiarMes(-1);
-                } else if (x > w * 0.7f) {
+                } else if (x > w * 0.65f) {
                     cambiarMes(1);
                 }
                 return true;
