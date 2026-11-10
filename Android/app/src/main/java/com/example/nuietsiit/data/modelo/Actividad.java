@@ -107,6 +107,20 @@ public class Actividad {
         }
     }
 
+    /**
+     * Sitio de la ETSIIT donde se hace, con el mismo nombre que un marcador del mapa interior
+     * (para el botón "Llévame"). null = la escuela en general.
+     */
+    public String sitioEnMapa() {
+        if (lugar != null) return lugar;
+        switch (tipo) {
+            case "bibliomaker": return "Biblioteca";   // el Bibliomaker está en la biblioteca
+            case "charla": return "Aula 0.4";
+            case "abiertaugr": return "Aula 2.1";
+            default: return null;                      // Día de la ETSIIT, torneos…: toda la escuela
+        }
+    }
+
     public static int color(String tipo) {
         switch (tipo) {
             case "charla": return 0xFF8E24AA;      // morado
