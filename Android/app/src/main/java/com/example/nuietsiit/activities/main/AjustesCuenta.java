@@ -13,8 +13,10 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.Insets;
+import androidx.core.os.LocaleListCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -161,7 +163,7 @@ public class AjustesCuenta extends BaseActivity {
         if (cardIdioma != null) {
             cardIdioma.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                mostrarToastFaltaPorImplementar();
+                mostrarDialogoIdioma();
             });
         }
 
@@ -292,6 +294,56 @@ public class AjustesCuenta extends BaseActivity {
                     finish();
                 })
                 .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void mostrarDialogoIdioma() {
+        String[] idiomasNombres = {"Español", "English"};
+        String[] idiomasCodigos = {"es", "en"};
+
+        String codigoActual = "es";
+        if (correoUsuario != null && !correoUsuario.isEmpty()) {
+            UsuariosDB usuariosDB = new UsuariosDB(BD);
+            String codigoDb = usuariosDB.obtenerCodigoIdiomaUsuario(correoUsuario);
+            if (codigoDb != null && !codigoDb.isEmpty()) {
+                codigoActual = codigoDb;
+            }
+        } else {
+            SharedPreferences prefs = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+            codigoActual = prefs.getString("CODIGO_IDIOMA", "es");
+        }
+
+        int seleccionActual = 0;
+        for (int i = 0; i < idiomasCodigos.length; i++) {
+            if (idiomasCodigos[i].equals(codigoActual)) {
+                seleccionActual = i;
+                break;
+            }
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.idioma)
+                .setSingleChoiceItems(idiomasNombres, seleccionActual, (dialog, which) -> {
+                    String nuevoCodigo = idiomasCodigos[which];
+
+                    getSharedPreferences("ConfiguracionApp", MODE_PRIVATE)
+                            .edit()
+                            .putString("CODIGO_IDIOMA", nuevoCodigo)
+                            .apply();
+
+                    if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                        UsuariosDB usuariosDB = new UsuariosDB(BD);
+                        usuariosDB.actualizarIdiomaEstudiante(correoUsuario, nuevoCodigo);
+                    }
+
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
+
+                    dialog.dismiss();
+
+                    Toast.makeText(this, which == 1 ? "English language selected" : "Idioma Español seleccionado", Toast.LENGTH_SHORT).show();
+                    recreate();
+                })
+                .setNegativeButton(R.string.cancelar, null)
                 .show();
     }
 }

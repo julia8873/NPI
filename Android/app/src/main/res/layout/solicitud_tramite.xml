@@ -66,9 +66,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/nui_espacio_m"
+        android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingHorizontal="10dp"
-        android:clipChildren="false">
+        android:paddingHorizontal="10dp">
 
         <!-- centrada; si no caben, las tarjetas se estrechan (SolicitudTramite.ajustarMesa) -->
         <LinearLayout
@@ -140,7 +140,7 @@
                 android:background="@drawable/fondo_zona_soltar"
                 android:gravity="center"
                 android:importantForAccessibility="no"
-                android:text="↓  Suelta aquí los documentos"
+                android:text="@string/zona_soltar_documentos"
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
                 android:textColor="@color/nui_madera_oscura" />
 
@@ -152,7 +152,7 @@
                 android:layout_gravity="bottom"
                 android:background="@drawable/fondo_carpeta_tapa"
                 android:elevation="4dp"
-                android:outlineProvider="none"><!-- elevation solo para quedar encima de las hojas; sin sombra difuminada -->
+                android:outlineProvider="none">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -205,7 +205,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:background="@drawable/fondo_firma"
-                                android:contentDescription="Recuadro para firmar con el dedo" />
+                                android:contentDescription="@string/lienzo_firma_desc" />
 
                             <TextView
                                 android:id="@+id/tvFirmaAqui"
@@ -213,7 +213,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:importantForAccessibility="no"
-                                android:text="Firma aquí"
+                                android:text="@string/firma_aqui"
                                 android:textAppearance="@style/TextAppearance.Nui.Titular.M"
                                 android:textColor="@color/nui_apagado" />
 
@@ -223,7 +223,7 @@
                                 android:layout_height="match_parent"
                                 android:background="@drawable/fondo_papel"
                                 android:gravity="center"
-                                android:text="Firmado con tu huella"
+                                android:text="@string/firmado_con_huella"
                                 android:textAppearance="@style/TextAppearance.Nui.Titular.M"
                                 android:visibility="gone" />
                         </FrameLayout>
@@ -246,7 +246,7 @@
                                 android:layout_marginEnd="@dimen/nui_espacio_l"
                                 android:minWidth="0dp"
                                 android:paddingHorizontal="0dp"
-                                android:text="Borrar firma"
+                                android:text="@string/btn_borrar_firma"
                                 android:textColor="@color/nui_madera_oscura" />
 
                             <com.google.android.material.button.MaterialButton
@@ -259,7 +259,7 @@
                                 android:minHeight="40dp"
                                 android:minWidth="0dp"
                                 android:paddingHorizontal="0dp"
-                                android:text="Usar mi huella"
+                                android:text="@string/btn_usar_huella"
                                 android:textColor="@color/nui_madera_oscura"
                                 android:visibility="gone" />
                         </LinearLayout>
@@ -271,9 +271,9 @@
                         android:layout_height="40dp"
                         android:layout_marginEnd="92dp"
                         android:background="?attr/selectableItemBackground"
+                        android:ellipsize="end"
                         android:gravity="center_vertical"
                         android:maxLines="1"
-                        android:ellipsize="end"
                         android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
                         android:textColor="@color/nui_madera_oscura"
                         android:textSize="@dimen/nui_texto_s" />
@@ -289,7 +289,7 @@
                     android:layout_marginBottom="@dimen/nui_espacio_l"
                     android:background="@drawable/fondo_sello"
                     android:clickable="true"
-                    android:contentDescription="Sello: mantén el dedo para sellar"
+                    android:contentDescription="@string/sello_desc"
                     android:elevation="3dp"
                     android:focusable="true"
                     android:outlineProvider="none"
@@ -318,12 +318,12 @@
                             android:layout_width="28dp"
                             android:layout_height="28dp"
                             android:src="@drawable/nui_ic_granada"
-                            android:tint="@color/nui_granada" />
+                            app:tint="@color/nui_granada" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Mantén"
+                            android:text="@string/sello_manten"
                             android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
                             android:textColor="@color/nui_granada" />
                     </LinearLayout>
@@ -347,7 +347,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="true"
-                android:contentDescription="Carpeta sellada: lánzala hacia arriba para enviar"
+                android:contentDescription="@string/capa_lanzar_desc"
                 android:elevation="6dp"
                 android:focusable="true"
                 android:visibility="gone" />
@@ -360,7 +360,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
-        android:text="Cerrar la carpeta sin los opcionales"
+        android:text="@string/btn_cerrar_carpeta_opcionales"
         android:visibility="gone" />
 
     <!-- Con la carpeta cerrada: volver a abrirla para ver o cambiar los documentos -->
@@ -370,7 +370,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
-        android:text="Abrir la carpeta para revisar los documentos"
+        android:text="@string/btn_abrir_carpeta_revisar"
         android:textColor="@color/nui_apagado"
         android:visibility="gone" />
 
@@ -382,6 +382,6 @@
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
         android:layout_marginBottom="@dimen/nui_espacio_m"
         android:minHeight="56dp"
-        android:text="Enviar sin lanzar"
+        android:text="@string/btn_enviar_sin_lanzar"
         android:visibility="gone" />
 </LinearLayout>

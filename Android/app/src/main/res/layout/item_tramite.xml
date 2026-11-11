@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/nui_espacio_xs"
-        android:text="Plazo abierto"
+        android:text="@string/plazo_abierto"
         android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
         android:textColor="@color/nui_granada"
         android:textSize="@dimen/nui_texto_s" />

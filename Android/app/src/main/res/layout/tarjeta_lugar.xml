@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Tarjeta inferior al tocar un edificio en el mapa: "¿Te llevo?" (TarjetaLugar) -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tarjetaLugar"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tarjetaLugar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:background="@color/nui_suave"
-                android:contentDescription="Foto del sitio · toca para verla en grande"
+                android:contentDescription="@string/foto_lugar_desc"
                 android:scaleType="centerCrop" />
 
             <com.google.android.material.button.MaterialButton
@@ -38,7 +38,7 @@
                 android:layout_height="48dp"
                 android:layout_gravity="end|top"
                 android:layout_margin="6dp"
-                android:contentDescription="Cerrar"
+                android:contentDescription="@string/cerrar_desc"
                 app:backgroundTint="#99000000"
                 app:icon="@android:drawable/ic_menu_close_clear_cancel"
                 app:iconTint="@android:color/white" />
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="18dp"
             android:layout_marginTop="12dp"
-            android:text="¿Te llevo?"
+            android:text="@string/pregunta_te_llevo"
             android:textColor="@color/nui_acento"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -80,7 +80,7 @@
             android:layout_marginHorizontal="14dp"
             android:layout_marginTop="12dp"
             android:backgroundTint="@color/nui_acento"
-            android:text="Llévame aquí"
+            android:text="@string/btn_llevame_aqui"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
@@ -97,7 +97,7 @@
             android:layout_marginHorizontal="14dp"
             android:layout_marginTop="4dp"
             android:backgroundTint="@color/nui_suave"
-            android:text="Ver por dentro"
+            android:text="@string/btn_ver_por_dentro"
             android:textAllCaps="false"
             android:textColor="@color/nui_tinta"
             android:textSize="15sp"

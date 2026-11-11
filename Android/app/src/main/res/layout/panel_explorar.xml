@@ -15,7 +15,7 @@
         android:paddingHorizontal="@dimen/nui_espacio_l"
         android:paddingTop="@dimen/nui_espacio_xl"
         android:paddingBottom="@dimen/nui_espacio_s"
-        android:text="Explorar la biblioteca"
+        android:text="@string/titulo_explorar_biblioteca"
         android:textAppearance="@style/TextAppearance.Nui.Titular" />
 
     <com.example.nuietsiit.ui.TramaAzulejo
@@ -39,7 +39,7 @@
 
             <TextView
                 style="@style/TituloExplorar"
-                android:text="Grado" />
+                android:text="@string/explorar_grado" />
 
             <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsGrado"
@@ -48,7 +48,7 @@
 
             <TextView
                 style="@style/TituloExplorar"
-                android:text="Curso" />
+                android:text="@string/explorar_curso" />
 
             <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsCurso"
@@ -57,7 +57,7 @@
 
             <TextView
                 style="@style/TituloExplorar"
-                android:text="Rama" />
+                android:text="@string/explorar_rama" />
 
             <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsRama"
@@ -66,7 +66,7 @@
 
             <TextView
                 style="@style/TituloExplorar"
-                android:text="Planta" />
+                android:text="@string/explorar_planta" />
 
             <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/chipsPlanta"
@@ -75,7 +75,7 @@
 
             <TextView
                 style="@style/TituloExplorar"
-                android:text="Asignatura" />
+                android:text="@string/explorar_asignatura" />
 
             <com.example.nuietsiit.ui.PestanasPapel
                 android:id="@+id/listaAsignaturas"
@@ -104,7 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/nui_espacio_s"
-            android:text="Limpiar" />
+            android:text="@string/btn_limpiar" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVerLibros"

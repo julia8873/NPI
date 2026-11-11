@@ -1,5 +1,375 @@
 <resources>
+    <!-- General -->
     <string name="app_name">NUI ETSIIT</string>
+    <string name="volver">Volver</string>
+    <string name="volver_menu_principal">Volver al menú principal</string>
+    <string name="chat">Chat</string>
+    <string name="perfil">Perfil</string>
+    <string name="perfil_usuario">Perfil de usuario</string>
+    <string name="abrir_asistente">Abrir asistente</string>
+    <string name="enviar">Enviar</string>
+    <string name="enviar_mensaje">Enviar mensaje</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="guardar">Guardar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="cerrar">Cerrar</string>
+
+    <string name="titulo_app">NUI ETSIIT</string>
+    <string name="inclinacion_indicador_desc">Indicador de inclinación. Toca para activar o desactivar.</string>
+    <string name="novedades_etsiit">Novedades ETSIIT</string>
+    <string name="tag_hoy">HOY</string>
+    <string name="calendario_etsiit">Calendario ETSIIT</string>
+    <string name="titulo_calendario_etsiit">Calendario de la ETSIIT</string>
+    <string name="subtitulo_calendario_etsiit">Actividades, citas, exámenes y entregas</string>
+    <string name="cabecera_acceso_rapido">ACCESO RÁPIDO</string>
+    <string name="btn_cambiar_ultimo_visto">🔄 Cambiar a último visto</string>
+    <string name="tag_hora_de_comer">🍽️ HORA DE COMER</string>
+    <string name="subinfo_horario_etsiit">Horario ETSIIT</string>
+    <string name="titulo_acceso_directo_ejemplo">Ruta: Aula 0.7 ➔ Comedor</string>
+    <string name="desc_acceso_directo_ejemplo">Detectada clase en 0.7 · Abrir mapa directo</string>
+
+    <string name="permiso_no_molestar_aviso">🔕 Para silenciarlo del todo, permite «No molestar» ›</string>
+    <string name="instrucciones_pausa_estudio">Levanta el móvil o toca para hacer una pausa</string>
+
+    <!-- Hello World / Main -->
+    <string name="hello_world">¡Hola, mundo!</string>
+
+    <!-- Chat Activity -->
+    <string name="asistente_etsiit">Asistente ETSIIT</string>
+    <string name="ia_gemini_subtitle">IA Conversacional · Gemini</string>
+    <string name="hint_chat_input">Haz una pregunta o pide una acción…</string>
+    <string name="avatar_asistente">Avatar del asistente</string>
+    <string name="avatar_asistente_desc">Avatar del asistente</string>
+    <string name="nombre_asistente_bot">Asistente ETSIIT</string>
+    <string name="consultando_gemini">Consultando con Gemini…</string>
+
+    <!-- Login & SignUp -->
+    <string name="iniciar_sesion">Iniciar sesión</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="correo_electronico">Correo electrónico</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="nueva_contrasena_opcional">Nueva contraseña (opcional)</string>
+    <string name="introduce_tu_contrasena">Introduce tu contraseña</string>
+    <string name="crea_una_contrasena">Crea una contraseña</string>
+    <string name="repite_la_contrasena">Repite la contraseña</string>
+    <string name="nombre_y_apellidos">Tu nombre y apellidos</string>
+    <string name="tu_nombre">Tu nombre</string>
+    <string name="grado_universitario">Grado universitario</string>
+    <string name="selecciona_tu_grado">Selecciona tu grado</string>
+    <string name="dejar_vacio_para_no_cambiar">Dejar vacío para no cambiar</string>
+
+    <!-- Secciones principales -->
+    <string name="seccion_actividades">Actividades</string>
+    <string name="seccion_asignaturas">Asignaturas</string>
+    <string name="seccion_biblioteca">Biblioteca</string>
+    <string name="seccion_comedores">Comedores</string>
+    <string name="seccion_calendario">Calendario</string>
+    <string name="seccion_profesorado">Profesorado</string>
+    <string name="seccion_secretaria">Secretaría</string>
+    <string name="seccion_noticias">Noticias y Avisos</string>
+    <string name="seccion_mapa">Mapa ETSIIT</string>
+
+    <!-- Actividades -->
+    <string name="comunidades_chat">💬 Comunidades de chat</string>
+    <string name="estas_apuntado">✓ Estás apuntado</string>
+    <string name="toca_tarjeta_detalles">Toca la tarjeta para ver todos los detalles</string>
+    <string name="me_apunto">ME APUNTO</string>
+    <string name="paso">PASO</string>
+    <string name="volver_a_empezar">↺ Volver a empezar</string>
+    <string name="actividad_anterior">Actividad anterior</string>
+    <string name="pasar">Pasar</string>
+    <string name="apuntarme">Apuntarme</string>
+    <string name="btn_terminar">Terminar</string>
+    <string name="instrucciones_comunidades">Pulsa un grupo para ver cómo es antes de unirte</string>
+    <string name="btn_calendario">Calendario</string>
+    <string name="btn_llevame">Llévame</string>
+    <string name="btn_mas_info">Más info</string>
+
+    <string name="abrir_enlace">Abrir enlace</string>
+
+    <string name="titulo_seccion_avisos">Avisos</string>
+    <string name="marcar_todo_leido">Marcar todo como leído</string>
+    <string name="sin_avisos_vacio">No hay avisos aquí 🎉</string>
+
+    <string name="etiqueta_urgente">🚨 URGENTE</string>
+    <string name="toca_para_leer_entero">Toca para leerlo entero</string>
+
+    <!-- Ajustes cuenta -->
+    <string name="ajustes">Ajustes</string>
+    <string name="tu_perfil">Tu perfil</string>
+    <string name="preferencias">PREFERENCIAS</string>
+    <string name="cuenta">Cuenta</string>
+    <string name="notificaciones">Notificaciones</string>
+    <string name="apariencia">Apariencia</string>
+    <string name="idioma">Idioma</string>
+    <string name="privacidad">Privacidad</string>
+    <string name="ayuda">Ayuda</string>
+    <string name="ajustes_rapidos">AJUSTES RÁPIDOS</string>
+    <string name="avisos_de_clase">Avisos de clase</string>
+    <string name="vegetariano">Vegetariano</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+
+    <!-- Biblioteca & Apuntar Libros -->
+    <string name="pasa_camara_codigo_barras">Pasa la cámara por el código de barras de los libros. No hace falta pulsar nada.</string>
+    <string name="como_vibra">Cómo vibra</string>
+    <string name="leyenda_disponible">●\ndisponible</string>
+    <string name="leyenda_asignatura">● ●\nde tu asignatura</string>
+    <string name="leyenda_sin_ejemplares">▬\nsin ejemplares</string>
+    <string name="necesita_camara_estanteria">Para escanear la estantería hace falta la cámara.</string>
+    <string name="permitir_la_camara">Permitir la cámara</string>
+    <string name="solo_disponibles">Solo disponibles</string>
+    <string name="no_hay_libros_baldas">No hay libros en estas baldas.</string>
+    <string name="estudiar">Estudiar</string>
+    <string name="escanear">Escanear</string>
+    <string name="suelta_para_devolverlo">Suelta para devolverlo · Desliza arriba para abrirlo</string>
+    <string name="hint_buscador_libros">Título, autor, editorial o ISBN</string>
+    <string name="modo_estudio_desc">Modo estudio: deja el móvil sobre la mesa para concentrarte 25 minutos</string>
+
+    <string name="prestado_label">Prestado</string>
+    <string name="ubicacion_label">Ubicación</string>
+    <string name="btn_como_llegar_biblio">Cómo llegar a la biblioteca</string>
+    <string name="datos_edicion_titulo">Datos de edición</string>
+    <string name="editorial_label">Editorial</string>
+    <string name="edicion_label">Edición</string>
+    <string name="anio_label">Año</string>
+    <string name="isbn_label">ISBN</string>
+    <string name="marca_prestado">Prestado</string>
+    <string name="marca_basica">Básica</string>
+
+    <string name="titulo_explorar_biblioteca">Explorar la biblioteca</string>
+    <string name="explorar_grado">Grado</string>
+    <string name="explorar_curso">Curso</string>
+    <string name="explorar_rama">Rama</string>
+    <string name="explorar_planta">Planta</string>
+    <string name="explorar_asignatura">Asignatura</string>
+    <string name="btn_limpiar">Limpiar</string>
+
+    <string name="ver_que_necesito_y_empezar">Ver qué necesito y empezar</string>
+    <string name="volver_pregunta_anterior">← Volver a la pregunta anterior</string>
+
+    <!-- Asignaturas -->
+    <string name="no_has_iniciado_sesion">No has iniciado sesión aún.\nPara ver tu horario accede con tus credenciales.</string>
+    <string name="iniciar_sesion_btn">Iniciar sesión</string>
+    <string name="tu_horario_semanal">Tu horario semanal:</string>
+    <string name="quieres_ver_mas_asignaturas">¿Quieres ver más asignaturas?</string>
+    <string name="buscador">Buscador</string>
+    <string name="selecciona_tu_grado_label">Selecciona tu Grado:</string>
+    <string name="nombre_grado">[Nombre del Grado]</string>
+    <string name="desliza_elegir_curso">Desliza para elegir el curso</string>
+    <string name="resultados">Resultados:</string>
+    <string name="buscar_asignatura_hint">Buscar asignatura por nombre...</string>
+
+    <!-- Calendario & Eventos -->
+    <string name="eventos_para_hoy">Eventos para hoy</string>
+    <string name="anadir_evento">+ Añadir</string>
+    <string name="no_hay_actividades_fecha">No hay actividades ni entregas anotadas para esta fecha.</string>
+    <string name="tipo_evento">Tipo de evento:</string>
+    <string name="titulo_examen_entrega_hint">Título del examen o entrega</string>
+    <string name="hora_ej_hint">Hora (ej. 10:30 o 23:59)</string>
+    <string name="descripcion_asignatura_hint">Descripción o asignatura</string>
+    <string name="tipo_evento_placeholder">Examen</string>
+    <string name="hora_placeholder">10:30</string>
+    <string name="titulo_evento_placeholder">Título del evento</string>
+    <string name="descripcion_evento_placeholder">Descripción o ubicación del evento</string>
+
+    <!-- Comedores -->
+    <string name="tag_comedor_cercano">📍 COMEDOR MÁS CERCANO</string>
+    <string name="mensaje_comedor_cercano">¡Tu comedor más cercano!\nComedor Aynadamar</string>
+    <string name="btn_horario">🕒 Horario</string>
+    <string name="btn_precios">💰 Precios</string>
+    <string name="btn_tipo_menu">🥩 Menú ▾</string>
+    <string name="dia_default">Martes, 02 de noviembre</string>
+    <string name="primer_plato_titulo">PRIMER PLATO</string>
+    <string name="primer_plato_default">Primer plato</string>
+    <string name="segundo_plato_titulo">SEGUNDO PLATO</string>
+    <string name="segundo_plato_default">Segundo plato</string>
+    <string name="postre_titulo">POSTRE</string>
+    <string name="postre_default">Postre</string>
+    <string name="titulo_semana_default">📅 SEMANA: 01/11/2026</string>
+    <string name="dia_lun">Lun</string>
+    <string name="dia_mar">Mar</string>
+    <string name="dia_mie">Mié</string>
+    <string name="dia_jue">Jue</string>
+    <string name="dia_vie">Vie</string>
+    <string name="dia_anterior_desc">Día anterior</string>
+    <string name="dia_siguiente_desc">Día siguiente</string>
+    <string name="comedores_universitarios">🍽️ Comedores Universitarios</string>
+    <string name="ordenados_cercania">Ordenados por cercanía. Toca uno para ver su menú:</string>
+    <string name="horario_apertura">🕒 Horario de Apertura</string>
+    <string name="comedor_label">Comedor</string>
+    <string name="fecha_seleccionada">Fecha seleccionada</string>
+    <string name="horario_13_16">Horario: 13:00 – 16:30</string>
+    <string name="precios_del_menu">💰 Precios del Menú</string>
+    <string name="tarifas_oficiales">Tarifas universitarias oficiales (en comedor)</string>
+    <string name="profesores_precio">👨‍🏫 Profesores:</string>
+    <string name="cinco_euros">5 euros</string>
+    <string name="estudiantes_precio">🎓 Estudiantes:</string>
+    <string name="cuatro_euros">4 euros</string>
+    <string name="veganos_precio">🌱 Veganos:</string>
+    <string name="mas_un_euro">+1 euro más</string>
+    <string name="tipo_menu_titulo">🍽️ Tipo de Menú</string>
+    <string name="menu_normal">Menú</string>
+    <string name="menu_vegetariano">Menú Vegetariano</string>
+    <string name="activo">✓ Activo</string>
+    <string name="alternar_inclinando">💡 También puedes alternar rápidamente inclinando el móvil hacia atrás.</string>
+    <string name="comedor_default">Comedor ETSIIT</string>
+    <string name="direccion_default">Calle del comedor</string>
+    <string name="distancia_default">120 m</string>
+
+    <!-- Profesorado -->
+    <string name="ficha_profesor">Ficha del Profesor</string>
+    <string name="nombre_profesor">Nombre del Profesor</string>
+    <string name="enviar_email">Enviar Email</string>
+    <string name="web_docente">Web Docente</string>
+    <string name="despacho_y_ubicacion">Despacho y Ubicación</string>
+    <string name="cargando_despacho">Cargando información del despacho...</string>
+    <string name="clases_e_imparticion">Clases e Impartición:</string>
+    <string name="horarios_tutorias">Horarios de Tutorías (Reservar):</string>
+    <string name="buscar_profesor_hint">Buscar profesor por nombre o asignatura...</string>
+    <string name="titulo_profesorado">Profesorado</string>
+    <string name="aviso_no_session_tutorias">No has iniciado sesión aún.\nPara gestionar y ver tus tutorías reservadas accede con tus credenciales.</string>
+    <string name="tus_tutorias_reservadas">Tus tutorías reservadas:</string>
+    <string name="btn_buscar_profesorado_tutorias">¿Quieres buscar profesorado o tutorías?</string>
+
+    <!-- Asignatura Detalle -->
+    <string name="ficha_asignatura">Ficha Asignatura</string>
+    <string name="nombre_asignatura_default">Nombre de la Asignatura</string>
+    <string name="codigo_default">Código: N/A</string>
+    <string name="creditos_ects">Créditos ECTS</string>
+    <string name="cuatrimestre">Cuatrimestre</string>
+    <string name="horarios_clase_titulo">Horarios de Clase e Impartición:</string>
+    <string name="profesorado_impartidor_titulo">Profesorado Impartidor:</string>
+    <string name="ver_guia_docente">Ver Guía Docente</string>
+
+    <!-- Secretaría y Trámites -->
+    <string name="requisitos">Requisitos</string>
+    <string name="plazos">Plazos</string>
+    <string name="documentos_necesitas">Documentos que necesitas</string>
+    <string name="buscar_tramite_hint">Buscar trámite</string>
+    <string name="fichas_anteriores">Fichas anteriores</string>
+    <string name="fichas_siguientes">Fichas siguientes</string>
+    <string name="motivo_cita_hint">Motivo de la cita</string>
+    <string name="elige_el_dia">Elige el día</string>
+    <string name="horas_tachadas">Las horas tachadas ya están ocupadas. Desliza o inclina el móvil para cambiar de hora</string>
+    <string name="deshacer">Deshacer</string>
+    <string name="ahora_no">Ahora no</string>
+    <string name="toca_para_fotografiar">Toca para\nfotografiar</string>
+    <string name="opcional">Opcional</string>
+    <string name="a_la_carpeta">↓ A la carpeta</string>
+    <string name="plazo_abierto">Plazo abierto</string>
+    <string name="resguardo_secretaria">Resguardo · Secretaría ETSIIT</string>
+    <string name="ayuda_qr_justificante">Gira el móvil hacia la ventanilla de Secretaría, o toca el código, para enseñarlo a pantalla completa.\nPellizca para ampliarlo; doble toque para volver.</string>
+    <string name="aviso_actualizar_calendario">Has cambiado la cita: actualiza también tu calendario</string>
+    <string name="anadir_al_calendario">Añadir al calendario</string>
+    <string name="paso_anterior">Paso anterior</string>
+    <string name="inclinar_para_pasar">Inclinar para pasar</string>
+    <string name="paso_siguiente">Paso siguiente</string>
+
+    <string name="hint_buscar_tramite">Buscar trámite</string>
+    <string name="no_hay_tramites_coincidentes">No hay trámites que coincidan.</string>
+    <string name="que_necesitas">¿Qué necesitas?</string>
+    <string name="pedir_cita">Pedir cita</string>
+    <string name="mis_gestiones">Mis gestiones</string>
+    <string name="ver_todos_los_tramites">Ver todos los trámites ▴</string>
+
+    <string name="zona_soltar_documentos">↓  Suelta aquí los documentos</string>
+    <string name="lienzo_firma_desc">Recuadro para firmar con el dedo</string>
+    <string name="firma_aqui">Firma aquí</string>
+    <string name="firmado_con_huella">Firmado con tu huella</string>
+    <string name="btn_borrar_firma">Borrar firma</string>
+    <string name="btn_usar_huella">Usar mi huella</string>
+    <string name="sello_desc">Sello: mantén el dedo para sellar</string>
+    <string name="sello_manten">Mantén</string>
+    <string name="capa_lanzar_desc">Carpeta sellada: lánzala hacia arriba para enviar</string>
+    <string name="btn_cerrar_carpeta_opcionales">Cerrar la carpeta sin los opcionales</string>
+    <string name="btn_abrir_carpeta_revisar">Abrir la carpeta para revisar los documentos</string>
+    <string name="btn_enviar_sin_lanzar">Enviar sin lanzar</string>
+
+    <!-- Mapa & Gyro -->
+    <string name="control_inclinacion">🧭 Control por Inclinación</string>
+    <string name="control_inclinacion_desc">Elige si deseas seleccionar las secciones inclinando el teléfono o solo de forma táctil</string>
+    <string name="activado">Activado</string>
+    <string name="inclinacion_activa_desc">Navegar inclinando el teléfono hacia los lados y arriba/abajo</string>
+    <string name="desactivado">Desactivado</string>
+    <string name="inclinacion_desact_desc">Navegar únicamente tocando las tarjetas en pantalla</string>
+    <string name="buscar_lugar_hint">Buscar aula, despacho, laboratorio o servicio...</string>
+    <string name="plano_planta">Plano de la planta</string>
+    <string name="mi_ubicacion">Mi ubicación</string>
+    <string name="simular">▶ Simular</string>
+    <string name="foto_camino_desc">Foto del camino. Toca para verla en grande</string>
+    <string name="direccion_seguir">Dirección a seguir</string>
+    <string name="voz_guia">Voz de la guía</string>
+    <string name="mascota">Mascota</string>
+    <string name="como_funciona">Cómo funciona</string>
+    <string name="saludo_mascota_mapa">¡Hola! Dime a dónde vas y te llevo paso a paso, con fotos del camino. También puedes tocar un edificio en el mapa.</string>
+    <string name="a_donde_vas">¿A dónde vas?</string>
+    <string name="buscando_gps">📍 Te busco con el GPS al elegir</string>
+    <string name="llevame_a_clase">Llévame a clase</string>
+    <string name="recientes">Recientes</string>
+    <string name="sitios">Sitios</string>
+    <string name="solo_ver_mapa">Solo ver el mapa</string>
+    <string name="no_preguntar_hoy">No preguntar más hoy</string>
+    <string name="titulo_mapa">Mapa</string>
+    <string name="modo_mapa_gps">🗺️ Mapa GPS</string>
+    <string name="modo_planos_etsiit">🏢 Planos ETSIIT</string>
+    <string name="hint_buscar_espacio">Buscar aula, despacho, laboratorio o servicio…</string>
+    <string name="plano_de_la_planta">Plano de la planta</string>
+    <string name="fab_a_donde_vas">¿A dónde vas?</string>
+    <string name="fab_como_llegar">Cómo llegar</string>
+    <string name="fab_mi_ubicacion_desc">Mi ubicación</string>
+    <string name="btn_visor">Visor</string>
+    <string name="btn_cambiar">Cambiar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="planta_sotano">Sótano</string>
+    <string name="planta_baja">Planta Baja</string>
+    <string name="planta_1">Planta 1</string>
+    <string name="planta_2">Planta 2</string>
+    <string name="planta_3">Planta 3</string>
+    <string name="planta_4">Planta 4</string>
+    <string name="planta_5">Planta 5</string>
+    <string name="como_llegar_titulo">Cómo llegar</string>
+    <string name="como_funciona_desc">Cómo funciona</string>
+    <string name="cerrar_desc">Cerrar</string>
+    <string name="btn_empezar_guia">Empezar guía</string>
+    <string name="btn_google_maps">Google Maps</string>
+    <string name="etiqueta_desde">Desde</string>
+    <string name="pista_mantener_pulsado_mapa">👆 Mantén pulsado el mapa para salir desde cualquier otro punto.</string>
+    <string name="etiqueta_hasta">Hasta</string>
+    <string name="etiqueta_otros_buses">Otros buses</string>
+    <string name="foto_lugar_desc">Foto del sitio · toca para verla en grande</string>
+    <string name="pregunta_te_llevo">¿Te llevo?</string>
+    <string name="btn_llevame_aqui">Llévame aquí</string>
+    <string name="btn_ver_por_dentro">Ver por dentro</string>
+    <string name="foto_ruta_desc">Foto de la ruta</string>
+    <string name="rumbo_desconocido">Rumbo: --</string>
+    <string name="btn_paso_anterior">Paso anterior</string>
+    <string name="btn_paso_siguiente">Paso siguiente</string>
+    <string name="vista_previa_simulada">Vista previa simulada</string>
+    <string name="vista_camino_desc">Vista del camino. Baja el móvil o toca para volver al mapa</string>
+    <string name="direccion_a_seguir_desc">Dirección a seguir</string>
+    <string name="pista_baja_movil">📱 Baja el móvil para volver al mapa</string>
+
+    <!-- Login & SignUp extra -->
+    <string name="hola_de_nuevo">¡Hola de nuevo!</string>
+    <string name="accede_cuenta_universitaria">Accede con tu cuenta universitaria para personalizar tus asignaturas, menús y horarios.</string>
+    <string name="hint_correo">ejemplo@correo.ugr.es</string>
+    <string name="olvidaste_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="no_tienes_cuenta">¿No tienes una cuenta aún?</string>
+    <string name="crear_cuenta_nueva">Crear cuenta nueva</string>
+    <string name="titulo_iniciar_sesion">Iniciar sesión</string>
+    <string name="titulo_crear_cuenta">Crear cuenta</string>
+    <string name="bienvenido">¡Bienvenido!</string>
+    <string name="crea_cuenta_correo_ugr">Crea tu cuenta con tu correo de la UGR.</string>
+    <string name="nombre_completo">Nombre completo</string>
+    <string name="hint_nombre_apellidos">Tu nombre y apellidos</string>
+    <string name="correo_universitario">Correo universitario</string>
+    <string name="hint_correo_ugr">ejemplo@correo.ugr.es</string>
+    <string name="confirmar_contrasena">Confirmar contraseña</string>
+    <string name="btn_crear_cuenta">Crear cuenta</string>
+    <string name="ya_tienes_cuenta">¿Ya tienes una cuenta?</string>
+
+    <!-- Arrays -->
     <string-array name="tipos_evento_array">
         <item>Examen</item>
         <item>Entrega</item>

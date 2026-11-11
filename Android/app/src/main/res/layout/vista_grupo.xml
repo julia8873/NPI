@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Vista previa simulada"
+            android:text="@string/vista_previa_simulada"
             android:textColor="#999999"
             android:textSize="11sp" />
 

@@ -59,7 +59,7 @@
             android:backgroundTint="#D32F2F"
             android:paddingHorizontal="10dp"
             android:paddingVertical="3dp"
-            android:text="🚨 URGENTE"
+            android:text="@string/etiqueta_urgente"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold"
@@ -93,7 +93,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Toca para leerlo entero"
+            android:text="@string/toca_para_leer_entero"
             android:textColor="#FF8C42"
             android:textSize="13sp"
             android:textStyle="bold" />

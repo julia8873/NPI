@@ -41,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="8dp"
                     android:paddingVertical="3dp"
-                    android:text="Examen"
+                    android:text="@string/tipo_evento_placeholder"
                     android:textColor="#DC2626"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="10:30"
+                android:text="@string/hora_placeholder"
                 android:textColor="#64748B"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -66,7 +66,7 @@
             android:layout_alignParentTop="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
-            android:contentDescription="Eliminar"
+            android:contentDescription="@string/eliminar"
             android:focusable="true"
             android:padding="4dp"
             android:src="@android:drawable/ic_menu_delete"
@@ -81,7 +81,7 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Título del Evento"
+            android:text="@string/titulo_evento_placeholder"
             android:textColor="#0F172A"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -94,7 +94,7 @@
             android:layout_marginTop="3dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Descripción o ubicación del evento"
+            android:text="@string/descripcion_evento_placeholder"
             android:textColor="#64748B"
             android:textSize="12sp" />
 

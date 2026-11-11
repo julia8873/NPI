@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
                 android:layout_weight="1"
-                android:text="📅 Calendario"
+                android:text="@string/btn_calendario"
                 android:textColor="#FF8C42"
                 app:strokeColor="#FF8C42" />
 
@@ -108,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="4dp"
                 android:layout_weight="1"
-                android:text="📍 Llévame"
+                android:text="@string/btn_llevame"
                 android:textColor="#FF8C42"
                 app:strokeColor="#FF8C42" />
 
@@ -119,7 +119,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_weight="1"
-                android:text="🔗 Info"
+                android:text="@string/btn_mas_info"
                 android:textColor="#FF8C42"
                 app:strokeColor="#FF8C42" />
         </LinearLayout>

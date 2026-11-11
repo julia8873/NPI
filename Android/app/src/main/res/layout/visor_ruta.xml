@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0"
-        android:contentDescription="Foto de la ruta"
+        android:contentDescription="@string/foto_ruta_desc"
         android:scaleType="centerCrop" />
 
     <!-- Capa superior: Módulo de información y estado (HUD Superior) -->
@@ -43,7 +43,7 @@
                     android:id="@+id/tvRumbo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Rumbo: --"
+                    android:text="@string/rumbo_desconocido"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -87,7 +87,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_gravity="center"
-                    android:contentDescription="Cerrar"
+                    android:contentDescription="@string/cerrar_desc"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
                     app:tint="#FFFFFF" />
             </com.google.android.material.card.MaterialCardView>
@@ -122,6 +122,7 @@
                 android:layout_width="52dp"
                 android:layout_height="52dp"
                 android:layout_marginEnd="12dp"
+                android:contentDescription="@string/btn_paso_anterior"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
@@ -142,6 +143,7 @@
                 style="@style/Widget.MaterialComponents.Button.Icon"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
+                android:contentDescription="@string/btn_paso_siguiente"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"

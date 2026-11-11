@@ -63,14 +63,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/nui_espacio_s"
-                android:text="Pasa la cámara por el código de barras de los libros. No hace falta pulsar nada."
+                android:text="@string/pasa_camara_codigo_barras"
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:accessibilityHeading="true"
-                android:text="Cómo vibra"
+                android:text="@string/como_vibra"
                 android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
                 android:textColor="@color/nui_apagado" />
 
@@ -88,7 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="●\ndisponible"
+                    android:text="@string/leyenda_disponible"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                     android:textColor="@color/nui_arrayan" />
 
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="● ●\nde tu asignatura"
+                    android:text="@string/leyenda_asignatura"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                     android:textColor="@color/nui_acento_profundo" />
 
@@ -106,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="▬\nsin ejemplares"
+                    android:text="@string/leyenda_sin_ejemplares"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                     android:textColor="@color/nui_granada" />
             </LinearLayout>
@@ -152,7 +152,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/nui_espacio_m"
             android:gravity="center"
-            android:text="Para escanear la estantería hace falta la cámara."
+            android:text="@string/necesita_camara_estanteria"
             android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
         <com.google.android.material.button.MaterialButton
@@ -160,6 +160,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/nui_espacio_m"
-            android:text="Permitir la cámara" />
+            android:text="@string/permitir_la_camara" />
     </LinearLayout>
 </FrameLayout>

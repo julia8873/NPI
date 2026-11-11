@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/black"
     android:clickable="true"
-    android:contentDescription="Vista del camino. Baja el móvil o toca para volver al mapa"
+    android:contentDescription="@string/vista_camino_desc"
     android:focusable="true">
 
     <ImageView
@@ -30,7 +30,7 @@
             android:id="@+id/ivLevantadaFlecha"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:contentDescription="Dirección a seguir"
+            android:contentDescription="@string/direccion_a_seguir_desc"
             android:src="@drawable/ic_flecha_guia" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:alpha="0.8"
-            android:text="📱 Baja el móvil para volver al mapa"
+            android:text="@string/pista_baja_movil"
             android:textColor="@android:color/white"
             android:textSize="15sp" />
     </LinearLayout>

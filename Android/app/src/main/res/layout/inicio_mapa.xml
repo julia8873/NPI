@@ -36,7 +36,7 @@
             <ImageView
                 android:layout_width="44dp"
                 android:layout_height="44dp"
-                android:contentDescription="Mascota"
+                android:contentDescription="@string/mascota"
                 android:src="@drawable/ic_mascota_ayudante" />
 
             <TextView
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:text="¡Hola! Dime a dónde vas y te llevo paso a paso, con fotos del camino. También puedes tocar un edificio en el mapa."
+                android:text="@string/saludo_mascota_mapa"
                 android:textColor="@color/nui_tinta"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -52,7 +52,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="¿A dónde vas?"
+            android:text="@string/a_donde_vas"
             android:textColor="@color/nui_tinta"
             android:textSize="26sp"
             android:textStyle="bold" />
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:text="📍 Te busco con el GPS al elegir"
+            android:text="@string/buscando_gps"
             android:textColor="@color/nui_apagado"
             android:textSize="13sp" />
 
@@ -107,7 +107,7 @@
                     android:layout_height="58dp"
                     android:layout_marginTop="10dp"
                     android:backgroundTint="@color/nui_acento"
-                    android:text="Llévame a clase"
+                    android:text="@string/llevame_a_clase"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="17sp"
@@ -122,7 +122,7 @@
             android:id="@+id/tvInicioRecientes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recientes"
+            android:text="@string/recientes"
             android:textColor="@color/nui_apagado"
             android:textSize="13sp"
             android:textStyle="bold"
@@ -139,7 +139,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
-            android:text="Sitios"
+            android:text="@string/sitios"
             android:textColor="@color/nui_apagado"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -156,7 +156,7 @@
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:layout_marginTop="12dp"
-            android:text="Solo ver el mapa"
+            android:text="@string/solo_ver_mapa"
             android:textAllCaps="false"
             android:textColor="@color/nui_tinta"
             android:textSize="16sp"
@@ -167,7 +167,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:text="No preguntar más hoy"
+            android:text="@string/no_preguntar_hoy"
             android:textColor="@color/nui_apagado"
             android:textSize="14sp" />
     </LinearLayout>

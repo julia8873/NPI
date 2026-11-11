@@ -105,7 +105,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:gravity="center"
                 android:minHeight="@dimen/nui_toque_min"
-                android:text="🔕 Para silenciarlo del todo, permite «No molestar» ›"
+                android:text="@string/permiso_no_molestar_aviso"
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
                 android:textColor="@color/nui_cobalto"
                 android:visibility="gone" />
@@ -170,7 +170,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/nui_espacio_xxl"
-            android:text="Levanta el móvil o toca para hacer una pausa"
+            android:text="@string/instrucciones_pausa_estudio"
             android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
             android:textColor="@color/biblio_estudio_texto_suave" />
     </LinearLayout>

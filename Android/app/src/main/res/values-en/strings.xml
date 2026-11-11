@@ -1,0 +1,379 @@
+<resources>
+    <!-- General -->
+    <string name="app_name">NUI ETSIIT</string>
+    <string name="volver">Back</string>
+    <string name="volver_menu_principal">Back to main menu</string>
+    <string name="chat">Chat</string>
+    <string name="perfil">Profile</string>
+    <string name="perfil_usuario">User Profile</string>
+    <string name="abrir_asistente">Open assistant</string>
+    <string name="enviar">Send</string>
+    <string name="enviar_mensaje">Send message</string>
+    <string name="cancelar">Cancel</string>
+    <string name="aceptar">Accept</string>
+    <string name="guardar">Save</string>
+    <string name="eliminar">Delete</string>
+    <string name="cerrar">Close</string>
+
+    <string name="titulo_app">NUI ETSIIT</string>
+    <string name="inclinacion_indicador_desc">Tilt indicator. Tap to enable or disable.</string>
+    <string name="novedades_etsiit">ETSIIT News</string>
+    <string name="tag_hoy">TODAY</string>
+    <string name="calendario_etsiit">ETSIIT Calendar</string>
+    <string name="titulo_calendario_etsiit">ETSIIT Calendar</string>
+    <string name="subtitulo_calendario_etsiit">Activities, appointments, exams and deadlines</string>
+    <string name="cabecera_acceso_rapido">QUICK ACCESS</string>
+    <string name="btn_cambiar_ultimo_visto">🔄 Switch to last viewed</string>
+    <string name="tag_hora_de_comer">🍽️ LUNCHTIME</string>
+    <string name="subinfo_horario_etsiit">ETSIIT Schedule</string>
+    <string name="titulo_acceso_directo_ejemplo">Route: Room 0.7 ➔ Canteen</string>
+    <string name="desc_acceso_directo_ejemplo">Class detected in 0.7 · Open direct map</string>
+
+    <string name="permiso_no_molestar_aviso">🔕 To mute completely, allow "Do Not Disturb" ›</string>
+    <string name="instrucciones_pausa_estudio">Pick up your phone or tap to pause</string>
+
+    <!-- Hello World / Main -->
+    <string name="hello_world">Hello, world!</string>
+
+    <!-- Chat Activity -->
+    <string name="asistente_etsiit">ETSIIT Assistant</string>
+    <string name="ia_gemini_subtitle">Conversational AI · Gemini</string>
+    <string name="hint_chat_input">Ask a question or request an action…</string>
+    <string name="avatar_asistente">Assistant avatar</string>
+    <string name="avatar_asistente_desc">Assistant avatar</string>
+    <string name="nombre_asistente_bot">ETSIIT Assistant</string>
+    <string name="consultando_gemini">Asking Gemini…</string>
+
+    <!-- Login & SignUp -->
+    <string name="iniciar_sesion">Log in</string>
+    <string name="registrarse">Sign up</string>
+    <string name="correo_electronico">Email</string>
+    <string name="contrasena">Password</string>
+    <string name="nueva_contrasena_opcional">New password (optional)</string>
+    <string name="introduce_tu_contrasena">Enter your password</string>
+    <string name="crea_una_contrasena">Create a password</string>
+    <string name="repite_la_contrasena">Repeat password</string>
+    <string name="nombre_y_apellidos">Full name</string>
+    <string name="tu_nombre">Your name</string>
+    <string name="grado_universitario">Degree</string>
+    <string name="selecciona_tu_grado">Select your degree</string>
+    <string name="dejar_vacio_para_no_cambiar">Leave blank to keep current</string>
+
+    <!-- Secciones principales -->
+    <string name="seccion_actividades">Activities</string>
+    <string name="seccion_asignaturas">Subjects</string>
+    <string name="seccion_biblioteca">Library</string>
+    <string name="seccion_comedores">Dining Halls</string>
+    <string name="seccion_calendario">Calendar</string>
+    <string name="seccion_profesorado">Faculty</string>
+    <string name="seccion_secretaria">Registrar\'s Office</string>
+    <string name="seccion_noticias">News &amp; Notices</string>
+    <string name="seccion_mapa">ETSIIT Map</string>
+
+    <!-- Actividades -->
+    <string name="comunidades_chat">💬 Chat communities</string>
+    <string name="estas_apuntado">✓ Joined</string>
+    <string name="toca_tarjeta_detalles">Tap card to see full details</string>
+    <string name="me_apunto">I\'M IN</string>
+    <string name="paso">SKIP</string>
+    <string name="volver_a_empezar">↺ Start over</string>
+    <string name="actividad_anterior">Previous activity</string>
+    <string name="pasar">Skip</string>
+    <string name="apuntarme">Join</string>
+    <string name="btn_terminar">Finish</string>
+    <string name="instrucciones_comunidades">Tap a group to preview it before joining</string>
+    <string name="btn_calendario">Calendar</string>
+    <string name="btn_llevame">Take me</string>
+    <string name="btn_mas_info">More info</string>
+
+    <string name="titulo_seccion_avisos">Notices</string>
+    <string name="marcar_todo_leido">Mark all as read</string>
+    <string name="sin_avisos_vacio">No notices here 🎉</string>
+
+    <string name="etiqueta_urgente">🚨 URGENT</string>
+    <string name="toca_para_leer_entero">Tap to read full notice</string>
+
+    <!-- Ajustes cuenta -->
+    <string name="ajustes">Settings</string>
+    <string name="tu_perfil">Your profile</string>
+    <string name="preferencias">PREFERENCES</string>
+    <string name="cuenta">Account</string>
+    <string name="notificaciones">Notifications</string>
+    <string name="apariencia">Appearance</string>
+    <string name="idioma">Language</string>
+    <string name="privacidad">Privacy</string>
+    <string name="ayuda">Help</string>
+    <string name="ajustes_rapidos">QUICK SETTINGS</string>
+    <string name="avisos_de_clase">Class notifications</string>
+    <string name="vegetariano">Vegetarian</string>
+    <string name="cerrar_sesion">Log out</string>
+
+    <!-- Biblioteca & Apuntar Libros -->
+    <string name="pasa_camara_codigo_barras">Scan book barcodes with the camera. No tapping required.</string>
+    <string name="como_vibra">Haptic feedback</string>
+    <string name="leyenda_disponible">●\navailable</string>
+    <string name="leyenda_asignatura">● ●\nfrom your subject</string>
+    <string name="leyenda_sin_ejemplares">▬\nout of stock</string>
+    <string name="necesita_camara_estanteria">Camera access is required to scan the bookshelf.</string>
+    <string name="permitir_la_camara">Allow camera access</string>
+    <string name="solo_disponibles">Available only</string>
+    <string name="no_hay_libros_baldas">No books found on these shelves.</string>
+    <string name="estudiar">Study</string>
+    <string name="escanear">Scan</string>
+    <string name="suelta_para_devolverlo">Release to return · Swipe up to open</string>
+    <string name="hint_buscador_libros">Title, author, publisher, or ISBN</string>
+    <string name="modo_estudio_desc">Study mode: place phone face down to focus for 25 minutes</string>
+
+    <string name="prestado_label">On Loan</string>
+    <string name="ubicacion_label">Location</string>
+    <string name="btn_como_llegar_biblio">Get directions to library</string>
+    <string name="datos_edicion_titulo">Edition Details</string>
+    <string name="editorial_label">Publisher</string>
+    <string name="edicion_label">Edition</string>
+    <string name="anio_label">Year</string>
+    <string name="isbn_label">ISBN</string>
+    <string name="marca_prestado">On Loan</string>
+    <string name="marca_basica">Basic</string>
+
+    <string name="titulo_explorar_biblioteca">Explore library</string>
+    <string name="explorar_grado">Degree</string>
+    <string name="explorar_curso">Year</string>
+    <string name="explorar_rama">Branch</string>
+    <string name="explorar_planta">Floor</string>
+    <string name="explorar_asignatura">Subject</string>
+    <string name="btn_limpiar">Clear</string>
+
+    <string name="ver_que_necesito_y_empezar">See requirements and start</string>
+    <string name="volver_pregunta_anterior">← Back to previous question</string>
+
+    <!-- Asignaturas -->
+    <string name="no_has_iniciado_sesion">You are not logged in.\nLog in to see your schedule.</string>
+    <string name="iniciar_sesion_btn">Log in</string>
+    <string name="tu_horario_semanal">Your weekly schedule:</string>
+    <string name="quieres_ver_mas_asignaturas">Want to see more subjects?</string>
+    <string name="buscador">Search</string>
+    <string name="selecciona_tu_grado_label">Select your Degree:</string>
+    <string name="nombre_grado">[Degree Name]</string>
+    <string name="desliza_elegir_curso">Swipe to choose academic year</string>
+    <string name="resultados">Results:</string>
+    <string name="buscar_asignatura_hint">Search subject by name...</string>
+
+    <string name="abrir_enlace">Open link</string>
+
+    <!-- Calendario & Eventos -->
+    <string name="eventos_para_hoy">Today\'s events</string>
+    <string name="anadir_evento">+ Add</string>
+    <string name="no_hay_actividades_fecha">No activities or assignments scheduled for this date.</string>
+    <string name="tipo_evento">Event type:</string>
+    <string name="titulo_examen_entrega_hint">Exam or assignment title</string>
+    <string name="hora_ej_hint">Time (e.g. 10:30 or 23:59)</string>
+    <string name="descripcion_asignatura_hint">Description or subject</string>
+    <string name="tipo_evento_placeholder">Exam</string>
+    <string name="hora_placeholder">10:30</string>
+    <string name="titulo_evento_placeholder">Event Title</string>
+    <string name="descripcion_evento_placeholder">Event description or location</string>
+
+    <!-- Comedores -->
+    <string name="tag_comedor_cercano">📍 NEAREST CANTEEN</string>
+    <string name="mensaje_comedor_cercano">Your nearest canteen!\nAynadamar Canteen</string>
+    <string name="btn_horario">🕒 Schedule</string>
+    <string name="btn_precios">💰 Prices</string>
+    <string name="btn_tipo_menu">🥩 Menu ▾</string>
+    <string name="dia_default">Tuesday, November 02</string>
+    <string name="primer_plato_titulo">FIRST COURSE</string>
+    <string name="primer_plato_default">First course</string>
+    <string name="segundo_plato_titulo">MAIN COURSE</string>
+    <string name="segundo_plato_default">Main course</string>
+    <string name="postre_titulo">DESSERT</string>
+    <string name="postre_default">Dessert</string>
+    <string name="titulo_semana_default">📅 WEEK: 01/11/2026</string>
+    <string name="dia_lun">Mon</string>
+    <string name="dia_mar">Tue</string>
+    <string name="dia_mie">Wed</string>
+    <string name="dia_jue">Thu</string>
+    <string name="dia_vie">Fri</string>
+    <string name="dia_anterior_desc">Previous day</string>
+    <string name="dia_siguiente_desc">Next day</string>
+    <string name="comedores_universitarios">🍽️ Campus Dining</string>
+    <string name="ordenados_cercania">Sorted by distance. Tap to view menu:</string>
+    <string name="horario_apertura">🕒 Opening Hours</string>
+    <string name="comedor_label">Dining Hall</string>
+    <string name="fecha_seleccionada">Selected date</string>
+    <string name="horario_13_16">Hours: 13:00 – 16:30</string>
+    <string name="precios_del_menu">💰 Menu Prices</string>
+    <string name="tarifas_oficiales">Official university rates (in dining hall)</string>
+    <string name="profesores_precio">👨‍🏫 Faculty:</string>
+    <string name="cinco_euros">5 euros</string>
+    <string name="estudiantes_precio">🎓 Students:</string>
+    <string name="cuatro_euros">4 euros</string>
+    <string name="veganos_precio">🌱 Vegan:</string>
+    <string name="mas_un_euro">+1 euro extra</string>
+    <string name="tipo_menu_titulo">🍽️ Menu Type</string>
+    <string name="menu_normal">Regular Menu</string>
+    <string name="menu_vegetariano">Vegetarian Menu</string>
+    <string name="activo">✓ Active</string>
+    <string name="alternar_inclinando">💡 You can also switch quickly by tilting your device back.</string>
+    <string name="comedor_default">ETSIIT Canteen</string>
+    <string name="direccion_default">Canteen street</string>
+    <string name="distancia_default">120 m</string>
+
+    <!-- Profesorado -->
+    <string name="ficha_profesor">Professor Profile</string>
+    <string name="nombre_profesor">Professor Name</string>
+    <string name="enviar_email">Send Email</string>
+    <string name="web_docente">Faculty Website</string>
+    <string name="despacho_y_ubicacion">Office &amp; Location</string>
+    <string name="cargando_despacho">Loading office information...</string>
+    <string name="clases_e_imparticion">Classes &amp; Teaching Schedule:</string>
+    <string name="horarios_tutorias">Office Hours (Book Slot):</string>
+    <string name="buscar_profesor_hint">Search professor by name or subject...</string>
+    <string name="titulo_profesorado">Profesorado</string>
+    <string name="aviso_no_session_tutorias">No has iniciado sesión aún.\nPara gestionar y ver tus tutorías reservadas accede con tus credenciales.</string>
+    <string name="tus_tutorias_reservadas">Tus tutorías reservadas:</string>
+    <string name="btn_buscar_profesorado_tutorias">¿Quieres buscar profesorado o tutorías?</string>
+
+    <!-- Asignatura Detalle -->
+    <string name="ficha_asignatura">Course Details</string>
+    <string name="nombre_asignatura_default">Course Name</string>
+    <string name="codigo_default">Code: N/A</string>
+    <string name="creditos_ects">ECTS Credits</string>
+    <string name="cuatrimestre">Semester</string>
+    <string name="horarios_clase_titulo">Class &amp; Teaching Schedule:</string>
+    <string name="profesorado_impartidor_titulo">Teaching Staff:</string>
+    <string name="ver_guia_docente">View Syllabus</string>
+
+    <!-- Secretaría y Trámites -->
+    <string name="requisitos">Requirements</string>
+    <string name="plazos">Deadlines</string>
+    <string name="documentos_necesitas">Required documents</string>
+    <string name="buscar_tramite_hint">Search procedure</string>
+    <string name="fichas_anteriores">Previous cards</string>
+    <string name="fichas_siguientes">Next cards</string>
+    <string name="motivo_cita_hint">Appointment reason</string>
+    <string name="elige_el_dia">Choose date</string>
+    <string name="horas_tachadas">Strikethrough hours are taken. Swipe or tilt phone to change time slot</string>
+    <string name="deshacer">Undo</string>
+    <string name="ahora_no">Not now</string>
+    <string name="toca_para_fotografiar">Tap to\nphotograph</string>
+    <string name="opcional">Optional</string>
+    <string name="a_la_carpeta">↓ Drop in folder</string>
+    <string name="plazo_abierto">Open deadline</string>
+    <string name="resguardo_secretaria">Receipt · ETSIIT Secretary\'s Office</string>
+    <string name="ayuda_qr_justificante">Turn your phone towards the Secretary\'s desk, or tap the code, to show it in full screen.\nPinch to zoom in; double tap to reset.</string>
+    <string name="aviso_actualizar_calendario">You changed the appointment: please update your calendar as well</string>
+    <string name="anadir_al_calendario">Add to calendar</string>
+    <string name="paso_anterior">Previous step</string>
+    <string name="inclinar_para_pasar">Tilt to pass</string>
+    <string name="paso_siguiente">Next step</string>
+
+    <string name="hint_buscar_tramite">Buscar trámite</string>
+    <string name="no_hay_tramites_coincidentes">No hay trámites que coincidan.</string>
+    <string name="que_necesitas">¿Qué necesitas?</string>
+    <string name="pedir_cita">Pedir cita</string>
+    <string name="mis_gestiones">Mis gestiones</string>
+    <string name="ver_todos_los_tramites">Ver todos los trámites ▴</string>
+
+    <string name="zona_soltar_documentos">↓  Drop documents here</string>
+    <string name="lienzo_firma_desc">Signature box to sign with your finger</string>
+    <string name="firma_aqui">Sign here</string>
+    <string name="firmado_con_huella">Signed with fingerprint</string>
+    <string name="btn_borrar_firma">Clear signature</string>
+    <string name="btn_usar_huella">Use my fingerprint</string>
+    <string name="sello_desc">Stamp: press and hold to stamp</string>
+    <string name="sello_manten">Hold</string>
+    <string name="capa_lanzar_desc">Sealed folder: swipe up to send</string>
+    <string name="btn_cerrar_carpeta_opcionales">Close folder without optional files</string>
+    <string name="btn_abrir_carpeta_revisar">Open folder to review documents</string>
+    <string name="btn_enviar_sin_lanzar">Send without swiping</string>
+
+    <!-- Mapa & Gyro -->
+    <string name="control_inclinacion">🧭 Tilt Control</string>
+    <string name="control_inclinacion_desc">Choose whether to select sections by tilting your phone or using touch input</string>
+    <string name="activado">Enabled</string>
+    <string name="inclinacion_activa_desc">Navigate by tilting phone sideways and up/down</string>
+    <string name="desactivado">Disabled</string>
+    <string name="inclinacion_desact_desc">Navigate solely by tapping screen cards</string>
+    <string name="buscar_lugar_hint">Search classroom, office, lab, or facility...</string>
+    <string name="plano_planta">Floor plan</string>
+    <string name="mi_ubicacion">My location</string>
+    <string name="simular">▶ Simulate</string>
+    <string name="foto_camino_desc">Route photo. Tap to view full size</string>
+    <string name="direccion_seguir">Direction to follow</string>
+    <string name="voz_guia">Voice guide</string>
+    <string name="mascota">Mascot</string>
+    <string name="como_funciona">How it works</string>
+    <string name="saludo_mascota_mapa">Hi! Tell me where you are going and I will guide you step by step, with pictures along the way. You can also tap a building on the map.</string>
+    <string name="a_donde_vas">Where are you going?</string>
+    <string name="buscando_gps">📍 Searching via GPS upon selection</string>
+    <string name="llevame_a_clase">Take me to class</string>
+    <string name="recientes">Recents</string>
+    <string name="sitios">Places</string>
+    <string name="solo_ver_mapa">Just view map</string>
+    <string name="no_preguntar_hoy">Don\'t ask again today</string>
+    <string name="titulo_mapa">Map</string>
+    <string name="modo_mapa_gps">🗺️ GPS Map</string>
+    <string name="modo_planos_etsiit">🏢 ETSIIT Plans</string>
+    <string name="hint_buscar_espacio">Search classroom, office, lab or service…</string>
+    <string name="plano_de_la_planta">Floor plan</string>
+    <string name="fab_a_donde_vas">Where are you going?</string>
+    <string name="fab_como_llegar">Get directions</string>
+    <string name="fab_mi_ubicacion_desc">My location</string>
+    <string name="btn_visor">Viewer</string>
+    <string name="btn_cambiar">Change</string>
+    <string name="btn_cancelar">Cancel</string>
+    <string name="planta_sotano">Basement</string>
+    <string name="planta_baja">Ground Floor</string>
+    <string name="planta_1">Floor 1</string>
+    <string name="planta_2">Floor 2</string>
+    <string name="planta_3">Floor 3</string>
+    <string name="planta_4">Floor 4</string>
+    <string name="planta_5">Floor 5</string>
+    <string name="como_llegar_titulo">Get directions</string>
+    <string name="como_funciona_desc">How it works</string>
+    <string name="cerrar_desc">Close</string>
+    <string name="btn_empezar_guia">Start guide</string>
+    <string name="btn_google_maps">Google Maps</string>
+    <string name="etiqueta_desde">From</string>
+    <string name="pista_mantener_pulsado_mapa">👆 Press and hold the map to start from any other point.</string>
+    <string name="etiqueta_hasta">To</string>
+    <string name="etiqueta_otros_buses">Other buses</string>
+    <string name="foto_lugar_desc">Place photo · tap to view full size</string>
+    <string name="pregunta_te_llevo">Take you there?</string>
+    <string name="btn_llevame_aqui">Take me here</string>
+    <string name="btn_ver_por_dentro">View inside</string>
+    <string name="foto_ruta_desc">Route photo</string>
+    <string name="rumbo_desconocido">Heading: --</string>
+    <string name="btn_paso_anterior">Previous step</string>
+    <string name="btn_paso_siguiente">Next step</string>
+    <string name="vista_previa_simulada">Simulated preview</string>
+    <string name="vista_camino_desc">Path view. Lower phone or tap to return to map</string>
+    <string name="direccion_a_seguir_desc">Direction to follow</string>
+    <string name="pista_baja_movil">📱 Lower phone to return to map</string>
+
+    <!-- Login & SignUp extra -->
+    <string name="hola_de_nuevo">Welcome back!</string>
+    <string name="accede_cuenta_universitaria">Log in with your university account to customize subjects, dining menus, and schedules.</string>
+    <string name="hint_correo">example@correo.ugr.es</string>
+    <string name="olvidaste_contrasena">Forgot your password?</string>
+    <string name="no_tienes_cuenta">Don\'t have an account yet?</string>
+    <string name="crear_cuenta_nueva">Create new account</string>
+    <string name="titulo_iniciar_sesion">Iniciar sesión</string>
+    <string name="titulo_crear_cuenta">Create account</string>
+    <string name="bienvenido">Welcome!</string>
+    <string name="crea_cuenta_correo_ugr">Create your account with your UGR email.</string>
+    <string name="nombre_completo">Full name</string>
+    <string name="hint_nombre_apellidos">Your full name</string>
+    <string name="correo_universitario">University email</string>
+    <string name="hint_correo_ugr">example@correo.ugr.es</string>
+    <string name="confirmar_contrasena">Confirm password</string>
+    <string name="btn_crear_cuenta">Create account</string>
+    <string name="ya_tienes_cuenta">Already have an account?</string>
+
+    <!-- Arrays -->
+    <string-array name="tipos_evento_array">
+        <item>Exam</item>
+        <item>Assignment</item>
+        <item>Personal</item>
+        <item>Reminder</item>
+    </string-array>
+</resources>

@@ -23,7 +23,7 @@
             android:layout_height="44dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_circulo_blanco_volver"
-            android:contentDescription="Volver al menú principal"
+            android:contentDescription="@string/volver_menu_principal"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
             android:scaleType="fitCenter"
@@ -37,7 +37,7 @@
             android:layout_weight="1"
             android:letterSpacing="-0.02"
             android:maxLines="1"
-            android:text="Avisos"
+            android:text="@string/titulo_seccion_avisos"
             android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -49,7 +49,7 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_nui_chat"
             android:clickable="true"
-            android:contentDescription="Abrir asistente"
+            android:contentDescription="@string/abrir_asistente"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="Chat"
+                android:text="@string/chat"
                 android:textColor="@android:color/white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -80,7 +80,7 @@
             android:layout_height="40dp"
             android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="Perfil"
+            android:contentDescription="@string/perfil"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
@@ -117,7 +117,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="8dp"
-                android:text="Marcar todo como leído"
+                android:text="@string/marcar_todo_leido"
                 android:textColor="#FF8C42"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -156,7 +156,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="No hay avisos aquí 🎉"
+            android:text="@string/sin_avisos_vacio"
             android:textColor="#000000"
             android:textSize="16sp"
             android:visibility="gone" />
