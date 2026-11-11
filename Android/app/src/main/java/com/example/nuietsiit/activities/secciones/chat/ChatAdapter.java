@@ -1,5 +1,7 @@
 package com.example.nuietsiit.activities.secciones.chat;
 
+import android.os.Build;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +61,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return listaMensajes.size();
     }
 
+    public static CharSequence parsearMarkdown(String markdown) {
+        if (markdown == null) return "";
+        String html = markdown
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>")
+                .replaceAll("\\*(.*?)\\*", "<i>$1</i>")
+                .replace("\n", "<br/>");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT);
+        } else {
+            return Html.fromHtml(html);
+        }
+    }
+
     // ViewHolder para mensajes del usuario
     static class ViewHolderUsuario extends RecyclerView.ViewHolder {
         private final TextView tvMensaje;
@@ -98,7 +116,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 llCargando.setVisibility(View.GONE);
                 tvMensaje.setVisibility(View.VISIBLE);
                 tvHora.setVisibility(View.VISIBLE);
-                tvMensaje.setText(mensaje.getTexto());
+                tvMensaje.setText(parsearMarkdown(mensaje.getTexto()));
                 tvHora.setText(mensaje.formatearHora());
             }
         }

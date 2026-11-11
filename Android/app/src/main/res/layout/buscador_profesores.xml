@@ -1,153 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
 
-    <!-- Título superior y botón de volver -->
-    <RelativeLayout
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="6dp">
 
-        <TextView
+        <ImageButton
             android:id="@+id/btnVolver"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="← Volver"
-            android:textColor="#FF9800"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="Volver al menú principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTituloSeccion"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
             android:text="Buscador"
-            android:textColor="#000000"
+            android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
-    </RelativeLayout>
-
-    <!-- Barra de búsqueda directa -->
-    <EditText
-        android:id="@+id/etBuscadorRapido"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="@android:drawable/editbox_background_normal"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawablePadding="8dp"
-        android:hint="Buscar profesor por nombre o asignatura..."
-        android:padding="12dp" />
-
-    <!-- CONTENEDOR 1: Lista de Grados -->
-    <ScrollView
-        android:id="@+id/scrollGrados"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true"
-        android:visibility="visible">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="Abrir asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Selecciona tu Grado:"
-                android:textColor="#333333"
-                android:textSize="18sp"
+                android:layout_marginStart="6dp"
+                android:text="Chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
                 android:textStyle="bold" />
-
-            <LinearLayout
-                android:id="@+id/contenedorBotonesGrados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <!-- Las tarjetas dinámicas de grados se insertan aquí -->
-            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
 
-    <!-- CONTENEDOR 2: La Ruleta Mágica de Cursos -->
-    <LinearLayout
-        android:id="@+id/layoutRuletaCursos"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tvTituloGradoSeleccionado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:text="[Nombre del Grado]"
-            android:textColor="#FF9800"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="Desliza para elegir el curso"
-            android:textColor="#666666"
-            android:textSize="14sp" />
-
-        <!-- Ruleta Mágica personalizada reutilizada -->
-        <com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView
-            android:id="@+id/ruletaCursosView"
-            android:layout_width="280dp"
-            android:layout_height="280dp"
-            android:layout_gravity="center" />
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
+            android:clickable="true"
+            android:contentDescription="Perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
     </LinearLayout>
 
-    <!-- CONTENEDOR 3: Resultados de la Búsqueda -->
-    <ScrollView
-        android:id="@+id/scrollResultados"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true"
-        android:visibility="gone">
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <LinearLayout
+        <!-- Barra de búsqueda directa -->
+        <EditText
+            android:id="@+id/etBuscadorRapido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginBottom="16dp"
+            android:background="@android:drawable/editbox_background_normal"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:hint="Buscar profesor por nombre o asignatura..."
+            android:padding="12dp" />
 
-            <TextView
-                android:id="@+id/tvTituloResultados"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Resultados:"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+        <!-- CONTENEDOR 1: Lista de Grados -->
+        <ScrollView
+            android:id="@+id/scrollGrados"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:visibility="visible">
 
             <LinearLayout
-                android:id="@+id/contenedorResultados"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <!-- Las tarjetas de profesores dinámicas se insertan aquí -->
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Selecciona tu Grado:"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/contenedorBotonesGrados"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- Las tarjetas dinámicas de grados se insertan aquí -->
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- CONTENEDOR 2: La Ruleta Mágica de Cursos -->
+        <LinearLayout
+            android:id="@+id/layoutRuletaCursos"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvTituloGradoSeleccionado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="[Nombre del Grado]"
+                android:textColor="#FF9800"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Desliza para elegir el curso"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <!-- Ruleta Mágica personalizada reutilizada -->
+            <com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView
+                android:id="@+id/ruletaCursosView"
+                android:layout_width="280dp"
+                android:layout_height="280dp"
+                android:layout_gravity="center" />
+        </LinearLayout>
+
+        <!-- CONTENEDOR 3: Resultados de la Búsqueda -->
+        <ScrollView
+            android:id="@+id/scrollResultados"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTituloResultados"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Resultados:"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/contenedorResultados"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- Las tarjetas de profesores dinámicas se insertan aquí -->
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
 </LinearLayout>

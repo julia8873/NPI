@@ -16,9 +16,11 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
+import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Actividad;
+import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.FechasUtil;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -35,7 +37,9 @@ import java.util.List;
  * Pantalla de Actividades SIN SCROLL: un "mazo" con una tarjeta grande cada vez.
  * - Deslizar a la derecha (o botón ✓) = me apunto y pasa a la siguiente.
  * - Deslizar a la izquierda (o botón ✕) = paso, siguiente.
- * - ↺ = volver a la anterior. Tocar la tarjeta = detalle completo (apuntarse, calendario, más info).
+ * - SENSOR (acelerómetro): inclinar el móvil a la derecha = me apunto, a la izquierda = paso.
+ *   Usa InclinarParaPasar, el mismo gesto que pasar páginas en Secretaría y Biblioteca.
+ * - ↺ = volver a la anterior. Tocar la tarjeta = detalle completo (apuntarse, calendario, llévame, más info).
  * - Sin sesión iniciada se pueden ver, pero no apuntarse.
  */
 public class Actividades extends BaseActivity {
@@ -56,6 +60,7 @@ public class Actividades extends BaseActivity {
     private MaterialCardView carta;
     private ChipGroup chipsTipos;
     private TextView tvVacio, tvContador, selloSi, selloNo;
+    private InclinarParaPasar inclinar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +69,13 @@ public class Actividades extends BaseActivity {
 
         // Barra superior con botón atrás
         MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Actividades");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (barra != null) {
+            setSupportActionBar(barra);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Actividades");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        }
 
         // Sesión guardada al iniciar sesión (SharedPreferences "SesionUsuario")
         correoUsuario = correoSesion();
@@ -92,6 +101,9 @@ public class Actividades extends BaseActivity {
         findViewById(R.id.btnAnterior).setOnClickListener(v -> anterior());
         findViewById(R.id.btnReiniciar).setOnClickListener(v -> { posicion = 0; mostrarCarta(); });
         carta.setOnTouchListener(new ArrastrarCarta());
+
+        // Sensor: inclinar el móvil hace lo mismo que los botones (+1 derecha = me apunto, -1 izquierda = paso)
+        inclinar = new InclinarParaPasar(carta, this::alInclinar, () -> posicion < mazo.size());
 
         crearChips();
         cargarActividades();
@@ -183,6 +195,7 @@ public class Actividades extends BaseActivity {
         findViewById(R.id.btnAnterior).setEnabled(posicion > 0);
 
         if (!hayCarta) {
+            if (inclinar != null) inclinar.actualizar();
             boolean visteTodas = !mazo.isEmpty();
             findViewById(R.id.btnReiniciar).setVisibility(visteTodas ? View.VISIBLE : View.GONE);
             tvContador.setText("");
@@ -216,7 +229,8 @@ public class Actividades extends BaseActivity {
             tvExtra.setVisibility(View.GONE);
         }
         findViewById(R.id.tvInscritoCarta).setVisibility(a.inscrito ? View.VISIBLE : View.GONE);
-        tvContador.setText((posicion + 1) + " de " + mazo.size());
+        tvContador.setText((posicion + 1) + " de " + mazo.size() + " · inclina el móvil o desliza");
+        if (inclinar != null) inclinar.actualizar();
     }
 
     /**
@@ -244,6 +258,15 @@ public class Actividades extends BaseActivity {
                     carta.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
                 })
                 .start();
+    }
+
+    /** Inclinar el móvil: enseña el sello un momento y decide, como si se hubiera arrastrado la carta. */
+    private void alInclinar(int direccion) {
+        if (posicion >= mazo.size()) return;
+        TextView sello = direccion > 0 ? selloSi : selloNo;
+        sello.setAlpha(1f);
+        carta.animate().rotation(direccion * 8f).setDuration(120)
+                .withEndAction(() -> decidir(direccion)).start();
     }
 
     private void anterior() {
@@ -428,6 +451,7 @@ public class Actividades extends BaseActivity {
         }
 
         v.findViewById(R.id.btnCalendario).setOnClickListener(x -> anadirACalendario(a));
+        v.findViewById(R.id.btnLlevame).setOnClickListener(x -> { hoja.dismiss(); llevarme(a); });
 
         View btnMasInfo = v.findViewById(R.id.btnMasInfo);
         if (a.enlace != null && !a.enlace.isEmpty()) {
@@ -453,7 +477,19 @@ public class Actividades extends BaseActivity {
     }
 
     private String lugar(Actividad a) {
-        return a.lugar != null ? a.lugar + " · ETSIIT" : "ETSIIT · Universidad de Granada";
+        String sitio = a.sitioEnMapa();
+        return sitio != null ? sitio + " · ETSIIT" : "ETSIIT · Universidad de Granada";
+    }
+
+    /**
+     * "Llévame": abre el mapa con la ruta hasta el sitio de la actividad (igual que "Cómo llegar" de Biblioteca).
+     * Si es en toda la escuela, el mapa pregunta "¿A dónde vas?".
+     */
+    private void llevarme(Actividad a) {
+        Intent intent = new Intent(this, Mapa.class).putExtra("CORREO", correoUsuario);
+        String sitio = a.sitioEnMapa();
+        if (sitio != null) intent.putExtra("RUTA_A_MARCADOR", sitio);
+        startActivity(intent);
     }
 
     // -------------------------------------------------

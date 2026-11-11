@@ -80,13 +80,20 @@ public class ActividadesDB {
      * devueltas como objetos EventoCalendario para mostrarlas automáticamente en el Calendario.
      */
     public List<EventoCalendario> obtenerActividadesPorFecha(String fechaYYYYMMDD) {
+        return obtenerActividadesPorFecha(fechaYYYYMMDD, null);
+    }
+
+    public List<EventoCalendario> obtenerActividadesPorFecha(String fechaYYYYMMDD, String correoUsuario) {
         List<EventoCalendario> lista = new ArrayList<>();
+        if (correoUsuario == null || correoUsuario.isEmpty()) return lista;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         try (Cursor cursor = db.rawQuery(
-                "SELECT idActividad, titulo, descripcion, tipoActividad, fechaInicio " +
-                "FROM ACTIVIDAD " +
-                "WHERE fechaInicio LIKE ? || '%' OR substr(fechaInicio, 1, 10) = ?",
-                new String[]{fechaYYYYMMDD, fechaYYYYMMDD})) {
+                "SELECT A.idActividad, A.titulo, A.descripcion, A.tipoActividad, A.fechaInicio " +
+                "FROM ACTIVIDAD A " +
+                "JOIN INSCRIPCION_ACTIVIDAD IA ON A.idActividad = IA.idActividad " +
+                "WHERE (A.fechaInicio LIKE ? || '%' OR substr(A.fechaInicio, 1, 10) = ?) " +
+                "AND LOWER(IA.correoEstudiante) = ?",
+                new String[]{fechaYYYYMMDD, fechaYYYYMMDD, correoUsuario.toLowerCase()})) {
             while (cursor.moveToNext()) {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("idActividad"));
                 String titulo = cursor.getString(cursor.getColumnIndexOrThrow("titulo"));
@@ -98,8 +105,7 @@ public class ActividadesDB {
                     hora = fechaInicio.substring(11, 16);
                 }
 
-                // ID negativo para diferenciar actividades del sistema de eventos de usuario
-                lista.add(new EventoCalendario(-id, "", titulo, "Actividad", fechaYYYYMMDD, hora, desc));
+                lista.add(new EventoCalendario(-id, correoUsuario, titulo, "Actividad", fechaYYYYMMDD, hora, desc));
             }
         } catch (Exception ignored) {}
         return lista;

@@ -104,7 +104,7 @@
                 android:orientation="vertical"
                 android:paddingBottom="80dp">
 
-                <!-- Card con el CalendarView original -->
+                <!-- Card con el CalendarGridView personalizado -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,13 +115,10 @@
                     app:strokeColor="#E2E8F0"
                     app:strokeWidth="1dp">
 
-                    <CalendarView
+                    <com.example.nuietsiit.activities.secciones.calendario.CalendarGridView
                         android:id="@+id/calendarView"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:dateTextAppearance="@style/TextoDiasCalendario"
-                        android:weekDayTextAppearance="@style/TextoSemanaCalendario"
-                        android:theme="@style/TemaCustomCalendario" />
+                        android:layout_height="wrap_content" />
 
                 </com.google.android.material.card.MaterialCardView>
 

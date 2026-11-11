@@ -33,7 +33,7 @@ public class BuscadorProfesores extends BaseActivity {
     private LinearLayout contenedorResultados;
     private TextView tvTituloGradoSeleccionado;
     private TextView tvTituloResultados;
-    private TextView btnVolver;
+    private View btnVolver;
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
 

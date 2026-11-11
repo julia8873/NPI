@@ -54,10 +54,7 @@ public final class InicioMapa {
     /** {icono, nombre, edificio, sitio de dentro (parte del título del marcador) o null}. */
     private static final String[][] SITIOS = {
             {"🎓", "ETSIIT", ProximaClase.ETSIIT, null},
-            {"🏢", "Edificio Auxiliar", ProximaClase.AUXILIAR, null},
-            {"📚", "Biblioteca", ProximaClase.ETSIIT, "Biblioteca"},
-            {"☕", "Comedor", ProximaClase.ETSIIT, "Comedor"},
-            {"🚪", "Secretaría", ProximaClase.ETSIIT, "Secretaría"},
+            {"🏢", "Edificio Auxiliar", ProximaClase.AUXILIAR, null}
     };
 
     private InicioMapa() {}
@@ -160,7 +157,6 @@ public final class InicioMapa {
             DestinoViaje d = new DestinoViaje(s[2], s[3], s[0] + " " + s[1], null);
             rejilla.addView(casilla(act, s[0], s[1], v -> ir.accept(d)));
         }
-        rejilla.addView(casilla(act, "🔍", "Buscar aula", v -> elegirAula(act, titulos, ir)));
     }
 
     private static MaterialButton casilla(Context ctx, String icono, String nombre, View.OnClickListener alTocar) {

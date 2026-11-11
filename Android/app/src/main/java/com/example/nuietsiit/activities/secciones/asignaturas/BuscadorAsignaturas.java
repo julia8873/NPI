@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,7 +34,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     private LinearLayout contenedorResultados;
     private TextView tvTituloGradoSeleccionado;
     private TextView tvTituloResultados;
-    private TextView btnVolver;
+    private View btnVolver;
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
 
@@ -285,7 +286,7 @@ public class BuscadorAsignaturas extends BaseActivity {
         tvNombre.setText(nombreAsignatura);
         tvNombre.setTextSize(18f);
         tvNombre.setTextColor(Color.BLACK);
-        tvNombre.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvNombre.setTypeface(null, Typeface.BOLD);
 
         TextView tvInfo = new TextView(this);
         tvInfo.setText(subtitulo);

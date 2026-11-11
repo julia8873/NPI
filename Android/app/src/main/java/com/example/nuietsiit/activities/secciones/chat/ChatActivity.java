@@ -2,10 +2,13 @@ package com.example.nuietsiit.activities.secciones.chat;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,8 +49,8 @@ public class ChatActivity extends BaseActivity {
         inicializarVistas();
         configurarRecyclerView();
         configurarEventos();
+        configurarAjusteTeclado();
 
-        // Inicializar GeminiManager con manejo de errores por si las herramientas fallan al deserializar
         try {
             geminiManager = new GeminiManager(this, correoUsuario, GeminiTools.obtenerHerramientas());
         } catch (Exception e) {
@@ -55,9 +58,25 @@ public class ChatActivity extends BaseActivity {
             geminiManager = new GeminiManager(this, correoUsuario, null);
         }
 
-
-        // Saludo inicial de bienvenida del asistente
         agregarMensajeBienvenida();
+    }
+
+    private void configurarAjusteTeclado() {
+        View rootChat = findViewById(R.id.rootChat);
+        if (rootChat != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(rootChat, (v, insets) -> {
+                Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+                Insets sysInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                int bottomPadding = Math.max(imeInsets.bottom, sysInsets.bottom);
+                v.setPadding(v.getPaddingLeft(), sysInsets.top, v.getPaddingRight(), bottomPadding);
+
+                if (imeInsets.bottom > 0 && listaMensajes != null && !listaMensajes.isEmpty()) {
+                    rvChatMensajes.postDelayed(() ->
+                            rvChatMensajes.scrollToPosition(listaMensajes.size() - 1), 100);
+                }
+                return insets;
+            });
+        }
     }
 
     private void inicializarVistas() {
@@ -80,6 +99,20 @@ public class ChatActivity extends BaseActivity {
         btnVolverChat.setOnClickListener(v -> finish());
 
         btnEnviarMensaje.setOnClickListener(v -> enviarMensajeUsuario());
+
+        etMensajeInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && !listaMensajes.isEmpty()) {
+                rvChatMensajes.postDelayed(() ->
+                        rvChatMensajes.smoothScrollToPosition(listaMensajes.size() - 1), 200);
+            }
+        });
+
+        etMensajeInput.setOnClickListener(v -> {
+            if (!listaMensajes.isEmpty()) {
+                rvChatMensajes.postDelayed(() ->
+                        rvChatMensajes.smoothScrollToPosition(listaMensajes.size() - 1), 200);
+            }
+        });
     }
 
     private void agregarMensajeBienvenida() {
@@ -97,7 +130,6 @@ public class ChatActivity extends BaseActivity {
             return;
         }
 
-        // 1. Añadir mensaje del usuario a la lista
         MensajeChat mensajeUsuario = new MensajeChat(texto, true);
         listaMensajes.add(mensajeUsuario);
         int posUsuario = listaMensajes.size() - 1;
@@ -105,14 +137,12 @@ public class ChatActivity extends BaseActivity {
         rvChatMensajes.scrollToPosition(posUsuario);
         etMensajeInput.setText("");
 
-        // 2. Añadir burbuja de estado "Pensando..." del asistente
         MensajeChat mensajeCargando = new MensajeChat(true);
         listaMensajes.add(mensajeCargando);
         int posCargando = listaMensajes.size() - 1;
         chatAdapter.notifyItemInserted(posCargando);
         rvChatMensajes.scrollToPosition(posCargando);
 
-        // 3. Enviar consulta a GeminiManager de forma asíncrona
         geminiManager.enviarMensaje(texto, new GeminiManager.GeminiCallback() {
             @Override
             public void onRespuesta(GenerateContentResponse respuesta) {
@@ -121,7 +151,6 @@ public class ChatActivity extends BaseActivity {
                     respuestaTexto = "No he recibido una respuesta de la API.";
                 }
 
-                // Reemplazar la burbuja "Pensando..." con la respuesta real del modelo
                 mensajeCargando.setCargando(false);
                 mensajeCargando.setTexto(respuestaTexto);
                 mensajeCargando.setTimestamp(System.currentTimeMillis());
@@ -144,8 +173,6 @@ public class ChatActivity extends BaseActivity {
                 chatAdapter.notifyItemChanged(posCargando);
                 rvChatMensajes.scrollToPosition(posCargando);
             }
-
-
         });
     }
 

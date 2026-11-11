@@ -115,11 +115,11 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Simulación: Iniciar en el martes 3 de noviembre de 2026
+        // Iniciar con la fecha del 10 de noviembre de 2026
         calendarioSeleccionado = Calendar.getInstance();
         calendarioSeleccionado.set(Calendar.YEAR, 2026);
         calendarioSeleccionado.set(Calendar.MONTH, Calendar.NOVEMBER);
-        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 3);
+        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 10);
         limpiarHora(calendarioSeleccionado);
 
         // Enlazar vistas del layout XML
@@ -156,6 +156,16 @@ public class Comedores extends BaseActivity {
         btnDiaX = findViewById(R.id.btnDiaX);
         btnDiaJ = findViewById(R.id.btnDiaJ);
         btnDiaV = findViewById(R.id.btnDiaV);
+
+        TextView tvTituloSeleccionDia = findViewById(R.id.tvTituloSeleccionDia);
+        if (tvTituloSeleccionDia != null) {
+            SimpleDateFormat sdfSemana = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Calendar inicio = (Calendar) calendarioSeleccionado.clone();
+            inicio.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            Calendar fin = (Calendar) calendarioSeleccionado.clone();
+            fin.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+            tvTituloSeleccionDia.setText("📅 SEMANA: " + sdfSemana.format(inicio.getTime()) + " - " + sdfSemana.format(fin.getTime()));
+        }
 
         btnHorario.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
@@ -202,12 +212,11 @@ public class Comedores extends BaseActivity {
 
 
         // Configurar selección directa mediante los botones de los días
-        btnDiaL.setOnClickListener(v ->
-                Toast.makeText(this, "Lunes no disponible en el período de simulación", Toast.LENGTH_SHORT).show());
-        btnDiaM.setOnClickListener(v -> seleccionarDiaDirecto(3));
-        btnDiaX.setOnClickListener(v -> seleccionarDiaDirecto(4));
-        btnDiaJ.setOnClickListener(v -> seleccionarDiaDirecto(5));
-        btnDiaV.setOnClickListener(v -> seleccionarDiaDirecto(6));
+        btnDiaL.setOnClickListener(v -> seleccionarDiaSemana(Calendar.MONDAY));
+        btnDiaM.setOnClickListener(v -> seleccionarDiaSemana(Calendar.TUESDAY));
+        btnDiaX.setOnClickListener(v -> seleccionarDiaSemana(Calendar.WEDNESDAY));
+        btnDiaJ.setOnClickListener(v -> seleccionarDiaSemana(Calendar.THURSDAY));
+        btnDiaV.setOnClickListener(v -> seleccionarDiaSemana(Calendar.FRIDAY));
 
         // Flechas laterales para navegación entre días
         btnDiaAnterior = findViewById(R.id.btnDiaAnterior);
@@ -382,7 +391,6 @@ public class Comedores extends BaseActivity {
             esModoVegetariano = false;
             guardarPreferenciaVegetariano(false);
             actualizarBotonTipoMenu();
-            actualizarVistasDialogoTipoMenu();
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
@@ -396,7 +404,6 @@ public class Comedores extends BaseActivity {
             esModoVegetariano = true;
             guardarPreferenciaVegetariano(true);
             actualizarBotonTipoMenu();
-            actualizarVistasDialogoTipoMenu();
             if (comedorSeleccionado != null) {
                 mostrarComedorPrincipal(comedorSeleccionado);
             }
@@ -425,25 +432,22 @@ public class Comedores extends BaseActivity {
         if (btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
                 && badgeMenuNormalDialog != null && badgeMenuVegetarianoDialog != null) {
 
-            if (esModoVegetariano) {
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuVegetarianoDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuNormalDialog.setVisibility(View.GONE);
+            View vActiva = esModoVegetariano ? btnOpcionMenuVegetarianoDialog : btnOpcionMenuNormalDialog;
+            View vInactiva = esModoVegetariano ? btnOpcionMenuNormalDialog : btnOpcionMenuVegetarianoDialog;
+            View bActiva = esModoVegetariano ? badgeMenuVegetarianoDialog : badgeMenuNormalDialog;
+            View bInactiva = esModoVegetariano ? badgeMenuNormalDialog : badgeMenuVegetarianoDialog;
 
-                btnOpcionMenuVegetarianoDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuVegetarianoDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            } else {
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuNormalDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuVegetarianoDialog.setVisibility(View.GONE);
+            vActiva.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
+            bActiva.setVisibility(View.VISIBLE);
+            vInactiva.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
+            bInactiva.setVisibility(View.GONE);
 
-                btnOpcionMenuNormalDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuNormalDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            }
+            final View targetView = vActiva;
+            targetView.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() -> {
+                if (targetView.isAttachedToWindow()) {
+                    targetView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+                }
+            }).start();
         }
     }
 
@@ -464,72 +468,122 @@ public class Comedores extends BaseActivity {
     /**
      * Selecciona directamente un día de la semana a través de su botón (Lunes a Viernes).
      */
-    private void seleccionarDiaDirecto(int diaMes) {
-        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-        if (calendarioSeleccionado != null) {
-            calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, diaMes);
-            if (comedorSeleccionado != null) {
-                mostrarComedorPrincipal(comedorSeleccionado);
-            }
-            actualizarVisibilidadBotonesNavegacion();
-            actualizarIndicadoresDias();
+    private void seleccionarDiaSemana(int targetDayOfWeek) {
+        Calendar temp = (Calendar) calendarioSeleccionado.clone();
+        temp.set(Calendar.DAY_OF_WEEK, targetDayOfWeek);
+        limpiarHora(temp);
+
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+
+        if (temp.before(hoy)) {
+            Toast.makeText(this, "No se pueden ver días que ya han pasado", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        Calendar max = obtenerFechaMaximaSemana();
+        if (temp.after(max)) {
+            Toast.makeText(this, "No puedes salir de la semana actual", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+        calendarioSeleccionado = temp;
+        if (comedorSeleccionado != null) {
+            mostrarComedorPrincipal(comedorSeleccionado);
+        }
+        actualizarVisibilidadBotonesNavegacion();
+        actualizarIndicadoresDias();
     }
 
     /**
-     * Actualiza el estilo visual de los botones de días de la semana según el día seleccionado.
+     * Actualiza el estilo visual de los botones de días de la semana según el día seleccionado y si ya han pasado.
      */
     private void actualizarIndicadoresDias() {
         if (calendarioSeleccionado == null) return;
-        int diaActual = calendarioSeleccionado.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = calendarioSeleccionado.get(Calendar.DAY_OF_WEEK);
 
-        configurarEstiloBotonDia(btnDiaM, diaActual == 3);
-        configurarEstiloBotonDia(btnDiaX, diaActual == 4);
-        configurarEstiloBotonDia(btnDiaJ, diaActual == 5);
-        configurarEstiloBotonDia(btnDiaV, diaActual == 6);
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+
+        Calendar lunes = (Calendar) calendarioSeleccionado.clone();
+        lunes.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        limpiarHora(lunes);
+
+        Calendar martes = (Calendar) calendarioSeleccionado.clone();
+        martes.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
+        limpiarHora(martes);
+
+        Calendar miercoles = (Calendar) calendarioSeleccionado.clone();
+        miercoles.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
+        limpiarHora(miercoles);
+
+        Calendar jueves = (Calendar) calendarioSeleccionado.clone();
+        jueves.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
+        limpiarHora(jueves);
+
+        Calendar viernes = (Calendar) calendarioSeleccionado.clone();
+        viernes.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+        limpiarHora(viernes);
+
+        configurarEstiloBotonDia(btnDiaL, dayOfWeek == Calendar.MONDAY, lunes.before(hoy));
+        configurarEstiloBotonDia(btnDiaM, dayOfWeek == Calendar.TUESDAY, martes.before(hoy));
+        configurarEstiloBotonDia(btnDiaX, dayOfWeek == Calendar.WEDNESDAY, miercoles.before(hoy));
+        configurarEstiloBotonDia(btnDiaJ, dayOfWeek == Calendar.THURSDAY, jueves.before(hoy));
+        configurarEstiloBotonDia(btnDiaV, dayOfWeek == Calendar.FRIDAY, viernes.before(hoy));
     }
 
-    private void configurarEstiloBotonDia(TextView btn, boolean seleccionado) {
+    private void configurarEstiloBotonDia(TextView btn, boolean seleccionado, boolean deshabilitado) {
         if (btn == null) return;
-        if (seleccionado) {
-            btn.setBackgroundResource(R.drawable.circulo_dia_seleccionado);
-            btn.setTextColor(Color.WHITE);
+        if (deshabilitado) {
+            btn.setBackgroundResource(R.drawable.circulo_dia_deshabilitado);
+            btn.setTextColor(Color.parseColor("#AAAAAA"));
+            btn.setEnabled(false);
+            btn.setOnClickListener(v -> Toast.makeText(this, "Este día ya ha pasado", Toast.LENGTH_SHORT).show());
         } else {
-            btn.setBackgroundResource(R.drawable.circulo_dia_disponible);
-            btn.setTextColor(Color.parseColor("#FF8C42"));
+            btn.setEnabled(true);
+            // Restaurar listener de selección
+            if (btn == btnDiaL) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.MONDAY));
+            else if (btn == btnDiaM) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.TUESDAY));
+            else if (btn == btnDiaX) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.WEDNESDAY));
+            else if (btn == btnDiaJ) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.THURSDAY));
+            else if (btn == btnDiaV) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.FRIDAY));
+
+            if (seleccionado) {
+                btn.setBackgroundResource(R.drawable.circulo_dia_seleccionado);
+                btn.setTextColor(Color.WHITE);
+            } else {
+                btn.setBackgroundResource(R.drawable.circulo_dia_disponible);
+                btn.setTextColor(Color.parseColor("#FF8C42"));
+            }
         }
     }
 
-    /**
-     * Devuelve la fecha mínima permitida de la semana simulada (Martes 3 de noviembre de 2026).
-     */
-    private Calendar obtenerFechaMinima() {
-        Calendar min = Calendar.getInstance();
-        min.set(Calendar.YEAR, 2026);
-        min.set(Calendar.MONTH, Calendar.NOVEMBER);
-        min.set(Calendar.DAY_OF_MONTH, 3);
+    private Calendar obtenerFechaMinimaSemana() {
+        Calendar min = (Calendar) calendarioSeleccionado.clone();
+        min.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         limpiarHora(min);
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+        if (min.before(hoy)) {
+            min = (Calendar) hoy.clone(); // No permitir días pasados de esta semana
+        }
         return min;
     }
 
-    /**
-     * Devuelve la fecha máxima permitida de la semana simulada (Viernes 6 de noviembre de 2026).
-     */
-    private Calendar obtenerFechaMaxima() {
-        Calendar max = Calendar.getInstance();
-        max.set(Calendar.YEAR, 2026);
-        max.set(Calendar.MONTH, Calendar.NOVEMBER);
-        max.set(Calendar.DAY_OF_MONTH, 6);
+    private Calendar obtenerFechaMaximaSemana() {
+        Calendar max = (Calendar) calendarioSeleccionado.clone();
+        max.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
         limpiarHora(max);
         return max;
     }
 
     /**
-     * Comprueba si existe un menú disponible para el día anterior dentro del rango permitido.
+     * Comprueba si existe un menú disponible para el día anterior dentro del rango permitido (no días pasados).
      */
     private boolean hayMenuDiaAnterior() {
         if (calendarioSeleccionado == null) return false;
-        Calendar min = obtenerFechaMinima();
+        Calendar min = obtenerFechaMinimaSemana();
         Calendar temp = (Calendar) calendarioSeleccionado.clone();
         limpiarHora(temp);
         temp.add(Calendar.DAY_OF_YEAR, -1);
@@ -537,11 +591,11 @@ public class Comedores extends BaseActivity {
     }
 
     /**
-     * Comprueba si existe un menú disponible para el día siguiente hasta final de semana (viernes).
+     * Comprueba si existe un menú disponible para el día siguiente sin salir de la semana actual.
      */
     private boolean hayMenuDiaSiguiente() {
         if (calendarioSeleccionado == null) return false;
-        Calendar max = obtenerFechaMaxima();
+        Calendar max = obtenerFechaMaximaSemana();
         Calendar temp = (Calendar) calendarioSeleccionado.clone();
         limpiarHora(temp);
         temp.add(Calendar.DAY_OF_YEAR, 1);

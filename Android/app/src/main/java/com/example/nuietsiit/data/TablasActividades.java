@@ -39,7 +39,7 @@ public final class TablasActividades {
     // -------------------------------------------------
     //                  ACTIVIDADES
     // -------------------------------------------------
-    private static void poblarActividades(SQLiteDatabase db) {
+    public static void poblarActividades(SQLiteDatabase db) {
         LocalDate hoy = LocalDate.now();
 
         long charlaIA = actividad(db, "IA generativa: del laboratorio a la empresa",

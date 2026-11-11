@@ -8,7 +8,6 @@ import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -27,6 +26,7 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
@@ -40,10 +40,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class Calendario extends BaseActivity {
 
-    private CalendarView calendarView;
+    private CalendarGridView calendarView;
     private TextView tvFechaSeleccionadaHeader, tvSinEventos;
     private RecyclerView rvEventosCalendario;
     private View btnAnadirEventoRapido;
@@ -130,16 +131,28 @@ public class Calendario extends BaseActivity {
         cargarEventosFecha(fechaSeleccionadaStr);
 
         if (calendarView != null) {
-            calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-                Calendar cal = Calendar.getInstance();
-                cal.set(year, month, dayOfMonth);
-                fechaSeleccionadaStr = sdf.format(cal.getTime());
-                actualizarHeaderFecha(cal.getTime());
+            calendarView.setOnDateSelectedListener(fechaYYYYMMDD -> {
+                fechaSeleccionadaStr = fechaYYYYMMDD;
+                try {
+                    Date date = sdf.parse(fechaYYYYMMDD);
+                    if (date != null) {
+                        actualizarHeaderFecha(date);
+                    }
+                } catch (Exception ignored) {}
                 cargarEventosFecha(fechaSeleccionadaStr);
             });
         }
 
+        actualizarFechasResaltadas();
+
         btnAnadirEventoRapido.setOnClickListener(v -> mostrarDialogoAnadirEvento());
+    }
+
+    private void actualizarFechasResaltadas() {
+        if (calendarView != null && calendarioDB != null) {
+            Set<String> fechas = calendarioDB.obtenerTodasLasFechasConEventos(correoUsuario);
+            calendarView.setFechasConEventos(fechas);
+        }
     }
 
     private void actualizarHeaderFecha(Date date) {
@@ -155,7 +168,7 @@ public class Calendario extends BaseActivity {
         listaEventos.clear();
 
         List<EventoCalendario> personales = calendarioDB.obtenerEventosPorFecha(fechaStr, correoUsuario);
-        List<EventoCalendario> actividades = actividadesDB.obtenerActividadesPorFecha(fechaStr);
+        List<EventoCalendario> actividades = actividadesDB.obtenerActividadesPorFecha(fechaStr, correoUsuario);
         List<EventoCalendario> citas = secretariaDB.obtenerCitasPorFecha(fechaStr, correoUsuario);
 
         listaEventos.addAll(personales);
@@ -178,6 +191,7 @@ public class Calendario extends BaseActivity {
             if (ok) {
                 Toast.makeText(this, "Evento eliminado", Toast.LENGTH_SHORT).show();
                 cargarEventosFecha(fechaSeleccionadaStr);
+                actualizarFechasResaltadas();
             }
         }
     }
@@ -215,6 +229,7 @@ public class Calendario extends BaseActivity {
                     calendarioDB.insertarEvento(correoUsuario, titulo, tipo, fechaSeleccionadaStr, hora, desc);
                     Toast.makeText(this, "Evento anotado para el calendario", Toast.LENGTH_LONG).show();
                     cargarEventosFecha(fechaSeleccionadaStr);
+                    actualizarFechasResaltadas();
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
@@ -272,6 +287,16 @@ public class Calendario extends BaseActivity {
                 holder.btnEliminar.setOnClickListener(v -> eliminarListener.onEliminar(ev));
             } else {
                 holder.btnEliminar.setVisibility(View.GONE);
+            }
+
+            // Enlace directo si es una Actividad (ID negativo)
+            if (ev.id < 0 || tipoLower.contains("actividad")) {
+                holder.itemView.setOnClickListener(v -> {
+                    Intent intent = new Intent(v.getContext(), Actividades.class);
+                    v.getContext().startActivity(intent);
+                });
+            } else {
+                holder.itemView.setOnClickListener(null);
             }
         }
 
