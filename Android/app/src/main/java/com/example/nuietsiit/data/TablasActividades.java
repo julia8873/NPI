@@ -1,6 +1,7 @@
 package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.nuietsiit.util.FechasUtil;
@@ -40,6 +41,10 @@ public final class TablasActividades {
     //                  ACTIVIDADES
     // -------------------------------------------------
     public static void poblarActividades(SQLiteDatabase db) {
+        try (Cursor c = db.rawQuery("SELECT COUNT(*) FROM ACTIVIDAD", null)) {
+            if (c != null && c.moveToFirst() && c.getInt(0) > 0) return;
+        } catch (Exception ignored) {}
+
         LocalDate hoy = LocalDate.now();
 
         long charlaIA = actividad(db, "IA generativa: del laboratorio a la empresa",
@@ -105,6 +110,10 @@ public final class TablasActividades {
     //                  ANUNCIOS
     // -------------------------------------------------
     private static void poblarAnuncios(SQLiteDatabase db) {
+        try (Cursor c = db.rawQuery("SELECT COUNT(*) FROM ANUNCIO_GENERAL", null)) {
+            if (c.moveToFirst() && c.getInt(0) > 0) return;
+        } catch (Exception ignored) {}
+
         LocalDateTime ahora = LocalDateTime.now();
         LocalDate hoy = LocalDate.now();
 
@@ -151,6 +160,10 @@ public final class TablasActividades {
     // Los enlaces no se abren: la app enseña una vista previa simulada del grupo.
     // idGrado: null = para todos, 1 = Informática, 2 = Doble Inf+Mat, 3 = Teleco
     private static void poblarComunidades(SQLiteDatabase db) {
+        try (Cursor c = db.rawQuery("SELECT COUNT(*) FROM COMUNIDAD_CHAT", null)) {
+            if (c.moveToFirst() && c.getInt(0) > 0) return;
+        } catch (Exception ignored) {}
+
         comunidad(db, "Informática · Delegación", "whatsapp",
                 "Avisos de los delegados, asambleas y dudas del grado.", 1);
         comunidad(db, "Informática 2º curso", "whatsapp",

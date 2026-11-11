@@ -3,38 +3,19 @@ package com.example.nuietsiit.util;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.BuildConfig;
-import com.example.nuietsiit.data.AcademicoDB;
-import com.example.nuietsiit.data.ActividadesDB;
-import com.example.nuietsiit.data.BibliotecaDB;
-import com.example.nuietsiit.data.Comedores.Comedor;
-import com.example.nuietsiit.data.Comedores.ComedoresDB;
-import com.example.nuietsiit.data.Comedores.MenuInfo;
-import com.example.nuietsiit.data.Comedores.TablasComedores;
 import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.SecretariaDB;
-import com.example.nuietsiit.data.TablasAcademico;
-import com.example.nuietsiit.data.TablasActividades;
-import com.example.nuietsiit.data.TablasBiblioteca;
-import com.example.nuietsiit.data.TablasSecretaria;
-import com.example.nuietsiit.data.TutoriasDB;
-import com.example.nuietsiit.data.UsuariosDB;
-import com.example.nuietsiit.data.modelo.Actividad;
-import com.example.nuietsiit.data.modelo.Libro;
-import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.data.UsuariosDB;;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.ChatFutures;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
 import com.google.ai.client.generativeai.type.Content;
 import com.google.ai.client.generativeai.type.FunctionCallPart;
-import com.google.ai.client.generativeai.type.FunctionResponsePart;
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.ai.client.generativeai.type.GenerationConfig;
-import com.google.ai.client.generativeai.type.Part;
 import com.google.ai.client.generativeai.type.RequestOptions;
 import com.google.ai.client.generativeai.type.SafetySetting;
 import com.google.ai.client.generativeai.type.Tool;
@@ -43,16 +24,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,7 +58,7 @@ public class GeminiManager {
         ToolConfig toolConfig = null;
 
         GenerativeModel gm = new GenerativeModel(
-                "gemini-3.5-flash-lite",
+                "gemini-3.5-flash",
                 BuildConfig.GEMINI_API_KEY,
                 genConfig,
                 safetySettings,
@@ -104,12 +78,28 @@ public class GeminiManager {
             DBHelper dbHelper = DBHelper.getInstance(context);
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            // 1. Asegurar que TODAS las tablas de los ficheros Tablas* estén pobladas en SQLite
-            TablasComedores.poblar(db);
-            TablasActividades.poblarActividades(db);
-            TablasSecretaria.poblar(db);
-            TablasBiblioteca.poblar(db);
-            TablasAcademico.poblar(db);
+            // 1. Datos específicos de matriculación del usuario actual
+            if (correoUsuarioRef != null && !correoUsuarioRef.isEmpty()) {
+                sb.append("\n[MATRÍCULA Y ASIGNATURAS DEL USUARIO ACTUAL]\n");
+                try (Cursor c = db.rawQuery(
+                        "SELECT M.codigoAsignatura, A.nombreAsignatura, M.grupo, M.cursoAcademico " +
+                                "FROM MATRICULA M " +
+                                "JOIN ASIGNATURA A ON M.codigoAsignatura = A.codigoAsignatura " +
+                                "WHERE LOWER(M.correoEstudiante) = LOWER(?)", new String[]{correoUsuarioRef})) {
+
+                    boolean tieneMatricula = false;
+                    while (c != null && c.moveToNext()) {
+                        tieneMatricula = true;
+                        sb.append("- Asignatura: ").append(c.getString(1))
+                                .append(" (Código: ").append(c.getString(0)).append(")")
+                                .append(" | Grupo: ").append(c.getString(2))
+                                .append(" | Curso: ").append(c.getString(3)).append("\n");
+                    }
+                    if (!tieneMatricula) {
+                        sb.append("- El usuario no tiene asignaturas matriculadas registradas.\n");
+                    }
+                }
+            }
 
             // 2. Menús de Comedores
             sb.append("\n[REGISTROS DE COMEDORES UGR]\n");
