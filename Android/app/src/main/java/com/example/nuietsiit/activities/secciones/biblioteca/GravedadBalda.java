@@ -25,9 +25,9 @@ import java.util.WeakHashMap;
 public class GravedadBalda implements SensorEventListener, Choreographer.FrameCallback {
 
     private static final float ZONA_MUERTA = 0.7f;      // m/s²: por debajo, el móvil está "plano" a los lados
-    private static final float GRADOS_POR_MS2 = 2.6f;   // cuánto se tuerce el libro por cada m/s² de inclinación
-    private static final float GIRO_MAX = 8f;           // grados
-    private static final float DESLIZ_MAX_DP = 3f;      // lo que resbala el libro hacia el lado bajo
+    private static final float GRADOS_POR_MS2 = 1.6f;   // cuánto se tuerce el libro por cada m/s² de inclinación
+    private static final float GIRO_MAX = 5f;           // grados
+    private static final float DESLIZ_MAX_DP = 2f;      // lo que resbala el libro hacia el lado bajo
     private static final float PLANO_Z = 9.0f;          // gravedad en Z por encima de esto = móvil sobre la mesa
     private static final float CONTRA_PARED = 0.35f; // el libro pegado al lateral apenas puede inclinarse
     private static final float RIGIDEZ = 140f;          // muelle (1/s²)
@@ -114,7 +114,7 @@ public class GravedadBalda implements SensorEventListener, Choreographer.FrameCa
         if (!animaciones) return;
         for (int i = 0; i < balda.getChildCount(); i++) {
             float[] e = estado(balda.getChildAt(i));
-            e[1] += (i % 2 == 0 ? 1 : -1) * (70f + 15f * (i % 3)); // grados/s, alternando el sentido
+            e[1] += (i % 2 == 0 ? 1 : -1) * (40f + 10f * (i % 3)); // grados/s, alternando el sentido
         }
         arrancar();
     }

@@ -177,7 +177,15 @@ public class Biblioteca extends PantallaBiblioteca {
 
         aplicarFiltro();
         // al entrar, los libros se balancean un poco: están sueltos y se mueven al inclinar el móvil
-        if (savedInstanceState == null) rvLibros.postDelayed(() -> gravedad.balancear(), 450);
+        if (savedInstanceState == null) {
+            rvLibros.getViewTreeObserver().addOnGlobalLayoutListener(new android.view.ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override public void onGlobalLayout() {
+                    if (rvLibros.getChildCount() == 0) return; // aún no hay libros: esperar
+                    rvLibros.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    rvLibros.postDelayed(() -> gravedad.balancear(), 200); // con la transición de entrada ya casi terminada
+                }
+            });
+        }
     }
 
     private void configurarBaldas() {
