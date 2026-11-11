@@ -20,7 +20,6 @@ import android.text.style.RelativeSizeSpan;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -696,32 +695,21 @@ public final class PanelRutaExterior {
         fila.setOnClickListener(v -> verTramo(tramo, fotos, 0));
         if (fotos.size() < 2) return fila;
 
-        // Tira "Ver el camino (8 fotos)": toque en una = visor desde esa
+        // "📷 Ver el camino (8 fotos)": una línea tocable que abre el visor desde la primera.
+        // (Antes había una tira de miniaturas por tramo; se quitó para que el panel quepa sin scroll.)
         LinearLayout bloque = new LinearLayout(act);
         bloque.setOrientation(LinearLayout.VERTICAL);
         bloque.addView(fila);
         int sangria = (int) (82 * dp);
         TextView titulo = new TextView(act);
-        titulo.setText("Ver el camino (" + fotos.size() + " fotos)");
+        titulo.setText("📷 Ver el camino (" + fotos.size() + " fotos)");
         titulo.setTextColor(ContextCompat.getColor(act, R.color.nui_acento));
         titulo.setTypeface(Typeface.DEFAULT_BOLD);
         titulo.setTextSize(12);
-        titulo.setPadding(sangria, 0, 0, (int) (4 * dp));
+        titulo.setPadding(sangria, 0, 0, (int) (6 * dp));
+        titulo.setBackgroundResource(fondoSeleccionable());
+        titulo.setOnClickListener(v -> verTramo(tramo, fotos, 0));
         bloque.addView(titulo);
-        HorizontalScrollView scroll = new HorizontalScrollView(act);
-        scroll.setHorizontalScrollBarEnabled(false);
-        scroll.setClipToPadding(false);
-        scroll.setPadding(sangria, 0, (int) (8 * dp), (int) (8 * dp));
-        LinearLayout tira = new LinearLayout(act);
-        for (int i = 0; i < fotos.size(); i++) {
-            View mini = miniatura(fotos.get(i), 88, 66);
-            int n = i;
-            mini.setOnClickListener(v -> verTramo(tramo, fotos, n));
-            mini.setContentDescription("Foto " + (i + 1) + ": " + FotoLugar.textoDe(act, fotos.get(i)));
-            tira.addView(mini);
-        }
-        scroll.addView(tira);
-        bloque.addView(scroll);
         return bloque;
     }
 

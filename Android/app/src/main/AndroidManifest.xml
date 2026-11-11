@@ -49,7 +49,9 @@
         <activity
             android:name=".activities.secciones.mapa.VisorRuta"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.secciones.Actividades" />
+        <activity
+            android:name=".activities.secciones.Actividades"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />
         <activity android:name=".activities.secciones.Secretaria" />
