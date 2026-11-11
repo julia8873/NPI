@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.ui.HojasPaginadas;
 import com.example.nuietsiit.util.tutorial.Gesto;
@@ -37,6 +38,7 @@ public class DetalleTramite extends PantallaSecretaria {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Trámite");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

@@ -98,7 +98,7 @@
         android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVolver"
+        android:id="@+id/btnAnterior"
         style="@style/Widget.Nui.Boton.Texto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

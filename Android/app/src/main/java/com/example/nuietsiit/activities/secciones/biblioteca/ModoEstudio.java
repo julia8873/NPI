@@ -20,6 +20,7 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
@@ -82,6 +83,7 @@ public class ModoEstudio extends PantallaBiblioteca {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Modo estudio");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

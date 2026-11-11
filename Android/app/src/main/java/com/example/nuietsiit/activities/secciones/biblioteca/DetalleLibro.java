@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.BibliotecaDB;
@@ -24,6 +25,7 @@ public class DetalleLibro extends PantallaBiblioteca {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Libro");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

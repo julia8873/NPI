@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.OneShotPreDrawListener;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.secretaria.PantallaSecretaria;
 import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
@@ -96,6 +97,7 @@ public class Secretaria extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         if (barra != null) {
             setSupportActionBar(barra);
+            CabeceraNui.preparar(barra);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Secretaría");
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);

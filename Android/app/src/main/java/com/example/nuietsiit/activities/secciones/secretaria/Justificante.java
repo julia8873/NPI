@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
@@ -79,6 +80,7 @@ public class Justificante extends PantallaSecretaria {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Justificante");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

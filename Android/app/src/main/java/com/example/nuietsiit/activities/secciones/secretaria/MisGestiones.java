@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
@@ -56,6 +57,7 @@ public class MisGestiones extends PantallaSecretaria {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Mis gestiones");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

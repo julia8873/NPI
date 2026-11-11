@@ -26,6 +26,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
@@ -86,6 +87,7 @@ public class ApuntarLibros extends PantallaBiblioteca {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        CabeceraNui.preparar(toolbar);
         getSupportActionBar().setTitle("Escanear estantería");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

@@ -23,6 +23,7 @@ import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.biblioteca.PantallaBiblioteca;
 import com.example.nuietsiit.activities.secciones.biblioteca.ApuntarLibros;
@@ -131,6 +132,7 @@ public class Biblioteca extends PantallaBiblioteca {
         // Botón atrás en la barra superior
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("Biblioteca");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -207,7 +209,7 @@ public class Biblioteca extends PantallaBiblioteca {
                 .gesto(R.id.rvLibros, Gesto.DESLIZAR_IZQ, "Desliza las baldas a la izquierda para pasar de estante")
                 .alLlegar(this::quitarFiltrosTutorial)
                 .gesto(R.id.rvLibros, Gesto.PELLIZCAR, "Pellizca la balda para ver más libros a la vez, o menos y más grandes")
-                .sensor(Gesto.INCLINAR, "Inclina el móvil a un lado para pasar de estante. Los libros están sueltos: se mueven")
+                .sensor(Gesto.INCLINAR, "Inclina el móvil a un lado para pasar de estante")
                 .soloSi(() -> numEstantes() > 1 || vistas.size() > 1)
                 .gesto(R.id.ivPortada, Gesto.MANTENER, "Mantén el dedo en una portada para sacar el libro y ojearlo."
                         + " Suelta y vuelve a su sitio")

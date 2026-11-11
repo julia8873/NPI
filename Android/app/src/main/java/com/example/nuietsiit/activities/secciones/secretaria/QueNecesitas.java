@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.ui.HojasPaginadas;
 import com.example.nuietsiit.util.tutorial.Gesto;
@@ -129,7 +130,7 @@ public class QueNecesitas extends PantallaSecretaria {
     private ImageView ivRosa;
     private LinearProgressIndicator progreso;
     private LinearLayout contenedorOpciones;
-    private Button btnIrTramite, btnVolver;
+    private Button btnIrTramite, btnAnterior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +139,7 @@ public class QueNecesitas extends PantallaSecretaria {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
+        CabeceraNui.preparar(barra);
         getSupportActionBar().setTitle("¿Qué necesitas?");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -153,9 +155,9 @@ public class QueNecesitas extends PantallaSecretaria {
         progreso = findViewById(R.id.progreso);
         contenedorOpciones = findViewById(R.id.contenedorOpciones);
         btnIrTramite = findViewById(R.id.btnIrTramite);
-        btnVolver = findViewById(R.id.btnVolver);
+        btnAnterior = findViewById(R.id.btnAnterior);
 
-        btnVolver.setOnClickListener(v -> volver());
+        btnAnterior.setOnClickListener(v -> volver());
         // atrás del sistema = pregunta anterior; en la primera, salir
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -176,7 +178,7 @@ public class QueNecesitas extends PantallaSecretaria {
                     mostrar(0);
                 })
                 .tocar(R.id.contenedorOpciones, "Toca la opción que mejor te describa: con unas pocas preguntas llegas a tu trámite")
-                .tocar(R.id.btnVolver, "¿Te has equivocado? Toca aquí para volver a la pregunta anterior").soloSiSeVe();
+                .tocar(R.id.btnAnterior, "¿Te has equivocado? Toca aquí para volver a la pregunta anterior").soloSiSeVe();
         return ((HojasPaginadas) findViewById(R.id.hojas)).pasosTutorial(t);
     }
 
@@ -208,7 +210,7 @@ public class QueNecesitas extends PantallaSecretaria {
         }
 
         contenedorOpciones.removeAllViews();
-        btnVolver.setVisibility(camino.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        btnAnterior.setVisibility(camino.isEmpty() ? View.INVISIBLE : View.VISIBLE);
         btnIrTramite.setVisibility(View.GONE);
 
         if (ultima != null && ultima.destino != null) {
