@@ -227,7 +227,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     private void mostrarResultadosPorRuleta(int curso) {
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Asignaturas de " + curso + "º Curso");
+        tvTituloResultados.setText(getString(R.string.titulo_asignaturas_curso, curso));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = academicoDB.obtenerAsignaturasPorGradoYCurso(idGradoActual, curso);
@@ -237,7 +237,7 @@ public class BuscadorAsignaturas extends BaseActivity {
                 String codigo = cursor.getString(0);
                 String nombre = cursor.getString(1); // nombreAsignatura
                 String tipo = cursor.getString(3);   // tipo (obligatoria/optativa)
-                View tarjeta = crearTarjetaAsignatura(codigo, nombre, "Tipo: " + tipo.toUpperCase());
+                View tarjeta = crearTarjetaAsignatura(codigo, nombre, getString(R.string.subtitulo_tipo_fmt, tipo.toUpperCase()));
                 contenedorResultados.addView(tarjeta);
             } while (cursor.moveToNext());
         } else {
@@ -250,7 +250,7 @@ public class BuscadorAsignaturas extends BaseActivity {
         scrollGrados.setVisibility(View.GONE);
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Resultados para: '" + texto + "'");
+        tvTituloResultados.setText(getString(R.string.titulo_resultados_busqueda, texto));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = academicoDB.buscarAsignaturasPorNombre(texto);
@@ -261,7 +261,7 @@ public class BuscadorAsignaturas extends BaseActivity {
                 String nombre = cursor.getString(1);      // nombreAsignatura
                 int curso = cursor.getInt(2);             // curso
                 String grado = cursor.getString(3);       // nombreGrado
-                View tarjeta = crearTarjetaAsignatura(codigo, nombre, grado + " - " + curso + "º Curso");
+                View tarjeta = crearTarjetaAsignatura(codigo, nombre, getString(R.string.subtitulo_curso_grado_fmt, grado, curso));
                 contenedorResultados.addView(tarjeta);
             } while (cursor.moveToNext());
         } else {
@@ -297,7 +297,7 @@ public class BuscadorAsignaturas extends BaseActivity {
         tarjeta.addView(tvNombre);
         tarjeta.addView(tvInfo);
 
-        // Click en la asignatura (Para futuras implementaciones, ej: abrir FichaAsignatura)
+        // Click en la asignatura
         tarjeta.setOnClickListener(v -> {
             Intent intent = new Intent(this, DetalleAsignatura.class);
             intent.putExtra("CODIGO_ASIGNATURA", codigo);
@@ -309,7 +309,7 @@ public class BuscadorAsignaturas extends BaseActivity {
 
     private void mostrarMensajeSinResultados() {
         TextView tvVacio = new TextView(this);
-        tvVacio.setText("No se han encontrado asignaturas en la base de datos.");
+        tvVacio.setText(R.string.sin_resultados_asignaturas);
         tvVacio.setTextSize(16f);
         tvVacio.setTextColor(Color.GRAY);
         tvVacio.setPadding(20, 40, 20, 20);

@@ -1,5 +1,4 @@
 <resources>
-    <!-- General -->
     <string name="app_name">NUI ETSIIT</string>
     <string name="volver">Volver</string>
     <string name="volver_menu_principal">Volver al menú principal</string>
@@ -376,4 +375,150 @@
         <item>Personal</item>
         <item>Recordatorio</item>
     </string-array>
+
+    <string name="asistente_virtual_titulo">Asistente Virtual ETSIIT 🤖</string>
+    <string name="asistente_virtual_msg">¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.</string>
+    <string name="btn_entendido">¡Entendido!</string>
+
+    <string name="sensor_activado_msg">🧭 Sensor de inclinación activado</string>
+    <string name="sensor_desactivado_msg">🛑 Sensor de inclinación desactivado</string>
+
+    <string name="modo_ruta_sugerida">Mostrando ruta sugerida</string>
+    <string name="modo_ultimo_visto">Mostrando última página vista</string>
+
+    <string name="acceso_rapido_contextual">ACCESO RÁPIDO CONTEXTUAL</string>
+    <string name="hora_de_comer">🍽️ HORA DE COMER</string>
+    <string name="horario_etsiit">Horario ETSIIT</string>
+    <string name="ruta_comedor">Ruta: Aula 0.7 ➔ Comedor</string>
+    <string name="desc_comedor">Tienes clase en 0.7 · Toca para abrir mapa y ruta guiada</string>
+
+    <string name="pagina_reciente">PÁGINA RECIENTE</string>
+    <string name="btn_cambiar_sugerido">🔄 Cambiar a sugerido</string>
+    <string name="visto_recientemente">🕒 VISTO RECIENTEMENTE</string>
+    <string name="acceso_directo_exacto">Acceso directo exacto</string>
+
+    <string name="hoy">HOY</string>
+    <string name="calendario_etsiit_titulo">Calendario de la ETSIIT</string>
+    <string name="calendario_etsiit_desc">Actividades, citas, exámenes y entregas</string>
+    <string name="calendario_etiqueta">Calendario</string>
+    <string name="seccion_escuela_desc">Sección de la escuela</string>
+    <string name="toca_para_volver">Toca para volver</string>
+
+    <string name="login_asistente_msg">¡Hola! Para iniciar sesión introduce tu correo institucional y contraseña de la UGR. Si aún no tienes cuenta, pulsa en \'Crear cuenta nueva\'.</string>
+    <string name="recuperar_password_titulo">Recuperar contraseña 🔑</string>
+    <string name="recuperar_password_msg">Para restablecer la contraseña de tu cuenta universitaria, debes acceder al portal de gestión de cuentas de la UGR o contactar con el CSIRC (csirc@ugr.es).</string>
+    <string name="toast_rellena_datos">Por favor, rellena todos los datos</string>
+    <string name="toast_usuario_incorrecto">Usuario incorrecto</string>
+    <string name="toast_password_incorrecta">Contraseña incorrecta</string>
+
+    <string name="signup_asistente_msg">¡Bienvenido al registro! Introduce tu nombre completo, correo institucional de la UGR y una contraseña. Podrás usar esta cuenta en toda la aplicación.</string>
+    <string name="toast_passwords_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="toast_correo_existente">Ya existe una cuenta asociada a este correo</string>
+    <string name="toast_cuenta_creada_exito">Cuenta creada con éxito</string>
+    <string name="toast_error_crear_cuenta">Error al crear la cuenta</string>
+
+    <string name="ajustes_asistente_msg">¡Hola! Aquí puedes gestionar tus preferencias de cuenta, activar notificaciones de clase, configurar tu dieta y modificar tus datos personales.</string>
+    <string name="sin_sesion_iniciada">Sin sesión iniciada</string>
+    <string name="invitado">Invitado</string>
+
+    <string name="avisos_clase_activados">Avisos de clase activados</string>
+    <string name="avisos_clase_desactivados">Avisos de clase desactivados</string>
+    <string name="menu_veg_activado">🌱 Menú vegetariano activado</string>
+    <string name="menu_normal_activado">🥩 Menú normal activado</string>
+    <string name="falta_por_implementar">Falta por implementar</string>
+
+    <string name="inicia_sesion_editar_perfil">Inicia sesión para editar tu perfil</string>
+    <string name="editar_perfil_titulo">Editar perfil</string>
+    <string name="btn_guardar">Guardar</string>
+    <string name="perfil_actualizado_exito">Perfil actualizado con éxito</string>
+
+    <string name="cerrar_sesion_titulo">Cerrar sesión</string>
+    <string name="cerrar_sesion_msg">¿Estás seguro de que deseas cerrar sesión?</string>
+    <string name="btn_si_salir">Sí, salir</string>
+
+    <string name="sec_avisos">Avisos</string>
+    <string name="sec_mapa">Mapa</string>
+    <string name="sec_actividades">Actividades</string>
+    <string name="sec_profesorado">Profesorado</string>
+    <string name="sec_asignaturas">Asignaturas</string>
+    <string name="sec_secretaria">Secretaría</string>
+    <string name="sec_comedores">Comedores</string>
+    <string name="sec_biblioteca">Biblioteca</string>
+    <string name="sec_calendario">Calendario</string>
+
+    <string name="titulo_actividades">Actividades</string>
+    <string name="chip_todas">Todas</string>
+    <string name="chip_mis_actividades">✓ Mis actividades</string>
+
+    <string name="vacio_viste_todas">🎉 ¡Has visto todas!</string>
+    <string name="vacio_no_hay_tipo">No hay actividades de este tipo.</string>
+    <string name="vacio_inicia_sesion">🔒 Inicia sesión para ver las actividades a las que te apuntes.</string>
+    <string name="vacio_no_apuntado">Todavía no te has apuntado a nada.</string>
+
+    <string name="contador_paginas">%1$d de \%2$d</string>
+    <string name="plazo_cerrado_msg">El plazo de inscripción no está abierto: %1$s</string>
+    <string name="sin_plazas">No quedan plazas 😢</string>
+    <string name="ya_apuntado">Ya estabas apuntado a «%1$s»</string>
+    <string name="error_inscripcion">No se ha podido completar la inscripción</string>
+    <string name="snack_apuntado">🎉 Te has apuntado a «%1$s»</string>
+    <string name="snack_desapuntado">Ya no estás apuntado a «%1$s»</string>
+    <string name="action_deshacer">Deshacer</string>
+
+    <string name="pedir_sesion_msg">🔒 Inicia sesión para %1$s</string>
+    <string name="btn_iniciar_sesion">Iniciar sesión</string>
+
+    <string name="plazas_ocupadas_fmt">👥 %1$d de \%2$d plazas ocupadas</string>
+    <string name="personas_apuntadas_uno">👥 %1$d persona apuntada</string>
+    <string name="personas_apuntadas_varios">👥 %1$d personas apuntadas</string>
+
+    <string name="btn_desapuntarme">Ya no puedo ir (desapuntarme)</string>
+    <string name="btn_plazas_agotadas">Plazas agotadas</string>
+    <string name="btn_inicia_sesion_apuntarte">🔒 Inicia sesión para apuntarte</string>
+    <string name="btn_apuntarme">🙋 Apuntarme</string>
+    <string name="hasta_el">hasta el %1$s</string>
+    <string name="lugar_etsiit_fmt">%1$s · ETSIIT</string>
+    <string name="lugar_default">ETSIIT · Universidad de Granada</string>
+
+    <string name="sin_app_calendario">No hay ninguna app de calendario en este móvil</string>
+    <string name="sin_navegador">No hay navegador para abrir el enlace</string>
+
+    <string name="subtitulo_todas_comunidades">Todas las comunidades de la ETSIIT</string>
+    <string name="subtitulo_grado_comunidades">De tu grado (%1$s) y generales de la escuela</string>
+    <string name="comunidad_unido">✓ Unido</string>
+
+    <string name="miembros_fmt">👥 %1$s miembros</string>
+    <string name="toast_te_has_unido">🎉 Te has unido a «%1$s»</string>
+    <string name="toast_has_salido">Has salido de «%1$s»</string>
+
+    <string name="btn_ya_miembro_salir">✓ Ya eres miembro · Salir</string>
+    <string name="btn_unirme_grupo">Unirme al grupo</string>
+
+    <string name="cabecera_hora">Hora</string>
+    <string name="dia_lunes">Lunes</string>
+    <string name="dia_martes">Martes</string>
+    <string name="dia_miercoles">Miércoles</string>
+    <string name="dia_jueves">Jueves</string>
+    <string name="dia_viernes">Viernes</string>
+
+    <string name="titulo_asignaturas_curso">Asignaturas de %1$dº Curso</string>
+    <string name="titulo_resultados_busqueda">Resultados para: \'%1$s\'</string>
+    <string name="subtitulo_tipo_fmt">Tipo: %1$s</string>
+    <string name="subtitulo_curso_grado_fmt">%1$s - \%2$dº Curso</string>
+    <string name="sin_resultados_asignaturas">No se han encontrado asignaturas en la base de datos.</string>
+
+    <string name="codigo_fmt">Código: %1$s</string>
+    <string name="cuatrimestre_fmt">%1$dº</string>
+    <string name="detalle_asignatura_subtitulo">Detalle de asignatura</string>
+    <string name="clase_mayus">CLASE</string>
+    <string name="sesion_grupo_fmt">%1$s (Grupo %2$s)</string>
+    <string name="horario_fmt">🗓️ %1$s de %2$s a %3$s</string>
+    <string name="dia_sabado">Sábado</string>
+    <string name="dia_domingo">Domingo</string>
+    <string name="dia_generico_fmt">Día %1$d</string>
+    <string name="sin_sesiones_registradas">No hay sesiones de clase registradas para esta asignatura.</string>
+    <string name="sin_profesores_asignados">No hay profesores asignados en esta asignatura.</string>
+    <string name="enlace_no_disponible">Enlace no disponible</string>
+
+    <string name="btn_ir">IR</string>
+
 </resources>

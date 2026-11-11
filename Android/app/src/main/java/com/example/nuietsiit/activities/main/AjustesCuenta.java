@@ -71,9 +71,9 @@ public class AjustesCuenta extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! Aquí puedes gestionar tus preferencias de cuenta, activar notificaciones de clase, configurar tu dieta y modificar tus datos personales.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.asistente_virtual_titulo)
+                        .setMessage(R.string.ajustes_asistente_msg)
+                        .setPositiveButton(R.string.btn_entendido, null)
                         .show();
             });
         }
@@ -100,8 +100,8 @@ public class AjustesCuenta extends BaseActivity {
 
     private void cargarDatosUsuario() {
         if (correoUsuario == null || correoUsuario.isEmpty()) {
-            if (tvCorreoPerfil != null) tvCorreoPerfil.setText("Sin sesión iniciada");
-            if (tvNombrePerfil != null) tvNombrePerfil.setText("Invitado");
+            if (tvCorreoPerfil != null) tvCorreoPerfil.setText(R.string.sin_sesion_iniciada);
+            if (tvNombrePerfil != null) tvNombrePerfil.setText(R.string.invitado);
             return;
         }
 
@@ -115,7 +115,7 @@ public class AjustesCuenta extends BaseActivity {
             if (nombre != null && !nombre.isEmpty()) {
                 tvNombrePerfil.setText(nombre);
             } else {
-                tvNombrePerfil.setText("Tu perfil");
+                tvNombrePerfil.setText(R.string.tu_perfil);
             }
         }
 
@@ -190,8 +190,8 @@ public class AjustesCuenta extends BaseActivity {
                         .edit()
                         .putBoolean("AVISOS_CLASE_HABILITADOS", isChecked)
                         .apply();
-                String msg = isChecked ? "Avisos de clase activados" : "Avisos de clase desactivados";
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                int msgRes = isChecked ? R.string.avisos_clase_activados : R.string.avisos_clase_desactivados;
+                Toast.makeText(this, msgRes, Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -206,8 +206,8 @@ public class AjustesCuenta extends BaseActivity {
                     UsuariosDB usuariosDB = new UsuariosDB(BD);
                     usuariosDB.actualizarPreferenciaVegetariano(correoUsuario, isChecked);
                 }
-                String msg = isChecked ? "🌱 Menú vegetariano activado" : "🥩 Menú normal activado";
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                int msgRes = isChecked ? R.string.menu_veg_activado : R.string.menu_normal_activado;
+                Toast.makeText(this, msgRes, Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -221,12 +221,12 @@ public class AjustesCuenta extends BaseActivity {
     }
 
     private void mostrarToastFaltaPorImplementar() {
-        Toast.makeText(this, "Falta por implementar", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.falta_por_implementar, Toast.LENGTH_SHORT).show();
     }
 
     private void mostrarDialogoEditarCuenta() {
         if (correoUsuario == null || correoUsuario.isEmpty()) {
-            Toast.makeText(this, "Inicia sesión para editar tu perfil", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.inicia_sesion_editar_perfil, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -257,9 +257,9 @@ public class AjustesCuenta extends BaseActivity {
         });
 
         new AlertDialog.Builder(this)
-                .setTitle("Editar perfil")
+                .setTitle(R.string.editar_perfil_titulo)
                 .setView(dialogView)
-                .setPositiveButton("Guardar", (dialog, which) -> {
+                .setPositiveButton(R.string.btn_guardar, (dialog, which) -> {
                     String nuevoNombre = etDialogNombre.getText().toString().trim();
                     String nuevaPassword = etDialogPassword.getText().toString().trim();
                     if (!nuevoNombre.isEmpty()) {
@@ -273,27 +273,29 @@ public class AjustesCuenta extends BaseActivity {
                                 switchVegetariano != null && switchVegetariano.isChecked()
                         );
                         tvNombrePerfil.setText(nuevoNombre);
-                        Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.perfil_actualizado_exito, Toast.LENGTH_SHORT).show();
                     }
                 })
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(R.string.cancelar, null)
                 .show();
     }
 
     private void cerrarSesion() {
         new AlertDialog.Builder(this)
-                .setTitle("Cerrar sesión")
-                .setMessage("¿Estás seguro de que deseas cerrar sesión?")
-                .setPositiveButton("Sí, salir", (dialog, which) -> {
+                .setTitle(R.string.cerrar_sesion_titulo)
+                .setMessage(R.string.cerrar_sesion_msg)
+                .setPositiveButton(R.string.btn_si_salir, (dialog, which) -> {
                     SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
                     prefs.edit().clear().apply();
+
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"));
 
                     Intent intent = new Intent(AjustesCuenta.this, MenuPrincipal.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
                 })
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(R.string.cancelar, null)
                 .show();
     }
 
@@ -326,22 +328,24 @@ public class AjustesCuenta extends BaseActivity {
                 .setSingleChoiceItems(idiomasNombres, seleccionActual, (dialog, which) -> {
                     String nuevoCodigo = idiomasCodigos[which];
 
+                    // 1. Guardar en SharedPreferences
                     getSharedPreferences("ConfiguracionApp", MODE_PRIVATE)
                             .edit()
                             .putString("CODIGO_IDIOMA", nuevoCodigo)
                             .apply();
 
+                    // 2. Guardar en Base de Datos si hay sesión iniciada
                     if (correoUsuario != null && !correoUsuario.isEmpty()) {
                         UsuariosDB usuariosDB = new UsuariosDB(BD);
                         usuariosDB.actualizarIdiomaEstudiante(correoUsuario, nuevoCodigo);
                     }
 
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
-
                     dialog.dismiss();
 
-                    Toast.makeText(this, which == 1 ? "English language selected" : "Idioma Español seleccionado", Toast.LENGTH_SHORT).show();
-                    recreate();
+                    // 3. Aplicar el idioma globalmente (AppCompat se encarga de reiniciar las actividades)
+                    LocaleListCompat appLocale = LocaleListCompat.forLanguageTags(nuevoCodigo);
+                    AppCompatDelegate.setApplicationLocales(appLocale);
+
                 })
                 .setNegativeButton(R.string.cancelar, null)
                 .show();

@@ -26,7 +26,7 @@ import java.util.Set;
 /**
  * Comunidades de chat (tabla COMUNIDAD_CHAT).
  * 1) mostrar(): hoja con la lista de grupos del grado del usuario + los generales.
- * 2) Al pulsar uno: vista previa SIMULADA del grupo (no abre WhatsApp/Telegram/Discord de verdad).
+ * 2) Al pulsar uno: vista previa SIMULADA del grupo.
  * 3) "Unirme" se guarda en el móvil (ComunidadesUnidas). Sin sesión iniciada no se puede unir.
  */
 public final class HojaComunidades {
@@ -50,9 +50,10 @@ public final class HojaComunidades {
         // Sin grado elegido (0 = "Ninguno") se enseñan todas
         TextView tvSubtitulo = v.findViewById(R.id.tvSubtituloComunidades);
         if (idGrado == null || idGrado == 0) {
-            tvSubtitulo.setText("Todas las comunidades de la ETSIIT");
+            tvSubtitulo.setText(act.getString(R.string.subtitulo_todas_comunidades));
         } else {
-            tvSubtitulo.setText("De tu grado (" + usuarios.obtenerGradoUsuario(correo) + ") y generales de la escuela");
+            String nombreGrado = usuarios.obtenerGradoUsuario(correo);
+            tvSubtitulo.setText(act.getString(R.string.subtitulo_grado_comunidades, nombreGrado));
         }
 
         LinearLayout lista = v.findViewById(R.id.listaComunidades);
@@ -79,10 +80,10 @@ public final class HojaComunidades {
 
             boolean unido = unidas.contains(String.valueOf(c.id));
             TextView tvPlataforma = item.findViewById(R.id.tvPlataforma);
-            tvPlataforma.setText(unido ? "✓ Unido" : Comunidad.nombrePlataforma(c.plataforma));
+            tvPlataforma.setText(unido ? act.getString(R.string.comunidad_unido) : Comunidad.nombrePlataforma(c.plataforma));
             tvPlataforma.setTextColor(unido ? VERDE : Comunidad.color(c.plataforma));
 
-            // al volver de la vista previa se repinta la lista (por si se ha unido)
+            // Al volver de la vista previa se repinta la lista
             item.setOnClickListener(x -> mostrarGrupo(act, c, correo != null,
                     () -> pintarLista(act, lista, comunidades, correo)));
             lista.addView(item);
@@ -100,7 +101,7 @@ public final class HojaComunidades {
         ((TextView) v.findViewById(R.id.tvPlataformaGrupo))
                 .setText(Comunidad.emoji(c.plataforma) + " " + Comunidad.nombrePlataforma(c.plataforma));
         ((TextView) v.findViewById(R.id.tvNombreGrupo)).setText(c.nombre);
-        ((TextView) v.findViewById(R.id.tvMiembros)).setText("👥 " + c.miembrosSimulados() + " miembros");
+        ((TextView) v.findViewById(R.id.tvMiembros)).setText(act.getString(R.string.miembros_fmt, c.miembrosSimulados()));
 
         // Burbujas de mensajes de ejemplo
         LinearLayout mensajes = v.findViewById(R.id.listaMensajes);
@@ -115,7 +116,7 @@ public final class HojaComunidades {
 
         Button btnUnirme = v.findViewById(R.id.btnUnirme);
         if (!haySesion) {
-            btnUnirme.setText("🔒 Inicia sesión para unirte");
+            btnUnirme.setText(act.getString(R.string.btn_inicia_sesion_apuntarte));
             btnUnirme.setBackgroundTintList(ColorStateList.valueOf(GRIS));
             btnUnirme.setOnClickListener(x -> {
                 hoja.dismiss();
@@ -130,8 +131,9 @@ public final class HojaComunidades {
             actualizarBoton(act, btnUnirme, c);
             alCambiar.run();
             boolean unido = ComunidadesUnidas.estaUnido(act, c.id);
-            Toast.makeText(act, unido ? "🎉 Te has unido a «" + c.nombre + "»"
-                    : "Has salido de «" + c.nombre + "»", Toast.LENGTH_SHORT).show();
+            String msg = unido ? act.getString(R.string.toast_te_has_unido, c.nombre)
+                    : act.getString(R.string.toast_has_salido, c.nombre);
+            Toast.makeText(act, msg, Toast.LENGTH_SHORT).show();
         });
 
         hoja.show();
@@ -139,7 +141,7 @@ public final class HojaComunidades {
 
     private static void actualizarBoton(AppCompatActivity act, Button btn, Comunidad c) {
         boolean unido = ComunidadesUnidas.estaUnido(act, c.id);
-        btn.setText(unido ? "✓ Ya eres miembro · Salir" : "Unirme al grupo");
+        btn.setText(unido ? act.getString(R.string.btn_ya_miembro_salir) : act.getString(R.string.btn_unirme_grupo));
         btn.setBackgroundTintList(ColorStateList.valueOf(unido ? GRIS : Comunidad.color(c.plataforma)));
     }
 }

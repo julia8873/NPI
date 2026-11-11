@@ -376,4 +376,150 @@
         <item>Personal</item>
         <item>Reminder</item>
     </string-array>
+
+    <string name="asistente_virtual_titulo">Virtual Assistant ETSIIT 🤖</string>
+    <string name="asistente_virtual_msg">Hello! In the future I will be your AI assistant to solve all your questions about ETSIIT, classes, and exams.\n\nFor now you can use the quick access grid and the calendar for your events.</string>
+    <string name="btn_entendido">Got it!</string>
+
+    <string name="sensor_activado_msg">🧭 Tilt sensor activated</string>
+    <string name="sensor_desactivado_msg">🛑 Tilt sensor disabled</string>
+
+    <string name="modo_ruta_sugerida">Showing suggested route</string>
+    <string name="modo_ultimo_visto">Showing last viewed page</string>
+
+    <string name="acceso_rapido_contextual">CONTEXTUAL QUICK ACCESS</string>
+    <string name="hora_de_comer">🍽️ LUNCH TIME</string>
+    <string name="horario_etsiit">ETSIIT Schedule</string>
+    <string name="ruta_comedor">Route: Room 0.7 ➔ Canteen</string>
+    <string name="desc_comedor">Class in Room 0.7 · Tap to open map and guided route</string>
+
+    <string name="pagina_reciente">RECENT PAGE</string>
+    <string name="btn_cambiar_sugerido">🔄 Switch to suggested</string>
+    <string name="visto_recientemente">🕒 RECENTLY VIEWED</string>
+    <string name="acceso_directo_exacto">Exact shortcut</string>
+
+    <string name="hoy">TODAY</string>
+    <string name="calendario_etsiit_titulo">ETSIIT Calendar</string>
+    <string name="calendario_etsiit_desc">Activities, appointments, exams, and assignments</string>
+    <string name="calendario_etiqueta">Calendar</string>
+    <string name="seccion_escuela_desc">School section</string>
+    <string name="toca_para_volver">Tap to return</string>
+
+    <string name="login_asistente_msg">Hello! To log in, enter your institutional email and UGR password. If you don\'t have an account yet, tap \'Create new account\'.</string>
+    <string name="recuperar_password_titulo">Recover password 🔑</string>
+    <string name="recuperar_password_msg">To reset your university account password, you must access the UGR account management portal or contact CSIRC (csirc@ugr.es).</string>
+    <string name="toast_rellena_datos">Please fill in all fields</string>
+    <string name="toast_usuario_incorrecto">Incorrect user</string>
+    <string name="toast_password_incorrecta">Incorrect password</string>
+
+    <string name="signup_asistente_msg">Welcome to registration! Enter your full name, UGR institutional email, and a password. You can use this account across the entire application.</string>
+    <string name="toast_passwords_no_coinciden">Passwords do not match</string>
+    <string name="toast_correo_existente">An account with this email already exists</string>
+    <string name="toast_cuenta_creada_exito">Account created successfully</string>
+    <string name="toast_error_crear_cuenta">Error creating account</string>
+
+    <string name="ajustes_asistente_msg">Hello! Here you can manage your account preferences, enable class notifications, configure your diet, and edit your personal details.</string>
+    <string name="sin_sesion_iniciada">No active session</string>
+    <string name="invitado">Guest</string>
+
+    <string name="avisos_clase_activados">Class alerts enabled</string>
+    <string name="avisos_clase_desactivados">Class alerts disabled</string>
+    <string name="menu_veg_activado">🌱 Vegetarian menu enabled</string>
+    <string name="menu_normal_activado">🥩 Regular menu enabled</string>
+    <string name="falta_por_implementar">Feature not implemented yet</string>
+
+    <string name="inicia_sesion_editar_perfil">Log in to edit your profile</string>
+    <string name="editar_perfil_titulo">Edit profile</string>
+    <string name="btn_guardar">Save</string>
+    <string name="perfil_actualizado_exito">Profile updated successfully</string>
+
+    <string name="cerrar_sesion_titulo">Log out</string>
+    <string name="cerrar_sesion_msg">Are you sure you want to log out?</string>
+    <string name="btn_si_salir">Yes, log out</string>
+
+    <string name="sec_avisos">Announcements</string>
+    <string name="sec_mapa">Map</string>
+    <string name="sec_actividades">Activities</string>
+    <string name="sec_profesorado">Faculty</string>
+    <string name="sec_asignaturas">Subjects</string>
+    <string name="sec_secretaria">Secretary</string>
+    <string name="sec_comedores">Dining</string>
+    <string name="sec_biblioteca">Library</string>
+    <string name="sec_calendario">Calendar</string>
+
+    <string name="titulo_actividades">Activities</string>
+    <string name="chip_todas">All</string>
+    <string name="chip_mis_actividades">✓ My activities</string>
+
+    <string name="vacio_viste_todas">🎉 You have seen them all!</string>
+    <string name="vacio_no_hay_tipo">No activities of this type.</string>
+    <string name="vacio_inicia_sesion">🔒 Log in to view activities you join.</string>
+    <string name="vacio_no_apuntado">You haven\'t joined any activities yet.</string>
+
+    <string name="contador_paginas">%1$d of %2$d</string>
+    <string name="plazo_cerrado_msg">Registration deadline closed: %1$s</string>
+    <string name="sin_plazas">No spots available 😢</string>
+    <string name="ya_apuntado">You were already registered for «%1$s»</string>
+    <string name="error_inscripcion">Could not complete registration</string>
+    <string name="snack_apuntado">🎉 You joined «%1$s»</string>
+    <string name="snack_desapuntado">You left «%1$s»</string>
+    <string name="action_deshacer">Undo</string>
+
+    <string name="pedir_sesion_msg">🔒 Log in to %1$s</string>
+    <string name="btn_iniciar_sesion">Log in</string>
+
+    <string name="plazas_ocupadas_fmt">👥 %1$d of %2$d spots taken</string>
+    <string name="personas_apuntadas_uno">👥 %1$d person joined</string>
+    <string name="personas_apuntadas_varios">👥 %1$d people joined</string>
+
+    <string name="btn_desapuntarme">Can\'t go anymore (leave)</string>
+    <string name="btn_plazas_agotadas">Fully booked</string>
+    <string name="btn_inicia_sesion_apuntarte">🔒 Log in to join</string>
+    <string name="btn_apuntarme">🙋 Join</string>
+    <string name="hasta_el">until %1$s</string>
+    <string name="lugar_etsiit_fmt">%1$s · ETSIIT</string>
+    <string name="lugar_default">ETSIIT · University of Granada</string>
+
+    <string name="sin_app_calendario">No calendar app found on this device</string>
+    <string name="sin_navegador">No browser app found to open link</string>
+
+    <string name="subtitulo_todas_comunidades">All ETSIIT communities</string>
+    <string name="subtitulo_grado_comunidades">From your degree (%1$s) and general school groups</string>
+    <string name="comunidad_unido">✓ Joined</string>
+
+    <string name="miembros_fmt">👥 %1$s members</string>
+    <string name="toast_te_has_unido">🎉 You joined «%1$s»</string>
+    <string name="toast_has_salido">You left «%1$s»</string>
+
+    <string name="btn_ya_miembro_salir">✓ Already a member · Leave</string>
+    <string name="btn_unirme_grupo">Join group</string>
+
+    <string name="cabecera_hora">Hour</string>
+    <string name="dia_lunes">Monday</string>
+    <string name="dia_martes">Tuesday</string>
+    <string name="dia_miercoles">Wednesday</string>
+    <string name="dia_jueves">Thursday</string>
+    <string name="dia_viernes">Friday</string>
+
+    <string name="titulo_asignaturas_curso">Subjects for Year %1$d</string>
+    <string name="titulo_resultados_busqueda">Results for: \'%1$s\'</string>
+    <string name="subtitulo_tipo_fmt">Type: %1$s</string>
+    <string name="subtitulo_curso_grado_fmt">%1$s - Year %2$d</string>
+    <string name="sin_resultados_asignaturas">No subjects found in the database.</string>
+
+    <string name="codigo_fmt">Code: %1$s</string>
+    <string name="cuatrimestre_fmt">Term %1$d</string>
+    <string name="detalle_asignatura_subtitulo">Subject details</string>
+    <string name="clase_mayus">CLASS</string>
+    <string name="sesion_grupo_fmt">%1$s (Group %2$s)</string>
+    <string name="horario_fmt">🗓️ %1$s from %2$s to %3$s</string>
+    <string name="dia_sabado">Saturday</string>
+    <string name="dia_domingo">Sunday</string>
+    <string name="dia_generico_fmt">Day %1$d</string>
+    <string name="sin_sesiones_registradas">No class sessions registered for this subject.</string>
+    <string name="sin_profesores_asignados">No professors assigned to this subject.</string>
+    <string name="enlace_no_disponible">Link not available</string>
+
+    <string name="btn_ir">GO</string>
+
 </resources>

@@ -49,10 +49,9 @@ import com.example.nuietsiit.data.modelo.EventoCalendario;
 import com.example.nuietsiit.util.DetectorInclinacionMenu;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.Notificador;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,11 +61,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Menú principal (rediseño minimalista).
- *
- * Inclinando el móvil se va seleccionando una sección de la cuadrícula 3x3 (la bola de la cabecera
- * muestra la inclinación: inclinar hacia uno mismo baja de fila, alejarlo sube). Para entrar se agita
- * el móvil. Tocar una ficha también la abre.
+ * Menú principal de la aplicación con navegación por cuadrícula Hub y sensor de inclinación.
  */
 public class MenuPrincipal extends BaseActivity {
 
@@ -257,9 +252,9 @@ public class MenuPrincipal extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(MenuPrincipal.this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.asistente_virtual_titulo)
+                        .setMessage(R.string.asistente_virtual_msg)
+                        .setPositiveButton(R.string.btn_entendido, null)
                         .show();
             });
         }
@@ -271,7 +266,6 @@ public class MenuPrincipal extends BaseActivity {
 
     private void configurarHub() {
         hub.setOnSeccionListener(indice -> {
-            // un toque también deja la selección donde se ha tocado
             detector.fijarSeleccion(indice / 3, indice % 3);
             nivel.setZona(indice / 3, indice % 3);
             abrirSeccion(indice);
@@ -306,7 +300,7 @@ public class MenuPrincipal extends BaseActivity {
 
             @Override
             public void alConfirmar() {
-                // Desactivado: solo se entra agitando el móvil
+                // Solo se entra agitando el móvil
             }
         });
     }
@@ -336,7 +330,7 @@ public class MenuPrincipal extends BaseActivity {
             actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
             actualizarEstadoVisualGiroscopio();
             detector.iniciar();
-            Toast.makeText(this, "🧭 Sensor de inclinación activado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sensor_activado_msg, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
@@ -347,7 +341,7 @@ public class MenuPrincipal extends BaseActivity {
             actualizarVistasDialogoGiroscopio(btnActivado, btnDesactivado, badgeActivado, badgeDesactivado);
             actualizarEstadoVisualGiroscopio();
             detector.parar();
-            Toast.makeText(this, "🛑 Sensor de inclinación desactivado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sensor_desactivado_msg, Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
@@ -364,7 +358,7 @@ public class MenuPrincipal extends BaseActivity {
             btnDesactivado.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
             badgeDesactivado.setVisibility(View.VISIBLE);
             btnActivado.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-            badgeActivado.setVisibility(View.GONE);
+            badgeDesactivado.setVisibility(View.GONE);
         }
     }
 
@@ -425,7 +419,10 @@ public class MenuPrincipal extends BaseActivity {
         abriendo = true;
         registrarSeccionVisitada(indice);
         HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[indice];
-        RecienteUtil.guardar(this, DESTINOS[indice], seccion.titulo, "Sección de la escuela", null, null, indice);
+
+        String descripcion = getString(R.string.seccion_escuela_desc);
+        RecienteUtil.guardar(this, DESTINOS[indice], seccion.titulo, descripcion, null, null, indice);
+
         hub.setSeleccion(indice, true);
         hub.animarApertura(indice, () -> {
             Intent intent = new Intent(MenuPrincipal.this, DESTINOS[indice]);
@@ -442,8 +439,8 @@ public class MenuPrincipal extends BaseActivity {
         simulacionManualForzada = true;
         simulacionManualEsComedor = !simulacionManualEsComedor;
         actualizarAccesoDirecto();
-        String mensaje = simulacionManualEsComedor ? "Mostrando ruta sugerida" : "Mostrando última página vista";
-        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
+        int mensajeRes = simulacionManualEsComedor ? R.string.modo_ruta_sugerida : R.string.modo_ultimo_visto;
+        Toast.makeText(this, mensajeRes, Toast.LENGTH_SHORT).show();
     }
 
     private void actualizarAccesoDirecto() {
@@ -451,7 +448,6 @@ public class MenuPrincipal extends BaseActivity {
 
         java.util.Calendar ahora = java.util.Calendar.getInstance();
         int minuto = ahora.get(java.util.Calendar.MINUTE);
-        // Simulación: cada 10 minutos alterna si no ha sido modificado manualmente
         boolean esModoComedor;
         if (simulacionManualForzada) {
             esModoComedor = simulacionManualEsComedor;
@@ -468,9 +464,9 @@ public class MenuPrincipal extends BaseActivity {
     }
 
     private void configurarAccesoDirectoComedor() {
-        tvTituloCabeceraAccesoDirecto.setText("ACCESO RÁPIDO CONTEXTUAL");
+        tvTituloCabeceraAccesoDirecto.setText(R.string.acceso_rapido_contextual);
         if (btnCambiarModoAcceso != null) {
-            btnCambiarModoAcceso.setText("🔄 Cambiar a último visto");
+            btnCambiarModoAcceso.setText(R.string.btn_cambiar_ultimo_visto);
             btnCambiarModoAcceso.setTextColor(Color.parseColor("#FF7A2F"));
             btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
         }
@@ -482,7 +478,7 @@ public class MenuPrincipal extends BaseActivity {
         ivIconoAccesoDirecto.setImageResource(R.drawable.ic_nui_mapa);
         ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
 
-        tvTagAccesoDirecto.setText("🍽️ HORA DE COMER");
+        tvTagAccesoDirecto.setText(R.string.hora_de_comer);
         tvTagAccesoDirecto.setTextColor(Color.parseColor("#FF7A2F"));
         tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF0E4")));
 
@@ -490,9 +486,9 @@ public class MenuPrincipal extends BaseActivity {
             ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.parseColor("#FF7A2F")));
         }
 
-        tvSubinfoAccesoDirecto.setText("Horario ETSIIT");
-        tvTituloAccesoDirecto.setText("Ruta: Aula 0.7 ➔ Comedor");
-        tvDescAccesoDirecto.setText("Tienes clase en 0.7 · Toca para abrir mapa y ruta guiada");
+        tvSubinfoAccesoDirecto.setText(R.string.horario_etsiit);
+        tvTituloAccesoDirecto.setText(R.string.ruta_comedor);
+        tvDescAccesoDirecto.setText(R.string.desc_comedor);
 
         cardAccesoDirecto.setOnClickListener(v -> {
             vibrarConfirmacion();
@@ -502,7 +498,6 @@ public class MenuPrincipal extends BaseActivity {
             startActivity(intent);
         });
 
-        // Alternancia manual con pulsación larga para pruebas rápidas
         cardAccesoDirecto.setOnLongClickListener(v -> {
             vibrarConfirmacion();
             alternarModoAccesoDirecto();
@@ -514,9 +509,9 @@ public class MenuPrincipal extends BaseActivity {
         RecienteUtil.DatosRecientes recientes = RecienteUtil.obtener(this);
         HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[recientes.seccionIndex];
 
-        tvTituloCabeceraAccesoDirecto.setText("PÁGINA RECIENTE");
+        tvTituloCabeceraAccesoDirecto.setText(R.string.pagina_reciente);
         if (btnCambiarModoAcceso != null) {
-            btnCambiarModoAcceso.setText("🔄 Cambiar a sugerido");
+            btnCambiarModoAcceso.setText(R.string.btn_cambiar_sugerido);
             btnCambiarModoAcceso.setTextColor(seccion.color);
             int bgTint = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.15f);
             btnCambiarModoAcceso.setBackgroundTintList(ColorStateList.valueOf(bgTint));
@@ -531,7 +526,7 @@ public class MenuPrincipal extends BaseActivity {
         ivIconoAccesoDirecto.setImageResource(seccion.icono);
         ivIconoAccesoDirecto.setImageTintList(ColorStateList.valueOf(Color.WHITE));
 
-        tvTagAccesoDirecto.setText("🕒 VISTO RECIENTEMENTE");
+        tvTagAccesoDirecto.setText(R.string.visto_recientemente);
         tvTagAccesoDirecto.setTextColor(seccion.color);
         int bgTag = ColorUtils.blendARGB(Color.WHITE, seccion.color, 0.18f);
         tvTagAccesoDirecto.setBackgroundTintList(ColorStateList.valueOf(bgTag));
@@ -540,9 +535,9 @@ public class MenuPrincipal extends BaseActivity {
             ivChevronAccesoDirecto.setImageTintList(ColorStateList.valueOf(seccion.color));
         }
 
-        tvSubinfoAccesoDirecto.setText("Acceso directo exacto");
+        tvSubinfoAccesoDirecto.setText(R.string.acceso_directo_exacto);
         tvTituloAccesoDirecto.setText(recientes.titulo);
-        tvDescAccesoDirecto.setText(recientes.subtitulo + " · Toca para volver");
+        tvDescAccesoDirecto.setText(recientes.subtitulo + " · " + getString(R.string.toca_para_volver));
 
         cardAccesoDirecto.setOnClickListener(v -> {
             vibrarConfirmacion();
@@ -656,7 +651,7 @@ public class MenuPrincipal extends BaseActivity {
         todosEventosHoy.addAll(actividadesOficiales);
         todosEventosHoy.addAll(citasSecretaria);
 
-        tvHoraEvento.setText("HOY");
+        tvHoraEvento.setText(R.string.hoy);
         if (!todosEventosHoy.isEmpty()) {
             EventoCalendario eventoProximo = todosEventosHoy.get(0);
             boolean hayHora = eventoProximo.hora != null && !eventoProximo.hora.isEmpty();
@@ -665,13 +660,13 @@ public class MenuPrincipal extends BaseActivity {
             if (hayHora && hayDescripcion) {
                 tvSubtituloEventoHoy.setText(eventoProximo.hora + " · " + eventoProximo.descripcion);
             } else if (hayHora) {
-                tvSubtituloEventoHoy.setText(eventoProximo.hora + " · Calendario");
+                tvSubtituloEventoHoy.setText(eventoProximo.hora + " · " + getString(R.string.calendario_etiqueta));
             } else {
-                tvSubtituloEventoHoy.setText(hayDescripcion ? eventoProximo.descripcion : "Calendario");
+                tvSubtituloEventoHoy.setText(hayDescripcion ? eventoProximo.descripcion : getString(R.string.calendario_etiqueta));
             }
         } else {
-            tvTituloEventoHoy.setText("Calendario de la ETSIIT");
-            tvSubtituloEventoHoy.setText("Actividades, citas, exámenes y entregas");
+            tvTituloEventoHoy.setText(R.string.calendario_etsiit_titulo);
+            tvSubtituloEventoHoy.setText(R.string.calendario_etsiit_desc);
         }
 
         cardEventoHoy.setOnClickListener(v -> abrirSeccion(DESTINOS.length - 1));

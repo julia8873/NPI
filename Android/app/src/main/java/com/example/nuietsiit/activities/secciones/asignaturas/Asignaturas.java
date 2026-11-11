@@ -131,12 +131,20 @@ public class Asignaturas extends BaseActivity {
 
         List<SesionHorarioInfo> sesiones = obtenerSesionesDesdeBD();
 
-        String[] dias = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+        String[] dias = {
+                getString(R.string.cabecera_hora),
+                getString(R.string.dia_lunes),
+                getString(R.string.dia_martes),
+                getString(R.string.dia_miercoles),
+                getString(R.string.dia_jueves),
+                getString(R.string.dia_viernes)
+        };
+
         TableRow rowCabecera = new TableRow(this);
         rowCabecera.setBackgroundColor(Color.parseColor("#E0E0E0"));
 
         for (String dia : dias) {
-            TextView tv = crearCelda(dia, true, dia.equals("Hora"), null);
+            TextView tv = crearCelda(dia, true, dia.equals(getString(R.string.cabecera_hora)), null);
             rowCabecera.addView(tv);
         }
         tablaHorario.addView(rowCabecera);
