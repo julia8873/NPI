@@ -27,15 +27,19 @@ import com.example.nuietsiit.activities.main.ShakeDetector;
 import com.example.nuietsiit.activities.main.WaveView;
 import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.util.DetectorBocaAbajo;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutorial {
 
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private ShakeDetector mShakeDetector;
     private WaveView mWaveView;
     private DetectorBocaAbajo mDetectorBocaAbajo;
+    private Tutorial mTutorial;        // el de la pantalla (crearTutorial)
+    private Tutorial mTutorialParte;   // el de una parte (mostrarTutorialSiPrimeraVez)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,10 @@ public class BaseActivity extends AppCompatActivity {
 
         mShakeDetector = new ShakeDetector();
         mShakeDetector.setOnShakeListener(() -> {
+            if (hayTutorialActivo()) { // en el tutorial agitar es un paso, no saca de la pantalla
+                avisarTutorial(Gesto.AGITAR);
+                return;
+            }
             if (!usaAgitar()) return; // puede cambiar sin pasar por onResume (p. ej. guía del mapa)
             if (!(BaseActivity.this instanceof MenuPrincipal)) {
                 if (isFinishing() || isDestroyed()) return;
@@ -205,6 +213,94 @@ public class BaseActivity extends AppCompatActivity {
                 toolbar.addView(ivIcono);
             }
         }
+
+        mTutorial = crearTutorial();
+        if (mTutorial != null) {
+            ponerBotonTutorial();
+            // tras el primer layout, para que el foco caiga sobre vistas ya colocadas
+            getWindow().getDecorView().post(() -> {
+                if (!isFinishing()) mTutorial.mostrarSiPrimeraVez();
+            });
+        }
+    }
+
+    // ---------- Tutorial interactivo (util/tutorial, ver PLAN_TUTORIAL) ----------
+
+    /** Pasos del tutorial de esta pantalla; null = sin tutorial ni botón "?". */
+    protected Tutorial crearTutorial() {
+        return null;
+    }
+
+    /** Llamar donde la pantalla ya reconoce un gesto. No hace nada si no hay tutorial activo. */
+    @Override
+    public void avisarTutorial(Gesto gesto) {
+        if (mTutorial != null) mTutorial.avisar(gesto);
+        if (mTutorialParte != null) mTutorialParte.avisar(gesto);
+    }
+
+    /** Tutorial de una parte de la pantalla (p. ej. al llegar a la firma). Devuelve si se mostró. */
+    protected boolean mostrarTutorialSiPrimeraVez(Tutorial tutorial) {
+        if (tutorial == null || hayTutorialActivo()) return false;
+        mTutorialParte = tutorial;
+        return tutorial.mostrarSiPrimeraVez();
+    }
+
+    /** Como el anterior, pero aunque ya se haya visto (p. ej. para acabar una práctica que se empezó en otra parte). */
+    protected boolean mostrarTutorialParte(Tutorial tutorial) {
+        if (tutorial == null || hayTutorialActivo()) return false;
+        mTutorialParte = tutorial;
+        tutorial.mostrar();
+        return true;
+    }
+
+    /** El que repite el botón "?": por defecto el de la pantalla; si tiene partes, el de la parte en la que se está. */
+    protected Tutorial tutorialParaAyuda() {
+        return mTutorial;
+    }
+
+    protected boolean hayTutorialActivo() {
+        return (mTutorial != null && mTutorial.activo()) || (mTutorialParte != null && mTutorialParte.activo());
+    }
+
+    /** Botón "?" para repetir el tutorial: junto al chat si la cabecera lo tiene; si no, en la toolbar. */
+    private void ponerBotonTutorial() {
+        int lado = Math.round(40 * getResources().getDisplayMetrics().density);
+        ImageView boton = new ImageView(this);
+        boton.setImageResource(R.drawable.ic_help);
+        boton.setColorFilter(getColor(R.color.nui_tinta));
+        boton.setBackgroundResource(R.drawable.bg_circulo_blanco_volver);
+        boton.setPadding(lado / 5, lado / 5, lado / 5, lado / 5);
+        boton.setContentDescription("Repetir el tutorial de esta pantalla");
+        boton.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            Tutorial t = tutorialParaAyuda();
+            if (t == null || hayTutorialActivo()) return;
+            if (t != mTutorial) mTutorialParte = t; // para que le lleguen los avisos
+            t.mostrar();
+        });
+
+        View chat = findViewById(R.id.cardMascotaAyudante);
+        if (chat != null && chat.getParent() instanceof android.widget.LinearLayout) {
+            ViewGroup cabecera = (ViewGroup) chat.getParent();
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(lado, lado);
+            lp.setMarginEnd(lado / 4);
+            lp.gravity = Gravity.CENTER_VERTICAL;
+            cabecera.addView(boton, cabecera.indexOfChild(chat), lp);
+            return;
+        }
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            Toolbar.LayoutParams lp = new Toolbar.LayoutParams(lado, lado, Gravity.END | Gravity.CENTER_VERTICAL);
+            lp.setMarginEnd(lado / 4);
+            toolbar.addView(boton, lp); // tras el icono de perfil: queda a su izquierda
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mTutorial != null) mTutorial.cerrar();
+        if (mTutorialParte != null) mTutorialParte.cerrar();
+        super.onDestroy();
     }
 
     @Override

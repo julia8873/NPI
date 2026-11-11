@@ -12,6 +12,7 @@ import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
 import com.example.nuietsiit.util.RecienteUtil;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class DetalleLibro extends PantallaBiblioteca {
@@ -60,6 +61,16 @@ public class DetalleLibro extends PantallaBiblioteca {
         findViewById(R.id.btnComoLlegar).setOnClickListener(v -> startActivity(new Intent(this, Mapa.class)
                 .putExtra("RUTA_A_MARCADOR", "Biblioteca")
                 .putExtra("CORREO", getIntent().getStringExtra("CORREO"))));
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "detalle_libro", 1)
+                .info(R.id.tvDisponibilidad, "Aquí ves si queda algún ejemplar. Si está prestado, la portada sale apagada")
+                .info(R.id.tvSignatura, "La signatura es la etiqueta del lomo: con ella lo encuentras en la estantería")
+                .info(R.id.filaUbicacion, "Planta y estantería donde está").soloSiSeVe()
+                .info(R.id.btnComoLlegar, "¿No sabes dónde está la biblioteca? El mapa te lleva hasta ella")
+                .info(R.id.toolbar, "Vuelve atrás y el libro regresa volando a su balda");
     }
 
     // oculta la fila si el dato no está; devuelve si se ve

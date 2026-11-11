@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.example.nuietsiit.util.DetectorInclinacion;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.IntConsumer;
@@ -29,8 +31,10 @@ public class InclinarParaPasar implements View.OnAttachStateChangeListener, View
     public InclinarParaPasar(View vista, IntConsumer pasar, BooleanSupplier hayPaginas) {
         this.vista = vista;
         this.hayPaginas = hayPaginas;
-        detector = new DetectorInclinacion(vista.getContext(),
-                direccion -> pasar.accept(direccion == DetectorInclinacion.DERECHA ? 1 : -1));
+        detector = new DetectorInclinacion(vista.getContext(), direccion -> {
+            pasar.accept(direccion == DetectorInclinacion.DERECHA ? 1 : -1);
+            Tutorial.avisar(vista.getContext(), Gesto.INCLINAR);
+        });
         vista.addOnAttachStateChangeListener(this);
         if (vista.isAttachedToWindow()) onViewAttachedToWindow(vista);
     }
@@ -46,6 +50,11 @@ public class InclinarParaPasar implements View.OnAttachStateChangeListener, View
 
     private static SharedPreferences prefs(Context ctx) {
         return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    /** Si ahora mismo inclinar pasaría páginas (para que el tutorial solo lo enseñe entonces). */
+    public boolean escuchando() {
+        return activo;
     }
 
     /** Llamar cuando cambie el número de páginas. */

@@ -27,6 +27,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
@@ -73,6 +75,8 @@ public class ApuntarLibros extends PantallaBiblioteca {
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
                 // si se concede, la cámara arranca en onResume
                 if (!concedido) panelPermiso.setVisibility(View.VISIBLE);
+                // al entrar estaba el diálogo del permiso y no tocaba ningún paso: ahora sí
+                else mostrarTutorialSiPrimeraVez(crearTutorial());
             });
 
     @Override
@@ -131,6 +135,19 @@ public class ApuntarLibros extends PantallaBiblioteca {
             if (savedInstanceState == null) pedirCamara.launch(Manifest.permission.CAMERA);
             else panelPermiso.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "apuntar_libros", 1)
+                .sensor(Gesto.ESCANEAR, "Pasa la cámara por los códigos de barras de los libros, sin pulsar nada."
+                        + " ¿No tienes ninguno a mano? Salta el paso")
+                .soloSi(this::tieneCamara)
+                .tocar(R.id.cuerpoEtiqueta, "Toca la etiqueta para ver el libro").soloSiSeVe()
+                .info(R.id.panelInferior, "Cada libro vibra distinto: un toque si está libre, dos si es de tu asignatura"
+                        + " y uno largo si no queda ninguno. Así no hace falta mirar")
+                .soloSi(this::tieneCamara)
+                .info(R.id.btnPermiso, "Para escanear hace falta la cámara: dale permiso aquí").soloSiSeVe();
     }
 
     // barrer la balda de lado a lado parecería agitar y sacaría del escáner
@@ -200,6 +217,7 @@ public class ApuntarLibros extends PantallaBiblioteca {
             etiquetas.put(isbn, seguida);
             capaEtiquetas.addView(seguida.etiqueta);
             tvPista.setVisibility(View.GONE);
+            avisarTutorial(Gesto.ESCANEAR);
         }
         if (!colocar(seguida, puntos, nueva)) return;
         programarDesaparicion(isbn, seguida);

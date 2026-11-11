@@ -17,6 +17,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +64,19 @@ public class HojasPaginadas extends FrameLayout {
         pinturaFlecha.setFakeBoldText(true);
         setWillNotDraw(false);
         inclinar = new InclinarParaPasar(this, this::pasar, () -> permitirInclinar && cortes.size() > 1);
+        if (getId() == NO_ID) setId(generateViewId()); // el foco del tutorial la busca por id
+    }
+
+    /**
+     * Pasos del tutorial para pasar hojas. Solo salen si, al llegar, el contenido no cabe en una
+     * (se decide entonces: al crear el tutorial aún no se ha medido nada).
+     */
+    public Tutorial pasosTutorial(Tutorial t) {
+        return t.gesto(getId(), Gesto.DESLIZAR_IZQ,
+                        "No cabe todo en una hoja: desliza a la izquierda (o toca el lado derecho del pie) para pasar")
+                .soloSi(() -> hoja < cortes.size() - 1)
+                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a la derecha o a la izquierda para pasar de hoja")
+                .soloSi(inclinar::escuchando);
     }
 
     public void setOnHoja(OnHoja listener) {
@@ -91,6 +106,7 @@ public class HojasPaginadas extends FrameLayout {
             return;
         }
         performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        if (toqueEnPie || arrastrando) Tutorial.avisar(getContext(), sentido > 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
         float ancho = getWidth();
         contenido.animate().translationX(-sentido * ancho).alpha(0f).setDuration(140).withEndAction(() -> {
             irA(nueva, true);

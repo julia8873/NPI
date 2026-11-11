@@ -118,6 +118,14 @@ public class SecretariaDB {
         }
     }
 
+    // solo para quitar las de práctica del tutorial (las de verdad no se borran)
+    public void borrarSolicitud(int idSolicitud) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String[] id = {String.valueOf(idSolicitud)};
+        db.delete("SOLICITUD_DOCUMENTO", "idSolicitud = ?", id);
+        db.delete("SOLICITUD", "idSolicitud = ?", id);
+    }
+
     // más recientes primero
     public List<Solicitud> getSolicitudes(String correoUsuario) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -170,6 +178,11 @@ public class SecretariaDB {
         cv.put("fecha", fecha);
         cv.put("hora", hora);
         return actualizarCita(idCita, cv);
+    }
+
+    // solo para quitar las de práctica del tutorial (las de verdad se cancelan)
+    public void borrarCita(int idCita) {
+        dbHelper.getWritableDatabase().delete("CITA", "idCita = ?", new String[]{String.valueOf(idCita)});
     }
 
     public boolean cancelarCita(int idCita) {

@@ -60,6 +60,8 @@ import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.LienzoFirma;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -120,6 +122,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     private ActivityResultLauncher<Uri> lanzadorFoto;
     private ActivityResultLauncher<String[]> lanzadorArchivo;
     private AlertDialog dialogo;
+    private Tutorial tutorialDocumentos, tutorialFirma; // se crean al pedirlos (ver tutorialParaAyuda)
 
     private Vibrator vibrador;
     private ValueAnimator animSello, animTapa;
@@ -233,6 +236,123 @@ public class SolicitudTramite extends PantallaSecretaria {
         construirMesa();
         construirPapeles(-1);
         aplicarFase(false);
+    }
+
+    // ------------------------------------------------------------
+    //   Tutorial: uno por parte (documentos; firma, sello y envío)
+    // ------------------------------------------------------------
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return tutorialParaAyuda();
+    }
+
+    @Override
+    protected Tutorial tutorialParaAyuda() {
+        if (fase == DOCUMENTOS) {
+            if (tutorialDocumentos == null) {
+                tutorialDocumentos = new Tutorial(this, "solicitud_documentos", 2)
+                        .tocar(R.id.mesaScroll, "Toca un documento para hacerle una foto (o mantenlo para elegir un archivo). "
+                                + "Ahora, para practicar, te ponemos uno de prueba")
+                        .gesto(R.id.mesaScroll, Gesto.ARRASTRAR, "Arrastra el documento hacia abajo, hasta la carpeta")
+                        .soloSi(this::hayDocumentosFuera)
+                        .info(R.id.carpeta, "Con todos los documentos dentro, la carpeta se cierra sola. Te metemos el resto de prueba")
+                        .alLlegar(this::completarCarpetaPractica)
+                        .soloSi(() -> fase == DOCUMENTOS)
+                        // si se queda a medias, lo de prueba no puede llegar a enviarse
+                        .alTerminar(() -> { if (fase == DOCUMENTOS) quitarPractica(); });
+            }
+            return tutorialDocumentos;
+        }
+        if (tutorialFirma == null) {
+            tutorialFirma = new Tutorial(this, "solicitud_firma", 2)
+                    .gesto(R.id.lienzoFirma, Gesto.DIBUJAR, "Firma con el dedo en la tapa de la carpeta (con la goma la borras)")
+                    .soloSi(() -> fase == FIRMA);
+            if (hayHuella) tutorialFirma.info(R.id.btnFirmarHuella, "Si lo prefieres, aquí firmas con tu huella").soloSiSeVe();
+            tutorialFirma.info(R.id.tvNota, "Aquí puedes añadir una nota para Secretaría (es opcional)").soloSiSeVe()
+                    .info(R.id.btnAbrirCarpeta, "¿Te falta algo? Abre la carpeta para cambiar los documentos").soloSiSeVe()
+                    .gesto(R.id.sello, Gesto.MANTENER, "Mantén el dedo en el sello hasta que se complete el anillo")
+                    .soloSiSeVe()
+                    .gesto(R.id.carpeta, Gesto.LANZAR, "Lanza la carpeta hacia arriba para enviarla. "
+                            + "Ahora es de práctica: no se envía")
+                    .soloSi(() -> fase == LANZAR)
+                    .alTerminar(this::quitarPractica);
+        }
+        return tutorialFirma;
+    }
+
+    // al cerrar la carpeta puede seguir puesto el de los documentos (se despide o falta "agita"): se espera.
+    // Con documentos de prueba sale siempre, para acabar la práctica (y luego quitarlos)
+    private void mostrarTutorialFirma() {
+        if (fase != FIRMA || isFinishing()) return;
+        if (hayTutorialActivo()) handler.postDelayed(this::mostrarTutorialFirma, 500);
+        else if (hayPractica()) mostrarTutorialParte(tutorialParaAyuda());
+        else mostrarTutorialSiPrimeraVez(tutorialParaAyuda());
+    }
+
+    // ---------- práctica: documentos de prueba, que nunca se envían ----------
+
+    private static final String PREFIJO_PRACTICA = "practica_";
+
+    private static boolean esPractica(String ruta) {
+        return ruta != null && new File(ruta).getName().startsWith(PREFIJO_PRACTICA);
+    }
+
+    private boolean hayPractica() {
+        for (String ruta : archivos.values()) if (esPractica(ruta)) return true;
+        return false;
+    }
+
+    // una hoja con "DOCUMENTO DE PRUEBA" en vez de abrir la cámara
+    private void ponerDocumentoPractica(int idDocumento) {
+        File carpetaArchivos = carpetaSecretaria();
+        if (carpetaArchivos == null) return;
+        Bitmap hoja = Bitmap.createBitmap(600, 800, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas lienzo = new android.graphics.Canvas(hoja);
+        lienzo.drawColor(getColor(R.color.nui_papel));
+        android.graphics.Paint pincel = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        pincel.setColor(getColor(R.color.nui_papel_sombra));
+        for (int y = 220; y < 760; y += 48) lienzo.drawRect(60, y, 540, y + 14, pincel); // renglones
+        pincel.setColor(getColor(R.color.nui_tinta));
+        pincel.setTextSize(52);
+        pincel.setFakeBoldText(true);
+        pincel.setTextAlign(android.graphics.Paint.Align.CENTER);
+        lienzo.drawText("DOCUMENTO", 300, 110, pincel);
+        lienzo.drawText("DE PRUEBA", 300, 170, pincel);
+        File archivo = new File(carpetaArchivos, PREFIJO_PRACTICA + idDocumento + "_" + System.currentTimeMillis() + ".png");
+        if (guardarPng(hoja, archivo)) ponerArchivo(idDocumento, archivo.getAbsolutePath());
+    }
+
+    // los que faltan, de prueba, y todos dentro: la carpeta se cierra sola (meterEnCarpeta)
+    private void completarCarpetaPractica() {
+        for (Documento d : documentos) if (!archivos.containsKey(d.id)) ponerDocumentoPractica(d.id);
+        for (Documento d : documentos) if (!enCarpeta.contains(d.id)) meterEnCarpeta(d.id);
+    }
+
+    // deja la solicitud como antes de practicar: sin lo de prueba, con la carpeta abierta y sin firma
+    private void quitarPractica() {
+        if (!hayPractica() || enviando) return;
+        for (Integer id : new ArrayList<>(archivos.keySet())) {
+            String ruta = archivos.get(id);
+            if (!esPractica(ruta)) continue;
+            archivos.remove(id);
+            enCarpeta.remove(id);
+            new File(ruta).delete();
+            miniaturas.olvidar(ruta);
+        }
+        handler.removeCallbacks(mostrarBotonEnviar);
+        if (!documentos.isEmpty()) fase = DOCUMENTOS;
+        firmaConHuella = false;
+        firma = null;
+        archivoFirmaEnCurso().delete();
+        lienzoFirma.borrar(); // con la fase ya cambiada, no hace aparecer el sello
+        carpeta.animate().cancel();
+        carpeta.setTranslationY(0);
+        carpeta.setRotation(0);
+        construirMesa();
+        construirPapeles(-1);
+        aplicarFase(false);
+        Toast.makeText(this, "Práctica terminada: ahora con tus documentos de verdad", Toast.LENGTH_LONG).show();
     }
 
     // ------------------------------------------------------------
@@ -451,6 +571,7 @@ public class SolicitudTramite extends PantallaSecretaria {
 
         tarjeta.setOnClickListener(v -> {
             if (llena) opcionesDocumento(d);
+            else if (hayTutorialActivo()) ponerDocumentoPractica(d.id);
             else hacerFoto(d.id);
         });
         // toque = foto/opciones, mantener = opciones, deslizar hacia abajo = coger la tarjeta
@@ -563,6 +684,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     private void meterEnCarpeta(int idDocumento) {
         if (fase != DOCUMENTOS || !archivos.containsKey(idDocumento)) return;
         enCarpeta.add(idDocumento);
+        avisarTutorial(Gesto.ARRASTRAR);
         vibrar(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
         construirMesa();
         construirPapeles(idDocumento);
@@ -663,6 +785,7 @@ public class SolicitudTramite extends PantallaSecretaria {
             public void onAnimationEnd(Animator animation) {
                 vibrar(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
                 zonaFirma.animate().alpha(1f).setDuration(250).start();
+                mostrarTutorialFirma();
             }
         });
         papeles.animate().translationY(dp(50)).alpha(0f).setDuration(300).start();
@@ -957,6 +1080,7 @@ public class SolicitudTramite extends PantallaSecretaria {
             sello.animate().scaleX(1f).scaleY(1f).setDuration(320)
                     .setInterpolator(new OvershootInterpolator(2.5f)).start();
             sello.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+            avisarTutorial(Gesto.DIBUJAR); // firmada (a mano o con la huella)
         }
     }
 
@@ -1085,6 +1209,7 @@ public class SolicitudTramite extends PantallaSecretaria {
             guardarPng(firma, archivoFirmaEnCurso());
         }
         fase = LANZAR;
+        avisarTutorial(Gesto.MANTENER);
         sello.animate().cancel();
         sello.setScaleX(1f);
         sello.setScaleY(1f);
@@ -1161,6 +1286,14 @@ public class SolicitudTramite extends PantallaSecretaria {
 
     private void lanzar(float vy) {
         if (enviando) return;
+        if (hayTutorialActivo() || hayPractica()) { // de práctica: sube, vuelve y no se envía nada
+            avisarTutorial(Gesto.LANZAR);
+            vibrar(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+            carpeta.animate().translationY(-carpeta.getBottom() * 0.5f).rotation(-6f).setDuration(220)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .withEndAction(() -> devolverCarpeta(false)).start();
+            return;
+        }
         enviando = true;
         handler.removeCallbacks(mostrarBotonEnviar);
         vibrar(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
@@ -1218,6 +1351,10 @@ public class SolicitudTramite extends PantallaSecretaria {
     // ------------------------------------------------------------
 
     private void enviar() {
+        if (hayPractica()) { // red de seguridad: lo de prueba nunca llega a Secretaría
+            fallo("Esto era de práctica: no se envía");
+            return;
+        }
         enviando = true;
         File rutaFirma = null; // firmada con huella → sin PNG
         if (!firmaConHuella) {

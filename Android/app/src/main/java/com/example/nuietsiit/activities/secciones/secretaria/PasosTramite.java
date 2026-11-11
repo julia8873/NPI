@@ -19,6 +19,8 @@ import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.DetectorInclinacion;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -89,6 +91,7 @@ public class PasosTramite extends PantallaSecretaria {
                 // la primera llamada es la página inicial: no vibra
                 if (paginaActual != -1 && paginaActual != position) {
                     vpPasos.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                    if (position > paginaActual) avisarTutorial(Gesto.DESLIZAR_IZQ);
                 }
                 paginaActual = position;
                 actualizarIndicadores(position);
@@ -105,8 +108,15 @@ public class PasosTramite extends PantallaSecretaria {
 
     private void configurarInclinacion() {
         swInclinar = findViewById(R.id.swInclinar);
-        detector = new DetectorInclinacion(this, direccion ->
-                irA(vpPasos.getCurrentItem() + (direccion == DetectorInclinacion.DERECHA ? 1 : -1)));
+        detector = new DetectorInclinacion(this, direccion -> {
+            boolean activado = swInclinar.isChecked();
+            if (hayTutorialActivo()) avisarTutorial(Gesto.INCLINAR);
+            else if (!activado) { // solo estaba escuchando para el tutorial
+                detector.parar();
+                return;
+            }
+            irA(vpPasos.getCurrentItem() + (direccion == DetectorInclinacion.DERECHA ? 1 : -1));
+        });
         if (!detector.disponible()) {
             swInclinar.setVisibility(View.GONE);
             return;
@@ -124,6 +134,28 @@ public class PasosTramite extends PantallaSecretaria {
                 detector.parar();
             }
         });
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        if (numPasos == 0) return null; // se está cerrando: el trámite no tiene pasos
+        Tutorial t = new Tutorial(this, "pasos_tramite", 2)
+                .alEmpezar(() -> irA(0));
+        if (numPasos > 1) {
+            t.gesto(R.id.vpPasos, Gesto.DESLIZAR_IZQ, "Desliza la ficha a la izquierda para ver el siguiente paso")
+                    .tocar(R.id.btnSiguiente, "O toca la flecha para avanzar (y la de la izquierda para volver)")
+                    .soloSi(() -> btnSiguiente.isEnabled());
+        }
+        if (detector.disponible() && numPasos > 1) {
+            t.alEmpezar(() -> { // en el tutorial se escucha aunque el interruptor esté apagado
+                        irA(0);
+                        detector.iniciar();
+                    })
+                    .alTerminar(() -> { if (!swInclinar.isChecked()) detector.parar(); })
+                    .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil: a la derecha avanzas y a la izquierda vuelves")
+                    .info(R.id.swInclinar, "Con este interruptor lo activas o lo apagas cuando quieras");
+        }
+        return t;
     }
 
     private void irA(int pagina) {

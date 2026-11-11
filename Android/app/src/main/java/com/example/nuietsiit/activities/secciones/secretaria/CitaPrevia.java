@@ -28,6 +28,8 @@ import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
@@ -135,6 +137,19 @@ public class CitaPrevia extends PantallaSecretaria {
         // al volver a la pantalla la cita existente puede haber pasado y las franjas de hoy haber caducado
         actualizarCitaExistente();
         cargarFranjas();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "cita_previa", 2)
+                .tocar(R.id.actvMotivo, "Toca aquí para elegir para qué es la cita")
+                .info(R.id.tvCitaExistente, "Ya tienes una cita para esto: si eliges otra franja, la cambias").soloSiSeVe()
+                .tocar(R.id.llDias, "Toca el día que te venga bien")
+                .tocar(R.id.pestanasHoras, "Toca una hora para ver sus franjas de 10 minutos")
+                .gesto(R.id.rvFranjas, Gesto.DESLIZAR_IZQ, "También puedes deslizar las franjas de lado para cambiar de hora")
+                .sensor(Gesto.INCLINAR, "O inclinar el móvil a un lado o al otro para cambiar de hora")
+                .soloSi(() -> inclinar.escuchando())
+                .tocar(R.id.rvFranjas, "Toca una franja libre para pedir la cita. Antes de guardarla te pediremos confirmación");
     }
 
     @Override
@@ -364,7 +379,10 @@ public class CitaPrevia extends PantallaSecretaria {
                         break;
                     case MotionEvent.ACTION_UP:
                         deslizando = false;
-                        if (Math.abs(dx) > umbral) pasarHora(dx < 0 ? 1 : -1);
+                        if (Math.abs(dx) > umbral) {
+                            pasarHora(dx < 0 ? 1 : -1);
+                            avisarTutorial(dx < 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
+                        }
                         else rv.animate().translationX(0).setDuration(150).start();
                         break;
                     case MotionEvent.ACTION_CANCEL:

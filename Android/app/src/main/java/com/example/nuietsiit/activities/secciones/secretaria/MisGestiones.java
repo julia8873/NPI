@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -22,6 +23,8 @@ import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -83,6 +86,7 @@ public class MisGestiones extends PantallaSecretaria {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!hayTutorialActivo()) DatosPractica.borrar(this, db); // las de práctica que quedaron (justificante, app cerrada)
         // al volver (p. ej. del justificante) se recalculan estados y citas pasadas
         cargarCitas();
         cargarSolicitudes();
@@ -103,8 +107,43 @@ public class MisGestiones extends PantallaSecretaria {
         for (Cita c : db.getCitas(correoUsuario)) lista.add(GestionAdapter.Gestion.deCita(c));
         citasAdapter.setGestiones(lista);
         actualizarVacio(PAGINA_CITAS);
-        // la primera vez que hay algo que rasgar, las tijeras enseñan el gesto recorriendo la línea
-        if (citasAdapter.hayCancelables() && ResguardoRasgable.primeraVez(this)) citasAdapter.ensenarTijeras();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "mis_gestiones", 2)
+                .alEmpezar(() -> {
+                    // sin nada que rasgar o enseñar no se puede practicar: se ponen una cita y una solicitud de mentira
+                    if (!citasAdapter.hayCancelables()) DatosPractica.crearCita(this, db, correoUsuario);
+                    if (solicitudesAdapter.getItemCount() == 0) DatosPractica.crearSolicitud(this, db, correoUsuario);
+                    cargarCitas();
+                    cargarSolicitudes();
+                    ((ViewPager2) findViewById(R.id.vpGestiones)).setCurrentItem(PAGINA_CITAS, false);
+                })
+                .alTerminar(() -> {
+                    // si ahora está abierto el justificante de la de práctica, se quita al volver (onResume)
+                    if (isFinishing() || getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                        quitarPractica();
+                    }
+                })
+                .info(0, "Para que puedas practicar te hemos puesto una cita y una solicitud de prueba. Se borran al acabar")
+                .soloSi(() -> DatosPractica.hay(this))
+                .gesto(R.id.resguardo, Gesto.DESLIZAR_DER,
+                        "Rasga el resguardo por la línea perforada para cancelar la cita. Ahora es de práctica: no se cancela")
+                .conPista(v -> ((ResguardoRasgable) v).ensenarTijeras())
+                .soloSiSeVe()
+                .tocar(R.id.tabs, "Toca una pestaña para cambiar entre tus citas y tus solicitudes")
+                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a un lado o al otro para cambiar de pestaña")
+                .soloSi(() -> inclinar.escuchando())
+                .tocar(R.id.ficha, "Toca una gestión para ver su justificante con el QR").soloSiSeVe();
+    }
+
+    private void quitarPractica() {
+        if (!DatosPractica.hay(this)) return;
+        DatosPractica.borrar(this, db);
+        if (isFinishing()) return;
+        cargarCitas();
+        cargarSolicitudes();
     }
 
     private void cargarSolicitudes() {
@@ -131,6 +170,11 @@ public class MisGestiones extends PantallaSecretaria {
     }
 
     private void cancelarCita(int posicion, View vista) {
+        if (hayTutorialActivo()) { // en la práctica no se cancela de verdad: el resguardo vuelve entero
+            avisarTutorial(Gesto.DESLIZAR_DER);
+            citasAdapter.notifyItemChanged(posicion);
+            return;
+        }
         GestionAdapter.Gestion g = citasAdapter.get(posicion);
         // la lista pudo quedarse abierta hasta pasada la hora de la cita
         Cita cita = db.getCita(g.id);

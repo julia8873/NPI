@@ -33,6 +33,8 @@ import com.example.nuietsiit.activities.secciones.biblioteca.GravedadBalda;
 import com.example.nuietsiit.activities.secciones.biblioteca.SugerenciaEstudio;
 import com.example.nuietsiit.activities.secciones.biblioteca.ModoEstudio;
 import com.example.nuietsiit.activities.secciones.biblioteca.LibroAdapter;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.activities.secciones.biblioteca.PanelExplorar;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
@@ -167,13 +169,18 @@ public class Biblioteca extends PantallaBiblioteca {
         etBuscar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) { aplicarFiltro(); }
+            @Override public void afterTextChanged(Editable s) {
+                aplicarFiltro();
+                if (s.length() >= 3) avisarTutorial(Gesto.ESCRIBIR);
+            }
         });
         chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
         findViewById(R.id.btnApuntar).setOnClickListener(v -> startActivity(new Intent(this, ApuntarLibros.class)
                 .putExtra("CORREO", getIntent().getStringExtra("CORREO"))));
         findViewById(R.id.btnModoEstudio).setOnClickListener(v -> abrirModoEstudio());
-        sugerencia = SugerenciaEstudio.enLaBalda(this, findViewById(R.id.marcoBalda), () -> libroOjeado != null);
+        // en el tutorial dejarlo en la mesa es un paso: no se propone estudiar
+        sugerencia = SugerenciaEstudio.enLaBalda(this, findViewById(R.id.marcoBalda),
+                () -> libroOjeado != null || hayTutorialActivo());
 
         aplicarFiltro();
         // al entrar, los libros se balancean un poco: están sueltos y se mueven al inclinar el móvil
@@ -186,6 +193,37 @@ public class Biblioteca extends PantallaBiblioteca {
                 }
             });
         }
+
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "biblioteca", 2)
+                .info(R.id.pestanasVista, "Cada pestaña es una estantería: tus asignaturas, la de tu próxima clase y todo"
+                        + " el catálogo. En Explorar eliges grado, curso o planta")
+                .gesto(R.id.etBuscar, Gesto.ESCRIBIR, "Escribe un título o un autor, aunque sea con faltas: te entendemos igual")
+                .tocar(R.id.chipSugerencia, "¿Era esto lo que querías decir? Tócalo para buscarlo").soloSiSeVe()
+                .tocar(R.id.chipDisponibles, "Toca Disponibles para ver solo los libros que te puedes llevar")
+                .gesto(R.id.rvLibros, Gesto.DESLIZAR_IZQ, "Desliza las baldas a la izquierda para pasar de estante")
+                .alLlegar(this::quitarFiltrosTutorial)
+                .gesto(R.id.rvLibros, Gesto.PELLIZCAR, "Pellizca la balda para ver más libros a la vez, o menos y más grandes")
+                .sensor(Gesto.INCLINAR, "Inclina el móvil a un lado para pasar de estante. Los libros están sueltos: se mueven")
+                .soloSi(() -> numEstantes() > 1 || vistas.size() > 1)
+                .gesto(R.id.ivPortada, Gesto.MANTENER, "Mantén el dedo en una portada para sacar el libro y ojearlo."
+                        + " Suelta y vuelve a su sitio")
+                .info(R.id.btnApuntar, "Escanea la estantería con la cámara: cada libro te dice si está libre o es de tu asignatura")
+                .info(R.id.btnModoEstudio, "Modo estudio: 25 minutos sin distracciones con el móvil sobre la mesa")
+                .sensor(Gesto.MESA, "Prueba: deja el móvil sobre la mesa, boca arriba. Al acabar el tutorial te propondrá estudiar")
+                .tocar(R.id.ivPortada, "Toca una portada (o súbela mientras la ojeas) para abrir el libro");
+    }
+
+    // tras practicar la búsqueda y Disponibles, la balda vuelve a enseñarlo todo para los demás pasos
+    private void quitarFiltrosTutorial() {
+        android.view.inputmethod.InputMethodManager teclado = getSystemService(android.view.inputmethod.InputMethodManager.class);
+        if (teclado != null) teclado.hideSoftInputFromWindow(etBuscar.getWindowToken(), 0);
+        etBuscar.clearFocus();
+        chipDisponibles.setChecked(false);
+        etBuscar.setText("");
     }
 
     private void configurarBaldas() {
@@ -220,7 +258,10 @@ public class Biblioteca extends PantallaBiblioteca {
         rv.addOnLayoutChangeListener((v, l, t, r, b, lViejo, tViejo, rViejo, bViejo) -> {
             if (r - l != rViejo - lViejo || b - t != bViejo - tViejo) v.post(() -> repartirEstantes(false));
         });
-        inclinar = new InclinarParaPasar(rv, this::pasar, () -> numEstantes() > 1 || vistas.size() > 1);
+        inclinar = new InclinarParaPasar(rv, sentido -> {
+            avisarTutorial(Gesto.INCLINAR);
+            pasar(sentido);
+        }, () -> numEstantes() > 1 || vistas.size() > 1);
         gravedad = new GravedadBalda(rv);
 
         ScaleGestureDetector pellizco = new ScaleGestureDetector(this, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -339,7 +380,10 @@ public class Biblioteca extends PantallaBiblioteca {
         } else if (e.getActionMasked() == MotionEvent.ACTION_UP || abandonado) {
             deslizando = false;
             float umbral = UMBRAL_DESLIZAR_DP * getResources().getDisplayMetrics().density;
-            if (!abandonado && Math.abs(dx) > umbral) pasar(dx < 0 ? 1 : -1);
+            if (!abandonado && Math.abs(dx) > umbral) {
+                avisarTutorial(dx < 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
+                pasar(dx < 0 ? 1 : -1);
+            }
             else rv.animate().translationX(0).setDuration(160).start();
         }
     }
@@ -432,6 +476,7 @@ public class Biblioteca extends PantallaBiblioteca {
         estante = caben > 0 ? primero / caben : 0;
         repartirEstantes(false);
         rv.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        avisarTutorial(Gesto.PELLIZCAR);
     }
 
     private void empezarOjear(Libro libro, ImageView portada) {
@@ -531,6 +576,7 @@ public class Biblioteca extends PantallaBiblioteca {
 
     // soltar: el libro vuelve a su hueco de la balda y el velo se va
     private void terminarOjear() {
+        avisarTutorial(Gesto.MANTENER);
         View portada = portadaOjeada;
         libroOjeado = null;
         portadaOjeada = null;
@@ -557,6 +603,7 @@ public class Biblioteca extends PantallaBiblioteca {
 
     // deslizar arriba: la portada de la tarjeta viaja hasta el detalle; el panel se recoge en onStop
     private void abrirDesdeOjear() {
+        avisarTutorial(Gesto.MANTENER);
         Libro libro = libroOjeado;
         portadaRetorno = portadaOjeada;
         libroOjeado = null;

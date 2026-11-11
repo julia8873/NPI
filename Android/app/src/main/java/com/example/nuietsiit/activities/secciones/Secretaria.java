@@ -39,6 +39,8 @@ import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.BuscadorTolerante;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 
@@ -147,7 +149,10 @@ public class Secretaria extends PantallaSecretaria {
         etBuscar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) { aplicarFiltro(); }
+            @Override public void afterTextChanged(Editable s) {
+                aplicarFiltro();
+                if (s.length() >= 3) avisarTutorial(Gesto.ESCRIBIR);
+            }
         });
         chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
 
@@ -162,6 +167,30 @@ public class Secretaria extends PantallaSecretaria {
         mostrarCatalogo(catalogoVisible);
 
         cargarCategoria();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "secretaria", 2)
+                .alEmpezar(() -> { // empieza con el catálogo cerrado y sin búsqueda
+                    etBuscar.setText("");
+                    mostrarCatalogo(false);
+                })
+                .info(R.id.contenedorLoTuyo, "Aquí tienes lo tuyo: tu próxima cita, lo que has solicitado y los plazos abiertos. Tócalo para abrirlo")
+                .soloSi(() -> contenedorLoTuyo.getChildCount() > 0)
+                .info(R.id.btnQueNecesitas, "¿No sabes qué trámite es el tuyo? Aquí te lo preguntamos paso a paso")
+                .info(R.id.btnPedirCita, "Pide cita para ir a la ventanilla de Secretaría")
+                .info(R.id.btnMisGestiones, "Tus citas y solicitudes, con su justificante y su QR")
+                .tocar(R.id.tvVerTodos, "Toca aquí para abrir el catálogo con todos los trámites")
+                .tocar(R.id.pestanasCategorias, "Toca una categoría para ver solo sus trámites")
+                .gesto(R.id.fichero, Gesto.DESLIZAR_IZQ, "Hay más fichas: desliza a la izquierda para pasarlas")
+                .soloSi(() -> fichero.getPaginas() > 1)
+                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a un lado o al otro para pasar las fichas")
+                .soloSi(() -> inclinar.escuchando())
+                .gesto(R.id.etBuscar, Gesto.ESCRIBIR,
+                        "Escribe lo que buscas, aunque sea con faltas: te entendemos igual")
+                .tocar(R.id.chipSugerencia, "¿Era esto lo que querías decir? Tócalo para buscarlo").soloSiSeVe()
+                .tocar(R.id.itemTramite, "Toca un trámite para ver qué necesitas y sus pasos");
     }
 
     @Override

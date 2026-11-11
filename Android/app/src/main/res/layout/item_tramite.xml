@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Ficha de trámite en el cajón del fichero: cabecera (categoría) sobre la línea granada -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemTramite"
     style="@style/Widget.Nui.Ficha"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

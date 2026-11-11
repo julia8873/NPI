@@ -21,6 +21,7 @@
         app:tesela="@drawable/nui_arqueria" />
 
     <com.example.nuietsiit.ui.HojasPaginadas
+        android:id="@+id/hojas"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">

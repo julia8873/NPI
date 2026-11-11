@@ -21,10 +21,13 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.Locale;
+import java.util.function.BooleanSupplier;
 
 /**
  * Modo estudio: dejar el móvil boca arriba y quieto sobre la mesa llena un anillo (3 s) y empieza un
@@ -146,6 +149,24 @@ public class ModoEstudio extends PantallaBiblioteca {
         empezarAlAbrir = savedInstanceState == null && getIntent().getBooleanExtra(EXTRA_EMPEZAR, false);
     }
 
+    @Override
+    protected Tutorial crearTutorial() {
+        // si se entra ya estudiando (desde la balda) no sale ninguno: saldrá la próxima vez
+        BooleanSupplier esperando = () -> estado == Estado.ESPERA || estado == Estado.PAUSA;
+        return new Tutorial(this, "modo_estudio", 1)
+                .sensor(Gesto.MESA, "Deja el móvil sobre la mesa, boca arriba y quieto: el anillo se llena"
+                        + " y empiezan 25 minutos de estudio (ahora es de prueba, no empieza)")
+                .soloSi(() -> esperando.getAsBoolean() && mesa.disponible())
+                .sensor(Gesto.LEVANTAR, "Ahora levántalo: el anillo se vacía. Estudiando, levantarlo hace una pausa"
+                        + " y dejarlo otra vez sigue")
+                .soloSi(() -> esperando.getAsBoolean() && mesa.disponible())
+                .info(R.id.anillo, "Mientras estudias la pantalla se apaga y el móvil se silencia. Tócala para pausar."
+                        + " Al acabar vibra suave y descansas 5 minutos")
+                .soloSi(esperando)
+                .info(R.id.btnNoMolestar, "Dale permiso de «No molestar» para que no te llegue ni una notificación")
+                .soloSiSeVe();
+    }
+
     // estudiar con el móvil en la mano o por accidente no tiene sentido: agitar no saca al menú
     @Override
     protected boolean usaAgitar() {
@@ -195,6 +216,7 @@ public class ModoEstudio extends PantallaBiblioteca {
     // ---------- sensor ----------
 
     private void alCambiarMesa(boolean enMesa) {
+        avisarTutorial(enMesa ? Gesto.MESA : Gesto.LEVANTAR);
         switch (estado) {
             case ESPERA:
             case PAUSA:
@@ -228,7 +250,8 @@ public class ModoEstudio extends PantallaBiblioteca {
                     long llenar = estado == Estado.PAUSA ? LLENAR_SEGUIR_MS : LLENAR_MS;
                     float p = (ahora - inicioLlenado) / (float) llenar;
                     anillo.setProgreso(p);
-                    if (p >= 1f) {
+                    // en el tutorial el anillo se llena, pero el estudio (silencio, pantalla negra) no empieza
+                    if (p >= 1f && !hayTutorialActivo()) {
                         empezarEstudio(false);
                         break;
                     }

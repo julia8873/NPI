@@ -20,6 +20,8 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 import java.util.function.BooleanSupplier;
 
@@ -127,6 +129,7 @@ public class SugerenciaEstudio implements DefaultLifecycleObserver {
     }
 
     private void alCambiarMesa(boolean enMesa) {
+        if (enMesa) Tutorial.avisar(act, Gesto.MESA);
         if (terminado) return;
         if (enMesa && SystemClock.elapsedRealtime() - reanudada < AL_VOLVER_MS) descartado = true;
         if (enMesa && !descartado) {

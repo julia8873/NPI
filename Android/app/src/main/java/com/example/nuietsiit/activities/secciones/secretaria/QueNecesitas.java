@@ -14,6 +14,9 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.ui.HojasPaginadas;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Tramite;
@@ -163,6 +166,18 @@ public class QueNecesitas extends PantallaSecretaria {
         });
 
         mostrar(0);
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        Tutorial t = new Tutorial(this, "que_necesitas", 1)
+                .alEmpezar(() -> { // desde la primera pregunta
+                    camino.clear();
+                    mostrar(0);
+                })
+                .tocar(R.id.contenedorOpciones, "Toca la opción que mejor te describa: con unas pocas preguntas llegas a tu trámite")
+                .tocar(R.id.btnVolver, "¿Te has equivocado? Toca aquí para volver a la pregunta anterior").soloSiSeVe();
+        return ((HojasPaginadas) findViewById(R.id.hojas)).pasosTutorial(t);
     }
 
     @Override

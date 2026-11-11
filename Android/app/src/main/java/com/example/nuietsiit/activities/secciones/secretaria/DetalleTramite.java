@@ -11,6 +11,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.ui.HojasPaginadas;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Documento;
@@ -93,6 +96,17 @@ public class DetalleTramite extends PantallaSecretaria {
         TextView tvMotivo = findViewById(R.id.tvMotivoSolicitar);
         tvMotivo.setVisibility(motivo != null ? View.VISIBLE : View.GONE);
         tvMotivo.setText(motivo);
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        if (findViewById(R.id.btnSiguiente) == null) return null;
+        Tutorial t = new Tutorial(this, "detalle_tramite", 1)
+                .info(R.id.tarjetaDocumentos, "Estos son los documentos que vas a necesitar: tenlos a mano").soloSiSeVe()
+                .info(R.id.btnPasos, "Aquí ves cómo se hace, paso a paso").soloSiSeVe();
+        ((HojasPaginadas) findViewById(R.id.hojas)).pasosTutorial(t);
+        return t.info(R.id.btnAlternativa, "Si prefieres hacerlo en persona, pide cita en la ventanilla").soloSiSeVe()
+                .tocar(R.id.btnSiguiente, "Cuando lo tengas claro, empieza aquí");
     }
 
     // oculta la tarjeta si el campo es opcional y no existe

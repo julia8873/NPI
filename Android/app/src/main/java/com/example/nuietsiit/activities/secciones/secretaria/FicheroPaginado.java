@@ -11,6 +11,9 @@ import android.widget.LinearLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -151,8 +154,10 @@ public class FicheroPaginado extends LinearLayout {
                 if (arrastrando) setTranslationX(dx * 0.6f); // la página sigue al dedo, con algo de resistencia
                 return true;
             case MotionEvent.ACTION_UP:
-                if (arrastrando && Math.abs(dx) > getWidth() / 6f) pasar(dx < 0 ? 1 : -1);
-                else animate().translationX(0).setDuration(150).start();
+                if (arrastrando && Math.abs(dx) > getWidth() / 6f) {
+                    pasar(dx < 0 ? 1 : -1);
+                    Tutorial.avisar(getContext(), dx < 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
+                } else animate().translationX(0).setDuration(150).start();
                 arrastrando = false;
                 return true;
             case MotionEvent.ACTION_CANCEL:

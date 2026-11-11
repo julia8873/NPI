@@ -87,14 +87,6 @@ public class ResguardoRasgable extends View {
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO); // TalkBack: acción "Cancelar cita" en la ficha
     }
 
-    /** true solo la primera vez en la app (Mis gestiones o justificante): entonces hay que enseñar las tijeras. */
-    public static boolean primeraVez(Context ctx) {
-        android.content.SharedPreferences prefs = ctx.getSharedPreferences("secretaria_mis_gestiones", Context.MODE_PRIVATE);
-        if (prefs.getBoolean("tijeras_vistas", false)) return false;
-        prefs.edit().putBoolean("tijeras_vistas", true).apply();
-        return true;
-    }
-
     public void alRasgar(@Nullable Runnable accion) {
         alRasgar = accion;
     }
@@ -112,7 +104,7 @@ public class ResguardoRasgable extends View {
         invalidate();
     }
 
-    /** Las tijeras recorren la línea dos veces para enseñar el gesto (la primera vez). */
+    /** Las tijeras recorren la línea dos veces para enseñar el gesto (es la pista del tutorial). */
     public void ensenarTijeras() {
         if (rasgado) return;
         animar(0f, 1f, 1400, 2, new DecelerateInterpolator(), v -> tijerasPista = v, () -> tijerasPista = -1);

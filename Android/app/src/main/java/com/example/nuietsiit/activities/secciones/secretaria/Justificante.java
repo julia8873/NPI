@@ -35,6 +35,8 @@ import com.example.nuietsiit.util.DetectorEnsenar;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.GeneradorQR;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 
 
@@ -167,7 +169,14 @@ public class Justificante extends PantallaSecretaria {
     private void prepararResguardo(Cita cita) {
         ResguardoRasgable resguardo = findViewById(R.id.resguardo);
         resguardo.setVisibility(View.VISIBLE);
-        resguardo.alRasgar(() -> cancelarCita(cita));
+        resguardo.alRasgar(() -> {
+            if (hayTutorialActivo()) { // en la práctica no se cancela de verdad: el resguardo vuelve entero
+                avisarTutorial(Gesto.DESLIZAR_DER);
+                resguardo.reiniciar();
+                return;
+            }
+            cancelarCita(cita);
+        });
         // TalkBack: el resguardo se anuncia y se cancela con una acción, sin gesto
         resguardo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         resguardo.setContentDescription("Resguardo de la cita. Rásgalo por la línea perforada para cancelarla.");
@@ -175,7 +184,39 @@ public class Justificante extends PantallaSecretaria {
             resguardo.completar();
             return true;
         });
-        if (ResguardoRasgable.primeraVez(this)) resguardo.post(resguardo::ensenarTijeras);
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        boolean conQR = ivQR != null && ivQR.getDrawable() != null;
+        boolean conResguardo = findViewById(R.id.resguardo).getVisibility() == View.VISIBLE;
+        if (!conQR) return null;
+        // cada variante (cita vigente, se puede enseñar, solo ampliar) tiene sus pasos: clave propia para cada una
+        String clave = conResguardo ? "justificante_cita" : codigoQR != null ? "justificante" : "justificante_ampliar";
+        Tutorial t = new Tutorial(this, clave, 2)
+                .alEmpezar(() -> {
+                    HojasPaginadas hp = findViewById(R.id.scroll);
+                    if (hp != null) hp.irA(0);
+                    ocultarCapaQR();
+                })
+                .gesto(R.id.flQR, Gesto.PELLIZCAR, "Pellizca el código QR para ampliarlo (doble toque para volver)");
+        ((HojasPaginadas) findViewById(R.id.scroll)).pasosTutorial(t);
+        t.info(R.id.btnCalendario, "Apúntala en tu calendario para que no se te olvide").soloSiSeVe();
+        if (conResguardo) {
+            t.gesto(R.id.resguardo, Gesto.DESLIZAR_DER,
+                            "Rasga el resguardo por la línea perforada para cancelar la cita. Ahora es de práctica: no se cancela")
+                    .alLlegar(() -> { // el resguardo está al final: si no cabe todo, en la última hoja
+                        HojasPaginadas hp = findViewById(R.id.scroll);
+                        if (hp != null && hp.getHojas() > 1) hp.irA(hp.getHojas() - 1);
+                    })
+                    .conPista(v -> ((ResguardoRasgable) v).ensenarTijeras());
+        }
+        // los últimos: dejan el QR a pantalla completa y enseñan a quitarlo
+        if (codigoQR != null) {
+            t.sensor(Gesto.GIRAR, "Gira el móvil hacia la ventanilla para enseñar el QR en grande")
+                    .tocar(R.id.ivCapaQR, "Para quitarlo, tócalo o vuelve a inclinar el móvil hacia ti").soloSiSeVe();
+        }
+        return t;
     }
 
     private void cancelarCita(Cita cita) {
@@ -223,6 +264,7 @@ public class Justificante extends PantallaSecretaria {
                         escalaQR = Math.max(ESCALA_MIN, Math.min(escalaMaxima(), escalaQR * d.getScaleFactor()));
                         ivQR.setScaleX(escalaQR);
                         ivQR.setScaleY(escalaQR);
+                        if (escalaQR > 1.3f) avisarTutorial(Gesto.PELLIZCAR);
                         return true;
                     }
                 });
@@ -289,11 +331,13 @@ public class Justificante extends PantallaSecretaria {
             @Override
             public void alEnsenar() {
                 mostrarCapaQR();
+                avisarTutorial(Gesto.GIRAR);
             }
 
             @Override
             public void alVolver() {
                 ocultarCapaQR();
+                avisarTutorial(Gesto.TOCAR); // quitarlo inclinando cuenta igual que tocarlo
             }
         });
     }

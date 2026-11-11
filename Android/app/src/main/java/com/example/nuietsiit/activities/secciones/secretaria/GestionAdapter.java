@@ -69,17 +69,10 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
     private List<Gestion> gestiones = new ArrayList<>();
     private final OnGestionClick listener;
     @Nullable private final OnRasgar alRasgar;
-    private boolean ensenarTijeras; // la primera cita cancelable que se pinte enseña el gesto
 
     public GestionAdapter(OnGestionClick listener, @Nullable OnRasgar alRasgar) {
         this.listener = listener;
         this.alRasgar = alRasgar;
-    }
-
-    /** Las tijeras recorrerán la línea de la próxima cita cancelable que se pinte (una sola vez). */
-    public void ensenarTijeras() {
-        ensenarTijeras = true;
-        notifyDataSetChanged();
     }
 
     /** ¿Hay alguna cita con resguardo que rasgar? */
@@ -133,10 +126,6 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
                     return true;
                 })
                 : View.NO_ID;
-        if (rasgable && ensenarTijeras) {
-            ensenarTijeras = false;
-            h.resguardo.ensenarTijeras();
-        }
     }
 
     @Override
