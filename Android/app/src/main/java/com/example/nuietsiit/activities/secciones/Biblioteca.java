@@ -23,31 +23,31 @@ import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.secciones.biblioteca.PantallaBiblioteca;
 import com.example.nuietsiit.activities.secciones.biblioteca.ApuntarLibros;
 import com.example.nuietsiit.activities.secciones.biblioteca.BaldaDecoration;
 import com.example.nuietsiit.activities.secciones.biblioteca.DetalleLibro;
 import com.example.nuietsiit.activities.secciones.biblioteca.FiltroExplorar;
 import com.example.nuietsiit.activities.secciones.biblioteca.GravedadBalda;
-import com.example.nuietsiit.activities.secciones.biblioteca.SugerenciaEstudio;
-import com.example.nuietsiit.activities.secciones.biblioteca.ModoEstudio;
 import com.example.nuietsiit.activities.secciones.biblioteca.LibroAdapter;
-import com.example.nuietsiit.util.tutorial.Gesto;
-import com.example.nuietsiit.util.tutorial.Tutorial;
+import com.example.nuietsiit.activities.secciones.biblioteca.ModoEstudio;
 import com.example.nuietsiit.activities.secciones.biblioteca.PanelExplorar;
+import com.example.nuietsiit.activities.secciones.biblioteca.PantallaBiblioteca;
+import com.example.nuietsiit.activities.secciones.biblioteca.SugerenciaEstudio;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.AsignaturaCatalogo;
 import com.example.nuietsiit.data.modelo.Libro;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.BuscadorTolerante;
 import com.example.nuietsiit.util.ProximaClase;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
-import com.example.nuietsiit.ui.InclinarParaPasar;
-import com.example.nuietsiit.ui.PestanasPapel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -133,8 +133,10 @@ public class Biblioteca extends PantallaBiblioteca {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Biblioteca");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.titulo_biblioteca);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         // al volver del detalle, la portada regresa a su libro de la balda (el panel de ojear ya no está)
         setExitSharedElementCallback(new SharedElementCallback() {
@@ -195,28 +197,25 @@ public class Biblioteca extends PantallaBiblioteca {
                 }
             });
         }
-
     }
 
     @Override
     protected Tutorial crearTutorial() {
         return new Tutorial(this, "biblioteca", 2)
-                .info(R.id.pestanasVista, "Cada pestaña es una estantería: tus asignaturas, la de tu próxima clase y todo"
-                        + " el catálogo. En Explorar eliges grado, curso o planta")
-                .gesto(R.id.etBuscar, Gesto.ESCRIBIR, "Escribe un título o un autor, aunque sea con faltas: te entendemos igual")
-                .tocar(R.id.chipSugerencia, "¿Era esto lo que querías decir? Tócalo para buscarlo").soloSiSeVe()
-                .tocar(R.id.chipDisponibles, "Toca Disponibles para ver solo los libros que te puedes llevar")
-                .gesto(R.id.rvLibros, Gesto.DESLIZAR_IZQ, "Desliza las baldas a la izquierda para pasar de estante")
+                .info(R.id.pestanasVista, getString(R.string.tut_bib_pestanas))
+                .gesto(R.id.etBuscar, Gesto.ESCRIBIR, getString(R.string.tut_bib_buscar))
+                .tocar(R.id.chipSugerencia, getString(R.string.tut_bib_sugerencia)).soloSiSeVe()
+                .tocar(R.id.chipDisponibles, getString(R.string.tut_bib_disponibles))
+                .gesto(R.id.rvLibros, Gesto.DESLIZAR_IZQ, getString(R.string.tut_bib_deslizar))
                 .alLlegar(this::quitarFiltrosTutorial)
-                .gesto(R.id.rvLibros, Gesto.PELLIZCAR, "Pellizca la balda para ver más libros a la vez, o menos y más grandes")
-                .sensor(Gesto.INCLINAR, "Inclina el móvil a un lado para pasar de estante")
+                .gesto(R.id.rvLibros, Gesto.PELLIZCAR, getString(R.string.tut_bib_pellizcar))
+                .sensor(Gesto.INCLINAR, getString(R.string.tut_bib_inclinar))
                 .soloSi(() -> numEstantes() > 1 || vistas.size() > 1)
-                .gesto(R.id.ivPortada, Gesto.MANTENER, "Mantén el dedo en una portada para sacar el libro y ojearlo."
-                        + " Suelta y vuelve a su sitio")
-                .info(R.id.btnApuntar, "Escanea la estantería con la cámara: cada libro te dice si está libre o es de tu asignatura")
-                .info(R.id.btnModoEstudio, "Modo estudio: 25 minutos sin distracciones con el móvil sobre la mesa")
-                .sensor(Gesto.MESA, "Prueba: deja el móvil sobre la mesa, boca arriba. Al acabar el tutorial te propondrá estudiar")
-                .tocar(R.id.ivPortada, "Toca una portada (o súbela mientras la ojeas) para abrir el libro");
+                .gesto(R.id.ivPortada, Gesto.MANTENER, getString(R.string.tut_bib_mantener))
+                .info(R.id.btnApuntar, getString(R.string.tut_bib_apuntar))
+                .info(R.id.btnModoEstudio, getString(R.string.tut_bib_estudio))
+                .sensor(Gesto.MESA, getString(R.string.tut_bib_mesa))
+                .tocar(R.id.ivPortada, getString(R.string.tut_bib_tocar));
     }
 
     // tras practicar la búsqueda y Disponibles, la balda vuelve a enseñarlo todo para los demás pasos
@@ -429,7 +428,7 @@ public class Biblioteca extends PantallaBiblioteca {
 
         int estantes = numEstantes();
         tvContador.setText(estantes > 1
-                ? textoContador + " · estante " + (estante + 1) + " de " + estantes
+                ? getString(R.string.bib_contador_estantes_fmt, textoContador, estante + 1, estantes)
                 : textoContador);
         inclinar.actualizar();
     }
@@ -630,12 +629,12 @@ public class Biblioteca extends PantallaBiblioteca {
 
         // una sola fila: mis asignaturas, la próxima clase, todo y Explorar (cada asignatura suelta, en Explorar)
         pestanasVista.nuevaFila();
-        if (!misAsignaturas.isEmpty()) anadirVista(VISTA_MIS, "Mías", null, R.drawable.ic_nui_asignaturas);
+        if (!misAsignaturas.isEmpty()) anadirVista(VISTA_MIS, getString(R.string.bib_pestana_mias), null, R.drawable.ic_nui_asignaturas);
         if (proximaClase != null) {
             anadirVista(proximaClase.codigo, proximaClase.codigo, proximaClase.cuando, R.drawable.ic_nui_calendario);
         }
-        anadirVista(VISTA_TODOS, "Todos", null, R.drawable.ic_nui_biblioteca);
-        pestanasVista.anadir(EXPLORAR, "Explorar", null, android.R.drawable.ic_menu_sort_by_size, R.color.nui_cobalto);
+        anadirVista(VISTA_TODOS, getString(R.string.bib_pestana_todos), null, R.drawable.ic_nui_biblioteca);
+        pestanasVista.anadir(EXPLORAR, getString(R.string.bib_pestana_explorar), null, android.R.drawable.ic_menu_sort_by_size, R.color.nui_cobalto);
         pestanasVista.setOnElegir(clave -> {
             if (EXPLORAR.equals(clave)) {
                 // su marca depende de lo elegido en el panel, no del toque
@@ -720,7 +719,7 @@ public class Biblioteca extends PantallaBiblioteca {
     // con un filtro de Explorar, su pestaña dice qué se está viendo
     private void pintarExplorar() {
         boolean activo = filtro.activo();
-        pestanasVista.setTexto(EXPLORAR, activo ? filtro.resumen() : "Explorar");
+        pestanasVista.setTexto(EXPLORAR, activo ? filtro.resumen() : getString(R.string.bib_pestana_explorar));
         pestanasVista.marcar(activo ? EXPLORAR : vistaActual);
     }
 
@@ -796,8 +795,8 @@ public class Biblioteca extends PantallaBiblioteca {
 
     private String nombreDeLaVista(String vista) {
         if (filtro.activo()) return filtro.resumen();
-        if (VISTA_MIS.equals(vista)) return "Mis asignaturas";
-        if (vista == null || VISTA_TODOS.equals(vista)) return "Todo el catálogo";
+        if (VISTA_MIS.equals(vista)) return getString(R.string.bib_vista_mis_asignaturas);
+        if (vista == null || VISTA_TODOS.equals(vista)) return getString(R.string.bib_vista_todo_catalogo);
         return nombresAsignatura.getOrDefault(vista, vista);
     }
 
@@ -833,10 +832,10 @@ public class Biblioteca extends PantallaBiblioteca {
                     .thenComparing(l -> !basicos.contains(l.id))
                     .thenComparing(l -> !l.disponible()));
         }
-        String cuantos = PanelExplorar.textoLibros(visibles.size());
+        String cuantos = PanelExplorar.textoLibros(this, visibles.size());
         textoContador = ampliado
-                ? "No está en " + nombreDeLaVista(vista) + ". En todo el catálogo: " + cuantos
-                : nombreDeLaVista(vista) + " · " + cuantos;
+                ? getString(R.string.bib_contador_ampliado_fmt, nombreDeLaVista(vista), cuantos)
+                : getString(R.string.bib_contador_normal_fmt, nombreDeLaVista(vista), cuantos);
         // otro filtro u otra pestaña: se empieza por el primer estante
         librosVista = visibles;
         basicosVista = basicos;
@@ -844,11 +843,11 @@ public class Biblioteca extends PantallaBiblioteca {
         repartirEstantes(!pasandoEstante);
         tvMostrandoPara.setVisibility(r.mostrandoPara != null ? View.VISIBLE : View.GONE);
         if (r.mostrandoPara != null) {
-            tvMostrandoPara.setText("Mostrando resultados para «" + r.mostrandoPara + "»");
+            tvMostrandoPara.setText(getString(R.string.bib_mostrando_para_fmt, r.mostrandoPara));
         }
         chipSugerencia.setVisibility(r.sugerencia != null ? View.VISIBLE : View.GONE);
         if (r.sugerencia != null) {
-            chipSugerencia.setText("¿Quisiste decir «" + r.sugerencia + "»?");
+            chipSugerencia.setText(getString(R.string.bib_quisiste_decir_fmt, r.sugerencia));
             chipSugerencia.setTag(r.sugerencia);
         }
         tvVacio.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);

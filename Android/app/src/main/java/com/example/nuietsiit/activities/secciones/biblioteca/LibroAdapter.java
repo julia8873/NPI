@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.biblioteca;
 
+import android.content.Context;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.view.LayoutInflater;
@@ -65,14 +66,15 @@ public class LibroAdapter extends RecyclerView.Adapter<LibroAdapter.Holder> {
 
     // también en DetalleLibro y al ojear un libro
     public static void mostrarDisponibilidad(TextView tv, Libro libro) {
-        tv.setText(textoDisponibilidad(libro));
-        tv.setTextColor(tv.getContext().getColor(libro.disponible() ? R.color.nui_ok : R.color.nui_error));
+        Context ctx = tv.getContext();
+        tv.setText(textoDisponibilidad(ctx, libro));
+        tv.setTextColor(ctx.getColor(libro.disponible() ? R.color.nui_ok : R.color.nui_error));
     }
 
-    static String textoDisponibilidad(Libro libro) {
+    static String textoDisponibilidad(Context ctx, Libro libro) {
         return libro.disponible()
-                ? "Disponible · " + libro.ejemplaresDisponibles + " de " + libro.ejemplaresTotales + " ejemplares"
-                : "Sin ejemplares disponibles";
+                ? ctx.getString(R.string.libro_disponible_fmt, libro.ejemplaresDisponibles, libro.ejemplaresTotales)
+                : ctx.getString(R.string.libro_sin_ejemplares);
     }
 
     // la portada generada queda debajo hasta que llega la real
@@ -121,9 +123,11 @@ public class LibroAdapter extends RecyclerView.Adapter<LibroAdapter.Holder> {
     }
 
     private void mostrarBasica(Holder h, Libro l) {
+        Context ctx = h.itemView.getContext();
         boolean basica = basicos.contains(l.id);
         h.tvBasica.setVisibility(basica ? View.VISIBLE : View.GONE);
-        h.itemView.setContentDescription(l.titulo + (basica ? ". Bibliografía básica. " : ". ") + textoDisponibilidad(l));
+        String descBasica = basica ? " " + ctx.getString(R.string.libro_bibliografia_basica) + " " : " ";
+        h.itemView.setContentDescription(l.titulo + "." + descBasica + textoDisponibilidad(ctx, l));
     }
 
     @Override

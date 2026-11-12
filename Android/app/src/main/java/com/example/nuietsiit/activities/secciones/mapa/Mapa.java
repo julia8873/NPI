@@ -282,9 +282,9 @@ public class Mapa extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! En esta sección puedes consultar el mapa GPS del campus y los planos interactivos de cada planta de la ETSIIT, buscar aulas y calcular rutas.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(getString(R.string.mapa_asistente_virtual))
+                        .setMessage(getString(R.string.mapa_asistente_msg))
+                        .setPositiveButton(getString(R.string.mapa_entendido_exclamacion), null)
                         .show();
             });
         }
@@ -383,8 +383,8 @@ public class Mapa extends BaseActivity {
             alLlegarAEdificio(idLugar, hora, true);
             return;
         }
-        guiaRutaExterior.decir("Has llegado. Sigue hasta " + destino.interior);
-        LlegadaEdificio.seguirHasta(this, "la ETSIIT", m.getTitulo(),
+        guiaRutaExterior.decir(getString(R.string.mapa_has_llegado_sigue_hasta, destino.interior));
+        LlegadaEdificio.seguirHasta(this, getString(R.string.edificio_etsiit), m.getTitulo(),
                 () -> rutaInteriorDesdeEntrada(destino.interior));
     }
 
@@ -455,14 +455,13 @@ public class Mapa extends BaseActivity {
         TarjetaLugar.cerrarEn(findViewById(R.id.flContenedorMapa));
         if (!tienePermisoUbicacion()) {
             new AlertDialog.Builder(this)
-                    .setTitle("📍 ¿Te busco en el mapa?")
-                    .setMessage("Para llevarte a " + destino.etiqueta + " necesito saber dónde estás. "
-                            + "Solo se usa mientras tienes el mapa abierto.")
-                    .setPositiveButton("Usar mi ubicación", (d, w) -> {
+                    .setTitle(getString(R.string.mapa_te_busco_en_mapa))
+                    .setMessage(getString(R.string.mapa_para_llevarte_a, destino.etiqueta))
+                    .setPositiveButton(getString(R.string.mapa_usar_mi_ubicacion), (d, w) -> {
                         viajePendientePermiso = true;
                         solicitarPermisosUbicacion();
                     })
-                    .setNegativeButton("Elegir a mano", (d, w) -> preguntarDondeEstas(destino))
+                    .setNegativeButton(getString(R.string.mapa_elegir_a_mano), (d, w) -> preguntarDondeEstas(destino))
                     .setCancelable(false)
                     .show();
             return;
@@ -485,7 +484,7 @@ public class Mapa extends BaseActivity {
             preguntarDondeEstas(destino);
             return;
         }
-        if (esperado == 0) Toast.makeText(this, "📍 Buscando dónde estás…", Toast.LENGTH_SHORT).show();
+        if (esperado == 0) Toast.makeText(this, getString(R.string.mapa_buscando_donde_estas), Toast.LENGTH_SHORT).show();
         handler.postDelayed(() -> esperarPosicion(destino, esperado + PASO_GPS_VIAJE_MS), PASO_GPS_VIAJE_MS);
     }
 
@@ -524,10 +523,10 @@ public class Mapa extends BaseActivity {
         List<Runnable> opciones = new ArrayList<>();
         if (residencia != null && panelRutaExterior != null) {
             String desde = residencia;
-            textos.add("🏠 En la residencia");
+            textos.add(getString(R.string.mapa_en_la_residencia));
             opciones.add(() -> panelRutaExterior.abrirEntre(desde, destino.idEdificio));
         }
-        textos.add("🎓 Ya estoy en la ETSIIT (escanear QR)");
+        textos.add(getString(R.string.mapa_ya_estoy_en_etsiit));
         opciones.add(() -> {
             Marcador m = destino.interior != null ? marcadorQueContiene(destino.interior) : null;
             if (m != null) {
@@ -541,18 +540,18 @@ public class Mapa extends BaseActivity {
             }
         });
         if (panelRutaExterior != null) {
-            textos.add("📍 En otro sitio (mantén pulsado en el mapa)");
+            textos.add(getString(R.string.mapa_en_otro_sitio_mantener));
             opciones.add(() -> {
                 sinPedirUbicacion = true;
                 panelRutaExterior.abrirHacia(destino.idEdificio);
                 sinPedirUbicacion = false;
-                Toast.makeText(this, "Mantén pulsado en el mapa el sitio donde estás", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.mapa_mantén_pulsado_sitio), Toast.LENGTH_LONG).show();
             });
         }
         new AlertDialog.Builder(this)
-                .setTitle("No te encuentro · ¿dónde estás?")
+                .setTitle(getString(R.string.mapa_no_te_encuentro_donde_estas))
                 .setItems(textos.toArray(new String[0]), (d, i) -> opciones.get(i).run())
-                .setNegativeButton("Cancelar", (d, w) -> viaje = null)
+                .setNegativeButton(getString(R.string.cancelar), (d, w) -> viaje = null)
                 .setOnCancelListener(d -> viaje = null) // tocar fuera o atrás también lo descarta
                 .show();
     }
@@ -695,7 +694,7 @@ public class Mapa extends BaseActivity {
 
     private void mostrarBurbujaInfo(View vistaIcono, Marcador marcador) {
         float d = getResources().getDisplayMetrics().density;
-        vistaIcono.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK);
+        vistaIcono.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
 
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
@@ -709,13 +708,13 @@ public class Mapa extends BaseActivity {
         tarjeta.setElevation(8f);
 
         TextView tvMensaje = new TextView(this);
-        tvMensaje.setText("¿Te llevo a\n" + marcador.getTitulo() + "?");
+        tvMensaje.setText(getString(R.string.mapa_te_llevo_a_pregunta, marcador.getTitulo()));
         tvMensaje.setTextColor(Color.BLACK);
         tvMensaje.setTextSize(13f);
         tarjeta.addView(tvMensaje);
 
         MaterialButton btnIniciar = new MaterialButton(this);
-        btnIniciar.setText("Llévame");
+        btnIniciar.setText(getString(R.string.mapa_llevame));
         btnIniciar.setTextSize(12f);
         btnIniciar.setAllCaps(false);
         btnIniciar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF8C42")));

@@ -15,12 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
@@ -58,12 +58,22 @@ public class MisGestiones extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Mis gestiones");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.gestiones_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         db = new SecretariaDB(DBHelper.getInstance(this));
         correoUsuario = SesionUtil.correo(getIntent());
-        RecienteUtil.guardar(this, MisGestiones.class, "Mis Gestiones", "Citas y solicitudes", null, null, 5);
+        RecienteUtil.guardar(
+                this,
+                MisGestiones.class,
+                getString(R.string.gestiones_titulo),
+                getString(R.string.gestiones_reciente_subtitulo),
+                null,
+                null,
+                5
+        );
 
         citasAdapter = new GestionAdapter(this::abrirJustificante, this::cancelarCita);
         solicitudesAdapter = new GestionAdapter(this::abrirJustificante, null);
@@ -75,7 +85,9 @@ public class MisGestiones extends PantallaSecretaria {
         vp.setUserInputEnabled(false);
         TabLayout tabs = findViewById(R.id.tabs);
         new TabLayoutMediator(tabs, vp,
-                (tab, pos) -> tab.setText(pos == PAGINA_CITAS ? "Citas" : "Solicitudes")).attach();
+                (tab, pos) -> tab.setText(pos == PAGINA_CITAS
+                        ? R.string.gestiones_tab_citas
+                        : R.string.gestiones_tab_solicitudes)).attach();
         // como el arrastre es para rasgar, de pestaña también se cambia inclinando el móvil (como los pasos)
         inclinar = new InclinarParaPasar(vp, sentido -> {
             int nueva = vp.getCurrentItem() + sentido;
@@ -128,16 +140,15 @@ public class MisGestiones extends PantallaSecretaria {
                         quitarPractica();
                     }
                 })
-                .info(0, "Para que puedas practicar te hemos puesto una cita y una solicitud de prueba. Se borran al acabar")
+                .info(0, getString(R.string.gestiones_tut_practica_info))
                 .soloSi(() -> DatosPractica.hay(this))
-                .gesto(R.id.resguardo, Gesto.DESLIZAR_DER,
-                        "Rasga el resguardo por la línea perforada para cancelar la cita. Ahora es de práctica: no se cancela")
+                .gesto(R.id.resguardo, Gesto.DESLIZAR_DER, getString(R.string.gestiones_tut_rasgar))
                 .conPista(v -> ((ResguardoRasgable) v).ensenarTijeras())
                 .soloSiSeVe()
-                .tocar(R.id.tabs, "Toca una pestaña para cambiar entre tus citas y tus solicitudes")
-                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a un lado o al otro para cambiar de pestaña")
+                .tocar(R.id.tabs, getString(R.string.gestiones_tut_tabs))
+                .sensor(Gesto.INCLINAR, getString(R.string.gestiones_tut_inclinar))
                 .soloSi(() -> inclinar.escuchando())
-                .tocar(R.id.ficha, "Toca una gestión para ver su justificante con el QR").soloSiSeVe();
+                .tocar(R.id.ficha, getString(R.string.gestiones_tut_ficha)).soloSiSeVe();
     }
 
     private void quitarPractica() {
@@ -160,8 +171,8 @@ public class MisGestiones extends PantallaSecretaria {
         boolean vacia = (pagina == PAGINA_CITAS ? citasAdapter : solicitudesAdapter).getItemCount() == 0;
         TextView tvVacio = paginas[pagina].findViewById(R.id.tvVacio);
         tvVacio.setText(pagina == PAGINA_CITAS
-                ? "No tienes citas.\nPídela con «Pedir cita» en Secretaría."
-                : "Todavía no has enviado ninguna solicitud.");
+                ? R.string.gestiones_vacio_citas
+                : R.string.gestiones_vacio_solicitudes);
         tvVacio.setVisibility(vacia ? View.VISIBLE : View.GONE);
     }
 
@@ -181,7 +192,7 @@ public class MisGestiones extends PantallaSecretaria {
         // la lista pudo quedarse abierta hasta pasada la hora de la cita
         Cita cita = db.getCita(g.id);
         if (cita == null || !cita.esFutura()) {
-            Toast.makeText(this, "Esta cita ya ha pasado y no se puede cancelar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.gestiones_toast_cita_pasada, Toast.LENGTH_SHORT).show();
             cargarCitas();
             return;
         }
@@ -191,14 +202,18 @@ public class MisGestiones extends PantallaSecretaria {
         }
         citasAdapter.quitar(posicion);
         actualizarVacio(PAGINA_CITAS);
-        AvisoDeshacer.mostrar(findViewById(R.id.vpGestiones), "Cita cancelada",
-                g.codigo + " · Si la añadiste a tu calendario, bórrala también.",
-                DURACION_DESHACER, () -> deshacerCancelacion(g.id));
+        AvisoDeshacer.mostrar(
+                findViewById(R.id.vpGestiones),
+                getString(R.string.just_aviso_cancelada_etiqueta),
+                getString(R.string.just_aviso_cancelada_texto_fmt, g.codigo),
+                DURACION_DESHACER,
+                () -> deshacerCancelacion(g.id)
+        );
     }
 
     private void deshacerCancelacion(int idCita) {
         if (!db.recuperarCita(correoUsuario, idCita)) {
-            Toast.makeText(this, "Ya no se puede recuperar la cita", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.just_toast_no_recuperable, Toast.LENGTH_SHORT).show();
             return;
         }
         cargarCitas();

@@ -100,8 +100,8 @@ public final class InicioMapa {
             p.edit().putBoolean(CLAVE_EXPLICADO, true).apply();
         }
         ((TextView) vista.findViewById(R.id.tvInicioUbicacion)).setText(conUbicacion
-                ? "📍 Te busco con el GPS al elegir"
-                : "📍 Al elegir te pediré la ubicación para guiarte");
+                ? act.getString(R.string.mapa_te_busco_gps)
+                : act.getString(R.string.mapa_pedire_ubicacion));
 
         pintarClase(vista, clase, ahora, titulos, ir);
         pintarRecientes(act, vista, ir);
@@ -116,10 +116,11 @@ public final class InicioMapa {
         int faltan = LlegadaEdificio.minutosHasta(clase.horaInicio, ahora);
         if (!clase.enCurso && faltan > MARGEN_CLASE_MIN) return;
 
+        Context ctx = vista.getContext();
         vista.findViewById(R.id.cardInicioClase).setVisibility(View.VISIBLE);
-        ((TextView) vista.findViewById(R.id.tvInicioClaseTitulo)).setText("🎓 Tu clase de " + clase.nombreAsignatura);
-        String cuando = clase.enCurso ? "ya ha empezado (" + clase.horaInicio + ")"
-                : "empieza a las " + clase.horaInicio + " (en " + faltan + " min)";
+        ((TextView) vista.findViewById(R.id.tvInicioClaseTitulo)).setText(ctx.getString(R.string.mapa_tu_clase_de, clase.nombreAsignatura));
+        String cuando = clase.enCurso ? ctx.getString(R.string.mapa_ya_ha_empezado, clase.horaInicio)
+                : ctx.getString(R.string.mapa_empieza_a_las, clase.horaInicio, faltan);
         ((TextView) vista.findViewById(R.id.tvInicioClaseDetalle))
                 .setText((clase.aula != null ? clase.aula + " · " : "") + cuando);
 
@@ -127,7 +128,7 @@ public final class InicioMapa {
         String interior = clase.aula != null && ProximaClase.ETSIIT.equals(clase.idEdificio)
                 && hayMarcador(titulos, clase.aula) ? clase.aula : null;
         DestinoViaje destino = new DestinoViaje(clase.idEdificio, interior,
-                "🎓 Clase de " + clase.codigoAsignatura, clase.horaInicio);
+                ctx.getString(R.string.mapa_clase_de, clase.codigoAsignatura), clase.horaInicio);
         vista.findViewById(R.id.btnInicioClaseLlevame).setOnClickListener(v -> ir.accept(destino));
     }
 
@@ -185,10 +186,10 @@ public final class InicioMapa {
             if (t.toLowerCase(Locale.ROOT).contains("aula")) aulas.add(t);
         }
         new AlertDialog.Builder(ctx)
-                .setTitle("¿A qué aula vas?")
+                .setTitle(ctx.getString(R.string.mapa_a_que_aula_vas))
                 .setItems(aulas.toArray(new String[0]), (d, i) ->
                         ir.accept(new DestinoViaje(ProximaClase.ETSIIT, aulas.get(i), "🚪 " + aulas.get(i), null)))
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(ctx.getString(R.string.cancelar), null)
                 .show();
     }
 

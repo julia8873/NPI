@@ -28,6 +28,7 @@ public class BaldaDecoration extends RecyclerView.ItemDecoration {
         sombra = (int) (6 * d);
         hueco = (int) (16 * d);
         altoFila = (int) (220 * d);
+
         madera.setColor(contexto.getColor(R.color.nui_madera));
         cantoOscuro.setColor(contexto.getColor(R.color.nui_madera_oscura));
         pinturaSombra.setColor(contexto.getColor(R.color.nui_sombra_libro)); // sombra dura, sin difuminar

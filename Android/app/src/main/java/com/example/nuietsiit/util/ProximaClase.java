@@ -1,8 +1,15 @@
 package com.example.nuietsiit.util;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Cuál es la siguiente clase de un horario semanal y cómo decirlo en pocas palabras ("hoy 10:30").
@@ -33,8 +40,7 @@ public final class ProximaClase {
         this.cuando = cuando;
     }
 
-    // la clase en curso cuenta como la próxima; null si el horario está vacío
-    public static ProximaClase de(List<Sesion> sesiones, LocalDateTime ahora) {
+    private static Sesion buscarMejor(List<Sesion> sesiones, LocalDateTime ahora, int[] outDiasMejor) {
         int hoy = ahora.getDayOfWeek().getValue();
         LocalTime hora = ahora.toLocalTime();
         Sesion mejor = null;
@@ -47,12 +53,44 @@ public final class ProximaClase {
                 diasMejor = dias;
             }
         }
+        outDiasMejor[0] = diasMejor;
+        return mejor;
+    }
+
+    // Versión localizada usando Context y Locale del dispositivo
+    public static ProximaClase de(Context ctx, List<Sesion> sesiones, LocalDateTime ahora) {
+        int[] diasMejor = new int[1];
+        Sesion mejor = buscarMejor(sesiones, ahora, diasMejor);
         if (mejor == null) return null;
 
+        LocalTime hora = ahora.toLocalTime();
         String cuando;
-        if (diasMejor == 0 && !hora.isBefore(mejor.inicio)) cuando = "ahora";
-        else if (diasMejor == 0) cuando = "hoy " + mejor.inicio;
-        else if (diasMejor == 1) cuando = "mañana " + mejor.inicio;
+        if (diasMejor[0] == 0 && !hora.isBefore(mejor.inicio)) {
+            cuando = ctx.getString(R.string.proxima_clase_ahora);
+        } else if (diasMejor[0] == 0) {
+            cuando = ctx.getString(R.string.proxima_clase_hoy_fmt, mejor.inicio.toString());
+        } else if (diasMejor[0] == 1) {
+            cuando = ctx.getString(R.string.proxima_clase_manana_fmt, mejor.inicio.toString());
+        } else {
+            String diaCorto = DayOfWeek.of(mejor.diaSemana)
+                    .getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                    .replace(".", "");
+            cuando = ctx.getString(R.string.proxima_clase_dia_fmt, diaCorto, mejor.inicio.toString());
+        }
+        return new ProximaClase(mejor.codigo, cuando);
+    }
+
+    // Versión Java puro (sin Context, útil para pruebas unitarias JUnit)
+    public static ProximaClase de(List<Sesion> sesiones, LocalDateTime ahora) {
+        int[] diasMejor = new int[1];
+        Sesion mejor = buscarMejor(sesiones, ahora, diasMejor);
+        if (mejor == null) return null;
+
+        LocalTime hora = ahora.toLocalTime();
+        String cuando;
+        if (diasMejor[0] == 0 && !hora.isBefore(mejor.inicio)) cuando = "ahora";
+        else if (diasMejor[0] == 0) cuando = "hoy " + mejor.inicio;
+        else if (diasMejor[0] == 1) cuando = "mañana " + mejor.inicio;
         else cuando = DIAS[mejor.diaSemana - 1] + " " + mejor.inicio;
         return new ProximaClase(mejor.codigo, cuando);
     }

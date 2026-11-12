@@ -8,19 +8,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.ui.HojasPaginadas;
-import com.example.nuietsiit.util.tutorial.Gesto;
-import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.HojasPaginadas;
 import com.example.nuietsiit.util.RecienteUtil;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.time.LocalDate;
@@ -39,8 +36,10 @@ public class DetalleTramite extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Trámite");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.det_tramite_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
         // int desde Secretaría; String desde "Página reciente" (RecienteUtil solo guarda Strings)
@@ -49,11 +48,19 @@ public class DetalleTramite extends PantallaSecretaria {
         if (idReciente != null) idProc = Integer.parseInt(idReciente);
         Tramite tramite = db.getTramite(idProc);
         if (tramite == null) {
-            Toast.makeText(this, "Trámite no encontrado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.det_tramite_no_encontrado, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        RecienteUtil.guardar(this, DetalleTramite.class, "Trámite: " + tramite.nombre, "Secretaría ETSIIT", "idProcedimiento", String.valueOf(tramite.id), 5);
+        RecienteUtil.guardar(
+                this,
+                DetalleTramite.class,
+                getString(R.string.det_tramite_reciente_fmt, tramite.nombre),
+                getString(R.string.det_tramite_reciente_subtitulo),
+                "idProcedimiento",
+                String.valueOf(tramite.id),
+                5
+        );
         List<Paso> pasos = db.getPasos(tramite.id);
         List<Documento> documentos = db.getDocumentos(tramite.id);
 
@@ -69,7 +76,7 @@ public class DetalleTramite extends PantallaSecretaria {
 
         String correoUsuario = getIntent().getStringExtra("CORREO");
         View btnPasos = findViewById(R.id.btnPasos);
-        ((TextView) findViewById(R.id.tvPasos)).setText("Cómo se hace, paso a paso (" + pasos.size() + ")");
+        ((TextView) findViewById(R.id.tvPasos)).setText(getString(R.string.det_tramite_pasos_fmt, pasos.size()));
         btnPasos.setVisibility(pasos.isEmpty() ? View.GONE : View.VISIBLE);
         btnPasos.setOnClickListener(v -> startActivity(new Intent(this, PasosTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
@@ -85,12 +92,14 @@ public class DetalleTramite extends PantallaSecretaria {
         Button btnSiguiente = findViewById(R.id.btnSiguiente);
         Button btnAlternativa = findViewById(R.id.btnAlternativa);
         if (tramite.sePuedeSolicitar()) {
-            btnSiguiente.setText("Empezar solicitud");
+            btnSiguiente.setText(R.string.det_tramite_btn_empezar);
             btnSiguiente.setOnClickListener(v -> startActivity(solicitar));
-            btnAlternativa.setText("o pide cita para hacerlo en ventanilla");
+            btnAlternativa.setText(R.string.det_tramite_btn_alternativa);
             btnAlternativa.setOnClickListener(v -> startActivity(pedirCita));
         } else {
-            btnSiguiente.setText(tramite.solicitudOnline ? "Pedir cita para consultarlo" : "Pedir cita en ventanilla");
+            btnSiguiente.setText(tramite.solicitudOnline
+                    ? R.string.det_tramite_btn_cita_consultar
+                    : R.string.det_tramite_btn_cita_ventanilla);
             btnSiguiente.setOnClickListener(v -> startActivity(pedirCita));
             btnAlternativa.setVisibility(View.GONE);
         }
@@ -104,11 +113,11 @@ public class DetalleTramite extends PantallaSecretaria {
     protected Tutorial crearTutorial() {
         if (findViewById(R.id.btnSiguiente) == null) return null;
         Tutorial t = new Tutorial(this, "detalle_tramite", 1)
-                .info(R.id.tarjetaDocumentos, "Estos son los documentos que vas a necesitar: tenlos a mano").soloSiSeVe()
-                .info(R.id.btnPasos, "Aquí ves cómo se hace, paso a paso").soloSiSeVe();
+                .info(R.id.tarjetaDocumentos, getString(R.string.det_tramite_tut_documentos)).soloSiSeVe()
+                .info(R.id.btnPasos, getString(R.string.det_tramite_tut_pasos)).soloSiSeVe();
         ((HojasPaginadas) findViewById(R.id.hojas)).pasosTutorial(t);
-        return t.info(R.id.btnAlternativa, "Si prefieres hacerlo en persona, pide cita en la ventanilla").soloSiSeVe()
-                .tocar(R.id.btnSiguiente, "Cuando lo tengas claro, empieza aquí");
+        return t.info(R.id.btnAlternativa, getString(R.string.det_tramite_tut_alternativa)).soloSiSeVe()
+                .tocar(R.id.btnSiguiente, getString(R.string.det_tramite_tut_siguiente));
     }
 
     // oculta la tarjeta si el campo es opcional y no existe
@@ -122,12 +131,12 @@ public class DetalleTramite extends PantallaSecretaria {
     private void mostrarDocumentos(List<Documento> documentos) {
         LinearLayout lista = findViewById(R.id.llDocumentos);
         if (documentos.isEmpty()) {
-            lista.addView(textoDocumento("No hace falta aportar documentos.", false));
+            lista.addView(textoDocumento(getString(R.string.det_tramite_sin_documentos), false));
             return;
         }
         for (Documento d : documentos) {
             TextView nombre = textoDocumento(d.nombre
-                    + (d.obligatorio ? "" : "  · opcional"), true);
+                    + (d.obligatorio ? "" : getString(R.string.det_tramite_doc_opcional_sufijo)), true);
             lista.addView(nombre);
             if (d.descripcion != null && !d.descripcion.isEmpty()) {
                 TextView detalle = textoDocumento(d.descripcion, false);
@@ -152,13 +161,13 @@ public class DetalleTramite extends PantallaSecretaria {
     // null si se puede solicitar
     private String motivoNoSolicitable(Tramite t) {
         if (t.sePuedeSolicitar()) return null;
-        if (!t.solicitudOnline) return "Este trámite solo se hace en ventanilla: pide cita.";
+        if (!t.solicitudOnline) return getString(R.string.det_tramite_motivo_solo_ventanilla);
         if (t.plazoAbierto() || !t.tienePlazo()) return null;
         LocalDate inicio = LocalDate.parse(t.plazoInicio);
         if (LocalDate.now().isBefore(inicio)) {
-            return "El plazo se abre el " + inicio.format(FORMATO) + ".";
+            return getString(R.string.det_tramite_motivo_plazo_abre_fmt, inicio.format(FORMATO));
         }
-        return "El plazo terminó el " + LocalDate.parse(t.plazoFin).format(FORMATO) + ".";
+        return getString(R.string.det_tramite_motivo_plazo_termino_fmt, LocalDate.parse(t.plazoFin).format(FORMATO));
     }
 
     @Override

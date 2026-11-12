@@ -82,20 +82,20 @@ public final class TarjetaLugar {
 
         boolean conPlanos = ProximaClase.ETSIIT.equals(lugar.id) || ProximaClase.AUXILIAR.equals(lugar.id);
         if (posicion != null && estasEn(lugar, posicion)) {
-            tvPregunta.setText("Ya estás aquí");
+            tvPregunta.setText(act.getString(R.string.mapa_ya_estas_aqui));
             if (conPlanos) {
-                tvTiempo.setText("¿A qué sitio de dentro vas?");
-                btnLlevame.setText("Elegir sitio de dentro");
+                tvTiempo.setText(act.getString(R.string.mapa_a_que_sitio_dentro));
+                btnLlevame.setText(act.getString(R.string.mapa_elegir_sitio_dentro));
                 btnLlevame.setOnClickListener(v -> { tarjeta.cerrar(); acciones.dentro(lugar.id); });
             } else {
-                tvTiempo.setText("Estás en " + lugar.corto);
+                tvTiempo.setText(act.getString(R.string.mapa_estas_en, lugar.corto));
                 btnLlevame.setVisibility(View.GONE);
             }
         } else {
-            tvPregunta.setText("¿Te llevo?");
+            tvPregunta.setText(act.getString(R.string.mapa_te_llevo));
             tvTiempo.setText(posicion != null
-                    ? tiempo(new PlanificadorRuta(red).planificar(posicion, lugar, ahora))
-                    : "📍 Sin ubicación: te lo calculo al abrir la ruta");
+                    ? tiempo(act, new PlanificadorRuta(act, red).planificar(posicion, lugar, ahora))
+                    : act.getString(R.string.mapa_sin_ubicacion_calculo));
             btnLlevame.setOnClickListener(v -> { tarjeta.cerrar(); acciones.llevame(lugar.id); });
         }
         if (ProximaClase.ETSIIT.equals(lugar.id)) {
@@ -126,14 +126,15 @@ public final class TarjetaLugar {
     }
 
     /** "🚶 A 12 min a pie" / "🚌 15 min en bus · sal a las 8:33" / "Está a 4,2 km". */
-    static String tiempo(PlanRuta plan) {
+    static String tiempo(AppCompatActivity act, PlanRuta plan) {
+        if (act == null || plan == null) return "";
         switch (plan.tipo) {
             case A_PIE:
-                return "🚶 A " + plan.minutosTotales() + " min a pie";
+                return act.getString(R.string.mapa_a_min_pie, (int) plan.minutosTotales());
             case BUS:
-                return "🚌 " + plan.minutosTotales() + " min en bus · sal a las " + PlanRuta.hora(plan.salida);
+                return act.getString(R.string.mapa_min_bus_sal_a_las, (int) plan.minutosTotales(), PlanRuta.hora(plan.salida));
             default:
-                return String.format(Locale.getDefault(), "Está a %.1f km de ti", plan.metrosRecta / 1000);
+                return act.getString(R.string.mapa_esta_a_km_de_ti, plan.metrosRecta / 1000);
         }
     }
 }

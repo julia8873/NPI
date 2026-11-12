@@ -14,11 +14,11 @@ import com.example.nuietsiit.R;
 
 /**
  * Repite una tesela para rellenar la vista (design system NUI, ver NPI/DisenoNUI/DESIGN.md).
- * - Por defecto la tesela es @drawable/nui_azulejo; con app:tesela="@drawable/nui_arqueria" hace la arquería.
- * - Alto pequeño (cenefa, zócalo, arquería) → una fila; la tesela toma el alto de la vista.
- * - Alto grande → trama de fondo con teselas de 48dp de alto. Bajar android:alpha (0.08–0.15) si va detrás de texto.
+ * Por defecto la tesela es @drawable/nui_azulejo; con app:tesela="@drawable/nui_arqueria" hace la arquería.
+ * Alto pequeño (cenefa, zócalo, arquería) → una fila; la tesela toma el alto de la vista.
+ * Alto grande → trama de fondo con teselas de 48dp de alto. Bajar android:alpha (0.08–0.15) si va detrás de texto.
  * Uso: <com.example.nuietsiit.ui.TramaAzulejo android:layout_width="match_parent"
- *          android:layout_height="@dimen/nui_zocalo" />
+ *           android:layout_height="@dimen/nui_zocalo" />
  */
 public class TramaAzulejo extends View {
 

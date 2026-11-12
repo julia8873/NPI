@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.AsignaturaCatalogo;
+import com.example.nuietsiit.ui.PestanasPapel;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
-import com.example.nuietsiit.ui.PestanasPapel;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.function.ToIntFunction;
  */
 public class PanelExplorar {
 
+    private final Context ctx;
     private final BottomSheetDialog dialogo;
     private final FiltroExplorar borrador;
     private final List<AsignaturaCatalogo> catalogo;
@@ -37,6 +38,7 @@ public class PanelExplorar {
 
     public PanelExplorar(Context ctx, FiltroExplorar actual, List<AsignaturaCatalogo> catalogo, List<String> plantas,
                          ToIntFunction<FiltroExplorar> contarLibros, Consumer<FiltroExplorar> alAplicar) {
+        this.ctx = ctx;
         this.borrador = actual.copia();
         this.catalogo = catalogo;
         this.plantas = plantas;
@@ -137,7 +139,7 @@ public class PanelExplorar {
             int libros = contarLibros.applyAsInt(conEsta);
             if (libros == 0) continue;
             nuevaFilaSiLlena(listaAsignaturas);
-            listaAsignaturas.anadir(a.getKey(), a.getValue(), textoLibros(libros), 0, 0).setOnClickListener(v -> {
+            listaAsignaturas.anadir(a.getKey(), a.getValue(), textoLibros(ctx, libros), 0, 0).setOnClickListener(v -> {
                 v.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK);
                 borrador.asignatura = a.getKey();
                 aplicar();
@@ -146,7 +148,8 @@ public class PanelExplorar {
         listaAsignaturas.completarFila(2);
         ocultarSiVacio(listaAsignaturas);
 
-        btnVer.setText("Ver " + textoLibros(contarLibros.applyAsInt(borrador)));
+        String cantidadLibros = textoLibros(ctx, contarLibros.applyAsInt(borrador));
+        btnVer.setText(ctx.getString(R.string.btn_ver_libros_fmt, cantidadLibros));
     }
 
     // porFila 0 = todas en una fila; si no, filas de porFila pestañas
@@ -176,7 +179,7 @@ public class PanelExplorar {
         if (libros == 0 && !marcada) return;
 
         nuevaFilaSiLlena(grupo);
-        View pestana = grupo.anadir(texto, texto, textoLibros(libros), 0, 0);
+        View pestana = grupo.anadir(texto, texto, textoLibros(ctx, libros), 0, 0);
         pestana.setSelected(marcada);
         // tocar la elegida la quita (los filtros de Explorar son opcionales)
         pestana.setOnClickListener(v -> {
@@ -187,7 +190,9 @@ public class PanelExplorar {
         });
     }
 
-    public static String textoLibros(int libros) {
-        return libros == 1 ? "1 libro" : libros + " libros";
+    public static String textoLibros(Context ctx, int libros) {
+        return libros == 1
+                ? ctx.getString(R.string.un_libro)
+                : ctx.getString(R.string.varios_libros_fmt, libros);
     }
 }

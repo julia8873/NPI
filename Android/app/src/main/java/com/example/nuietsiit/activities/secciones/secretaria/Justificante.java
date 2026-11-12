@@ -17,21 +17,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
-import com.example.nuietsiit.util.CalendarioUtil;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.HojasPaginadas;
+import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.DetectorEnsenar;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.GeneradorQR;
@@ -39,7 +38,6 @@ import com.example.nuietsiit.util.SesionUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
-
 
 /**
  * Justificante para enseñar en ventanilla: código, resumen y QR grande.
@@ -81,8 +79,10 @@ public class Justificante extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Justificante");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.just_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         correoUsuario = SesionUtil.correo(getIntent());
 
@@ -95,7 +95,7 @@ public class Justificante extends PantallaSecretaria {
         } else if (solicitud != null && correoUsuario.equals(solicitud.correoUsuario)) {
             mostrarSolicitud(solicitud);
         } else {
-            Toast.makeText(this, "Justificante no encontrado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.just_no_encontrado, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -112,9 +112,9 @@ public class Justificante extends PantallaSecretaria {
         TextView tvEstado = findViewById(R.id.tvEstado);
         boolean vigente = false;
         if (Cita.CANCELADA.equals(cita.estado)) {
-            mostrarEstado(tvEstado, "Cancelada", R.color.nui_error);
+            mostrarEstado(tvEstado, getString(R.string.just_estado_cancelada), R.color.nui_error);
         } else if (!cita.esFutura()) {
-            mostrarEstado(tvEstado, "Pasada", R.color.nui_apagado);
+            mostrarEstado(tvEstado, getString(R.string.just_estado_pasada), R.color.nui_apagado);
         } else {
             mostrarBotonCalendario(cita);
             prepararResguardo(cita);
@@ -125,7 +125,7 @@ public class Justificante extends PantallaSecretaria {
         // a pantalla completa no se vería el aviso de cancelada o pasada y parecería un QR válido
         if (!vigente) {
             codigoQR = null;
-            ((TextView) findViewById(R.id.tvAyudaQR)).setText("Pellizca para ampliarlo; doble toque para volver.");
+            ((TextView) findViewById(R.id.tvAyudaQR)).setText(R.string.just_ayuda_qr_solo_zoom);
         }
     }
 
@@ -156,11 +156,11 @@ public class Justificante extends PantallaSecretaria {
         btn.setVisibility(View.VISIBLE);
         btn.setOnClickListener(v -> {
             boolean abierto = CalendarioUtil.anadirEvento(this,
-                    "Cita Secretaría ETSIIT: " + cita.motivo(),
-                    "Justificante " + cita.codigo() + ". Enseña el QR de la app en la ventanilla.",
-                    "Secretaría ETSIIT",
+                    getString(R.string.just_cal_titulo_fmt, cita.motivo()),
+                    getString(R.string.just_cal_desc_fmt, cita.codigo()),
+                    getString(R.string.just_cal_ubicacion),
                     cita.fechaHora(), cita.fechaHora().plusMinutes(DURACION_CITA_MIN));
-            if (!abierto) Toast.makeText(this, "No hay ninguna app de calendario", Toast.LENGTH_SHORT).show();
+            if (!abierto) Toast.makeText(this, R.string.just_toast_sin_calendario, Toast.LENGTH_SHORT).show();
         });
         // viene de CitaPrevia tras cambiar una cita que ya existía
         if (getIntent().getBooleanExtra("citaCambiada", false)) {
@@ -181,8 +181,8 @@ public class Justificante extends PantallaSecretaria {
         });
         // TalkBack: el resguardo se anuncia y se cancela con una acción, sin gesto
         resguardo.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        resguardo.setContentDescription("Resguardo de la cita. Rásgalo por la línea perforada para cancelarla.");
-        ViewCompat.addAccessibilityAction(resguardo, "Cancelar cita", (v, a) -> {
+        resguardo.setContentDescription(getString(R.string.just_desc_resguardo));
+        ViewCompat.addAccessibilityAction(resguardo, getString(R.string.just_accion_cancelar_cita), (v, a) -> {
             resguardo.completar();
             return true;
         });
@@ -201,12 +201,11 @@ public class Justificante extends PantallaSecretaria {
                     if (hp != null) hp.irA(0);
                     ocultarCapaQR();
                 })
-                .gesto(R.id.flQR, Gesto.PELLIZCAR, "Pellizca el código QR para ampliarlo (doble toque para volver)");
+                .gesto(R.id.flQR, Gesto.PELLIZCAR, getString(R.string.just_tut_pellizcar));
         ((HojasPaginadas) findViewById(R.id.scroll)).pasosTutorial(t);
-        t.info(R.id.btnCalendario, "Apúntala en tu calendario para que no se te olvide").soloSiSeVe();
+        t.info(R.id.btnCalendario, getString(R.string.just_tut_calendario)).soloSiSeVe();
         if (conResguardo) {
-            t.gesto(R.id.resguardo, Gesto.DESLIZAR_DER,
-                            "Rasga el resguardo por la línea perforada para cancelar la cita. Ahora es de práctica: no se cancela")
+            t.gesto(R.id.resguardo, Gesto.DESLIZAR_DER, getString(R.string.just_tut_rasgar))
                     .alLlegar(() -> { // el resguardo está al final: si no cabe todo, en la última hoja
                         HojasPaginadas hp = findViewById(R.id.scroll);
                         if (hp != null && hp.getHojas() > 1) hp.irA(hp.getHojas() - 1);
@@ -215,8 +214,8 @@ public class Justificante extends PantallaSecretaria {
         }
         // los últimos: dejan el QR a pantalla completa y enseñan a quitarlo
         if (codigoQR != null) {
-            t.sensor(Gesto.GIRAR, "Gira el móvil hacia la ventanilla para enseñar el QR en grande")
-                    .tocar(R.id.ivCapaQR, "Para quitarlo, tócalo o vuelve a inclinar el móvil hacia ti").soloSiSeVe();
+            t.sensor(Gesto.GIRAR, getString(R.string.just_tut_girar))
+                    .tocar(R.id.ivCapaQR, getString(R.string.just_tut_quitar_capa)).soloSiSeVe();
         }
         return t;
     }
@@ -224,24 +223,28 @@ public class Justificante extends PantallaSecretaria {
     private void cancelarCita(Cita cita) {
         Cita actual = db.getCita(cita.id);
         if (actual == null || !actual.esFutura() || !db.cancelarCita(cita.id)) {
-            Toast.makeText(this, "Esta cita ya no se puede cancelar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.just_toast_no_cancelable, Toast.LENGTH_SHORT).show();
             recreate();
             return;
         }
         // el QR deja de parecer válido en el acto: apagado, sello de cancelada y sin enseñarlo a pantalla completa
         qrAnulado = true;
         ocultarCapaQR();
-        mostrarEstado(findViewById(R.id.tvEstado), "Cancelada", R.color.nui_error);
+        mostrarEstado(findViewById(R.id.tvEstado), getString(R.string.just_estado_cancelada), R.color.nui_error);
         findViewById(R.id.btnCalendario).setVisibility(View.GONE);
         findViewById(R.id.tvAvisoCalendario).setVisibility(View.GONE);
         if (ivQR != null) ivQR.animate().alpha(0.15f).setDuration(300).start();
-        ((TextView) findViewById(R.id.tvAyudaQR)).setText("Cita cancelada: este código ya no vale.");
-        AvisoDeshacer.mostrar(findViewById(R.id.scroll), "Cita cancelada",
-                cita.codigo() + " · Si la añadiste a tu calendario, bórrala también.",
-                MisGestiones.DURACION_DESHACER, () -> {
+        ((TextView) findViewById(R.id.tvAyudaQR)).setText(R.string.just_ayuda_qr_anulado);
+        AvisoDeshacer.mostrar(
+                findViewById(R.id.scroll),
+                getString(R.string.just_aviso_cancelada_etiqueta),
+                getString(R.string.just_aviso_cancelada_texto_fmt, cita.codigo()),
+                MisGestiones.DURACION_DESHACER,
+                () -> {
                     if (db.recuperarCita(correoUsuario, cita.id)) recreate(); // vuelve el justificante vigente
-                    else Toast.makeText(this, "Ya no se puede recuperar la cita", Toast.LENGTH_SHORT).show();
-                });
+                    else Toast.makeText(this, R.string.just_toast_no_recuperable, Toast.LENGTH_SHORT).show();
+                }
+        );
     }
 
     private void mostrarQR(String codigo) {
@@ -254,7 +257,7 @@ public class Justificante extends PantallaSecretaria {
             return;
         }
         ivQR.setImageBitmap(qr);
-        ivQR.setContentDescription("Código QR del justificante " + codigo);
+        ivQR.setContentDescription(getString(R.string.just_desc_qr_fmt, codigo));
         codigoQR = codigo;
     }
 
@@ -312,8 +315,9 @@ public class Justificante extends PantallaSecretaria {
         ivCapaQR = capaQR.findViewById(R.id.ivCapaQR);
         ((TextView) capaQR.findViewById(R.id.tvCapaCodigo)).setText(codigoQR);
         if (estadoCapa != null) mostrarEstado(capaQR.findViewById(R.id.tvCapaEstado), estadoCapa, colorEstadoCapa);
-        capaQR.setContentDescription("Código QR a pantalla completa, " + codigoQR
-                + (estadoCapa != null ? ", estado: " + estadoCapa : "") + ". Toca para volver.");
+        capaQR.setContentDescription(estadoCapa != null
+                ? getString(R.string.just_desc_capa_qr_estado_fmt, codigoQR, estadoCapa)
+                : getString(R.string.just_desc_capa_qr_fmt, codigoQR));
         capaQR.setOnClickListener(v -> ocultarCapaQR());
         addContentView(capaQR, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

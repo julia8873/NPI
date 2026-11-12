@@ -12,16 +12,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.StringRes;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.ui.HojasPaginadas;
-import com.example.nuietsiit.util.tutorial.Gesto;
-import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.HojasPaginadas;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
@@ -46,70 +46,70 @@ public class QueNecesitas extends PantallaSecretaria {
     // ------------------------------------------------------------
 
     private static class Opcion {
-        final String texto, detalle;
+        @StringRes final int textoRes, detalleRes;
         final Pregunta siguiente; // null = acaba en destino
         final String destino;
 
-        Opcion(String texto, String detalle, Pregunta siguiente) {
-            this(texto, detalle, siguiente, null);
+        Opcion(@StringRes int textoRes, @StringRes int detalleRes, Pregunta siguiente) {
+            this(textoRes, detalleRes, siguiente, null);
         }
 
-        Opcion(String texto, String detalle, String destino) {
-            this(texto, detalle, null, destino);
+        Opcion(@StringRes int textoRes, @StringRes int detalleRes, String destino) {
+            this(textoRes, detalleRes, null, destino);
         }
 
-        private Opcion(String texto, String detalle, Pregunta siguiente, String destino) {
-            this.texto = texto;
-            this.detalle = detalle;
+        private Opcion(@StringRes int textoRes, @StringRes int detalleRes, Pregunta siguiente, String destino) {
+            this.textoRes = textoRes;
+            this.detalleRes = detalleRes;
             this.siguiente = siguiente;
             this.destino = destino;
         }
     }
 
     private static class Pregunta {
-        final String texto;
+        @StringRes final int textoRes;
         final Opcion[] opciones;
 
-        Pregunta(String texto, Opcion... opciones) {
-            this.texto = texto;
+        Pregunta(@StringRes int textoRes, Opcion... opciones) {
+            this.textoRes = textoRes;
             this.opciones = opciones;
         }
     }
 
-    private static final Pregunta RAIZ = new Pregunta("¿Sobre qué es?",
-            new Opcion("Mi matrícula", "Matricularme, cambiarla o anularla",
-                    new Pregunta("¿Qué quieres hacer con tu matrícula?",
-                            new Opcion("Matricularme este curso", "Elegir las asignaturas del curso",
+    private static final Pregunta RAIZ = new Pregunta(R.string.qn_p_raiz,
+            new Opcion(R.string.qn_op_matricula, R.string.qn_op_matricula_det,
+                    new Pregunta(R.string.qn_p_matricula,
+                            new Opcion(R.string.qn_op_mat_curso, R.string.qn_op_mat_curso_det,
                                     "Automatrícula"),
-                            new Opcion("Cambiar o añadir asignaturas", "Dentro del plazo oficial",
+                            new Opcion(R.string.qn_op_mat_cambiar, R.string.qn_op_mat_cambiar_det,
                                     "Modificación y ampliación de matrícula"),
-                            new Opcion("Anularla", "Toda o solo una parte",
+                            new Opcion(R.string.qn_op_mat_anular, R.string.qn_op_mat_anular_det,
                                     "Anulación de matrícula"),
-                            new Opcion("Cambiarme de grupo", "De teoría o de prácticas",
+                            new Opcion(R.string.qn_op_mat_grupo, R.string.qn_op_mat_grupo_det,
                                     "Cambio de grupo"))),
-            new Opcion("Mis exámenes", "Cómo y cuándo me examino",
-                    new Pregunta("¿Qué te pasa con los exámenes?",
-                            new Opcion("Quiero hacer solo el examen final", "Sin evaluación continua",
+            new Opcion(R.string.qn_op_examenes, R.string.qn_op_examenes_det,
+                    new Pregunta(R.string.qn_p_examenes,
+                            new Opcion(R.string.qn_op_ex_unica, R.string.qn_op_ex_unica_det,
                                     "Evaluación única final"),
-                            new Opcion("Me queda poco para acabar", "Una convocatoria extra",
+                            new Opcion(R.string.qn_op_ex_especial, R.string.qn_op_ex_especial_det,
                                     "Convocatoria especial"))),
-            new Opcion("Créditos que ya tengo", "Convalidar lo que hiciste en otro sitio",
-                    new Pregunta("¿De dónde vienen esos créditos?",
-                            new Opcion("De otros estudios", "Otra carrera o FP superior",
+            new Opcion(R.string.qn_op_creditos, R.string.qn_op_creditos_det,
+                    new Pregunta(R.string.qn_p_creditos,
+                            new Opcion(R.string.qn_op_cred_estudios, R.string.qn_op_cred_estudios_det,
                                     "Reconocimiento y transferencia de créditos"),
-                            new Opcion("De actividades", "Culturales, deportivas, solidarias…",
+                            new Opcion(R.string.qn_op_cred_actividades, R.string.qn_op_cred_actividades_det,
                                     "Créditos por actividades universitarias"))),
-            new Opcion("Un papel oficial", "Certificados y el título",
-                    new Pregunta("¿Qué papel necesitas?",
-                            new Opcion("Mis notas y la nota media", "Certificado académico",
+            new Opcion(R.string.qn_op_papel, R.string.qn_op_papel_det,
+                    new Pregunta(R.string.qn_p_papel,
+                            new Opcion(R.string.qn_op_papel_notas, R.string.qn_op_papel_notas_det,
                                     "Certificado académico personal"),
-                            new Opcion("El título", "Porque ya he terminado",
+                            new Opcion(R.string.qn_op_papel_titulo, R.string.qn_op_papel_titulo_det,
                                     "Solicitud del título de grado y SET"))),
-            new Opcion("Otra cosa", "No lo veo aquí",
-                    new Pregunta("¿Cómo seguimos?",
-                            new Opcion("Hablarlo en Secretaría", "Pide una cita de consulta general",
+            new Opcion(R.string.qn_op_otra, R.string.qn_op_otra_det,
+                    new Pregunta(R.string.qn_p_otra,
+                            new Opcion(R.string.qn_op_otra_hablar, R.string.qn_op_otra_hablar_det,
                                     DESTINO_CITA),
-                            new Opcion("Buscarlo yo", "Ver todos los trámites",
+                            new Opcion(R.string.qn_op_otra_buscar, R.string.qn_op_otra_buscar_det,
                                     DESTINO_CATALOGO))));
 
     // ------------------------------------------------------------
@@ -140,13 +140,16 @@ public class QueNecesitas extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("¿Qué necesitas?");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.qn_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         correoUsuario = SesionUtil.correo(getIntent());
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
         if (savedInstanceState != null) {
-            camino = savedInstanceState.getIntegerArrayList(ESTADO_CAMINO);
+            ArrayList<Integer> guardado = savedInstanceState.getIntegerArrayList(ESTADO_CAMINO);
+            if (guardado != null) camino = guardado;
         }
 
         tvPaso = findViewById(R.id.tvPaso);
@@ -177,8 +180,8 @@ public class QueNecesitas extends PantallaSecretaria {
                     camino.clear();
                     mostrar(0);
                 })
-                .tocar(R.id.contenedorOpciones, "Toca la opción que mejor te describa: con unas pocas preguntas llegas a tu trámite")
-                .tocar(R.id.btnAnterior, "¿Te has equivocado? Toca aquí para volver a la pregunta anterior").soloSiSeVe();
+                .tocar(R.id.contenedorOpciones, getString(R.string.qn_tut_opciones))
+                .tocar(R.id.btnAnterior, getString(R.string.qn_tut_anterior)).soloSiSeVe();
         return ((HojasPaginadas) findViewById(R.id.hojas)).pasosTutorial(t);
     }
 
@@ -218,18 +221,24 @@ public class QueNecesitas extends PantallaSecretaria {
             mostrarPaso(PASOS);
         } else {
             mostrarPaso(camino.size() + 1);
-            tvPregunta.setText(pregunta.texto);
+            tvPregunta.setText(pregunta.textoRes);
             for (int i = 0; i < pregunta.opciones.length; i++) {
                 Opcion o = pregunta.opciones[i];
                 int indice = i;
-                anadirTarjeta(camino.isEmpty() ? i : camino.get(0), null, o.texto, o.detalle, null).setOnClickListener(v -> elegir(indice));
+                anadirTarjeta(
+                        camino.isEmpty() ? i : camino.get(0),
+                        null,
+                        getString(o.textoRes),
+                        getString(o.detalleRes),
+                        null
+                ).setOnClickListener(v -> elegir(indice));
             }
         }
         animarEntrada(direccion);
     }
 
     private void mostrarPaso(int paso) {
-        tvPaso.setText("Paso " + paso + " de " + PASOS);
+        tvPaso.setText(getString(R.string.paso_numero_fmt, paso, PASOS));
         progreso.setProgressCompat(paso, true);
         // la rosa de los vientos se orienta un rumbo (45°) con cada respuesta
         ivRosa.animate().rotation(45f * (paso - 1)).setDuration(400)
@@ -254,12 +263,14 @@ public class QueNecesitas extends PantallaSecretaria {
             return irADestino(DESTINO_CATALOGO);
         }
 
-        tvPregunta.setText("Esto es lo que buscas");
+        tvPregunta.setText(R.string.qn_resultado_titulo);
         Intent detalle = new Intent(this, DetalleTramite.class)
                 .putExtra("idProcedimiento", tramite.id)
                 .putExtra("CORREO", correoUsuario);
         mostrarResultado(tramite, camino.get(0)).setOnClickListener(v -> startActivity(detalle));
-        btnIrTramite.setText(tramite.sePuedeSolicitar() ? "Ver qué necesito y empezar" : "Ver detalles y pedir cita");
+        btnIrTramite.setText(tramite.sePuedeSolicitar()
+                ? R.string.qn_btn_ver_y_empezar
+                : R.string.qn_btn_ver_y_cita);
         btnIrTramite.setVisibility(View.VISIBLE);
         btnIrTramite.setOnClickListener(v -> startActivity(detalle));
         return true;
@@ -284,9 +295,12 @@ public class QueNecesitas extends PantallaSecretaria {
         Pastilla.pintar(tarjeta.findViewById(R.id.tvEstado), t.textoEstado(), t.colorEstado());
         int documentos = secretariaDB.getDocumentos(t.id).size();
         int pasos = secretariaDB.getPasos(t.id).size();
+        String txtDocs = documentos == 0
+                ? getString(R.string.qn_resumen_sin_docs)
+                : getResources().getQuantityString(R.plurals.qn_resumen_docs, documentos, documentos);
+        String txtPasos = getResources().getQuantityString(R.plurals.qn_resumen_pasos, pasos, pasos);
         ((TextView) tarjeta.findViewById(R.id.tvResumen)).setText(
-                (documentos == 0 ? "Sin documentos" : documentos == 1 ? "1 documento" : documentos + " documentos")
-                + " · " + pasos + (pasos == 1 ? " paso" : " pasos"));
+                getString(R.string.qn_resumen_fmt, txtDocs, txtPasos));
         contenedorOpciones.addView(tarjeta);
         return tarjeta;
     }

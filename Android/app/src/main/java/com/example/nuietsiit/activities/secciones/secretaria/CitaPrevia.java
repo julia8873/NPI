@@ -15,16 +15,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.FechasUtil;
@@ -57,7 +56,6 @@ public class CitaPrevia extends PantallaSecretaria {
     private static final String ESTADO_MOTIVO = "motivo";
     private static final String ESTADO_FECHA = "fecha";
     private static final String ESTADO_HORA = "hora";
-    private static final Locale ES = Locale.forLanguageTag("es-ES");
 
     private static final int NUM_DIAS = 10;
     private static final int DIAS_POR_FILA = 5;
@@ -97,8 +95,10 @@ public class CitaPrevia extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Pedir cita");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.cita_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         correoUsuario = SesionUtil.correo(getIntent());
         db = new SecretariaDB(DBHelper.getInstance(this));
@@ -144,14 +144,14 @@ public class CitaPrevia extends PantallaSecretaria {
     @Override
     protected Tutorial crearTutorial() {
         return new Tutorial(this, "cita_previa", 2)
-                .tocar(R.id.actvMotivo, "Toca aquí para elegir para qué es la cita")
-                .info(R.id.tvCitaExistente, "Ya tienes una cita para esto: si eliges otra franja, la cambias").soloSiSeVe()
-                .tocar(R.id.llDias, "Toca el día que te venga bien")
-                .tocar(R.id.pestanasHoras, "Toca una hora para ver sus franjas de 10 minutos")
-                .gesto(R.id.rvFranjas, Gesto.DESLIZAR_IZQ, "También puedes deslizar las franjas de lado para cambiar de hora")
-                .sensor(Gesto.INCLINAR, "O inclinar el móvil a un lado o al otro para cambiar de hora")
+                .tocar(R.id.actvMotivo, getString(R.string.cita_tut_motivo))
+                .info(R.id.tvCitaExistente, getString(R.string.cita_tut_existente)).soloSiSeVe()
+                .tocar(R.id.llDias, getString(R.string.cita_tut_dias))
+                .tocar(R.id.pestanasHoras, getString(R.string.cita_tut_pestanas))
+                .gesto(R.id.rvFranjas, Gesto.DESLIZAR_IZQ, getString(R.string.cita_tut_deslizar))
+                .sensor(Gesto.INCLINAR, getString(R.string.cita_tut_inclinar))
                 .soloSi(() -> inclinar.escuchando())
-                .tocar(R.id.rvFranjas, "Toca una franja libre para pedir la cita. Antes de guardarla te pediremos confirmación");
+                .tocar(R.id.rvFranjas, getString(R.string.cita_tut_franjas));
     }
 
     @Override
@@ -166,7 +166,7 @@ public class CitaPrevia extends PantallaSecretaria {
     //                    MOTIVO
     // -------------------------------------------------
     private void crearMotivos() {
-        nombresMotivos.add("Consulta general");
+        nombresMotivos.add(getString(R.string.cita_motivo_general));
         for (Tramite t : tramites) nombresMotivos.add(t.nombre);
 
         actvMotivo.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nombresMotivos));
@@ -196,8 +196,7 @@ public class CitaPrevia extends PantallaSecretaria {
         citaExistente = db.getCitaActiva(correoUsuario, idProcedimientoSeleccionado());
         tvCitaExistente.setVisibility(citaExistente != null ? View.VISIBLE : View.GONE);
         if (citaExistente != null) {
-            tvCitaExistente.setText("Ya tienes cita para este motivo el " + textoFechaHora(citaExistente.fechaHora()) +
-                    ". Si eliges otra hora, se cambiará.");
+            tvCitaExistente.setText(getString(R.string.cita_existente_aviso_fmt, textoFechaHora(citaExistente.fechaHora())));
         }
     }
 
@@ -218,6 +217,7 @@ public class CitaPrevia extends PantallaSecretaria {
 
     // hojas de taco de calendario, cinco por fila (una semana laborable): nada queda cortado
     private void crearChipsDias(List<LocalDate> dias) {
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
         LinearLayout fila = null;
         int hueco = getResources().getDimensionPixelSize(R.dimen.nui_espacio_xs);
         for (int i = 0; i < dias.size(); i++) {
@@ -232,15 +232,16 @@ public class CitaPrevia extends PantallaSecretaria {
             View hoja = LayoutInflater.from(this).inflate(R.layout.item_dia_taco, fila, false);
             ((LinearLayout.LayoutParams) hoja.getLayoutParams()).setMargins(hueco / 2, 0, hueco / 2, 0);
             long faltan = FechasUtil.diasHasta(dia);
-            ((TextView) hoja.findViewById(R.id.tvSemana)).setText(faltan == 0 ? "Hoy"
-                    : dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, ES).replace(".", ""));
+            ((TextView) hoja.findViewById(R.id.tvSemana)).setText(faltan == 0
+                    ? getString(R.string.cita_dia_hoy)
+                    : dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, localeActivo).replace(".", ""));
             ((TextView) hoja.findViewById(R.id.tvNumero)).setText(String.valueOf(dia.getDayOfMonth()));
             ((TextView) hoja.findViewById(R.id.tvMes)).setText(
-                    dia.getMonth().getDisplayName(TextStyle.SHORT, ES).replace(".", ""));
+                    dia.getMonth().getDisplayName(TextStyle.SHORT, localeActivo).replace(".", ""));
             hoja.setTag(dia);
             hoja.setContentDescription(etiquetaDia(dia) + ", " + FechasUtil.diaLargo(dia.atStartOfDay()));
             hoja.setSelected(dia.equals(fechaSeleccionada));
-            hoja.setOnClickListener(v -> elegirDia(v));
+            hoja.setOnClickListener(this::elegirDia);
             fila.addView(hoja);
         }
     }
@@ -260,9 +261,10 @@ public class CitaPrevia extends PantallaSecretaria {
 
     // "Hoy 22 oct", "Mañana 23 oct", "Lun 26 oct"
     private String etiquetaDia(LocalDate dia) {
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
         long dias = FechasUtil.diasHasta(dia);
-        String nombre = dias <= 1 ? FechasUtil.cuando(dia.atStartOfDay())
-                : FechasUtil.capitalizar(dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, ES).replace(".", ""));
+        String nombre = dias <= 1 ? FechasUtil.cuando(this, dia.atStartOfDay())
+                : FechasUtil.capitalizar(dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, localeActivo).replace(".", ""));
         return nombre + " " + FechasUtil.diaCorto(dia);
     }
 
@@ -270,7 +272,10 @@ public class CitaPrevia extends PantallaSecretaria {
     //                    FRANJAS
     // -------------------------------------------------
     private void cargarFranjas() {
-        tvTituloHoras.setText("Elige la hora · " + FechasUtil.capitalizar(FechasUtil.diaLargo(fechaSeleccionada.atStartOfDay())));
+        tvTituloHoras.setText(getString(
+                R.string.cita_titulo_horas_fmt,
+                FechasUtil.capitalizar(FechasUtil.diaLargo(fechaSeleccionada.atStartOfDay()))
+        ));
 
         String fecha = fechaSeleccionada.toString();
         Set<String> ocupadasBD = db.getHorasOcupadas(fecha);
@@ -322,7 +327,11 @@ public class CitaPrevia extends PantallaSecretaria {
                 if (f.estado == FranjaAdapter.LIBRE) libres++;
                 if (f.estado == FranjaAdapter.TUYA) tuya = true;
             }
-            String detalle = tuya ? "tu cita" : libres == 0 ? "llena" : libres == 1 ? "1 libre" : libres + " libres";
+            String detalle = tuya
+                    ? getString(R.string.cita_pestana_tu_cita)
+                    : libres == 0
+                      ? getString(R.string.cita_pestana_llena)
+                      : getResources().getQuantityString(R.plurals.cita_pestana_libres, libres, libres);
             pestanasHoras.anadir(h, h + ":00", detalle, 0, 0);
         }
         pestanasHoras.marcar(horaElegida);
@@ -384,8 +393,9 @@ public class CitaPrevia extends PantallaSecretaria {
                         if (Math.abs(dx) > umbral) {
                             pasarHora(dx < 0 ? 1 : -1);
                             avisarTutorial(dx < 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
+                        } else {
+                            rv.animate().translationX(0).setDuration(150).start();
                         }
-                        else rv.animate().translationX(0).setDuration(150).start();
                         break;
                     case MotionEvent.ACTION_CANCEL:
                         deslizando = false;
@@ -403,16 +413,24 @@ public class CitaPrevia extends PantallaSecretaria {
         String motivo = nombresMotivos.get(motivoSeleccionado);
         MaterialAlertDialogBuilder dialogo = new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria);
         if (citaExistente != null) {
-            dialogo.setTitle("¿Cambiar tu cita?")
-                    .setMessage(motivo + "\n\nAntes: " + textoFechaHora(citaExistente.fechaHora()) +
-                            "\nAhora: " + cuando)
-                    .setPositiveButton("Cambiar", (d, w) -> guardar(hora));
+            dialogo.setTitle(R.string.cita_dialog_cambiar_titulo)
+                    .setMessage(getString(
+                            R.string.cita_dialog_cambiar_msg_fmt,
+                            motivo,
+                            textoFechaHora(citaExistente.fechaHora()),
+                            cuando
+                    ))
+                    .setPositiveButton(R.string.cita_btn_cambiar, (d, w) -> guardar(hora));
         } else {
-            dialogo.setTitle("¿Confirmar cita?")
-                    .setMessage(motivo + "\n\n" + FechasUtil.capitalizar(cuando))
-                    .setPositiveButton("Confirmar", (d, w) -> guardar(hora));
+            dialogo.setTitle(R.string.cita_dialog_confirmar_titulo)
+                    .setMessage(getString(
+                            R.string.cita_dialog_confirmar_msg_fmt,
+                            motivo,
+                            FechasUtil.capitalizar(cuando)
+                    ))
+                    .setPositiveButton(R.string.cita_btn_confirmar, (d, w) -> guardar(hora));
         }
-        dialogoConfirmar = dialogo.setNegativeButton("Cancelar", null).show();
+        dialogoConfirmar = dialogo.setNegativeButton(R.string.cita_btn_cancelar, null).show();
     }
 
     private void guardar(String hora) {
@@ -420,7 +438,7 @@ public class CitaPrevia extends PantallaSecretaria {
         // se comprueba otra vez por si la franja ha caducado o se ha ocupado con el diálogo abierto
         boolean pasada = !fechaSeleccionada.atTime(LocalTime.parse(hora)).isAfter(LocalDateTime.now());
         if (pasada || db.getHorasOcupadas(fecha).contains(hora)) {
-            Toast.makeText(this, "Esa hora ya no está libre", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.cita_toast_no_libre, Toast.LENGTH_SHORT).show();
             actualizarCitaExistente();
             cargarFranjas();
             return;
@@ -433,7 +451,7 @@ public class CitaPrevia extends PantallaSecretaria {
             idCita = db.insertarCita(correoUsuario, idProcedimientoSeleccionado(), fecha, hora);
         }
         if (idCita == -1) {
-            Toast.makeText(this, "No se ha podido guardar la cita", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.cita_toast_error_guardar, Toast.LENGTH_SHORT).show();
             return;
         }
         startActivity(new Intent(this, Justificante.class)
@@ -444,8 +462,8 @@ public class CitaPrevia extends PantallaSecretaria {
     }
 
     // "jueves 22 de octubre a las 10:30"
-    private static String textoFechaHora(LocalDateTime fechaHora) {
-        return FechasUtil.diaLargo(fechaHora) + " a las " + FechasUtil.hora(fechaHora);
+    private String textoFechaHora(LocalDateTime fechaHora) {
+        return getString(R.string.cita_fecha_hora_fmt, FechasUtil.diaLargo(fechaHora), FechasUtil.hora(fechaHora));
     }
 
     @Override

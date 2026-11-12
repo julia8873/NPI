@@ -3,6 +3,7 @@ package com.example.nuietsiit.activities.secciones.mapa;
 import android.content.Context;
 import android.database.Cursor;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.AcademicoDB;
 import com.example.nuietsiit.data.DBHelper;
 
@@ -47,6 +48,13 @@ public final class ProximaClase {
     }
 
     /** "NPI · Aula 2.1 · empieza 10:30" o "NPI · Aula 2.1 · en curso". */
+    public String texto(Context ctx) {
+        if (ctx == null) return texto();
+        StringBuilder sb = new StringBuilder(codigoAsignatura);
+        if (aula != null) sb.append(" · ").append(aula);
+        return sb.append(enCurso ? ctx.getString(R.string.mapa_en_curso) : ctx.getString(R.string.mapa_empieza, horaInicio)).toString();
+    }
+
     public String texto() {
         StringBuilder sb = new StringBuilder(codigoAsignatura);
         if (aula != null) sb.append(" · ").append(aula);

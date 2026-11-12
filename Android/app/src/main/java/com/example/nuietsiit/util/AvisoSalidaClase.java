@@ -15,6 +15,7 @@ import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.mapa.CapaLugares;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.activities.secciones.mapa.PlanRuta;
@@ -33,12 +34,12 @@ import java.util.Calendar;
  * "Sal ya para llegar a clase": notificación que avisa de cuándo hay que salir para llegar a la próxima
  * clase de hoy (ETSIIT o Edificio Auxiliar), usando el planificador del mapa exterior (sin cambiarlo).
  * <ul>
- *   <li>Al abrir la app (lo llama Notificador) mira la próxima clase, calcula la ruta y programa una alarma
+ *    <li>Al abrir la app (lo llama Notificador) mira la próxima clase, calcula la ruta y programa una alarma
  *       {@link #AVISAR_ANTES_MIN} minutos antes de la hora a la que hay que salir. Si ya toca, avisa en el momento.</li>
- *   <li>Cuando salta la alarma ({@link Receptor}) vuelve a calcular con la ubicación de ese momento y avisa.</li>
- *   <li>Al pulsar la notificación se abre el mapa, que propone ir a esa clase ("¿A dónde vas?").</li>
- * </ul>
- * Cada clase se avisa una sola vez. Solo con sesión iniciada.
+ *    <li>Cuando salta la alarma ({@link Receptor}) vuelve a calcular con la ubicación de ese momento y avisa.</li>
+ *    <li>Al pulsar la notificación se abre el mapa, que propone ir a esa clase ("¿A dónde vas?").</li>
+ *  </ul>
+ *  Cada clase se avisa una sola vez. Solo con sesión iniciada.
  */
 public final class AvisoSalidaClase {
 
@@ -159,15 +160,15 @@ public final class AvisoSalidaClase {
         long faltan = Duration.between(LocalDateTime.now(), calculo.salirComoTarde).toMinutes();
         String titulo;
         if (faltan > 0) {
-            titulo = "🚌 Sal en " + faltan + " min para llegar a " + clase.codigoAsignatura
-                    + " (" + clase.horaInicio + ")";
+            titulo = ctx.getString(R.string.aviso_salida_en_min_fmt, faltan, clase.codigoAsignatura, clase.horaInicio);
         } else if (faltan == 0) {
-            titulo = "🏃 ¡Sal ya! " + clase.codigoAsignatura + " empieza a las " + clase.horaInicio;
+            titulo = ctx.getString(R.string.aviso_salida_ya_fmt, clase.codigoAsignatura, clase.horaInicio);
         } else {
-            titulo = "⚠️ Vas justo: " + clase.codigoAsignatura + " empieza a las " + clase.horaInicio;
+            titulo = ctx.getString(R.string.aviso_salida_justo_fmt, clase.codigoAsignatura, clase.horaInicio);
         }
 
-        String edificio = ProximaClase.AUXILIAR.equals(clase.idEdificio) ? "Edificio Auxiliar" : "ETSIIT";
+        String edificio = ctx.getString(ProximaClase.AUXILIAR.equals(clase.idEdificio)
+                ? R.string.edificio_auxiliar : R.string.edificio_etsiit);
         String texto = clase.nombreAsignatura + (clase.aula != null ? " · " + clase.aula : "") + " · " + edificio
                 + "\n" + calculo.plan.resumen();
 

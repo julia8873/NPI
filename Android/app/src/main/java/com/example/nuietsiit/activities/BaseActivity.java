@@ -14,10 +14,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.os.LocaleListCompat;
 
 import com.example.nuietsiit.R;
@@ -25,11 +24,11 @@ import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.auth.SignUp;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.main.MenuPrincipal;
-import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.activities.main.ShakeDetector;
 import com.example.nuietsiit.activities.main.WaveView;
 import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
+import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorBocaAbajo;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
@@ -306,7 +305,7 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
         boton.setColorFilter(getColor(R.color.nui_tinta));
         boton.setBackgroundResource(R.drawable.bg_circulo_blanco_volver);
         boton.setPadding(lado / 5, lado / 5, lado / 5, lado / 5);
-        boton.setContentDescription("Repetir el tutorial de esta pantalla");
+        boton.setContentDescription(getString(R.string.base_desc_repetir_tutorial));
         boton.setOnClickListener(v -> {
             v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             Tutorial t = tutorialParaAyuda();

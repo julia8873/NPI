@@ -1,5 +1,9 @@
 package com.example.nuietsiit.activities.secciones.mapa;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -93,6 +97,27 @@ public final class PlanRuta {
     }
 
     /** "Sal a las 8:33 · 3 min a pie · 🚌 9 de las 8:37 en … · 6 min · bájate en … · 7 min a pie · llegas 8:50". */
+    public String resumen(Context ctx) {
+        if (ctx == null) return resumen();
+        if (tipo == Tipo.LEJOS) {
+            return ctx.getString(R.string.mapa_lejos_google_maps, destino.corto, metrosRecta / 1000);
+        }
+        StringBuilder sb = new StringBuilder(ctx.getString(R.string.mapa_sal_a_las)).append(hora(salida));
+        for (Tramo t : tramos) {
+            switch (t.tipo) {
+                case A_PIE:
+                    sb.append(ctx.getString(R.string.mapa_min_a_pie, t.minutos()));
+                    break;
+                case BUS:
+                    sb.append(ctx.getString(R.string.mapa_resumen_bus, t.linea.id, hora(t.inicio), t.subida.nombre, (int) t.minutos(), t.bajada.nombre));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return sb.append(ctx.getString(R.string.mapa_llegas)).append(horaArriba(llegada)).toString();
+    }
+
     public String resumen() {
         if (tipo == Tipo.LEJOS) {
             return String.format(Locale.getDefault(), "%s está a %.1f km: mejor con Google Maps",

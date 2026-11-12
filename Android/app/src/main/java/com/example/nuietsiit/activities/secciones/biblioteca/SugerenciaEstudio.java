@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
@@ -29,9 +29,9 @@ import java.util.function.BooleanSupplier;
  * "¿Vas a estudiar?": aviso con un anillo que se llena mientras el móvil está sobre la mesa y, lleno,
  * abre el modo estudio ya estudiando. Tocar el aviso empieza al momento.
  * <ul>
- * <li>{@link #enLaBalda}: el aviso sale solo tras 2 s en la mesa; tocar la pantalla fuera de él lo descarta
+ *  <li>{@link #enLaBalda}: el aviso sale solo tras 2 s en la mesa; tocar la pantalla fuera de él lo descarta
  *     hasta levantar el móvil (se está usando la balda). La Activity reenvía sus toques a {@link #alTocar}.</li>
- * <li>{@link #alLlegar}: al acabar la ruta a la biblioteca; el aviso se queda a la vista con "Ahora no".</li>
+ *  <li>{@link #alLlegar}: al acabar la ruta a la biblioteca; el aviso se queda a la vista con "Ahora no".</li>
  * </ul>
  * Sigue el ciclo de vida de la Activity: solo escucha el sensor mientras está delante.
  */
@@ -54,7 +54,7 @@ public class SugerenciaEstudio implements DefaultLifecycleObserver {
     private boolean descartado;     // en la balda: se tocó la pantalla; no vuelve hasta levantarlo
     private boolean terminado;      // al llegar: ya se abrió el modo estudio o se dijo "Ahora no"
     private long reanudada;
-    private long mostradoEn;      // los toques que ya venían de camino (p. ej. a "Siguiente") no cuentan
+    private long mostradoEn;        // los toques que ya venían de camino (p. ej. a "Siguiente") no cuentan
     private static final long TOQUE_TRAS_MOSTRAR_MS = 700;
 
     /** En la balda: el aviso aparece al dejar el móvil en la mesa. ocupado = se está usando (p. ej. ojeando). */
@@ -76,7 +76,7 @@ public class SugerenciaEstudio implements DefaultLifecycleObserver {
         aviso = LayoutInflater.from(act).inflate(R.layout.aviso_estudio, contenedor, false);
         contenedor.addView(aviso);
         anillo = aviso.findViewById(R.id.anilloAviso);
-        anillo.setGrosor(5 * act.getResources().getDisplayMetrics().density);
+        anillo.setGrosor(5f * act.getResources().getDisplayMetrics().density);
         aviso.setOnClickListener(v -> {
             if (SystemClock.elapsedRealtime() - mostradoEn > TOQUE_TRAS_MOSTRAR_MS) abrir();
         });
@@ -85,8 +85,8 @@ public class SugerenciaEstudio implements DefaultLifecycleObserver {
         TextView detalle = aviso.findViewById(R.id.tvDetalleAviso);
         View ahoraNo = aviso.findViewById(R.id.btnAhoraNo);
         if (enBalda) {
-            titulo.setText("¿Vas a estudiar?");
-            detalle.setText("Déjalo así y empieza el modo estudio. Toca aquí para empezar ya, o en otro sitio para seguir mirando libros.");
+            titulo.setText(R.string.sug_estudio_balda_titulo);
+            detalle.setText(R.string.sug_estudio_balda_detalle);
             ahoraNo.setVisibility(View.GONE);
         } else {
             // arriba: abajo están los botones de la ruta
@@ -94,8 +94,8 @@ public class SugerenciaEstudio implements DefaultLifecycleObserver {
             lp.gravity = Gravity.TOP;
             lp.topMargin = act.getResources().getDimensionPixelSize(R.dimen.biblio_aviso_arriba);
             aviso.setLayoutParams(lp);
-            titulo.setText("Ya estás en la biblioteca. ¿Vas a estudiar?");
-            detalle.setText("Deja el móvil sobre la mesa y empieza el modo estudio, o toca aquí.");
+            titulo.setText(R.string.sug_estudio_llegar_titulo);
+            detalle.setText(R.string.sug_estudio_llegar_detalle);
             ahoraNo.setOnClickListener(v -> {
                 terminado = true;
                 ocultar();

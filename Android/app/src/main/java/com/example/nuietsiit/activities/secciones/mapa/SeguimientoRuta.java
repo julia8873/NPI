@@ -1,5 +1,9 @@
 package com.example.nuietsiit.activities.secciones.mapa;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +43,19 @@ public final class SeguimientoRuta {
 
         Etapa(String texto) {
             this.texto = texto;
+        }
+
+        public String texto(Context ctx) {
+            if (ctx == null) return texto;
+            switch (this) {
+                case POR_SALIR: return ctx.getString(R.string.mapa_etapa_por_salir);
+                case A_LA_PARADA: return ctx.getString(R.string.mapa_etapa_a_la_parada);
+                case ESPERANDO: return ctx.getString(R.string.mapa_etapa_esperando);
+                case EN_BUS: return ctx.getString(R.string.mapa_etapa_en_bus);
+                case BAJATE: return ctx.getString(R.string.mapa_etapa_bajate);
+                case AL_DESTINO: return ctx.getString(R.string.mapa_etapa_al_destino);
+                case LLEGADO: default: return ctx.getString(R.string.mapa_etapa_llegado);
+            }
         }
     }
 
@@ -106,6 +123,7 @@ public final class SeguimientoRuta {
         }
     }
 
+    private final Context ctx;
     private final PlanRuta plan;
     private final PlanRuta.Tramo aLaParada, espera, enBus, alDestino;
     private final HorarioBus horario;
@@ -117,10 +135,11 @@ public final class SeguimientoRuta {
     private Punto anterior;
     private LocalDateTime horaAnterior, horaLlegado;
 
-    public SeguimientoRuta(PlanRuta plan) {
+    public SeguimientoRuta(Context ctx, PlanRuta plan) {
         if (plan.tipo == PlanRuta.Tipo.LEJOS || plan.tramos.isEmpty()) {
             throw new IllegalArgumentException("Un plan LEJOS no se sigue: se abre Google Maps");
         }
+        this.ctx = ctx;
         this.plan = plan;
         enBus = plan.tramoBus();
         PlanRuta.Tramo antes = null, espera = null, despues = null;
@@ -144,6 +163,10 @@ public final class SeguimientoRuta {
         entrada = ultimo.tipo == PlanRuta.TipoTramo.A_PIE && !ultimo.geometria.isEmpty()
                 ? ultimo.geometria.get(ultimo.geometria.size() - 1) : plan.destino.punto;
         etapa = Etapa.POR_SALIR;
+    }
+
+    public SeguimientoRuta(PlanRuta plan) {
+        this(null, plan);
     }
 
     public PlanRuta plan() {
@@ -202,30 +225,44 @@ public final class SeguimientoRuta {
                 HorarioBus.Paso perdido = paso;
                 paso = horario.proximoPaso(enBus.sentido, enBus.subida, enLaParada);
                 avisados.remove(Evento.Tipo.BUS_EN_1_MIN);
-                eventos.add(new Evento(Evento.Tipo.BUS_PERDIDO, paso == null
+                String msgPerdido = ctx != null
+                        ? (paso == null ? ctx.getString(R.string.mapa_evento_bus_perdido_fin, PlanRuta.hora(perdido.hora))
+                        : ctx.getString(R.string.mapa_evento_bus_perdido_sig, PlanRuta.hora(perdido.hora), PlanRuta.hora(paso.hora)))
+                        : (paso == null
                         ? "Has perdido el bus de las " + PlanRuta.hora(perdido.hora) + " y no hay más hoy"
                         : "Has perdido el bus de las " + PlanRuta.hora(perdido.hora) + ": el siguiente pasa a las "
-                        + PlanRuta.hora(paso.hora)));
+                        + PlanRuta.hora(paso.hora));
+                eventos.add(new Evento(Evento.Tipo.BUS_PERDIDO, msgPerdido));
             }
         }
 
         // ---------- avisos ----------
         if (enBus != null && antesDe(Etapa.ESPERANDO) && !ahora.isBefore(plan.salida) && !lejosDelOrigen(posicion)) {
-            avisar(eventos, Evento.Tipo.SAL_YA, "Sal ya hacia " + enBus.subida.nombre);
+            String msgSal = ctx != null ? ctx.getString(R.string.mapa_evento_sal_ya, enBus.subida.nombre)
+                    : "Sal ya hacia " + enBus.subida.nombre;
+            avisar(eventos, Evento.Tipo.SAL_YA, msgSal);
         }
         if (antesDe(Etapa.EN_BUS) && paso != null && etapa != Etapa.POR_SALIR
                 && !ahora.isBefore(paso.hora.minusMinutes(1))) {
-            avisar(eventos, Evento.Tipo.BUS_EN_1_MIN, "El " + enBus.linea.id + " llega en 1 min a " + enBus.subida.nombre);
+            String msgLlega = ctx != null ? ctx.getString(R.string.mapa_evento_bus_en_1_min, enBus.linea.id, enBus.subida.nombre)
+                    : "El " + enBus.linea.id + " llega en 1 min a " + enBus.subida.nombre;
+            avisar(eventos, Evento.Tipo.BUS_EN_1_MIN, msgLlega);
         }
         int paradas = enBus == null ? 0 : paradasHastaBajada(enLinea);
         if (etapa == Etapa.EN_BUS && paradas <= 1) {
-            avisar(eventos, Evento.Tipo.SIGUIENTE_ES_TU_PARADA, "La siguiente es tu parada: " + enBus.bajada.nombre);
+            String msgSig = ctx != null ? ctx.getString(R.string.mapa_evento_siguiente_parada, enBus.bajada.nombre)
+                    : "La siguiente es tu parada: " + enBus.bajada.nombre;
+            avisar(eventos, Evento.Tipo.SIGUIENTE_ES_TU_PARADA, msgSig);
         }
         if (etapa == Etapa.BAJATE) {
-            avisar(eventos, Evento.Tipo.BAJATE_AHORA, "Bájate ahora en " + enBus.bajada.nombre);
+            String msgBajate = ctx != null ? ctx.getString(R.string.mapa_evento_bajate_ahora, enBus.bajada.nombre)
+                    : "Bájate ahora en " + enBus.bajada.nombre;
+            avisar(eventos, Evento.Tipo.BAJATE_AHORA, msgBajate);
         }
         if (etapa == Etapa.LLEGADO) {
-            avisar(eventos, Evento.Tipo.LLEGADO, "Has llegado a " + plan.destino.corto);
+            String msgLlegado = ctx != null ? ctx.getString(R.string.mapa_evento_has_llegado, plan.destino.corto)
+                    : "Has llegado a " + plan.destino.corto;
+            avisar(eventos, Evento.Tipo.LLEGADO, msgLlegado);
         }
 
         return estado(posicion, ahora, enLinea, paradas, eventos);
@@ -247,37 +284,58 @@ public final class SeguimientoRuta {
                         : ahora.plus(aPie(alDestino, pos));
                 String destino = enBus != null ? enBus.subida.nombre : plan.destino.corto;
                 if (etapa == Etapa.POR_SALIR) {
-                    return new Estado(etapa, tramo, "Sal a las " + PlanRuta.hora(plan.salida) + " hacia " + destino,
-                            objetivo, pos, plan.salida, "Sal en " + minutos(ahora, plan.salida), ahora, llegada,
+                    String inst = ctx != null ? ctx.getString(R.string.mapa_instruccion_sal_a_las, PlanRuta.hora(plan.salida), destino)
+                            : "Sal a las " + PlanRuta.hora(plan.salida) + " hacia " + destino;
+                    String cuenta = ctx != null ? ctx.getString(R.string.mapa_cuenta_sal_en, minutos(ahora, plan.salida))
+                            : "Sal en " + minutos(ahora, plan.salida);
+                    return new Estado(etapa, tramo, inst,
+                            objetivo, pos, plan.salida, cuenta, ahora, llegada,
                             paso, 0, eventos);
                 }
                 LocalDateTime hito = paso != null ? paso.hora : llegada;
-                return new Estado(etapa, tramo, "Camina hasta " + destino + " (" + metrosTexto(metros) + ")",
+                String instCamina = ctx != null ? ctx.getString(R.string.mapa_instruccion_camina_m, destino, metrosTexto(metros))
+                        : "Camina hasta " + destino + " (" + metrosTexto(metros) + ")";
+                return new Estado(etapa, tramo, instCamina,
                         objetivo, pos, hito, busPasa(ahora), ahora, llegada, paso, 0, eventos);
             }
             case ESPERANDO: {
                 LocalDateTime llegada = enBajada != null ? enBajada.plus(finalAPie) : ahora.plus(aPie(alDestino, pos));
-                return new Estado(etapa, espera != null ? espera : enBus, "Espera el " + enBus.linea.id + " hacia "
-                        + enBus.sentido.hacia, enBus.subida.punto, pos, paso != null ? paso.hora : null,
+                String instEspera = ctx != null ? ctx.getString(R.string.mapa_instruccion_espera_bus_hacia, enBus.linea.id, enBus.sentido.hacia)
+                        : "Espera el " + enBus.linea.id + " hacia " + enBus.sentido.hacia;
+                return new Estado(etapa, espera != null ? espera : enBus, instEspera, enBus.subida.punto, pos, paso != null ? paso.hora : null,
                         busPasa(ahora), ahora, llegada, paso, 0, eventos);
             }
             case EN_BUS:
             case BAJATE: {
-                String instruccion = etapa == Etapa.BAJATE ? "Bájate en " + enBus.bajada.nombre
-                        : "Bájate en " + enBus.bajada.nombre + " (" + paradas + (paradas == 1 ? " parada)" : " paradas)");
+                String instruccion = ctx != null ? (etapa == Etapa.BAJATE
+                        ? ctx.getString(R.string.mapa_instruccion_bajate_en, enBus.bajada.nombre)
+                        : (paradas == 1
+                        ? ctx.getString(R.string.mapa_instruccion_bajate_en_paradas_sing, enBus.bajada.nombre, paradas)
+                        : ctx.getString(R.string.mapa_instruccion_bajate_en_paradas_plur, enBus.bajada.nombre, paradas)))
+                        : (etapa == Etapa.BAJATE ? "Bájate en " + enBus.bajada.nombre
+                        : "Bájate en " + enBus.bajada.nombre + " (" + paradas + (paradas == 1 ? " parada)" : " paradas)"));
+                String cuentaBajas = ctx != null ? ctx.getString(R.string.mapa_cuenta_bajas_en, minutos(ahora, enBajada))
+                        : "Bajas en " + minutos(ahora, enBajada);
                 return new Estado(etapa, enBus, instruccion, enBus.bajada.punto, pos, enBajada,
-                        "Bajas en " + minutos(ahora, enBajada), ahora, enBajada.plus(finalAPie), paso, paradas, eventos);
+                        cuentaBajas, ahora, enBajada.plus(finalAPie), paso, paradas, eventos);
             }
             case AL_DESTINO: {
                 LocalDateTime llegada = ahora.plus(aPie(alDestino, pos));
                 double metros = aPieMetros(alDestino, pos);
+                String instDestino = ctx != null ? ctx.getString(R.string.mapa_instruccion_camina_m, plan.destino.corto, metrosTexto(metros))
+                        : "Camina hasta " + plan.destino.corto + " (" + metrosTexto(metros) + ")";
+                String cuentaQuedan = ctx != null ? ctx.getString(R.string.mapa_cuenta_quedan, minutos(ahora, llegada))
+                        : "Quedan " + minutos(ahora, llegada);
                 return new Estado(etapa, alDestino != null ? alDestino : plan.tramos.get(plan.tramos.size() - 1),
-                        "Camina hasta " + plan.destino.corto + " (" + metrosTexto(metros) + ")", entrada, pos,
-                        llegada, "Quedan " + minutos(ahora, llegada), ahora, llegada, paso, 0, eventos);
+                        instDestino, entrada, pos,
+                        llegada, cuentaQuedan, ahora, llegada, paso, 0, eventos);
             }
             default:
-                return new Estado(etapa, plan.tramos.get(plan.tramos.size() - 1), "Has llegado a " + plan.destino.nombre,
-                        null, pos, null, "Has llegado", ahora, horaLlegado, paso, 0, eventos);
+                String instLlegado = ctx != null ? ctx.getString(R.string.mapa_evento_has_llegado, plan.destino.nombre)
+                        : "Has llegado a " + plan.destino.nombre;
+                String txtLlegado = ctx != null ? ctx.getString(R.string.mapa_etapa_llegado) : "Has llegado";
+                return new Estado(etapa, plan.tramos.get(plan.tramos.size() - 1), instLlegado,
+                        null, pos, null, txtLlegado, ahora, horaLlegado, paso, 0, eventos);
         }
     }
 
@@ -306,13 +364,18 @@ public final class SeguimientoRuta {
     }
 
     private String busPasa(LocalDateTime ahora) {
-        if (paso == null) return "No quedan buses hoy";
-        return ahora.isBefore(paso.hora) ? "Tu bus pasa en " + minutos(ahora, paso.hora) : "Tu bus está llegando";
+        if (paso == null) return ctx != null ? ctx.getString(R.string.mapa_no_quedan_buses) : "No quedan buses hoy";
+        if (ahora.isBefore(paso.hora)) {
+            return ctx != null ? ctx.getString(R.string.mapa_bus_pasa_en, minutos(ahora, paso.hora))
+                    : "Tu bus pasa en " + minutos(ahora, paso.hora);
+        }
+        return ctx != null ? ctx.getString(R.string.mapa_bus_llegando_ya) : "Tu bus está llegando";
     }
 
-    private static String minutos(LocalDateTime ahora, LocalDateTime hito) {
+    private String minutos(LocalDateTime ahora, LocalDateTime hito) {
         long min = PlanRuta.minutosArriba(Duration.between(ahora, hito));
-        return min == 0 ? "ya" : min + " min";
+        if (min == 0) return ctx != null ? ctx.getString(R.string.mapa_ya) : "ya";
+        return ctx != null ? ctx.getString(R.string.mapa_bus_minutos, (int) min) : min + " min";
     }
 
     private static String metrosTexto(double metros) {

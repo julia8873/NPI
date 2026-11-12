@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.nuietsiit.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -18,7 +20,7 @@ import java.util.function.Consumer;
  * clave + versión: si cambian los pasos, se sube la versión y vuelve a salir).
  *
  * <pre>
- * new Tutorial(this, "biblioteca", 1)
+ *  new Tutorial(this, "biblioteca", 1)
  *     .tocar(R.id.portada, "Toca una portada")
  *     .gesto(R.id.balda, Gesto.PELLIZCAR, "Pellizca para ver más libros")
  *     .sensor(Gesto.INCLINAR, "Inclina el móvil para pasar")
@@ -146,7 +148,7 @@ public class Tutorial {
             pasos.remove(pasos.size() - 1);
             conPasoAgitar = false;
         } else if (!conPasoAgitar && !agitarVisto) {
-            pasos.add(new Paso(0, Gesto.AGITAR, "Agita el móvil para volver al menú. Ahora no sale: pruébalo"));
+            pasos.add(new Paso(0, Gesto.AGITAR, actividad.getString(R.string.tut_global_agitar)));
             conPasoAgitar = true;
         }
         if (alEmpezar != null) alEmpezar.run();

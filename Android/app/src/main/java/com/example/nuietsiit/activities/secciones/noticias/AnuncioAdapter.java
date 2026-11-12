@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.noticias;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,12 +53,17 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int posicion) {
+        Context ctx = h.itemView.getContext();
         Anuncio a = anuncios.get(posicion);
-        float densidad = h.itemView.getResources().getDisplayMetrics().density;
+        float densidad = ctx.getResources().getDisplayMetrics().density;
 
         h.tvEmoji.setText(Anuncio.emoji(a.categoria));
         h.tvTitulo.setText(a.titulo);
-        h.tvMeta.setText(Anuncio.nombreCategoria(a.categoria) + " · " + FechasUtil.hace(a.publicacion));
+        h.tvMeta.setText(ctx.getString(
+                R.string.noticias_meta_fmt,
+                Anuncio.nombreCategoria(a.categoria),
+                FechasUtil.hace(ctx, a.publicacion)
+        ));
         h.tvContenido.setText(a.contenido);
 
         // Urgentes: borde rojo más grueso y etiqueta

@@ -6,6 +6,8 @@ import android.os.Looper;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.nuietsiit.R;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -66,10 +68,10 @@ public final class LlegadaEdificio {
         if (act.isFinishing()) return;
         Handler handler = new Handler(Looper.getMainLooper());
         AlertDialog dialogo = new AlertDialog.Builder(act)
-                .setTitle("🏁 Has llegado a " + edificio)
-                .setMessage(textoSeguir(destino, SEGUNDOS_SEGUIR))
-                .setPositiveButton("Ir ya", (d, w) -> seguir.run())
-                .setNegativeButton("Cancelar", null)
+                .setTitle(act.getString(R.string.mapa_has_llegado_a, edificio))
+                .setMessage(textoSeguir(act, destino, SEGUNDOS_SEGUIR))
+                .setPositiveButton(act.getString(R.string.mapa_ir_ya), (d, w) -> seguir.run())
+                .setNegativeButton(act.getString(R.string.cancelar), null)
                 .create();
         int[] quedan = {SEGUNDOS_SEGUIR};
         Runnable cuenta = new Runnable() {
@@ -80,7 +82,7 @@ public final class LlegadaEdificio {
                     seguir.run();
                     return;
                 }
-                dialogo.setMessage(textoSeguir(destino, quedan[0]));
+                dialogo.setMessage(textoSeguir(act, destino, quedan[0]));
                 handler.postDelayed(this, 1000);
             }
         };
@@ -89,8 +91,8 @@ public final class LlegadaEdificio {
         handler.postDelayed(cuenta, 1000);
     }
 
-    private static String textoSeguir(String destino, int segundos) {
-        return "Sigue hasta " + destino + ".\n\nTe enseño el camino por dentro en " + segundos + " s…";
+    private static String textoSeguir(Activity act, String destino, int segundos) {
+        return act.getString(R.string.mapa_texto_seguir, destino, segundos);
     }
 
     private static void enLaEtsiit(Activity act, ProximaClase clase, List<String> titulos, boolean llegando,
@@ -100,10 +102,10 @@ public final class LlegadaEdificio {
 
         if (clase != null) {
             if (ProximaClase.AUXILIAR.equals(clase.idEdificio)) {
-                textos.add("🏢 A tu clase de " + clase.texto());
+                textos.add(act.getString(R.string.mapa_a_tu_clase_de_auxiliar, clase.texto(act)));
                 opciones.add(() -> acciones.rutaExterior(ProximaClase.ETSIIT, ProximaClase.AUXILIAR));
             } else if (clase.aula != null && hayMarcador(titulos, clase.aula)) {
-                textos.add("🎓 A tu clase de " + clase.texto());
+                textos.add(act.getString(R.string.mapa_a_tu_clase_de, clase.texto(act)));
                 opciones.add(() -> acciones.rutaInterior(clase.aula));
             }
         }
@@ -111,29 +113,29 @@ public final class LlegadaEdificio {
             textos.add(d[0]);
             opciones.add(() -> acciones.rutaInterior(d[1]));
         }
-        textos.add("🔍 Buscar un aula");
+        textos.add(act.getString(R.string.mapa_buscar_un_aula));
         opciones.add(() -> elegirAula(act, titulos, acciones));
 
         new AlertDialog.Builder(act)
-                .setTitle(llegando ? "🎓 Has llegado a la ETSIIT · ¿a dónde vas ahora?"
-                        : "🎓 Estás en la ETSIIT · ¿a qué sitio de dentro vas?")
+                .setTitle(llegando ? act.getString(R.string.mapa_llegado_etsiit_preguntar)
+                        : act.getString(R.string.mapa_estas_etsiit_preguntar))
                 .setItems(textos.toArray(new String[0]), (d, i) -> opciones.get(i).run())
-                .setNegativeButton("A ningún sitio", null)
+                .setNegativeButton(act.getString(R.string.mapa_a_ningun_sitio), null)
                 .show();
     }
 
     private static void enElAuxiliar(Activity act, ProximaClase clase, Acciones acciones) {
         AlertDialog.Builder dialogo = new AlertDialog.Builder(act)
-                .setTitle("🏢 Estás en el Edificio Auxiliar")
-                .setPositiveButton("Vale", null);
+                .setTitle(act.getString(R.string.mapa_estas_en_auxiliar))
+                .setPositiveButton(act.getString(R.string.mapa_vale), null);
         if (clase == null) {
-            dialogo.setMessage("No tienes clase en los próximos " + MARGEN_CLASE_MIN + " min.");
+            dialogo.setMessage(act.getString(R.string.mapa_sin_clase_margen, MARGEN_CLASE_MIN));
         } else if (ProximaClase.AUXILIAR.equals(clase.idEdificio)) {
-            dialogo.setMessage("Tu clase es aquí: " + clase.texto());
+            dialogo.setMessage(act.getString(R.string.mapa_tu_clase_es_aqui, clase.texto(act)));
         } else {
             // La clase es en la ETSIIT: se ofrece volver
-            dialogo.setMessage("Tu clase de " + clase.texto() + " es en la ETSIIT.")
-                    .setNeutralButton("Ir a la ETSIIT",
+            dialogo.setMessage(act.getString(R.string.mapa_tu_clase_es_en_etsiit, clase.texto(act)))
+                    .setNeutralButton(act.getString(R.string.mapa_ir_a_etsiit),
                             (d, w) -> acciones.rutaExterior(ProximaClase.AUXILIAR, ProximaClase.ETSIIT));
         }
         dialogo.show();
@@ -145,9 +147,9 @@ public final class LlegadaEdificio {
             if (t.toLowerCase(Locale.ROOT).contains("aula")) aulas.add(t);
         }
         new AlertDialog.Builder(act)
-                .setTitle("¿A qué aula vas?")
+                .setTitle(act.getString(R.string.mapa_a_que_aula_vas))
                 .setItems(aulas.toArray(new String[0]), (d, i) -> acciones.rutaInterior(aulas.get(i)))
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(act.getString(R.string.cancelar), null)
                 .show();
     }
 

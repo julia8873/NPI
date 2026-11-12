@@ -3,6 +3,7 @@ package com.example.nuietsiit.activities.secciones.secretaria;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Tramite;
 import com.example.nuietsiit.util.tutorial.Tutorial;
@@ -10,6 +11,7 @@ import com.example.nuietsiit.util.tutorial.Tutorial;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -19,9 +21,12 @@ import java.util.Set;
 final class DatosPractica {
 
     private static final String CITA = "practica_cita", SOLICITUD = "practica_solicitud";
-    static final String NOTA = "Solicitud de práctica del tutorial";
 
     private DatosPractica() {}
+
+    static String nota(Context ctx) {
+        return ctx.getString(R.string.sec_practica_nota);
+    }
 
     /** Crea una cita futura (que se puede rasgar) si no hay ninguna que cancelar. */
     static void crearCita(Context ctx, SecretariaDB db, String correo) {
@@ -31,7 +36,7 @@ final class DatosPractica {
         Set<String> ocupadas = db.getHorasOcupadas(dia.toString());
         String hora = "09:00";
         for (int m = 9 * 60; m < 14 * 60; m += 10) {
-            hora = String.format(java.util.Locale.ROOT, "%02d:%02d", m / 60, m % 60);
+            hora = String.format(Locale.ROOT, "%02d:%02d", m / 60, m % 60);
             if (!ocupadas.contains(hora)) break;
         }
         long id = db.insertarCita(correo, null, dia.toString(), hora);
@@ -45,7 +50,7 @@ final class DatosPractica {
         if (tramites.isEmpty()) return;
         Tramite elegido = tramites.get(0);
         for (Tramite t : tramites) if (t.sePuedeSolicitar()) { elegido = t; break; }
-        long id = db.insertarSolicitud(correo, elegido.id, NOTA, null, null);
+        long id = db.insertarSolicitud(correo, elegido.id, nota(ctx), null, null);
         if (id != -1) prefs(ctx).edit().putInt(SOLICITUD, (int) id).apply();
     }
 

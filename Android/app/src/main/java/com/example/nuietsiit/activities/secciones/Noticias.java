@@ -56,6 +56,7 @@ public class Noticias extends BaseActivity {
     private final Handler reloj = new Handler(Looper.getMainLooper());
     private Runnable marcarPendiente;
 
+    @android.annotation.SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +66,7 @@ public class Noticias extends BaseActivity {
         if (barra != null) {
             setSupportActionBar(barra);
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Noticias y avisos");
+                getSupportActionBar().setTitle(R.string.not_titulo);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
         }
@@ -132,11 +133,11 @@ public class Noticias extends BaseActivity {
     }
 
     private void crearChips() {
-        anadirChip(3000, null, "Todos");
-        anadirChip(3001, FILTRO_NO_LEIDOS, "Sin leer");
+        anadirChip(3000, null, getString(R.string.not_chip_todos));
+        anadirChip(3001, FILTRO_NO_LEIDOS, getString(R.string.not_chip_sin_leer));
         for (int i = 0; i < Anuncio.CATEGORIAS.length; i++) {
             String cat = Anuncio.CATEGORIAS[i][0];
-            anadirChip(3002 + i, cat, Anuncio.emoji(cat) + " " + Anuncio.CATEGORIAS[i][1]);
+            anadirChip(3002 + i, cat, getString(R.string.not_chip_categoria_fmt, Anuncio.emoji(cat), Anuncio.CATEGORIAS[i][1]));
         }
         ChipGroup chips = findViewById(R.id.chipsCategorias);
         chips.setOnCheckedStateChangeListener((grupo, ids) -> {
@@ -181,9 +182,9 @@ public class Noticias extends BaseActivity {
         int sinLeer = 0;
         for (Anuncio a : todos) if (!a.leido) sinLeer++;
         if (sinLeer == 0) {
-            tvSinLeer.setText("✅ Estás al día");
+            tvSinLeer.setText(R.string.not_al_dia);
         } else {
-            tvSinLeer.setText("📬 " + sinLeer + (sinLeer == 1 ? " aviso sin leer" : " avisos sin leer"));
+            tvSinLeer.setText(getResources().getQuantityString(R.plurals.not_avisos_sin_leer, sinLeer, sinLeer));
         }
         tvMarcarTodo.setVisibility(sinLeer > 0 ? View.VISIBLE : View.GONE);
     }
@@ -195,8 +196,9 @@ public class Noticias extends BaseActivity {
             return;
         }
         int actual = vpAnuncios.getCurrentItem();
-        tvPagina.setText((actual > 0 ? "← " : "   ") + (actual + 1) + " de " + visibles.size()
-                + (actual < visibles.size() - 1 ? " →" : "   "));
+        String flechaIzq = actual > 0 ? "← " : "   ";
+        String flechaDer = actual < visibles.size() - 1 ? " →" : "   ";
+        tvPagina.setText(getString(R.string.not_paginacion_fmt, flechaIzq, actual + 1, visibles.size(), flechaDer));
     }
 
     // -------------------------------------------------
@@ -233,19 +235,22 @@ public class Noticias extends BaseActivity {
         hoja.setContentView(v);
 
         TextView tvCategoria = v.findViewById(R.id.tvCategoriaDetalle);
-        tvCategoria.setText(Anuncio.emoji(a.categoria) + " " + Anuncio.nombreCategoria(a.categoria)
-                + (a.esUrgente() ? " · URGENTE" : ""));
+        String catTexto = getString(R.string.not_detalle_categoria_fmt, Anuncio.emoji(a.categoria), Anuncio.nombreCategoria(a.categoria));
+        if (a.esUrgente()) {
+            catTexto += getString(R.string.not_detalle_urgente_sufijo);
+        }
+        tvCategoria.setText(catTexto);
         tvCategoria.setBackgroundTintList(ColorStateList.valueOf(a.esUrgente() ? ROJO : NARANJA));
 
         ((TextView) v.findViewById(R.id.tvTituloDetalle)).setText(a.titulo);
-        ((TextView) v.findViewById(R.id.tvFechaDetalle)).setText("Publicado " + FechasUtil.hace(a.publicacion)
-                + " · " + FechasUtil.diaLargo(a.publicacion));
+        ((TextView) v.findViewById(R.id.tvFechaDetalle)).setText(
+                getString(R.string.not_detalle_publicado_fmt, FechasUtil.hace(this, a.publicacion), FechasUtil.diaLargo(a.publicacion)));
         ((TextView) v.findViewById(R.id.tvContenidoDetalle)).setText(a.contenido);
 
         if (a.caducidad != null) {
             TextView tvCaducidad = v.findViewById(R.id.tvCaducidadDetalle);
             tvCaducidad.setVisibility(View.VISIBLE);
-            tvCaducidad.setText("Válido hasta el " + FechasUtil.diaLargo(a.caducidad));
+            tvCaducidad.setText(getString(R.string.not_detalle_caducidad_fmt, FechasUtil.diaLargo(a.caducidad)));
         }
 
         if (a.enlace != null && !a.enlace.isEmpty()) {
@@ -255,7 +260,7 @@ public class Noticias extends BaseActivity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(a.enlace)));
                 } catch (ActivityNotFoundException e) {
-                    Snackbar.make(raiz, "No hay navegador para abrir el enlace", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(raiz, R.string.not_error_sin_navegador, Snackbar.LENGTH_SHORT).show();
                 }
             });
         }

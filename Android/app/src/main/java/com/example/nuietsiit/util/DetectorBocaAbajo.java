@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.mapa.LocalizadorUsuario;
 
 import java.util.Calendar;
@@ -137,7 +138,7 @@ public class DetectorBocaAbajo implements SensorEventListener {
                         Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
-                        Toast.makeText(context, "Concede acceso a «No Molestar» para permitir silenciar llamadas del sistema automáticamente", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, R.string.boca_abajo_permiso_dnd, Toast.LENGTH_LONG).show();
                     }
                 } else {
                     audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
@@ -151,8 +152,8 @@ public class DetectorBocaAbajo implements SensorEventListener {
             }
         }
 
-        String aulaTexto = sesion.aula != null ? (" (" + sesion.aula + ")") : "";
-        String msg = "🔕 Móvil totalmente silenciado en el sistema durante " + sesion.nombreAsignatura + aulaTexto;
+        String asignaturaConAula = sesion.nombreAsignatura + (sesion.aula != null ? (" (" + sesion.aula + ")") : "");
+        String msg = context.getString(R.string.boca_abajo_silenciado_fmt, asignaturaConAula);
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
     }
 

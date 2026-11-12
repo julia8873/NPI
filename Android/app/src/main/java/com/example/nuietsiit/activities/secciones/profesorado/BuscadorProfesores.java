@@ -24,6 +24,8 @@ import com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
 
+import java.util.Locale;
+
 public class BuscadorProfesores extends BaseActivity {
 
     private ScrollView scrollGrados;
@@ -195,7 +197,7 @@ public class BuscadorProfesores extends BaseActivity {
         );
 
         int numCursosFallback = 4;
-        if (nombreGrado != null && (nombreGrado.toLowerCase().contains("doble") || nombreGrado.toLowerCase().contains("dgiim"))) {
+        if (nombreGrado != null && (nombreGrado.toLowerCase(Locale.ROOT).contains("doble") || nombreGrado.toLowerCase(Locale.ROOT).contains("dgiim"))) {
             numCursosFallback = 5;
         }
 
@@ -213,7 +215,7 @@ public class BuscadorProfesores extends BaseActivity {
     private void mostrarResultadosPorRuleta(int curso) {
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Profesorado de " + curso + "º Curso");
+        tvTituloResultados.setText(getString(R.string.prof_titulo_curso_fmt, curso));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = usuariosDB.obtenerProfesoresPorGradoYCurso(idGradoActual, curso);
@@ -223,7 +225,7 @@ public class BuscadorProfesores extends BaseActivity {
                 String correo = cursor.getString(0);
                 String nombre = cursor.getString(1);
                 String asignatura = cursor.getString(3);
-                View tarjeta = crearTarjetaProfesor(correo, nombre, "Imparte: " + asignatura);
+                View tarjeta = crearTarjetaProfesor(correo, nombre, getString(R.string.prof_imparte_fmt, asignatura));
                 contenedorResultados.addView(tarjeta);
             } while (cursor.moveToNext());
             cursor.close();
@@ -237,7 +239,7 @@ public class BuscadorProfesores extends BaseActivity {
         scrollGrados.setVisibility(View.GONE);
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Resultados para: '" + texto + "'");
+        tvTituloResultados.setText(getString(R.string.prof_resultados_texto_fmt, texto));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = usuariosDB.buscarProfesoresPorTexto(texto);
@@ -294,7 +296,7 @@ public class BuscadorProfesores extends BaseActivity {
 
     private void mostrarMensajeSinResultados() {
         TextView tvVacio = new TextView(this);
-        tvVacio.setText("No se ha encontrado profesorado en la base de datos.");
+        tvVacio.setText(R.string.prof_sin_resultados);
         tvVacio.setTextSize(16f);
         tvVacio.setTextColor(Color.GRAY);
         tvVacio.setPadding(20, 40, 20, 20);

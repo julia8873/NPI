@@ -26,14 +26,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.util.tutorial.Gesto;
-import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeResult;
@@ -51,8 +51,6 @@ import java.util.Map;
  */
 public class ApuntarLibros extends PantallaBiblioteca {
 
-    // la etiqueta se va enseguida al dejar de ver el código (si no, parece trabada en el borde),
-    // pero el libro no vuelve a vibrar hasta pasado un rato aunque la cámara lo pierda y lo recupere
     private static final long ETIQUETA_FIJA_MS = 500;
     private static final long ETIQUETA_DESVANECER_MS = 300;
     private static final long VIBRACION_REPOSO_MS = 5000;
@@ -74,9 +72,7 @@ public class ApuntarLibros extends PantallaBiblioteca {
 
     private final ActivityResultLauncher<String> pedirCamara =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
-                // si se concede, la cámara arranca en onResume
                 if (!concedido) panelPermiso.setVisibility(View.VISIBLE);
-                // al entrar estaba el diálogo del permiso y no tocaba ningún paso: ahora sí
                 else mostrarTutorialSiPrimeraVez(crearTutorial());
             });
 
@@ -88,10 +84,12 @@ public class ApuntarLibros extends PantallaBiblioteca {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         CabeceraNui.preparar(toolbar);
-        getSupportActionBar().setTitle("Escanear estantería");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.titulo_escanear_estanteria);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
-        barra = findViewById(R.id.cabecera); // yesería + arquería: las etiquetas no pasan por debajo
+        barra = findViewById(R.id.cabecera);
         View zocalo = findViewById(R.id.zocalo);
         int altoZocalo = zocalo.getLayoutParams().height;
         int altoToolbar = toolbar.getLayoutParams().height;
@@ -101,10 +99,8 @@ public class ApuntarLibros extends PantallaBiblioteca {
         panelPermiso = findViewById(R.id.panelPermiso);
         tvPista = findViewById(R.id.tvPista);
 
-        // la cámara llega hasta los bordes; la cabecera y el zócalo crecen bajo las barras del sistema
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets sistema = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // la yesería sube hasta la barra de estado; la arquería sigue dejando ver la cámara
             toolbar.getLayoutParams().height = altoToolbar + sistema.top;
             toolbar.setPadding(0, sistema.top, 0, 0);
             toolbar.requestLayout();
@@ -116,10 +112,8 @@ public class ApuntarLibros extends PantallaBiblioteca {
         db = new BibliotecaDB(DBHelper.getInstance(this));
         misAsignaturas = db.getAsignaturasMatriculadas(SesionUtil.correo(getIntent()));
 
-        // lee todos los códigos que haya en pantalla, también girados (libro tumbado)
         camara.setDecoderFactory(DecodificadorVarios.fabrica());
         camara.getCameraSettings().setContinuousFocusEnabled(true);
-        // la zona de lectura ocupa toda la pantalla, no solo el cuadrado central
         camara.setFramingRectSize(new Size(10000, 10000));
         camara.decodeContinuous(this::alLeerCodigo);
 
@@ -127,12 +121,11 @@ public class ApuntarLibros extends PantallaBiblioteca {
             if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                 pedirCamara.launch(Manifest.permission.CAMERA);
             } else {
-                // denegado para siempre: Android ya no muestra el diálogo
                 startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.fromParts("package", getPackageName(), null)));
             }
         });
-        // al girar no se vuelve a preguntar: cada denegación acerca a que Android deje de mostrar el diálogo
+
         if (!tieneCamara()) {
             if (savedInstanceState == null) pedirCamara.launch(Manifest.permission.CAMERA);
             else panelPermiso.setVisibility(View.VISIBLE);
@@ -142,17 +135,14 @@ public class ApuntarLibros extends PantallaBiblioteca {
     @Override
     protected Tutorial crearTutorial() {
         return new Tutorial(this, "apuntar_libros", 1)
-                .sensor(Gesto.ESCANEAR, "Pasa la cámara por los códigos de barras de los libros, sin pulsar nada."
-                        + " ¿No tienes ninguno a mano? Salta el paso")
+                .sensor(Gesto.ESCANEAR, getString(R.string.tut_escanear_sensor))
                 .soloSi(this::tieneCamara)
-                .tocar(R.id.cuerpoEtiqueta, "Toca la etiqueta para ver el libro").soloSiSeVe()
-                .info(R.id.panelInferior, "Cada libro vibra distinto: un toque si está libre, dos si es de tu asignatura"
-                        + " y uno largo si no queda ninguno. Así no hace falta mirar")
+                .tocar(R.id.cuerpoEtiqueta, getString(R.string.tut_escanear_tocar)).soloSiSeVe()
+                .info(R.id.panelInferior, getString(R.string.tut_escanear_vibracion))
                 .soloSi(this::tieneCamara)
-                .info(R.id.btnPermiso, "Para escanear hace falta la cámara: dale permiso aquí").soloSiSeVe();
+                .info(R.id.btnPermiso, getString(R.string.tut_escanear_permiso)).soloSiSeVe();
     }
 
-    // barrer la balda de lado a lado parecería agitar y sacaría del escáner
     @Override
     protected boolean usaAgitar() {
         return false;
@@ -180,7 +170,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
         capaEtiquetas.removeAllViews();
     }
 
-    // la etiqueta de un libro mientras se ve su código: recuerda hacia dónde se movía para seguirlo al perderlo
     private static class Seguida {
         final View etiqueta;
         float xCodigo, yCodigo; // en pantalla
@@ -209,7 +198,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
     }
 
     private void alLeerCodigo(String isbn, List<ResultPoint> puntos) {
-        // un EAN-13 de libro siempre empieza por 978 o 979; lo demás (una caja, un bote) se ignora
         if (!isbn.startsWith("978") && !isbn.startsWith("979")) return;
 
         Seguida seguida = etiquetas.get(isbn);
@@ -234,10 +222,9 @@ public class ApuntarLibros extends PantallaBiblioteca {
 
         Libro libro = db.getLibroPorIsbn(isbn);
         if (libro == null) {
-            // no vibra, pero se ve que lo ha leído
             color = getColor(R.color.nui_apagado);
-            tvTitulo.setText("No está en el catálogo");
-            tvEstado.setText("ISBN " + isbn);
+            tvTitulo.setText(R.string.libro_no_catalogo);
+            tvEstado.setText(getString(R.string.libro_isbn_fmt, isbn));
         } else {
             List<String> comunes = new ArrayList<>(db.getAsignaturasDeLibro(libro.id));
             comunes.retainAll(misAsignaturas);
@@ -251,8 +238,10 @@ public class ApuntarLibros extends PantallaBiblioteca {
             }
 
             tvTitulo.setText(libro.titulo);
-            String estado = LibroAdapter.textoDisponibilidad(libro);
-            if (!comunes.isEmpty()) estado += "\nDe tu asignatura: " + String.join(", ", comunes);
+            String estado = LibroAdapter.textoDisponibilidad(this, libro);
+            if (!comunes.isEmpty()) {
+                estado += "\n" + getString(R.string.libro_de_tu_asignatura_fmt, String.join(", ", comunes));
+            }
             tvEstado.setText(estado);
             etiqueta.setOnClickListener(v -> abrirDetalle(libro));
         }
@@ -262,9 +251,7 @@ public class ApuntarLibros extends PantallaBiblioteca {
         return etiqueta;
     }
 
-    // la etiqueta queda justo encima del código, sin salirse de la zona libre de la pantalla
     private boolean colocar(Seguida seguida, List<ResultPoint> puntos, boolean nueva) {
-        // los puntos vienen en píxeles de la imagen de la cámara: se pasan a píxeles de la pantalla
         Rect enPantalla = camara.getFramingRect();
         Rect enImagen = camara.getPreviewFramingRect();
         if (enPantalla == null || enImagen == null || puntos.isEmpty()) return false;
@@ -277,7 +264,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
         float xCodigo = enPantalla.left + (xImagen - enImagen.left) * escala;
         float yCodigo = enPantalla.top + (yImagen - enImagen.top) * escala;
 
-        // velocidad suavizada del código, para adelantar la etiqueta y para seguirlo cuando se deje de ver
         long ahora = SystemClock.elapsedRealtime();
         long dt = ahora - seguida.ultimaLectura;
         if (nueva || dt > VELOCIDAD_CADUCA_MS) {
@@ -290,7 +276,7 @@ public class ApuntarLibros extends PantallaBiblioteca {
         seguida.xCodigo = xCodigo;
         seguida.yCodigo = yCodigo;
         seguida.ultimaLectura = ahora;
-        // la etiqueta llega a donde estará el código al acabar de moverse, no a donde estaba
+
         xCodigo += seguida.vx * ETIQUETA_MOVER_MS;
         yCodigo += seguida.vy * ETIQUETA_MOVER_MS;
 
@@ -304,7 +290,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
         float y = limitar(yCodigo - etiqueta.getMeasuredHeight() - margen,
                 barra.getBottom() + margen, panelInferior.getTop() - etiqueta.getMeasuredHeight() - margen);
 
-        // si la etiqueta choca con el borde, la punta se desplaza para seguir señalando el código
         float mitad = etiqueta.getMeasuredWidth() / 2f;
         float desvio = xCodigo - (x + mitad);
         etiqueta.findViewById(R.id.puntaEtiqueta).setTranslationX(limitar(desvio, -mitad + dp(PUNTA_BORDE_DP), mitad - dp(PUNTA_BORDE_DP)));
@@ -330,8 +315,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
         return Math.max(minimo, Math.min(valor, maximo));
     }
 
-    // cada lectura del mismo código reinicia la cuenta: se va al dejar de apuntarle. Si no se vuelve a leer,
-    // la etiqueta sigue frenando en la dirección en la que iba el código (también fuera de la pantalla)
     private void programarDesaparicion(String isbn, Seguida seguida) {
         View etiqueta = seguida.etiqueta;
         etiqueta.animate().cancel();
@@ -344,10 +327,11 @@ public class ApuntarLibros extends PantallaBiblioteca {
                 }).start();
 
         if (seguida.vx == 0 && seguida.vy == 0) return;
-        // con DecelerateInterpolator la velocidad inicial es 2·distancia/duración: así arranca a la del código
+
         long duracion = ETIQUETA_FIJA_MS + ETIQUETA_DESVANECER_MS - LECTURA_PERDIDA_MS;
-        float dx = seguida.vx * duracion / 2, dy = seguida.vy * duracion / 2;
-        // empieza cuando ya ha acabado el movimiento hacia la última lectura (LECTURA_PERDIDA_MS > ETIQUETA_MOVER_MS)
+        float dx = seguida.vx * duracion / 2f;
+        float dy = seguida.vy * duracion / 2f;
+
         seguida.deriva = ObjectAnimator.ofPropertyValuesHolder(etiqueta,
                 PropertyValuesHolder.ofFloat(View.TRANSLATION_X, seguida.xEtiqueta, seguida.xEtiqueta + dx),
                 PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, seguida.yEtiqueta, seguida.yEtiqueta + dy));
@@ -365,7 +349,6 @@ public class ApuntarLibros extends PantallaBiblioteca {
     }
 
     private void abrirDetalle(Libro libro) {
-        // String, igual que los extras de RecienteUtil
         startActivity(new Intent(this, DetalleLibro.class)
                 .putExtra("idLibro", String.valueOf(libro.id))
                 .putExtra("CORREO", getIntent().getStringExtra("CORREO")));

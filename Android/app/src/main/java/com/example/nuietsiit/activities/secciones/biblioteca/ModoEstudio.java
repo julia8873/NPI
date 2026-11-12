@@ -20,8 +20,8 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -33,8 +33,7 @@ import java.util.function.BooleanSupplier;
 /**
  * Modo estudio: dejar el móvil boca arriba y quieto sobre la mesa llena un anillo (3 s) y empieza un
  * Pomodoro de 25 minutos con «No molestar» (sin permiso: modo vibración) y la pantalla negra y atenuada.
- * Levantarlo = pausa ("Llevas 18 min, ¿lo dejas?"); dejarlo otra vez = sigue. Al acabar, vibración suave
- * y 5 minutos de descanso. El modo de sonido de antes se restaura siempre al salir del estudio.
+ * Levantarlo = pausa; dejarlo otra vez = sigue. Al acabar, vibración suave y 5 minutos de descanso.
  */
 public class ModoEstudio extends PantallaBiblioteca {
 
@@ -84,8 +83,10 @@ public class ModoEstudio extends PantallaBiblioteca {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Modo estudio");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.titulo_modo_estudio);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         anillo = findViewById(R.id.anillo);
         ivMovil = findViewById(R.id.ivMovil);
@@ -114,7 +115,7 @@ public class ModoEstudio extends PantallaBiblioteca {
             switch (estado) {
                 case ESPERA:
                 case PAUSA:
-                    empezarEstudio(!mesa.enMesa()); // "Empezar sin dejarlo" / "Seguir"
+                    empezarEstudio(!mesa.enMesa());
                     break;
                 case DESCANSO:
                     finDescanso(false);
@@ -126,7 +127,6 @@ public class ModoEstudio extends PantallaBiblioteca {
         btnSecundario.setOnClickListener(v -> finish());
         capaEstudio.setOnClickListener(v -> pausar());
 
-        // atrás mientras se estudia = pausa (como levantarlo); si no, se sale
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -144,7 +144,7 @@ public class ModoEstudio extends PantallaBiblioteca {
             estudiadoMs = savedInstanceState.getLong("estudiado");
             rondas = savedInstanceState.getInt("rondas");
             inicioDescanso = SystemClock.elapsedRealtime() - savedInstanceState.getLong("descansado");
-            if (estado == Estado.ESTUDIO) estado = Estado.PAUSA; // al volver, hay que dejarlo otra vez
+            if (estado == Estado.ESTUDIO) estado = Estado.PAUSA;
             necesitaLevantar = false;
         }
         inicioEspera = SystemClock.elapsedRealtime();
@@ -153,23 +153,18 @@ public class ModoEstudio extends PantallaBiblioteca {
 
     @Override
     protected Tutorial crearTutorial() {
-        // si se entra ya estudiando (desde la balda) no sale ninguno: saldrá la próxima vez
         BooleanSupplier esperando = () -> estado == Estado.ESPERA || estado == Estado.PAUSA;
         return new Tutorial(this, "modo_estudio", 1)
-                .sensor(Gesto.MESA, "Deja el móvil sobre la mesa, boca arriba y quieto: el anillo se llena"
-                        + " y empiezan 25 minutos de estudio (ahora es de prueba, no empieza)")
+                .sensor(Gesto.MESA, getString(R.string.tut_estudio_mesa))
                 .soloSi(() -> esperando.getAsBoolean() && mesa.disponible())
-                .sensor(Gesto.LEVANTAR, "Ahora levántalo: el anillo se vacía. Estudiando, levantarlo hace una pausa"
-                        + " y dejarlo otra vez sigue")
+                .sensor(Gesto.LEVANTAR, getString(R.string.tut_estudio_levantar))
                 .soloSi(() -> esperando.getAsBoolean() && mesa.disponible())
-                .info(R.id.anillo, "Mientras estudias la pantalla se apaga y el móvil se silencia. Tócala para pausar."
-                        + " Al acabar vibra suave y descansas 5 minutos")
+                .info(R.id.anillo, getString(R.string.tut_estudio_anillo))
                 .soloSi(esperando)
-                .info(R.id.btnNoMolestar, "Dale permiso de «No molestar» para que no te llegue ni una notificación")
+                .info(R.id.btnNoMolestar, getString(R.string.tut_estudio_permiso))
                 .soloSiSeVe();
     }
 
-    // estudiar con el móvil en la mano o por accidente no tiene sentido: agitar no saca al menú
     @Override
     protected boolean usaAgitar() {
         return false;
@@ -181,7 +176,6 @@ public class ModoEstudio extends PantallaBiblioteca {
         mesa.iniciar();
         inicioEspera = SystemClock.elapsedRealtime();
         if (empezarAlAbrir) {
-            // el anillo ya se llenó en la balda; el detector se da cuenta enseguida de que sigue en la mesa
             empezarAlAbrir = false;
             empezarEstudio(false);
         }
@@ -192,7 +186,6 @@ public class ModoEstudio extends PantallaBiblioteca {
     @Override
     protected void onPause() {
         super.onPause();
-        // otra app delante o pantalla apagada: el estudio se pausa y el sonido vuelve como estaba
         pausar();
         mesa.parar();
         inicioLlenado = -1;
@@ -224,7 +217,7 @@ public class ModoEstudio extends PantallaBiblioteca {
             case PAUSA:
                 if (enMesa && !necesitaLevantar) {
                     inicioLlenado = SystemClock.elapsedRealtime();
-                    anillo.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK); // el anillo empieza a llenarse
+                    anillo.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
                 } else if (!enMesa) {
                     necesitaLevantar = false;
                     inicioLlenado = -1;
@@ -232,7 +225,7 @@ public class ModoEstudio extends PantallaBiblioteca {
                 mostrar();
                 break;
             case ESTUDIO:
-                if (enMesa) manual = false; // ya está en la mesa: a partir de ahora levantarlo pausa
+                if (enMesa) manual = false;
                 else if (!manual) pausar();
                 break;
             default:
@@ -252,17 +245,16 @@ public class ModoEstudio extends PantallaBiblioteca {
                     long llenar = estado == Estado.PAUSA ? LLENAR_SEGUIR_MS : LLENAR_MS;
                     float p = (ahora - inicioLlenado) / (float) llenar;
                     anillo.setProgreso(p);
-                    // en el tutorial el anillo se llena, pero el estudio (silencio, pantalla negra) no empieza
                     if (p >= 1f && !hayTutorialActivo()) {
                         empezarEstudio(false);
                         break;
                     }
                 } else {
-                    anillo.setProgreso(anillo.getProgreso() - 0.06f); // se vacía al levantarlo
+                    anillo.setProgreso(anillo.getProgreso() - 0.06f);
                 }
                 if (estado == Estado.ESPERA && btnPrincipal.getVisibility() != View.VISIBLE && inicioLlenado < 0
                         && ahora - inicioEspera > SIN_MESA_MS) {
-                    mostrar(); // aparece "Empezar sin dejarlo"
+                    mostrar();
                 }
                 siguiente = 30;
                 break;
@@ -302,11 +294,11 @@ public class ModoEstudio extends PantallaBiblioteca {
         anillo.setProgreso(1f);
         tvNoMolestarEstudio.setText(silenciar());
         tvTiempoEstudio.setText(formato(ESTUDIO_MS - estudiadoMs));
-        vibrar(new long[]{0, 30, 60, 50}, new int[]{0, 120, 0, 255}); // "clac": empieza
+        vibrar(new long[]{0, 30, 60, 50}, new int[]{0, 120, 0, 255});
         capaEstudio.setAlpha(0f);
         capaEstudio.setVisibility(View.VISIBLE);
         capaEstudio.animate().alpha(1f).setDuration(600).withEndAction(() -> brillo(BRILLO_ESTUDIO)).start();
-        capaEstudio.announceForAccessibility("Estudiando 25 minutos. Toca la pantalla para hacer una pausa.");
+        capaEstudio.announceForAccessibility(getString(R.string.a11y_estudiando_inicio));
         mostrar();
     }
 
@@ -314,7 +306,6 @@ public class ModoEstudio extends PantallaBiblioteca {
         if (estado != Estado.ESTUDIO) return;
         estudiadoMs = estudiado(SystemClock.elapsedRealtime());
         estado = Estado.PAUSA;
-        // si se pausa tocando, sigue en la mesa: hay que levantarlo y dejarlo (o pulsar Seguir)
         necesitaLevantar = mesa.enMesa();
         inicioLlenado = -1;
         anillo.setProgreso(0f);
@@ -329,10 +320,9 @@ public class ModoEstudio extends PantallaBiblioteca {
         inicioDescanso = SystemClock.elapsedRealtime();
         anillo.setProgreso(0f);
         salirDeLaCapa();
-        // vibración suave: dos toques flojos y uno algo más largo
         vibrar(new long[]{0, 120, 200, 120, 200, 260}, new int[]{0, 60, 0, 60, 0, 100});
         mostrar();
-        tvTitulo.announceForAccessibility("Ronda completada. Descansa 5 minutos.");
+        tvTitulo.announceForAccessibility(getString(R.string.a11y_ronda_completada));
     }
 
     private void finDescanso(boolean avisar) {
@@ -367,46 +357,57 @@ public class ModoEstudio extends PantallaBiblioteca {
         switch (estado) {
             case PAUSA:
                 long min = estudiadoMs / 60_000;
-                titulo = (min == 0 ? "Llevas menos de un minuto" : "Llevas " + min + (min == 1 ? " minuto" : " minutos"))
-                        + ". ¿Lo dejas?";
-                detalle = llenando ? "Quieto… sigues en un momento"
-                        : necesitaLevantar ? "Levántalo y vuelve a dejarlo para seguir"
-                        : "Vuelve a dejarlo sobre la mesa para seguir";
-                principal = "Seguir";
-                secundario = "Terminar";
+                if (min == 0) {
+                    titulo = getString(R.string.estudio_pausa_menos_min);
+                } else if (min == 1) {
+                    titulo = getString(R.string.estudio_pausa_un_min);
+                } else {
+                    titulo = getString(R.string.estudio_pausa_varios_min, (int) min);
+                }
+
+                if (llenando) {
+                    detalle = getString(R.string.estudio_pausa_quieto);
+                } else if (necesitaLevantar) {
+                    detalle = getString(R.string.estudio_pausa_levantar);
+                } else {
+                    detalle = getString(R.string.estudio_pausa_dejar);
+                }
+
+                principal = getString(R.string.btn_estudio_seguir);
+                secundario = getString(R.string.btn_estudio_terminar);
                 break;
             case DESCANSO:
-                titulo = "¡Ronda completada! Descansa";
-                detalle = "Levántate y estira las piernas. Vibrará cuando acabe el descanso.";
-                principal = "Saltar el descanso";
-                secundario = "Terminar";
+                titulo = getString(R.string.estudio_descanso_titulo);
+                detalle = getString(R.string.estudio_descanso_detalle);
+                principal = getString(R.string.btn_estudio_saltar_descanso);
+                secundario = getString(R.string.btn_estudio_terminar);
                 break;
             case ESTUDIO:
-                titulo = "Estudiando";
+                titulo = getString(R.string.estudio_estado_estudiando);
                 detalle = "";
                 break;
             default:
                 if (llenando) {
-                    titulo = "Quieto… no lo muevas";
-                    detalle = "Cuando se llene el anillo empiezan 25 minutos de estudio";
+                    titulo = getString(R.string.estudio_espera_quieto_titulo);
+                    detalle = getString(R.string.estudio_espera_quieto_detalle);
                 } else if (necesitaLevantar) {
-                    titulo = "Levántalo y vuelve a dejarlo";
-                    detalle = "Así empieza otra ronda de 25 minutos";
+                    titulo = getString(R.string.estudio_espera_levantar_titulo);
+                    detalle = getString(R.string.estudio_espera_levantar_detalle);
                 } else {
-                    titulo = "Deja el móvil sobre la mesa";
-                    detalle = "Boca arriba y quieto: empiezan 25 minutos de estudio y el móvil se silencia";
+                    titulo = getString(R.string.estudio_espera_dejar_titulo);
+                    detalle = getString(R.string.estudio_espera_dejar_detalle);
                 }
                 boolean sinMesa = !mesa.disponible() || necesitaLevantar
                         || SystemClock.elapsedRealtime() - inicioEspera > SIN_MESA_MS;
-                if (!llenando && sinMesa) principal = "Empezar sin dejarlo";
+                if (!llenando && sinMesa) principal = getString(R.string.btn_estudio_sin_dejarlo);
                 break;
         }
         tvTitulo.setText(titulo);
         tvDetalle.setText(detalle);
-        boton(btnPrincipal, principal, View.INVISIBLE); // guarda su hueco: lo de arriba no salta al aparecer
+        boton(btnPrincipal, principal, View.INVISIBLE);
         boton(btnSecundario, secundario, View.GONE);
         tvRondas.setVisibility(rondas > 0 ? View.VISIBLE : View.GONE);
-        tvRondas.setText("Rondas completadas: " + rondas);
+        tvRondas.setText(getString(R.string.estudio_rondas_completadas_fmt, rondas));
 
         NotificationManager nm = getSystemService(NotificationManager.class);
         boolean sinPermiso = nm != null && !nm.isNotificationPolicyAccessGranted();
@@ -418,16 +419,14 @@ public class ModoEstudio extends PantallaBiblioteca {
         if (texto != null) b.setText(texto);
     }
 
-    // el móvil del centro se tumba una y otra vez: "déjalo así, sobre la mesa"
     private void crearAnimacionMovil() {
         float d = getResources().getDisplayMetrics().density;
-        ivMovil.setCameraDistance(8000 * d);
+        ivMovil.setCameraDistance(8000f * d);
         animMovil = ValueAnimator.ofFloat(0f, 1f);
         animMovil.setDuration(2400);
         animMovil.setRepeatCount(ValueAnimator.INFINITE);
         animMovil.addUpdateListener(a -> {
             float t = (float) a.getAnimatedValue();
-            // 0–0,4 se tumba, 0,4–0,8 quieto tumbado, 0,8–1 vuelve a ponerse de pie
             float tumbado = t < 0.4f ? suave(t / 0.4f) : t < 0.8f ? 1f : 1f - suave((t - 0.8f) / 0.2f);
             ponerMovil(tumbado, d);
         });
@@ -439,7 +438,7 @@ public class ModoEstudio extends PantallaBiblioteca {
     }
 
     private static float suave(float x) {
-        return x * x * (3 - 2 * x);
+        return x * x * (3f - 2f * x);
     }
 
     private void animarMovil(boolean si) {
@@ -449,7 +448,6 @@ public class ModoEstudio extends PantallaBiblioteca {
         } else if (!si && animMovil.isStarted()) {
             animMovil.cancel();
         }
-        // llenándose: tumbado y quieto, como está de verdad
         if (!si) ponerMovil(inicioLlenado >= 0 ? 1f : 0f, getResources().getDisplayMetrics().density);
     }
 
@@ -469,7 +467,6 @@ public class ModoEstudio extends PantallaBiblioteca {
 
     // ---------- sonido ----------
 
-    /** Pone «No molestar» (o, sin permiso, modo vibración) y dice en una frase lo que ha hecho. */
     private String silenciar() {
         NotificationManager nm = getSystemService(NotificationManager.class);
         if (nm != null && nm.isNotificationPolicyAccessGranted()) {
@@ -479,7 +476,7 @@ public class ModoEstudio extends PantallaBiblioteca {
                 nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY);
                 cambieFiltro = true;
             }
-            return "🔕 No molestar activado";
+            return getString(R.string.estudio_no_molestar_on);
         }
         AudioManager audio = getSystemService(AudioManager.class);
         if (audio == null) return "";
@@ -492,10 +489,11 @@ public class ModoEstudio extends PantallaBiblioteca {
                 return "";
             }
         }
-        return audio.getRingerMode() == AudioManager.RINGER_MODE_SILENT ? "🔕 Móvil en silencio" : "📳 Móvil en vibración";
+        return audio.getRingerMode() == AudioManager.RINGER_MODE_SILENT
+                ? getString(R.string.estudio_movil_silencio)
+                : getString(R.string.estudio_movil_vibracion);
     }
 
-    /** Vuelve a dejar el sonido como estaba, salvo que el usuario lo haya cambiado mientras tanto. */
     private void restaurarSonido() {
         if (cambieFiltro) {
             cambieFiltro = false;

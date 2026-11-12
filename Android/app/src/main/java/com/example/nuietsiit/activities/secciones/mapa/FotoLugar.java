@@ -20,6 +20,8 @@ import android.text.TextUtils;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.nuietsiit.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +61,7 @@ public final class FotoLugar {
             if (foto != null) return foto;
         }
         String[] nombre = nombreEIcono(ctx, id);
-        return new BitmapDrawable(ctx.getResources(), tarjeta(nombre[1], nombre[0], ANCHO));
+        return new BitmapDrawable(ctx.getResources(), tarjeta(ctx, nombre[1], nombre[0], ANCHO));
     }
 
     /** Foto del punto del camino, o tarjeta con su instrucción, la flecha del giro y "numero/total". */
@@ -71,7 +73,7 @@ public final class FotoLugar {
             if (foto != null) return foto;
         }
         return new BitmapDrawable(ctx.getResources(),
-                tarjetaPunto(punto.instruccion, punto.giro, numero == total, numero + "/" + total, ANCHO));
+                tarjetaPunto(ctx, punto.instruccion, punto.giro, numero == total, numero + "/" + total, ANCHO));
     }
 
     // ---------- Claves ----------
@@ -113,10 +115,10 @@ public final class FotoLugar {
         if (punto != null) {
             List<FotosRutaExterior.PuntoFoto> puntos = CapaLugares.cargarFotos(ctx).tramoDe(clave).puntos;
             boolean ultimo = puntos.get(puntos.size() - 1) == punto;
-            return new BitmapDrawable(ctx.getResources(), tarjetaPunto(null, punto.giro, ultimo, null, anchoPx));
+            return new BitmapDrawable(ctx.getResources(), tarjetaPunto(ctx, null, punto.giro, ultimo, null, anchoPx));
         }
         String[] nombre = nombreEIcono(ctx, idDe(clave));
-        return new BitmapDrawable(ctx.getResources(), tarjeta(nombre[1], nombre[0], anchoPx));
+        return new BitmapDrawable(ctx.getResources(), tarjeta(ctx, nombre[1], nombre[0], anchoPx));
     }
 
     /** Texto de la foto: instrucción del punto o nombre del sitio. */
@@ -165,7 +167,7 @@ public final class FotoLugar {
 
     /** {nombre, icono} del lugar, parada o bus ("bus_<línea>") según la red cargada. */
     private static String[] nombreEIcono(Context ctx, String id) {
-        if (id == null) return new String[]{"Ruta", "📍"};
+        if (id == null) return new String[]{ctx.getString(R.string.mapa_ruta), "📍"};
         RedTransporte red = CapaLugares.cargarRed(ctx);
         if (red != null) {
             RedTransporte.Lugar lugar = red.lugar(id);
@@ -174,7 +176,7 @@ public final class FotoLugar {
                 if (id.equals("bus_" + linea.id)) return new String[]{linea.nombre, "🚌"};
                 for (RedTransporte.Sentido sentido : linea.sentidos) {
                     for (RedTransporte.Parada parada : sentido.paradas) {
-                        if (parada.id.equals(id)) return new String[]{"Parada " + parada.nombre, "🚏"};
+                        if (parada.id.equals(id)) return new String[]{ctx.getString(R.string.mapa_parada_nombre, parada.nombre), "🚏"};
                     }
                 }
             }
@@ -190,7 +192,7 @@ public final class FotoLugar {
     }
 
     /** Tarjeta 4:3 con degradado, icono grande y nombre. */
-    private static Bitmap tarjeta(String icono, String nombre, int anchoPx) {
+    private static Bitmap tarjeta(Context ctx, String icono, String nombre, int anchoPx) {
         int ancho = 800, alto = 600;
         Bitmap bmp = Bitmap.createBitmap(anchoPx, anchoPx * 3 / 4, Bitmap.Config.ARGB_8888);
         Canvas c = lienzo(bmp, anchoPx);
@@ -211,7 +213,7 @@ public final class FotoLugar {
                 TextUtils.TruncateAt.END).toString();
         c.drawText(texto, ancho / 2f, 390, p);
 
-        marcaProvisional(c, ancho, alto);
+        marcaProvisional(ctx, c, ancho, alto);
         return bmp;
     }
 
@@ -219,7 +221,7 @@ public final class FotoLugar {
      * Tarjeta 4:3 de un punto del camino: flecha del giro (o bandera al llegar), instrucción y contador
      * (instruccion == null: solo la flecha, centrada).
      */
-    private static Bitmap tarjetaPunto(String instruccion, double giro, boolean llegada, String contador,
+    private static Bitmap tarjetaPunto(Context ctx, String instruccion, double giro, boolean llegada, String contador,
                                        int anchoPx) {
         int ancho = 800, alto = 600;
         Bitmap bmp = Bitmap.createBitmap(anchoPx, anchoPx * 3 / 4, Bitmap.Config.ARGB_8888);
@@ -239,7 +241,7 @@ public final class FotoLugar {
             flecha(c, ancho / 2f, 210 + dy, Math.max(-150, Math.min(150, giro)));
         }
         if (instruccion == null) {
-            marcaProvisional(c, ancho, alto);
+            marcaProvisional(ctx, c, ancho, alto);
             return bmp;
         }
 
@@ -269,7 +271,7 @@ public final class FotoLugar {
         texto.draw(c);
         c.restore();
 
-        marcaProvisional(c, ancho, alto);
+        marcaProvisional(ctx, c, ancho, alto);
         return bmp;
     }
 
@@ -306,11 +308,11 @@ public final class FotoLugar {
     }
 
     /** Marca pequeña "provisional" abajo a la derecha (hasta que haya foto real). */
-    private static void marcaProvisional(Canvas c, int ancho, int alto) {
+    private static void marcaProvisional(Context ctx, Canvas c, int ancho, int alto) {
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setTextAlign(Paint.Align.RIGHT);
         p.setTextSize(24);
         p.setColor(Color.argb(150, 255, 255, 255));
-        c.drawText("provisional", ancho - 24, alto - 22, p);
+        c.drawText(ctx.getString(R.string.mapa_provisional), ancho - 24, alto - 22, p);
     }
 }

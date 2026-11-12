@@ -522,4 +522,950 @@
 
     <string name="btn_ir">GO</string>
 
+    <string name="titulo_escanear_estanteria">Scan bookshelf</string>
+    <string name="tut_escanear_sensor">Point the camera at the book barcodes without pressing anything. Don\'t have one handy? Skip this step</string>
+    <string name="tut_escanear_tocar">Tap the label to view the book</string>
+    <string name="tut_escanear_vibracion">Each book vibrates differently: one tap if available, two if it\'s for your subject, and a long one if out of stock. No need to look</string>
+    <string name="tut_escanear_permiso">Camera access is required to scan: grant permission here</string>
+
+    <string name="libro_no_catalogo">Not in catalog</string>
+    <string name="libro_isbn_fmt">ISBN %1$s</string>
+    <string name="libro_de_tu_asignatura_fmt">From your subject: %1$s</string>
+
+    <string name="titulo_libro">Book</string>
+    <string name="libro_no_encontrado">Book not found</string>
+    <string name="reciente_libro_fmt">Book: %1$s</string>
+    <string name="reciente_biblioteca_subtitulo">ETSIIT Library</string>
+    <string name="libro_sin_signatura">No call number</string>
+
+    <string name="tut_libro_disponibilidad">Here you can see if any copies are available. If checked out, the cover appears dimmed</string>
+    <string name="tut_libro_signatura">The call number is the spine label: use it to find the book on the shelf</string>
+    <string name="tut_libro_ubicacion">Floor and shelf location</string>
+    <string name="tut_libro_como_llegar">Don\'t know where the library is? The map will guide you there</string>
+    <string name="tut_libro_volver">Go back and the book flies right back to its shelf</string>
+
+    <string name="libro_disponible_fmt">Available · %1$d of %2$d copies</string>
+    <string name="libro_sin_ejemplares">No copies available</string>
+    <string name="libro_bibliografia_basica">Core bibliography.</string>
+
+    <string name="titulo_modo_estudio">Study mode</string>
+
+    <string name="tut_estudio_mesa">Place your phone face up and still on the table: the ring fills up and 25 minutes of study begin (test mode right now, won\'t start)</string>
+    <string name="tut_estudio_levantar">Now pick it up: the ring empties. While studying, picking it up pauses and placing it back resumes</string>
+    <string name="tut_estudio_anillo">While you study, the screen dims and the phone is silenced. Tap to pause. When done, it vibrates gently for a 5-minute break</string>
+    <string name="tut_estudio_permiso">Grant \"Do Not Disturb\" permission so not a single notification bothers you</string>
+
+    <string name="a11y_estudiando_inicio">Studying for 25 minutes. Tap the screen to pause.</string>
+    <string name="a11y_ronda_completada">Round completed. Take a 5-minute break.</string>
+
+    <string name="estudio_pausa_menos_min">Less than a minute in. Stopping already?</string>
+    <string name="estudio_pausa_un_min">1 minute in. Stopping already?</string>
+    <string name="estudio_pausa_varios_min">%1$d minutes in. Stopping already?</string>
+    <string name="estudio_pausa_quieto">Hold still… resuming in a moment</string>
+    <string name="estudio_pausa_levantar">Pick it up and place it back down to resume</string>
+    <string name="estudio_pausa_dejar">Place it back on the table to resume</string>
+    <string name="btn_estudio_seguir">Resume</string>
+    <string name="btn_estudio_terminar">Finish</string>
+
+    <string name="estudio_descanso_titulo">Round completed! Take a break</string>
+    <string name="estudio_descanso_detalle">Stand up and stretch your legs. It will vibrate when your break ends.</string>
+    <string name="btn_estudio_saltar_descanso">Skip break</string>
+    <string name="estudio_estado_estudiando">Studying</string>
+
+    <string name="estudio_espera_quieto_titulo">Hold still… don\'t move it</string>
+    <string name="estudio_espera_quieto_detalle">When the ring fills up, 25 minutes of study will begin</string>
+    <string name="estudio_espera_levantar_titulo">Pick it up and place it back down</string>
+    <string name="estudio_espera_levantar_detalle">This starts another 25-minute round</string>
+    <string name="estudio_espera_dejar_titulo">Place your phone on the table</string>
+    <string name="estudio_espera_dejar_detalle">Face up and still: 25 minutes of study begin and the phone is silenced</string>
+    <string name="btn_estudio_sin_dejarlo">Start without placing it down</string>
+
+    <string name="estudio_rondas_completadas_fmt">Rounds completed: %1$d</string>
+    <string name="estudio_no_molestar_on">🔕 Do Not Disturb enabled</string>
+    <string name="estudio_movil_silencio">🔕 Phone on silent</string>
+    <string name="estudio_movil_vibracion">📳 Phone on vibrate</string>
+
+    <string name="btn_ver_libros_fmt">View %1$s</string>
+    <string name="un_libro">1 book</string>
+    <string name="varios_libros_fmt">%1$d books</string>
+
+    <string name="titulo_biblioteca">Library</string>
+
+    <string name="tut_bib_pestanas">Each tab is a bookshelf: your subjects, your next class, and the full catalog. In Explore you can filter by degree, year, or floor</string>
+    <string name="tut_bib_buscar">Type a title or author, even with typos: we\'ll still understand you</string>
+    <string name="tut_bib_sugerencia">Did you mean this? Tap it to search</string>
+    <string name="tut_bib_disponibles">Tap Available to see only the books you can borrow</string>
+    <string name="tut_bib_deslizar">Swipe the shelves left to turn to the next shelf</string>
+    <string name="tut_bib_pellizcar">Pinch the shelf to see more books at once, or fewer and larger</string>
+    <string name="tut_bib_inclinar">Tilt your phone to the side to switch shelves</string>
+    <string name="tut_bib_mantener">Press and hold a cover to pull out the book and peek at it. Release and it goes back</string>
+    <string name="tut_bib_apuntar">Scan the bookshelf with the camera: each book tells you if it\'s free or from your subject</string>
+    <string name="tut_bib_estudio">Study mode: 25 distraction-free minutes with your phone on the table</string>
+    <string name="tut_bib_mesa">Try it: place your phone face up on the table. When the tutorial ends, it will suggest studying</string>
+    <string name="tut_bib_tocar">Tap a cover (or swipe it up while peeking) to open the book</string>
+
+    <string name="bib_pestana_mias">Mine</string>
+    <string name="bib_pestana_todos">All</string>
+    <string name="bib_pestana_explorar">Explore</string>
+    <string name="bib_vista_mis_asignaturas">My subjects</string>
+    <string name="bib_vista_todo_catalogo">Full catalog</string>
+
+    <string name="bib_contador_estantes_fmt">%1$s · shelf %2$d of %3$d</string>
+    <string name="bib_contador_ampliado_fmt">Not in %1$s. In full catalog: %2$s</string>
+    <string name="bib_contador_normal_fmt">%1$s · %2$s</string>
+    <string name="bib_mostrando_para_fmt">Showing results for “%1$s”</string>
+    <string name="bib_quisiste_decir_fmt">Did you mean “%1$s”?</string>
+
+    <string name="sug_estudio_balda_titulo">Going to study?</string>
+    <string name="sug_estudio_balda_detalle">Leave it like this to start study mode. Tap here to start right away, or anywhere else to keep browsing books.</string>
+    <string name="sug_estudio_llegar_titulo">You\'ve arrived at the library. Going to study?</string>
+    <string name="sug_estudio_llegar_detalle">Place your phone on the table to start study mode, or tap here.</string>
+
+    <string-array name="calendario_dias_semana">
+        <item>M</item>
+        <item>T</item>
+        <item>W</item>
+        <item>T</item>
+        <item>F</item>
+        <item>S</item>
+        <item>S</item>
+    </string-array>
+
+    <string name="cal_asistente_titulo">ETSIIT Virtual Assistant 🤖</string>
+    <string name="cal_asistente_mensaje">Hi! In the future, I\'ll be your smart AI assistant to answer all your questions about ETSIIT, your classes, assignments, and the school.\n\nFor now, you can use the quick shortcuts to browse sections and the calendar for your exams.</string>
+    <string name="cal_asistente_btn">Got it!</string>
+
+    <string name="cal_patron_fecha_header">EEEE, MMMM d</string>
+    <string name="cal_header_eventos_fmt">Events: %1$s</string>
+    <string name="cal_toast_eliminado">Event deleted</string>
+
+    <string name="cal_no_registrado_titulo">Unregistered user</string>
+    <string name="cal_no_registrado_mensaje">You must log in to save your personal exams and assignments to your account.</string>
+    <string name="cal_btn_aceptar">OK</string>
+
+    <string name="cal_dialog_anadir_titulo">Add Exam / Assignment</string>
+    <string name="cal_btn_guardar">Save</string>
+    <string name="cal_btn_cancelar">Cancel</string>
+    <string name="cal_toast_titulo_vacio">Enter a title for the event</string>
+    <string name="cal_toast_anotado">Event added to calendar</string>
+
+    <string name="cal_todo_el_dia">All day</string>
+    <string name="cal_sin_descripcion">No description</string>
+    <string name="cal_tipo_examen">Exam</string>
+    <string name="cal_tipo_entrega">Assignment</string>
+    <string name="cal_tipo_cita">Appointment</string>
+    <string name="cal_tipo_evento">Event</string>
+
+    <string name="chat_bienvenida">Hi! I\'m your ETSIIT Virtual Assistant powered by Gemini.\n\nHow can I help you today? You can ask me about subjects, professors, dining hall menus, or request information about the school.</string>
+    <string name="chat_sin_respuesta">I didn\'t receive a response from the API.</string>
+    <string name="chat_error_desconocido">Unknown error</string>
+    <string name="chat_error_conexion_fmt">Connection error with Gemini:\n\n%1$s\n\nPlease check your internet connection or API Key and try again.</string>
+
+    <string name="noticias_meta_fmt">%1$s · %2$s</string>
+
+    <string name="prof_titulo_curso_fmt">Year %1$d Faculty</string>
+    <string name="prof_imparte_fmt">Teaches: %1$s</string>
+    <string name="prof_resultados_texto_fmt">Results for: \'%1$s\'</string>
+    <string name="prof_sin_resultados">No faculty members found in the database.</string>
+
+    <string name="prof_no_encontrado">Professor not found</string>
+    <string name="prof_enviar_correo_fmt">Send email to %1$s</string>
+    <string name="prof_web_no_disponible">Faculty webpage not available</string>
+
+    <string name="prof_reciente_titulo_fmt">Professor: %1$s</string>
+    <string name="prof_reciente_subtitulo">ETSIIT Faculty</string>
+
+    <string name="prof_sin_despacho">No office assigned in the database.</string>
+    <string name="prof_clase_item_fmt">📚 %1$s (%2$s %3$s)\n⏰ %4$s from %5$s to %6$s (Tap to view subject)</string>
+    <string name="prof_sin_clases">No classes registered for this professor.</string>
+    <string name="prof_sin_tutorias">No office hours currently available.</string>
+
+    <string name="prof_tutoria_horario_fmt">%1$s: %2$s - %3$s</string>
+    <string name="prof_tutoria_modalidad_fmt">Modality: %1$s</string>
+    <string name="prof_btn_reservar_tutoria">Book Office Hours</string>
+
+    <string name="prof_sesion_requerida_titulo">Login required</string>
+    <string name="prof_sesion_requerida_mensaje">To book office hours, you must first log in with your credentials. Would you like to log in now?</string>
+    <string name="prof_btn_iniciar_sesion">Log in</string>
+    <string name="prof_btn_cancelar">Cancel</string>
+
+    <string name="prof_tutoria_ocupada_fmt">This time slot is already booked for %1$s</string>
+    <string name="prof_confirmar_reserva_titulo">Confirm Office Hours Booking</string>
+    <string name="prof_confirmar_reserva_info_fmt">Suggested date: %1$s\nTime: %2$s - %3$s\nModality: %4$s</string>
+    <string name="prof_motivo_tutoria_hint">Write the reason or topic for the meeting (optional)</string>
+    <string name="prof_btn_confirmar_reserva">Confirm Booking</string>
+    <string name="prof_reserva_exito">Booking completed successfully!</string>
+    <string name="prof_reserva_error">Error saving the booking.</string>
+
+    <string-array name="prof_dias_semana">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    <string name="prof_dia_fallback_fmt">Day %1$d</string>
+
+    <string name="act_titulo">Activities</string>
+    <string name="act_chip_todas">All</string>
+    <string name="act_chip_mis">✓ My activities</string>
+    <string name="act_chip_tipo_fmt">%1$s \%2$s</string>
+
+    <string name="act_vacio_todas_vistas">🎉 You\'ve seen them all!</string>
+    <string name="act_vacio_sin_tipo">No activities of this type.</string>
+    <string name="act_vacio_sin_sesion">🔒 Log in to view the activities you sign up for.</string>
+    <string name="act_vacio_sin_inscripciones">You haven\'t signed up for anything yet.</string>
+
+    <string name="act_carta_cuando_fmt">📅 %1$s · \%2$s</string>
+    <string name="act_carta_extra_fmt">🎓 %1$s · \%2$s</string>
+    <string name="act_contador_fmt">%1$d of \%2$d · tilt phone or swipe</string>
+
+    <string name="act_accion_apuntarte">sign up</string>
+    <string name="act_plazo_cerrado_fmt">Registration is not open: %1$s</string>
+    <string name="act_sin_plazas">No spots left 😢</string>
+    <string name="act_ya_apuntado_fmt">You were already signed up for “%1$s”</string>
+    <string name="act_error_inscripcion">Could not complete registration</string>
+    <string name="act_apuntado_ok_fmt">🎉 You signed up for “%1$s”</string>
+    <string name="act_accion_calendario">📅 Calendar</string>
+    <string name="act_desapuntado_ok_fmt">You are no longer signed up for “%1$s”</string>
+    <string name="act_accion_deshacer">Undo</string>
+    <string name="act_pedir_sesion_fmt">🔒 Log in to %1$s</string>
+    <string name="act_accion_login">Log in</string>
+
+    <string name="act_detalle_tipo_fmt">%1$s \%2$s</string>
+    <string name="act_detalle_fecha_fmt">📅 %1$s</string>
+    <string name="act_detalle_lugar_fmt">📍 %1$s</string>
+    <string name="act_detalle_abierta_fmt">🎓 %1$s\n\%2$s</string>
+    <string name="act_plazas_ocupadas_fmt">%1$d of \%2$d spots taken</string>
+    <plurals name="act_personas_apuntadas">
+        <item quantity="one">%1$d person signed up</item>
+        <item quantity="other">%1$d people signed up</item>
+    </plurals>
+    <string name="act_detalle_plazas_fmt">👥 %1$s</string>
+
+    <string name="act_btn_desapuntarme">I can\'t go anymore (unregister)</string>
+    <string name="act_btn_agotadas">Sold out</string>
+    <string name="act_btn_login_apuntar">🔒 Log in to sign up</string>
+    <string name="act_btn_apuntarme">🙋 Sign me up</string>
+
+    <string name="act_fecha_inicio_fmt">%1$s · \%2$s</string>
+    <string name="act_fecha_rango_mismo_dia_fmt">%1$s – \%2$s</string>
+    <string name="act_fecha_hasta_fmt">%1$s\n    until \%2$s</string>
+    <string name="act_lugar_sitio_fmt">%1$s · ETSIIT</string>
+    <string name="act_lugar_general">ETSIIT · University of Granada</string>
+
+    <string name="act_error_sin_calendario">No calendar app found on this phone</string>
+    <string name="act_error_sin_navegador">No browser available to open the link</string>
+
+    <string-array name="asig_cabecera_horario">
+        <item>Time</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+    </string-array>
+    <string name="asig_celda_horario_fmt">%1$s\n%2$s - %3$s\n(%4$s %5$s)</string>
+
+    <string name="com_semana_fmt">📅 WEEK: %1$s - %2$s</string>
+    <string name="com_asistente_titulo">ETSIIT Virtual Assistant 🤖</string>
+    <string name="com_asistente_mensaje">Hi! I\'m your Dining Halls assistant. Here you can check the daily UGR menu, view opening hours, and switch between the regular or vegetarian menu.</string>
+    <string name="com_asistente_btn">Got it!</string>
+
+    <string name="com_btn_menu_vegetariano">🌱 Vegetarian Menu ▾</string>
+    <string name="com_btn_menu_normal">🥩 Menu ▾</string>
+
+    <string name="com_toast_dia_pasado">You cannot view days that have already passed</string>
+    <string name="com_toast_fuera_semana">You cannot leave the current week</string>
+    <string name="com_toast_este_dia_pasado">This day has already passed</string>
+
+    <string name="com_patron_dia_mes">MMMM d</string>
+    <string name="com_horario_dia_fmt">📅 %1$s</string>
+    <string name="com_item_mas_cercano"> (Closest)</string>
+
+    <string name="com_tag_mas_cercano">📍 CLOSEST DINING HALL</string>
+    <string name="com_tag_seleccionado">📍 SELECTED DINING HALL</string>
+
+    <string name="not_titulo">News &amp; Announcements</string>
+    <string name="not_chip_todos">All</string>
+    <string name="not_chip_sin_leer">Unread</string>
+    <string name="not_chip_categoria_fmt">%1$s %2$s</string>
+
+    <string name="not_al_dia">✅ You\'re all caught up</string>
+    <plurals name="not_avisos_sin_leer">
+        <item quantity="one">📬 %1$d unread announcement</item>
+        <item quantity="other">📬 %1$d unread announcements</item>
+    </plurals>
+
+    <string name="not_paginacion_fmt">%1$s%2$d of %3$d%4$s</string>
+    <string name="not_detalle_categoria_fmt">%1$s %2$s</string>
+    <string name="not_detalle_urgente_sufijo"> · URGENT</string>
+    <string name="not_detalle_publicado_fmt">Published %1$s · %2$s</string>
+    <string name="not_detalle_caducidad_fmt">Valid until %1$s</string>
+    <string name="not_error_sin_navegador">No browser available to open the link</string>
+
+    <string name="prof_sin_tutorias_reservadas">You don\'t have any booked office hours at the moment.</string>
+    <string name="prof_reserva_detalles_fmt">Date: %1$s (%2$s)\nModality: %3$s</string>
+    <string name="prof_reserva_estado_fmt">Status: %1$s</string>
+    <string name="prof_estado_confirmada">CONFIRMED</string>
+    <string name="prof_estado_cancelada">CANCELLED</string>
+    <string name="prof_estado_pendiente">PENDING</string>
+    <string name="prof_btn_cancelar_reserva">Cancel booking</string>
+    <string name="prof_toast_reserva_cancelada">Booking cancelled successfully</string>
+
+    <string name="sec_titulo">Registrar\'s Office</string>
+    <plurals name="sec_cuantos_tramites">
+        <item quantity="one">%1$d procedure</item>
+        <item quantity="other">%1$d procedures</item>
+    </plurals>
+    <string name="sec_pagina_varias_fmt">%1$s · %2$d of %3$d · swipe or tilt</string>
+
+    <string name="sec_tut_lo_tuyo">Here is your overview: your next appointment, what you\'ve requested, and open deadlines. Tap to open</string>
+    <string name="sec_tut_que_necesitas">Not sure which procedure you need? Here we\'ll guide you step by step</string>
+    <string name="sec_tut_pedir_cita">Book an appointment to visit the Registrar\'s Office counter</string>
+    <string name="sec_tut_mis_gestiones">Your appointments and requests, with their receipt and QR code</string>
+    <string name="sec_tut_ver_todos">Tap here to open the catalog with all procedures</string>
+    <string name="sec_tut_pestanas">Tap a category to view only its procedures</string>
+    <string name="sec_tut_deslizar">There are more cards: swipe left to browse them</string>
+    <string name="sec_tut_inclinar">You can also tilt your phone to either side to flip through the cards</string>
+    <string name="sec_tut_buscar">Type what you\'re looking for, even with typos: we\'ll still understand you</string>
+    <string name="sec_tut_sugerencia">Did you mean this? Tap it to search</string>
+    <string name="sec_tut_item_tramite">Tap a procedure to see what you need and its steps</string>
+
+    <string name="sec_catalogo_cerrar">Close catalog ▾</string>
+    <string name="sec_catalogo_abrir">View all procedures ▴</string>
+
+    <string name="sec_tarjeta_cita_etiqueta">Your next appointment</string>
+    <string name="sec_tarjeta_cita_titulo_fmt">%1$s at %2$s</string>
+    <string name="sec_tarjeta_cita_accion">At the Registrar\'s Office, flip your phone to show the QR</string>
+
+    <string name="sec_tarjeta_solicitud_etiqueta">Request</string>
+    <string name="sec_tarjeta_solicitud_detalle_fmt">Submitted %1$s</string>
+
+    <string name="sec_plazo_ultimo_dia">Last day</string>
+    <plurals name="sec_plazo_dias_restantes">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
+    <string name="sec_tarjeta_plazo_etiqueta">Open deadline</string>
+    <string name="sec_tarjeta_plazo_detalle_fmt">%1$s · until %2$s</string>
+
+    <string name="sec_tarjeta_todo_orden_etiqueta">All clear</string>
+    <string name="sec_tarjeta_todo_orden_titulo">Nothing pending</string>
+    <string name="sec_tarjeta_todo_orden_detalle">No appointments, requests, or expiring deadlines</string>
+    <string name="sec_tarjeta_todo_orden_accion">If you need anything, tap “What do you need?”</string>
+
+    <string name="sec_pestana_todas">All</string>
+    <string name="sec_pestana_creditos">Credits</string>
+
+    <string name="sec_mostrando_para_fmt">Showing results for “%1$s”</string>
+    <string name="sec_sugerencia_fmt">Did you mean “%1$s”?</string>
+
+    <string name="sec_mis_gestiones_contador_fmt">My requests (%1$d)</string>
+    <string name="sec_mis_gestiones">My requests</string>
+
+    <string name="base_desc_repetir_tutorial">Replay the tutorial for this screen</string>
+
+    <string name="sec_aviso_deshacer_fmt">Undo · %1$d</string>
+
+    <string name="cita_titulo">Book appointment</string>
+
+    <string name="cita_tut_motivo">Tap here to choose what the appointment is for</string>
+    <string name="cita_tut_existente">You already have an appointment for this: if you pick another slot, it will be rescheduled</string>
+    <string name="cita_tut_dias">Tap the day that suits you best</string>
+    <string name="cita_tut_pestanas">Tap an hour to view its 10-minute slots</string>
+    <string name="cita_tut_deslizar">You can also swipe the slots sideways to change the hour</string>
+    <string name="cita_tut_inclinar">Or tilt your phone to either side to change the hour</string>
+    <string name="cita_tut_franjas">Tap a free slot to book the appointment. We\'ll ask for confirmation before saving</string>
+
+    <string name="cita_motivo_general">General inquiry</string>
+    <string name="cita_existente_aviso_fmt">You already have an appointment for this reason on %1$s. If you pick another time, it will be changed.</string>
+    <string name="cita_dia_hoy">Today</string>
+    <string name="cita_titulo_horas_fmt">Choose time · %1$s</string>
+
+    <string name="cita_pestana_tu_cita">your slot</string>
+    <string name="cita_pestana_llena">full</string>
+    <plurals name="cita_pestana_libres">
+        <item quantity="one">%1$d free</item>
+        <item quantity="other">%1$d free</item>
+    </plurals>
+
+    <string name="cita_dialog_cambiar_titulo">Reschedule appointment?</string>
+    <string name="cita_dialog_cambiar_msg_fmt">%1$s\n\nBefore: %2$s\nNow: %3$s</string>
+    <string name="cita_btn_cambiar">Reschedule</string>
+    <string name="cita_dialog_confirmar_titulo">Confirm appointment?</string>
+    <string name="cita_dialog_confirmar_msg_fmt">%1$s\n\n%2$s</string>
+    <string name="cita_btn_confirmar">Confirm</string>
+    <string name="cita_btn_cancelar">Cancel</string>
+
+    <string name="cita_toast_no_libre">That time slot is no longer available</string>
+    <string name="cita_toast_error_guardar">Could not save the appointment</string>
+    <string name="cita_fecha_hora_fmt">%1$s at %2$s</string>
+
+    <string name="sec_practica_nota">Tutorial practice request</string>
+
+    <string name="det_tramite_titulo">Procedure</string>
+    <string name="det_tramite_no_encontrado">Procedure not found</string>
+    <string name="det_tramite_reciente_fmt">Procedure: %1$s</string>
+    <string name="det_tramite_reciente_subtitulo">ETSIIT Registrar\'s Office</string>
+
+    <string name="det_tramite_pasos_fmt">How to do it, step by step (%1$d)</string>
+    <string name="det_tramite_btn_empezar">Start application</string>
+    <string name="det_tramite_btn_alternativa">or book an appointment to do it at the counter</string>
+    <string name="det_tramite_btn_cita_consultar">Book an appointment to inquire</string>
+    <string name="det_tramite_btn_cita_ventanilla">Book counter appointment</string>
+
+    <string name="det_tramite_tut_documentos">These are the documents you\'ll need: have them handy</string>
+    <string name="det_tramite_tut_pasos">Here you can see how to do it, step by step</string>
+    <string name="det_tramite_tut_alternativa">If you prefer to do it in person, book an appointment at the counter</string>
+    <string name="det_tramite_tut_siguiente">When you\'re ready, start here</string>
+
+    <string name="det_tramite_sin_documentos">No documents are required.</string>
+    <string name="det_tramite_doc_opcional_sufijo">  · optional</string>
+
+    <string name="det_tramite_motivo_solo_ventanilla">This procedure can only be done at the counter: book an appointment.</string>
+    <string name="det_tramite_motivo_plazo_abre_fmt">The deadline opens on %1$s.</string>
+    <string name="det_tramite_motivo_plazo_termino_fmt">The deadline ended on %1$s.</string>
+
+    <string name="franja_desc_ocupada_fmt">%1$s, busy</string>
+    <string name="franja_desc_tuya_fmt">%1$s, your appointment</string>
+    <string name="franja_desc_libre_fmt">%1$s, available</string>
+
+    <string name="gestion_estado_cita_activa">Active</string>
+    <string name="gestion_estado_cita_pasada">Past</string>
+    <string name="gestion_accion_cancelar_cita">Cancel appointment (tear the stub)</string>
+
+    <string name="just_titulo">Receipt</string>
+    <string name="just_no_encontrado">Receipt not found</string>
+
+    <string name="just_estado_cancelada">Cancelled</string>
+    <string name="just_estado_pasada">Past</string>
+    <string name="just_ayuda_qr_solo_zoom">Pinch to zoom; double-tap to reset.</string>
+
+    <string name="just_cal_titulo_fmt">ETSIIT Registrar\'s Office Appointment: %1$s</string>
+    <string name="just_cal_desc_fmt">Receipt %1$s. Show the app\'s QR code at the counter.</string>
+    <string name="just_cal_ubicacion">ETSIIT Registrar\'s Office</string>
+    <string name="just_toast_sin_calendario">No calendar app available</string>
+
+    <string name="just_desc_resguardo">Appointment stub. Tear it along the perforated line to cancel.</string>
+    <string name="just_accion_cancelar_cita">Cancel appointment</string>
+
+    <string name="just_tut_pellizcar">Pinch the QR code to zoom in (double-tap to reset)</string>
+    <string name="just_tut_calendario">Add it to your calendar so you don\'t forget</string>
+    <string name="just_tut_rasgar">Tear the stub along the perforated line to cancel the appointment. This is just practice: it won\'t cancel</string>
+    <string name="just_tut_girar">Turn your phone toward the counter to display the large QR code</string>
+    <string name="just_tut_quitar_capa">To dismiss it, tap it or tilt your phone back toward you</string>
+
+    <string name="just_toast_no_cancelable">This appointment can no longer be cancelled</string>
+    <string name="just_ayuda_qr_anulado">Appointment cancelled: this code is no longer valid.</string>
+    <string name="just_aviso_cancelada_etiqueta">Appointment cancelled</string>
+    <string name="just_aviso_cancelada_texto_fmt">%1$s · If you added it to your calendar, delete it there too.</string>
+    <string name="just_toast_no_recuperable">The appointment can no longer be restored</string>
+
+    <string name="just_desc_qr_fmt">QR code for receipt %1$s</string>
+    <string name="just_desc_capa_qr_fmt">Full-screen QR code, %1$s. Tap to return.</string>
+    <string name="just_desc_capa_qr_estado_fmt">Full-screen QR code, %1$s, status: %2$s. Tap to return.</string>
+
+    <string name="gestiones_titulo">My requests</string>
+    <string name="gestiones_reciente_subtitulo">Appointments &amp; requests</string>
+    <string name="gestiones_tab_citas">Appointments</string>
+    <string name="gestiones_tab_solicitudes">Requests</string>
+
+    <string name="gestiones_tut_practica_info">So you can practice, we\'ve added a sample appointment and request. They\'ll be removed when you\'re done</string>
+    <string name="gestiones_tut_rasgar">Tear the stub along the perforated line to cancel the appointment. This is just practice: it won\'t cancel</string>
+    <string name="gestiones_tut_tabs">Tap a tab to switch between your appointments and requests</string>
+    <string name="gestiones_tut_inclinar">You can also tilt your phone to either side to switch tabs</string>
+    <string name="gestiones_tut_ficha">Tap an item to view its receipt with the QR code</string>
+
+    <string name="gestiones_vacio_citas">You have no appointments.\nBook one with “Book appointment” in Registrar\'s Office.</string>
+    <string name="gestiones_vacio_solicitudes">You haven\'t submitted any requests yet.</string>
+    <string name="gestiones_toast_cita_pasada">This appointment has already passed and cannot be cancelled</string>
+
+    <string name="paso_numero_fmt">Step %1$d of %2$d</string>
+
+    <string name="pasos_sin_pasos">This procedure has no steps</string>
+    <string name="pasos_titulo">Step by step</string>
+    <string name="pasos_btn_solicitar_ahora">Apply now</string>
+    <string name="pasos_btn_pedir_cita">Book appointment</string>
+    <string name="pasos_toast_inclinar">Tilt right to go forward and left to go back</string>
+
+    <string name="pasos_tut_deslizar">Swipe the card left to view the next step</string>
+    <string name="pasos_tut_flecha">Or tap the arrow to move forward (and the left one to go back)</string>
+    <string name="pasos_tut_inclinar">You can also tilt your phone: right to move forward, left to go back</string>
+    <string name="pasos_tut_interruptor">Use this switch to turn it on or off whenever you want</string>
+
+    <string name="qn_titulo">What do you need?</string>
+    <string name="qn_tut_opciones">Tap the option that best describes your situation: in just a few questions you\'ll find your procedure</string>
+    <string name="qn_tut_anterior">Made a mistake? Tap here to go back to the previous question</string>
+
+    <string name="qn_resultado_titulo">Here is what you\'re looking for</string>
+    <string name="qn_btn_ver_y_empezar">See requirements &amp; start</string>
+    <string name="qn_btn_ver_y_cita">View details &amp; book appointment</string>
+
+    <string name="qn_resumen_sin_docs">No documents</string>
+    <plurals name="qn_resumen_docs">
+        <item quantity="one">%1$d document</item>
+        <item quantity="other">%1$d documents</item>
+    </plurals>
+    <plurals name="qn_resumen_pasos">
+        <item quantity="one">%1$d step</item>
+        <item quantity="other">%1$d steps</item>
+    </plurals>
+    <string name="qn_resumen_fmt">%1$s · %2$s</string>
+
+    <!-- Question tree -->
+    <string name="qn_p_raiz">What is it about?</string>
+
+    <string name="qn_op_matricula">My enrollment</string>
+    <string name="qn_op_matricula_det">Enroll, modify, or cancel it</string>
+    <string name="qn_p_matricula">What do you want to do with your enrollment?</string>
+    <string name="qn_op_mat_curso">Enroll for this academic year</string>
+    <string name="qn_op_mat_curso_det">Choose your courses for the year</string>
+    <string name="qn_op_mat_cambiar">Change or add courses</string>
+    <string name="qn_op_mat_cambiar_det">Within the official period</string>
+    <string name="qn_op_mat_anular">Cancel enrollment</string>
+    <string name="qn_op_mat_anular_det">All of it or just a part</string>
+    <string name="qn_op_mat_grupo">Switch class group</string>
+    <string name="qn_op_mat_grupo_det">Lecture or lab group</string>
+
+    <string name="qn_op_examenes">My exams</string>
+    <string name="qn_op_examenes_det">How and when I take exams</string>
+    <string name="qn_p_examenes">What do you need regarding exams?</string>
+    <string name="qn_op_ex_unica">Take only the final exam</string>
+    <string name="qn_op_ex_unica_det">Single final assessment (no continuous assessment)</string>
+    <string name="qn_op_ex_especial">Almost finished my degree</string>
+    <string name="qn_op_ex_especial_det">Extra examination sitting</string>
+
+    <string name="qn_op_creditos">Credits I already have</string>
+    <string name="qn_op_creditos_det">Transfer or validate prior credits</string>
+    <string name="qn_p_creditos">Where do those credits come from?</string>
+    <string name="qn_op_cred_estudios">From other studies</string>
+    <string name="qn_op_cred_estudios_det">Another degree or higher vocational training</string>
+    <string name="qn_op_cred_actividades">From activities</string>
+    <string name="qn_op_cred_actividades_det">Cultural, sports, volunteering…</string>
+
+    <string name="qn_op_papel">An official document</string>
+    <string name="qn_op_papel_det">Certificates and degree diploma</string>
+    <string name="qn_p_papel">Which document do you need?</string>
+    <string name="qn_op_papel_notas">My grades and GPA</string>
+    <string name="qn_op_papel_notas_det">Personal academic transcript</string>
+    <string name="qn_op_papel_titulo">My degree diploma</string>
+    <string name="qn_op_papel_titulo_det">Because I have already graduated</string>
+
+    <string name="qn_op_otra">Something else</string>
+    <string name="qn_op_otra_det">I don\'t see it here</string>
+    <string name="qn_p_otra">How would you like to proceed?</string>
+    <string name="qn_op_otra_hablar">Talk to the Registrar\'s Office</string>
+    <string name="qn_op_otra_hablar_det">Book a general inquiry appointment</string>
+    <string name="qn_op_otra_buscar">Browse myself</string>
+    <string name="qn_op_otra_buscar_det">View all procedures</string>
+
+    <string name="resguardo_texto_inicial">Tear along the line to cancel appointment</string>
+    <string name="resguardo_texto_arrastrando">Keep tearing to the end to cancel</string>
+
+    <string name="sol_no_solicitable">This procedure cannot be requested right now</string>
+    <string name="sol_titulo">Application</string>
+
+    <string-array name="sol_nombres_paso">
+        <item>Documents</item>
+        <item>Signature</item>
+        <item>Stamp</item>
+        <item>Submit</item>
+    </string-array>
+    <string name="sol_paso_fmt">Step %1$d of 4 · %2$s</string>
+
+    <!-- Tutorial -->
+    <string name="sol_tut_docs_tocar">Tap a document to take a photo of it (or press and hold to choose a file). Now, to practice, we\'ve added a sample one</string>
+    <string name="sol_tut_docs_arrastrar">Drag the document downward into the folder</string>
+    <string name="sol_tut_docs_carpeta">Once all documents are inside, the folder closes automatically. We\'ll put the rest of the sample ones in for you</string>
+    <string name="sol_tut_firma_dibujar">Sign with your finger on the folder cover (use the eraser to clear it)</string>
+    <string name="sol_tut_firma_huella">If you prefer, sign here with your fingerprint</string>
+    <string name="sol_tut_firma_nota">Here you can add a note for the Registrar\'s Office (optional)</string>
+    <string name="sol_tut_firma_abrir">Forgot something? Open the folder to change the documents</string>
+    <string name="sol_tut_sello">Press and hold the stamp until the ring completes</string>
+    <string name="sol_tut_lanzar">Fling the folder upward to submit it. This is just practice: nothing will be sent</string>
+
+    <!-- Practice -->
+    <string name="sol_practica_doc_l1">SAMPLE</string>
+    <string name="sol_practica_doc_l2">DOCUMENT</string>
+    <string name="sol_toast_practica_fin">Practice finished: now use your real documents</string>
+
+    <!-- Folder & phases -->
+    <string name="sol_btn_cerrar_carpeta">Close folder</string>
+    <string name="sol_btn_cerrar_sin_opcionales">Close folder without optional documents</string>
+    <string name="sol_nota_anadir">✎ Add a note (optional)</string>
+    <string name="sol_nota_con_texto_fmt">✎ Note: %1$s</string>
+    <string name="sol_sello_registrado_fmt">REGISTERED\nETSIIT · %1$s</string>
+    <string name="sol_contador_docs_fmt">%1$d of %2$d documents inside</string>
+    <string name="sol_contador_nombre_fmt">In the name of %1$s</string>
+
+    <!-- Instructions & hints -->
+    <string name="sol_inst_foto">Take a photo of each document</string>
+    <string name="sol_ayuda_foto">Tap a card to open the camera · press and hold to upload a file</string>
+    <string name="sol_inst_arrastrar">Drag the documents into the folder</string>
+    <string name="sol_ayuda_arrastrar">Swipe each card downward and drop it onto the folder</string>
+    <string name="sol_inst_todos_dentro">Everything is in the folder</string>
+    <string name="sol_ayuda_todos_dentro">Tap a sheet to view or replace it, or close the folder</string>
+    <string name="sol_inst_obligatorios">All required documents are inside</string>
+    <string name="sol_ayuda_obligatorios">Add optional ones or close the folder</string>
+    <string name="sol_inst_firma">Sign on the folder</string>
+    <string name="sol_ayuda_firma_dedo">With your finger, inside the box</string>
+    <string name="sol_ayuda_firma_dedo_huella">With your finger, inside the box · or use your fingerprint</string>
+    <string name="sol_inst_sello">Press and hold on the stamp</string>
+    <string name="sol_ayuda_sello">Until the ring completes and you hear the “click”</string>
+    <string name="sol_inst_lanzar">Fling the folder upward</string>
+    <string name="sol_ayuda_lanzar">Swipe and release quickly to submit it</string>
+
+    <!-- Desk, cards & drag -->
+    <string name="sol_mesa_vacia">The desk is empty\n\nDrag a sheet out of the folder here to remove it</string>
+    <string name="sol_desc_tarjeta_llena_fmt">%1$s, added. Drag it to the folder or tap to replace it</string>
+    <string name="sol_accion_meter_carpeta">Put in folder</string>
+    <string name="sol_desc_tarjeta_vacia_oblig_fmt">%1$s. Tap to photograph; press and hold to upload a file</string>
+    <string name="sol_desc_tarjeta_vacia_opc_fmt">%1$s, optional. Tap to photograph; press and hold to upload a file</string>
+    <string name="sol_drag_suelta_carpeta">Drop it here</string>
+    <string name="sol_drag_suelta_mesa">Drop on the desk to take it out</string>
+    <string name="sol_desc_hoja_fmt">%1$s, inside the folder. Tap to replace or remove</string>
+    <string name="sol_accion_sacar_carpeta">Take out of folder</string>
+
+    <!-- Dialogs & options -->
+    <string name="sol_dlg_abrir_titulo">Open the folder?</string>
+    <string name="sol_dlg_abrir_msg">The stamp will be broken. Your signature stays; you\'ll just need to stamp it again.</string>
+    <string name="sol_dlg_abrir_btn">Open it</string>
+    <string name="sol_btn_cancelar">Cancel</string>
+
+    <string name="sol_op_ver">View full size</string>
+    <string name="sol_op_otra_foto">Take another photo</string>
+    <string name="sol_op_otro_archivo">Choose another file</string>
+    <string name="sol_op_quitar">Remove</string>
+    <string name="sol_op_hacer_foto">Take a photo</string>
+    <string name="sol_op_subir_archivo">Upload a file (image or PDF)</string>
+    <string name="sol_op_sacar_carpeta">Take out of folder</string>
+
+    <string name="sol_toast_no_mostrar">Cannot display this file</string>
+    <string name="sol_btn_cerrar">Close</string>
+    <string name="sol_btn_repetir_foto">Retake photo</string>
+
+    <string name="sol_nota_hint">Anything the Registrar\'s Office should know</string>
+    <string name="sol_nota_titulo">Note for Registrar\'s Office</string>
+    <string name="sol_btn_guardar">Save</string>
+
+    <!-- Camera & files -->
+    <string name="sol_toast_sin_permiso_camara">No camera permission: press and hold the card to upload a file</string>
+    <string name="sol_toast_error_prep_foto">Could not prepare photo</string>
+    <string name="sol_toast_sin_app_camara">No camera app found: press and hold the card to upload a file</string>
+    <string name="sol_toast_sin_app_archivos">No file picker app available</string>
+    <string name="sol_toast_tipo_invalido">Choose an image or a PDF</string>
+    <string name="sol_toast_archivo_grande">File is too large (10 MB maximum)</string>
+    <string name="sol_toast_error_leer_archivo">Could not read the file</string>
+
+    <!-- Biometrics, stamp, fling & exit -->
+    <string name="sol_bio_titulo">Sign application</string>
+    <string name="sol_bio_negativo">Sign by hand</string>
+    <string name="sol_ayuda_sello_incompleto">Hold your finger until the ring completes</string>
+    <string name="sol_ayuda_lanzar_flojo">Faster: swipe upward and release without slowing down</string>
+    <string name="sol_dlg_enviar_titulo">Submit application?</string>
+    <string name="sol_btn_enviar">Submit</string>
+    <string name="sol_toast_practica_no_envia">This was just practice: it won\'t be sent</string>
+    <string name="sol_toast_error_firma">Could not save signature</string>
+    <string name="sol_toast_error_enviar">Could not submit application</string>
+
+    <string name="sol_dlg_salir_titulo">Exit without submitting?</string>
+    <string name="sol_dlg_salir_btn">Exit</string>
+    <string name="sol_dlg_salir_msg">Photos and signature will be lost.</string>
+    <string name="sol_btn_seguir">Stay</string>
+    <string name="sol_dlg_menu_titulo">Return to menu without submitting?</string>
+    <string name="sol_dlg_menu_btn">Return to menu</string>
+
+    <string name="hojas_tut_deslizar">Not everything fits on one page: swipe left (or tap the right side of the footer) to turn the page</string>
+    <string name="hojas_tut_inclinar">You can also tilt your phone left or right to turn pages</string>
+    <string name="hojas_anuncio_pagina_fmt">Page %1$d of %2$d</string>
+
+    <string name="tut_saltar_todo">Skip tutorial</string>
+    <string name="tut_progreso_desc_fmt">Step %1$d of \%2$d</string>
+    <string name="tut_entendido">Got it</string>
+    <string name="tut_saltar_paso">Skip step</string>
+    <string name="tut_acierto">That\'s it!</string>
+    <string name="tut_despedida">All set! Tap ? to replay</string>
+    <string name="tut_despedida_desc">All set! Tap the help button to replay</string>
+    <string name="tut_cerrar">Close</string>
+
+    <string name="tut_global_agitar">Shake your phone to return to the menu. It won\'t exit right now—give it a try</string>
+
+    <string name="aviso_salida_en_min_fmt">🚌 Leave in %1$d min to make it to %2$s (%3$s)</string>
+    <string name="aviso_salida_ya_fmt">🏃 Leave now! %1$s starts at %2$s</string>
+    <string name="aviso_salida_justo_fmt">⚠️ Cutting it close: %1$s starts at %2$s</string>
+    <string name="edificio_auxiliar">Auxiliary Building</string>
+    <string name="edificio_etsiit">ETSIIT</string>
+
+    <string name="boca_abajo_permiso_dnd">Grant \"Do Not Disturb\" access to allow silencing system calls automatically</string>
+    <string name="boca_abajo_silenciado_fmt">🔕 Phone completely muted in the system during %1$s</string>
+
+    <string name="fecha_hoy">Today</string>
+    <string name="fecha_manana">Tomorrow</string>
+    <string name="fecha_ahora_mismo">just now</string>
+    <string name="fecha_hace_min_fmt">%1$d min ago</string>
+    <string name="fecha_hace_horas_fmt">%1$d h ago</string>
+    <string name="fecha_ayer">yesterday</string>
+    <plurals name="fecha_hace_dias_fmt">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+
+    <string name="gemini_usuario_defecto">Student</string>
+    <string name="gemini_grado_no_especificado">Not specified</string>
+    <string name="gemini_invitado">Guest</string>
+    <string name="gemini_system_prompt">You are the Official Virtual Assistant of ETSIIT (School of Computer and Telecommunications Engineering) at the University of Granada (UGR).\n\nINVIOLABLE RESPONSE RULES - ZERO HALLUCINATIONS:\n1. It is STRICTLY FORBIDDEN to invent data, meal menus, dishes, professors, offices, tutoring hours, courses, class schedules, books, or administrative procedures.\n2. All institutional information, menus, activities, professors, courses, library, and registrar data provided below comes directly from the application database. You must answer based EXCLUSIVELY on this data.\n3. NEVER display raw function names or write text like \'consultarMenuComedor(...)\'. Always respond directly in natural language, with friendly bullet points, and in the language the user speaks to you (default: %1$s).\n\n=== OFFICIAL FACULTY RECORDS (DATABASE TABLES) ===\n%2$s\n===============================================================\n\n=== LOGGED-IN USER CONTEXT ===\n- Current user: %3$s (%4$s)\n- Academic degree: %5$s\n- Current system date: %6$s\n=======================================\n</string>
+
+    <string name="notif_anuncio_urgente_fmt">🚨 %1$s</string>
+    <string name="notif_actividad_titulo_fmt">⏰ %1$s at %2$s: %3$s</string>
+    <string name="notif_actividad_texto">You signed up for this activity. Don\'t forget!</string>
+    <string name="notif_canal_nombre">ETSIIT Alerts</string>
+    <string name="notif_canal_descripcion">Urgent announcements and activity reminders</string>
+
+    <string name="proxima_clase_ahora">now</string>
+    <string name="proxima_clase_hoy_fmt">today %1$s</string>
+    <string name="proxima_clase_manana_fmt">tomorrow %1$s</string>
+    <string name="proxima_clase_dia_fmt">%1$s %2$s</string>
+
+    <string name="reciente_titulo_defecto">Recent page</string>
+    <string name="reciente_subtitulo_defecto">Last opened page</string>
+    <string name="reciente_asignaturas_defecto">ETSIIT Courses</string>
+
+    <!-- Mapa ETSIIT -->
+    <string name="mapa_ubicacion_ejemplo">Example location</string>
+    <string name="mapa_hacia_parada">Towards %1$s: %2$s</string>
+    <string name="mapa_no_hay_mas_buses_hoy">no more buses today</string>
+    <string name="mapa_bus_llegando">arriving</string>
+    <string name="mapa_bus_minutos">%1$d min</string>
+    <string name="mapa_ruta">Route</string>
+    <string name="mapa_parada_nombre">%1$s Stop</string>
+    <string name="mapa_provisional">provisional</string>
+    <string name="mapa_te_busco_gps">📍 I\'ll locate you with GPS when selected</string>
+    <string name="mapa_pedire_ubicacion">📍 When selected, I\'ll request your location to guide you</string>
+    <string name="mapa_tu_clase_de">🎓 Your %1$s class</string>
+    <string name="mapa_ya_ha_empezado">has already started (%1$s)</string>
+    <string name="mapa_empieza_a_las">starts at %1$s (in %2$d min)</string>
+    <string name="mapa_clase_de">🎓 %1$s Class</string>
+    <string name="mapa_a_que_aula_vas">Which classroom are you going to?</string>
+    <string name="mapa_has_llegado_a">🏁 You arrived at %1$s</string>
+    <string name="mapa_ir_ya">Go now</string>
+    <string name="mapa_texto_seguir">Continue to %1$s.\n\nI\'ll show you the indoor route in %2$d s…</string>
+    <string name="mapa_a_tu_clase_de">🎓 To your %1$s class</string>
+    <string name="mapa_a_tu_clase_de_auxiliar">🏢 To your %1$s class</string>
+    <string name="mapa_buscar_un_aula">🔍 Search for a classroom</string>
+    <string name="mapa_llegado_etsiit_preguntar">🎓 You arrived at ETSIIT · where are you going now?</string>
+    <string name="mapa_estas_etsiit_preguntar">🎓 You are at ETSIIT · which indoor location are you going to?</string>
+    <string name="mapa_a_ningun_sitio">Nowhere</string>
+    <string name="mapa_estas_en_auxiliar">🏢 You are at the Auxiliary Building</string>
+    <string name="mapa_vale">OK</string>
+    <string name="mapa_sin_clase_margen">You have no classes in the next %1$d min.</string>
+    <string name="mapa_tu_clase_es_aqui">Your class is here: %1$s</string>
+    <string name="mapa_tu_clase_es_en_etsiit">Your %1$s class is at ETSIIT.</string>
+    <string name="mapa_ir_a_etsiit">Go to ETSIIT</string>
+    <string name="mapa_lejos_google_maps">%1$s is %2$.1f km away: better with Google Maps</string>
+    <string name="mapa_sal_a_las">Leave at </string>
+    <string name="mapa_min_a_pie"> · %1$d min on foot</string>
+    <string name="mapa_resumen_bus"> · 🚌 %1$s at %2$s from %3$s · %4$d min · get off at %5$s</string>
+    <string name="mapa_llegas"> · arrive at </string>
+    <string name="mapa_instruccion_camina_parada">Walk %1$s to %2$s stop</string>
+    <string name="mapa_instruccion_espera_bus">Wait for %1$s towards %2$s (arrives at %3$s)</string>
+    <string name="mapa_instruccion_sube_bus_sing">Board %1$s towards %2$s and get off at %3$s (%4$d stop)</string>
+    <string name="mapa_instruccion_sube_bus_plur">Board %1$s towards %2$s and get off at %3$s (%4$d stops)</string>
+    <string name="mapa_instruccion_camina_hasta">Walk %1$s to %2$s</string>
+    <string name="mapa_en_curso"> · in progress</string>
+    <string name="mapa_empieza"> · starts at %1$s</string>
+    <string name="mapa_llegas_min_antes">You arrive %1$d min early</string>
+    <string name="mapa_llegas_justo">You arrive just on time</string>
+    <string name="mapa_llegaras_min_tarde">You will arrive %1$d min late</string>
+    <string name="mapa_etapa_por_salir">Get ready to leave</string>
+    <string name="mapa_etapa_a_la_parada">Walking to the stop</string>
+    <string name="mapa_etapa_esperando">Waiting for the bus</string>
+    <string name="mapa_etapa_en_bus">On the bus</string>
+    <string name="mapa_etapa_bajate">Get off</string>
+    <string name="mapa_etapa_al_destino">Walking to destination</string>
+    <string name="mapa_etapa_llegado">You have arrived</string>
+    <string name="mapa_evento_bus_perdido_fin">You missed the %1$s bus and there are no more today</string>
+    <string name="mapa_evento_bus_perdido_sig">You missed the %1$s bus: the next one arrives at %2$s</string>
+    <string name="mapa_evento_sal_ya">Leave now for %1$s</string>
+    <string name="mapa_evento_bus_en_1_min">Line %1$s arrives in 1 min at %2$s</string>
+    <string name="mapa_evento_siguiente_parada">The next stop is yours: %1$s</string>
+    <string name="mapa_evento_bajate_ahora">Get off now at %1$s</string>
+    <string name="mapa_evento_has_llegado">You arrived at %1$s</string>
+    <string name="mapa_instruccion_sal_a_las">Leave at %1$s towards %2$s</string>
+    <string name="mapa_cuenta_sal_en">Leave in %1$s</string>
+    <string name="mapa_instruccion_camina_m">Walk to %1$s (%2$s)</string>
+    <string name="mapa_instruccion_espera_bus_hacia">Wait for %1$s towards %2$s</string>
+    <string name="mapa_instruccion_bajate_en">Get off at %1$s</string>
+    <string name="mapa_instruccion_bajate_en_paradas_sing">Get off at %1$s (%2$d stop)</string>
+    <string name="mapa_instruccion_bajate_en_paradas_plur">Get off at %1$s (%2$d stops)</string>
+    <string name="mapa_cuenta_bajas_en">Getting off in %1$s</string>
+    <string name="mapa_cuenta_quedan">%1$s remaining</string>
+    <string name="mapa_no_quedan_buses">No more buses today</string>
+    <string name="mapa_bus_pasa_en">Your bus arrives in %1$s</string>
+    <string name="mapa_bus_llegando_ya">Your bus is arriving</string>
+    <string name="mapa_ya">now</string>
+    <string name="mapa_ya_estas_aqui">You are already here</string>
+    <string name="mapa_a_que_sitio_dentro">Which indoor location are you going to?</string>
+    <string name="mapa_elegir_sitio_dentro">Choose indoor location</string>
+    <string name="mapa_estas_en">You are at %1$s</string>
+    <string name="mapa_te_llevo">Take me there?</string>
+    <string name="mapa_sin_ubicacion_calculo">📍 No location: calculated when opening route</string>
+    <string name="mapa_a_min_pie">🚶 %1$d min on foot</string>
+    <string name="mapa_min_bus_sal_a_las">🚌 %1$d min by bus · leave at %2$s</string>
+    <string name="mapa_esta_a_km_de_ti">It is %1$.1f km away from you</string>
+    <string name="mapa_metodo_horario">according to your schedule</string>
+    <string name="mapa_metodo_entrada">at the entrance</string>
+    <string name="mapa_metodo_qr">via QR code</string>
+    <string name="mapa_metodo_gps">via GPS</string>
+    <string name="mapa_metodo_manual">selected by you</string>
+    <string name="mapa_pista_visor_mas">Swipe for more · pinch to zoom · drag down to close</string>
+    <string name="mapa_pista_visor_solo">Pinch to zoom · drag down to close</string>
+    <string name="mapa_sin_sensor_orientacion">No orientation sensor: use manual control</string>
+    <string name="mapa_esperando_sensor_orientacion">Waiting for orientation sensor...</string>
+    <string name="mapa_confirma_llegada_p1">🛗 Confirm you arrived at 1st Floor to continue</string>
+    <string name="mapa_has_llegado_al_destino">🎉 You arrived at %1$s!</string>
+    <string name="mapa_uso_ascensor_titulo">🛗 Elevator Usage</string>
+    <string name="mapa_uso_ascensor_msg">Press the elevator button to go to 1st Floor.</string>
+    <string name="mapa_esperando_confirmacion_llegada">🛗 Waiting for arrival confirmation...</string>
+    <string name="mapa_en_el_ascensor_titulo">🛗 In the Elevator</string>
+    <string name="mapa_en_el_ascensor_msg">Have you reached the 1st Floor?</string>
+    <string name="mapa_si_he_llegado">Yes, I arrived!</string>
+    <string name="mapa_deseas_ascensor_titulo">🛗 Do you want to use the elevator?</string>
+    <string name="mapa_deseas_ascensor_msg">Do you want to use the elevator to continue the route?</string>
+    <string name="mapa_si">Yes</string>
+    <string name="mapa_no">No</string>
+    <string name="mapa_ruta_ascensor_activada">🛗 Elevator route activated</string>
+    <string name="mapa_continuando_escaleras">🚶 Continuing via stairs</string>
+    <string name="mapa_destino_alcanzado">🎉 Destination reached: %1$s!</string>
+    <string name="mapa_subiendo_ascensor">🛗 Going up in elevator...</string>
+    <string name="mapa_gira_direccion_indicada">🔄 Turn your phone towards the indicated direction!</string>
+    <string name="mapa_gira_para_continuar">🔄 Turn to continue!</string>
+    <string name="mapa_avanza_pasos_al_frente">🚶 Walk %1$d steps forward</string>
+    <string name="mapa_gira_sur_para_iniciar">⚠️ Turn South to start the route!</string>
+    <string name="mapa_orientado_al_sur">🧭 Facing South! Moving forward...</string>
+    <string name="mapa_hacia_derecha">to the RIGHT</string>
+    <string name="mapa_hacia_izquierda">to the LEFT</string>
+    <string name="mapa_gira_sentido_para_continuar">🔄 Turn %1$s to continue.</string>
+    <string name="mapa_rumbo_formato">Heading: %1$d° %2$s</string>
+    <string name="mapa_sin_foto_direccion">No photo in this direction</string>
+    <string name="mapa_mostrando_foto">Showing photo of %1$d°</string>
+    <string name="mapa_guia_simular">▶ Simulate</string>
+    <string name="mapa_guia_terminar">Finish</string>
+    <string name="mapa_guia_gps">■ GPS</string>
+    <string name="mapa_guia_buscando_ubicacion">Searching for your location…</string>
+    <string name="mapa_guia_sal_a_la_calle">Go outside or press «Simulate» to view route</string>
+    <string name="mapa_guia_simulacion"> · simulation </string>
+    <string name="mapa_guia_has_llegado">🏁 You have arrived</string>
+    <string name="mapa_guia_llegas_a_las">Arrive at %1$s · %2$d min remaining</string>
+    <string name="mapa_guia_ve_mas_rapido">walk faster</string>
+    <string name="mapa_guia_coge_bus_de"> · 👉 take the %1$s bus</string>
+    <string name="mapa_guia_ve_andando"> · 👉 go on foot</string>
+    <string name="mapa_guia_silenciar_voz">Mute voice</string>
+    <string name="mapa_guia_activar_voz">Enable voice</string>
+    <string name="mapa_guia_confirmar_titulo">End guidance?</string>
+    <string name="mapa_guia_confirmar_msg">I will stop notifying you about the bus and arrival.</string>
+    <string name="mapa_guia_seguir">Continue</string>
+    <string name="mapa_panel_no_encuentro_ubicacion">Location not found</string>
+    <string name="mapa_panel_mantén_pulsado_mapa">Long press the map to select origin, or choose a location.</string>
+    <string name="mapa_panel_mi_ubicacion">📍 My location</string>
+    <string name="mapa_panel_punto_del_mapa">📌 Map point</string>
+    <string name="mapa_panel_ejemplo"> (example)</string>
+    <string name="mapa_panel_automatico">🎓 Automatic</string>
+    <string name="mapa_panel_te_llevo_a">Taking you to %1$s</string>
+    <string name="mapa_panel_estas_a_km">You are %1$.1f km away</string>
+    <string name="mapa_panel_sin_ruta_pie_bus">No walking or bus route from here: use Google Maps</string>
+    <string name="mapa_panel_llegas_a_las">Arrive at %1$s · %2$d min</string>
+    <string name="mapa_panel_mientras_pulsar_mapa">Meanwhile, you can long press the map or pick a location.</string>
+    <string name="mapa_panel_segun_horario">According to your schedule: %1$s → %2$s</string>
+    <string name="mapa_panel_hoy_no_mas_clases">No more classes today: taking you to %1$s</string>
+    <string name="mapa_panel_todo_a_pie">🚶 All on foot · %1$d m · leave whenever you want</string>
+    <string name="mapa_panel_sal_ya">Leave now! (%1$s)</string>
+    <string name="mapa_panel_sal_a_las_en_min">Leave at %1$s (in %2$d min)</string>
+    <string name="mapa_panel_no_te_encuentro_gps">Location not found via GPS</string>
+    <string name="mapa_panel_no_estas_en">You are not at %1$s</string>
+    <string name="mapa_panel_simular_trayecto">▶ Simulate route</string>
+    <string name="mapa_panel_desde_mi_ubicacion">📍 From my location</string>
+    <string name="mapa_panel_empezar">Start</string>
+    <string name="mapa_panel_cambiar">   change ▾</string>
+    <string name="mapa_panel_punto_elegido">the selected point</string>
+    <string name="mapa_panel_tu_ubicacion">your location</string>
+    <string name="mapa_panel_como_llegar_titulo">How to get there</string>
+    <string name="mapa_panel_como_llegar_ayuda">📍 From: by default you start from your location (GPS). If you move, the route recalculates automatically.\n\n👆 Long press any point on the map to start from there, or select a location under \"From\".\n\n🎓 To: \"Automatic\" takes you to the building of your next class according to your schedule.\n\n🚌 If convenient, it suggests bus 9 with the departure time. Under \"Other buses\" you can pick an earlier or later one.\n\n📷 Tap a step in the list to see a photo of the location.\n\n▶ \"Start guide\" guides you step by step: arrow, countdown, and vibration on departure, bus arrival, and getting off.\n\n📱 During guidance, hold the phone vertically to see a large photo of the path with the arrow; lower it to return to the map. Place it face down to mute the voice.\n\nDrag the panel up to see everything and down to view the map.</string>
+    <string name="mapa_panel_entendido">Understood</string>
+    <string name="mapa_panel_chip_bus">🚌 %1$s · %2$s → %3$s</string>
+    <string name="mapa_panel_chip_pie">🚶 On foot → %1$s</string>
+    <string name="mapa_panel_sal_desde">Leave from %1$s</string>
+    <string name="mapa_panel_min_a_pie">%1$d min on foot</string>
+    <string name="mapa_panel_min_margen_parada">%1$d min buffer at the stop</string>
+    <string name="mapa_panel_min_bus_bajate">%1$d min by bus · get off at %2$s</string>
+    <string name="mapa_panel_llegas_a">You arrive at %1$s</string>
+    <string name="mapa_panel_ver_camino">📷 View path (%1$d photos)</string>
+    <string name="mapa_tu_simulacion">You (simulation)</string>
+    <string name="mapa_asistente_virtual">ETSIIT Virtual Assistant 🤖</string>
+    <string name="mapa_asistente_msg">Hello! In this section you can view the GPS map of the campus and interactive floorplans for each ETSIIT building floor, search classrooms, and calculate routes.</string>
+    <string name="mapa_entendido_exclamacion">Understood!</string>
+    <string name="mapa_te_busco_en_mapa">📍 Find you on the map?</string>
+    <string name="mapa_para_llevarte_a">To take you to %1$s I need to know where you are. Only used while the map is open.</string>
+    <string name="mapa_usar_mi_ubicacion">Use my location</string>
+    <string name="mapa_elegir_a_mano">Choose manually</string>
+    <string name="mapa_buscando_donde_estas">📍 Finding where you are…</string>
+    <string name="mapa_en_la_residencia">🏠 At the residence</string>
+    <string name="mapa_ya_estoy_en_etsiit">🎓 Already at ETSIIT (scan QR)</string>
+    <string name="mapa_en_otro_sitio_mantener">📍 Somewhere else (long press on map)</string>
+    <string name="mapa_mantén_pulsado_sitio">Long press on the map where you are</string>
+    <string name="mapa_no_te_encuentro_donde_estas">Location not found · where are you?</string>
+    <string name="mapa_ruta_contextual_comedor">🍽️ Contextual route active: Room 0.7 ➔ Canteen</string>
+    <string name="mapa_te_llevo_a_pregunta">Take you to\n%1$s?</string>
+    <string name="mapa_llevame">Take me</string>
+    <string name="mapa_no_se_encontro_plano">Floorplan not found: %1$s</string>
+    <string name="mapa_punto_encontrado">🎯 Point found: %1$s</string>
+    <string name="mapa_solo_puntos_registrados">⚠️ Search is only allowed among registered map points</string>
+    <string name="mapa_obteniendo_ubicacion_ruta">Getting current location for route...</string>
+    <string name="mapa_calculando_ruta_etsiit">Calculating route to ETSIIT...</string>
+    <string name="mapa_info_ruta_msg">📍 Distance: %1$s\n\n🚗 By car / transit: ~%2$d min\n🚶 On foot: ~%3$d min</string>
+    <string name="mapa_ruta_a_etsiit_titulo">Route to ETSIIT - UGR</string>
+    <string name="mapa_navegar_gps_maps">Navigate in GPS / Maps</string>
+    <string name="mapa_uso_ubicacion_titulo">Location Use</string>
+    <string name="mapa_uso_ubicacion_msg">Do you want to enable your current location to show it on the map?</string>
+    <string name="mapa_no_detectamos_ubicacion">Location not detected because device location is turned off.\n\nDo you want to turn it on?</string>
+    <string name="mapa_ubicacion_no_detectada">Location not detected</string>
+    <string name="mapa_activar_ubicacion">Enable location</string>
+    <string name="mapa_ahora_no">Not now</string>
+    <string name="mapa_segun_horario_tienes">According to your schedule you now have %1$s in %2$s</string>
+    <string name="mapa_necesitamos_tu_ubicacion">We need your location</string>
+    <string name="mapa_no_tienes_clase_intentaremos_gps">You don\'t have a class right now, so we will try to locate you using GPS. Do you want to allow access to your location?</string>
+    <string name="mapa_gps_desactivado">GPS disabled</string>
+    <string name="mapa_para_ubicarte_activar_gps">To locate you automatically we need you to turn on device location. Do you want to turn it on?</string>
+    <string name="mapa_buscando_tu_posicion">Searching for your position</string>
+    <string name="mapa_un_momento">One moment...</string>
+    <string name="mapa_estoy_puerta_aula">📚 I am at a classroom door</string>
+    <string name="mapa_estoy_entrada_etsiit">🚪 I am at the ETSIIT entrance</string>
+    <string name="mapa_escanear_codigo_qr">📷 Scan a QR code</string>
+    <string name="mapa_donde_estas">Where are you?</string>
+    <string name="mapa_no_hay_aulas_registradas">No registered classrooms on the map</string>
+    <string name="mapa_escribe_nombre_numero_aula">Enter the name or number of the classroom you are at:</string>
+    <string name="mapa_hint_buscar_aula">E.g.: Room 0.5, 1.4, 2.1...</string>
+    <string name="mapa_buscar_tu_aula_actual">🔍 Search your current classroom</string>
+    <string name="mapa_puerta_de">Door of %1$s</string>
+    <string name="mapa_distancia_km">%1$.1f km away</string>
+    <string name="mapa_distancia_m">about %1$d m away</string>
+    <string name="mapa_ubicacion_gps_titulo">GPS Location</string>
+    <string name="mapa_segun_gps_estas">According to your GPS you are %1$s from ETSIIT.\n\nIf you are already inside the building, press "I\'m inside" to scan a QR code.</string>
+    <string name="mapa_estoy_dentro_qr">I\'m inside (scan QR)</string>
+    <string name="mapa_en_la_entrada">At the entrance</string>
+    <string name="mapa_escanea_codigo_qr_titulo">Scan a QR code</string>
+    <string name="mapa_escanea_codigo_qr_msg">It seems you are inside ETSIIT, and GPS is unreliable indoors.\n\nLook for the nearest location QR code (they are in halls and corridors) and scan it to find out where you are.</string>
+    <string name="mapa_escanear_qr">Scan QR</string>
+    <string name="mapa_apunta_codigo_qr">Point at the nearest location QR code</string>
+    <string name="mapa_escaneo_cancelado">Scan canceled</string>
+    <string name="mapa_qr_no_reconocido_titulo">Unrecognized QR</string>
+    <string name="mapa_qr_no_reconocido_msg">That code is not one of ETSIIT\'s location QR codes.</string>
+    <string name="mapa_reintentar">Retry</string>
+    <string name="mapa_simular_escaneo_qr">Simulate QR scan</string>
+    <string name="mapa_simular_dia_hora">Simulate day and time (test)</string>
+    <string name="mapa_horario_simulado">Schedule: %1$s</string>
+    <string name="mapa_estas_en_info">📍 You are at: %1$s (%2$s)\n🎯 Destination: %3$s</string>
+    <string name="mapa_has_llegado_sigue_hasta">You have arrived. Continue to %1$s</string>
 </resources>

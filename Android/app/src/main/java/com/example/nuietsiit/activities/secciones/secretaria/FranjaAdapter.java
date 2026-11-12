@@ -26,7 +26,6 @@ public class FranjaAdapter extends RecyclerView.Adapter<FranjaAdapter.Holder> {
     public static final int OCUPADA = 1;
     public static final int TUYA = 2;
 
-
     public interface OnFranjaPulsada {
         void alPulsar(String hora);
     }
@@ -78,7 +77,10 @@ public class FranjaAdapter extends RecyclerView.Adapter<FranjaAdapter.Holder> {
         b.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(
                 estado == TUYA ? R.color.nui_resaltado : tachada ? R.color.nui_transparente : R.color.nui_papel)));
         b.setStrokeColor(ColorStateList.valueOf(ctx.getColor(tachada ? R.color.nui_linea : R.color.nui_tinta)));
-        b.setContentDescription(hora + (estado == OCUPADA ? ", ocupada" : estado == TUYA ? ", tu cita" : ", libre"));
+        int descResId = estado == OCUPADA
+                ? R.string.franja_desc_ocupada_fmt
+                : estado == TUYA ? R.string.franja_desc_tuya_fmt : R.string.franja_desc_libre_fmt;
+        b.setContentDescription(ctx.getString(descResId, hora));
         b.setOnClickListener(v -> listener.alPulsar(hora));
     }
 

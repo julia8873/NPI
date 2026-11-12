@@ -6,12 +6,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Libro;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -26,19 +26,29 @@ public class DetalleLibro extends PantallaBiblioteca {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setTitle("Libro");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.titulo_libro);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         // el extra es String porque RecienteUtil solo guarda Strings
         String idLibro = getIntent().getStringExtra("idLibro");
         Libro libro = idLibro == null ? null
                 : new BibliotecaDB(DBHelper.getInstance(this)).getLibro(Integer.parseInt(idLibro));
         if (libro == null) {
-            Toast.makeText(this, "Libro no encontrado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.libro_no_encontrado, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        RecienteUtil.guardar(this, DetalleLibro.class, "Libro: " + libro.titulo, "Biblioteca ETSIIT", "idLibro", idLibro, 7);
+        RecienteUtil.guardar(
+                this,
+                DetalleLibro.class,
+                getString(R.string.reciente_libro_fmt, libro.titulo),
+                getString(R.string.reciente_biblioteca_subtitulo),
+                "idLibro",
+                idLibro,
+                7
+        );
 
         LibroAdapter.mostrarPortada(findViewById(R.id.ivPortada), libro);
         if (!libro.disponible()) {
@@ -47,7 +57,9 @@ public class DetalleLibro extends PantallaBiblioteca {
             findViewById(R.id.tvPrestado).setVisibility(View.VISIBLE);
         }
         ((TextView) findViewById(R.id.tvSignatura)).setText(
-                libro.signatura == null || libro.signatura.isEmpty() ? "Sin signatura" : libro.signatura);
+                libro.signatura == null || libro.signatura.isEmpty()
+                        ? getString(R.string.libro_sin_signatura)
+                        : libro.signatura);
         ((TextView) findViewById(R.id.tvTitulo)).setText(libro.titulo);
         ((TextView) findViewById(R.id.tvAutores)).setText(libro.autores);
         LibroAdapter.mostrarDisponibilidad(findViewById(R.id.tvDisponibilidad), libro);
@@ -68,11 +80,11 @@ public class DetalleLibro extends PantallaBiblioteca {
     @Override
     protected Tutorial crearTutorial() {
         return new Tutorial(this, "detalle_libro", 1)
-                .info(R.id.tvDisponibilidad, "Aquí ves si queda algún ejemplar. Si está prestado, la portada sale apagada")
-                .info(R.id.tvSignatura, "La signatura es la etiqueta del lomo: con ella lo encuentras en la estantería")
-                .info(R.id.filaUbicacion, "Planta y estantería donde está").soloSiSeVe()
-                .info(R.id.btnComoLlegar, "¿No sabes dónde está la biblioteca? El mapa te lleva hasta ella")
-                .info(R.id.toolbar, "Vuelve atrás y el libro regresa volando a su balda");
+                .info(R.id.tvDisponibilidad, getString(R.string.tut_libro_disponibilidad))
+                .info(R.id.tvSignatura, getString(R.string.tut_libro_signatura))
+                .info(R.id.filaUbicacion, getString(R.string.tut_libro_ubicacion)).soloSiSeVe()
+                .info(R.id.btnComoLlegar, getString(R.string.tut_libro_como_llegar))
+                .info(R.id.toolbar, getString(R.string.tut_libro_volver));
     }
 
     // oculta la fila si el dato no está; devuelve si se ve

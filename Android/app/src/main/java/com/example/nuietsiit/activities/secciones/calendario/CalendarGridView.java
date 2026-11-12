@@ -8,6 +8,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.example.nuietsiit.R;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -21,6 +23,7 @@ public class CalendarGridView extends View {
     private Paint paintSeleccion;
     private Paint paintDot;
     private Paint paintHeader;
+    private String[] diasSemana;
 
     private Calendar calendarActual;
     private int selectedDay = -1;
@@ -47,6 +50,8 @@ public class CalendarGridView extends View {
     }
 
     private void init() {
+        diasSemana = getResources().getStringArray(R.array.calendario_dias_semana);
+
         calendarActual = Calendar.getInstance();
         selectedDay = calendarActual.get(Calendar.DAY_OF_MONTH);
 
@@ -114,10 +119,13 @@ public class CalendarGridView extends View {
         paintTextoDiaSemana.setTextSize(cellW * 0.28f);
         paintHeader.setTextSize(cellW * 0.42f);
 
-        // 1. Dibujar Mes y Año actual con flechas ‹  Mes y Año  ›
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
+        // 1. Dibujar Mes y Año actual con flechas ‹  Mes y Año  › según el Locale activo
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", localeActivo);
         String mesAno = sdf.format(calendarActual.getTime());
-        mesAno = mesAno.substring(0, 1).toUpperCase() + mesAno.substring(1);
+        if (!mesAno.isEmpty()) {
+            mesAno = mesAno.substring(0, 1).toUpperCase(localeActivo) + mesAno.substring(1);
+        }
 
         float titleY = headerH * 0.38f;
         canvas.drawText(mesAno, w / 2f, titleY, paintHeader);
@@ -134,7 +142,6 @@ public class CalendarGridView extends View {
 
         // 2. Días de la semana con mayor separación
         float diasSemanaY = headerH * 0.82f;
-        String[] diasSemana = {"L", "M", "X", "J", "V", "S", "D"};
         for (int i = 0; i < 7; i++) {
             float cx = (i + 0.5f) * cellW;
             canvas.drawText(diasSemana[i], cx, diasSemanaY, paintTextoDiaSemana);
@@ -143,12 +150,12 @@ public class CalendarGridView extends View {
         // 3. Calcular días del mes
         Calendar calTemp = (Calendar) calendarActual.clone();
         calTemp.set(Calendar.DAY_OF_MONTH, 1);
-        
+
         int primerDiaSemana = calTemp.get(Calendar.DAY_OF_WEEK);
         int offset = (primerDiaSemana + 5) % 7;
         int diasEnMes = calendarActual.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
         int year = calendarActual.get(Calendar.YEAR);
         int month = calendarActual.get(Calendar.MONTH);
 
@@ -235,7 +242,7 @@ public class CalendarGridView extends View {
         if (listener == null) return;
         Calendar calTemp = (Calendar) calendarActual.clone();
         calTemp.set(Calendar.DAY_OF_MONTH, selectedDay);
-        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
         listener.onDateSelected(sdfDb.format(calTemp.getTime()));
     }
 }

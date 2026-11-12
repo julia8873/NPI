@@ -3,12 +3,14 @@ package com.example.nuietsiit.util;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.format.DateFormat;
 
 import androidx.core.content.ContextCompat;
 
 import com.example.nuietsiit.BuildConfig;
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
-import com.example.nuietsiit.data.UsuariosDB;;
+import com.example.nuietsiit.data.UsuariosDB;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.ChatFutures;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
@@ -23,7 +25,6 @@ import com.google.ai.client.generativeai.type.ToolConfig;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -106,9 +107,9 @@ public class GeminiManager {
             try (Cursor c = db.rawQuery("SELECT C.nombreComedor, M.fecha, M.modalidad, P.nombrePlato, MP.categoria FROM MENU M JOIN COMEDOR C ON M.idComedor = C.idComedor JOIN MENU_PLATO MP ON M.idMenu = MP.idMenu JOIN PLATO P ON MP.idPlato = P.idPlato ORDER BY M.fecha ASC", null)) {
                 while (c != null && c.moveToNext()) {
                     sb.append("- Comedor: ").append(c.getString(0))
-                      .append(" | Fecha: ").append(c.getString(1))
-                      .append(" | Menú: ").append(c.getString(2))
-                      .append(" | ").append(c.getString(4)).append(": ").append(c.getString(3)).append("\n");
+                            .append(" | Fecha: ").append(c.getString(1))
+                            .append(" | Menú: ").append(c.getString(2))
+                            .append(" | ").append(c.getString(4)).append(": ").append(c.getString(3)).append("\n");
                 }
             }
 
@@ -169,7 +170,7 @@ public class GeminiManager {
                             .append(" | Plazos: ").append(c.getString(3) != null ? c.getString(3) : "No especificado").append("\n");
                 }
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -187,31 +188,29 @@ public class GeminiManager {
         }
 
         if (nombre == null || nombre.isEmpty()) {
-            nombre = "Estudiante";
+            nombre = context.getString(R.string.gemini_usuario_defecto);
         }
         if (grado == null || grado.isEmpty()) {
-            grado = "No especificado";
+            grado = context.getString(R.string.gemini_grado_no_especificado);
         }
 
-        SimpleDateFormat sdfFecha = new SimpleDateFormat("EEEE, d 'de' MMMM 'de' yyyy", new Locale("es", "ES"));
+        Locale loc = Locale.getDefault();
+        String patronFecha = DateFormat.getBestDateTimePattern(loc, "EEEEdMMMMyyyy");
+        SimpleDateFormat sdfFecha = new SimpleDateFormat(patronFecha, loc);
         String fechaHoy = sdfFecha.format(new Date());
 
         String datosBd = cargarBaseDeDatosComoTexto(context);
+        String correoMostrado = correoUsuario != null ? correoUsuario : context.getString(R.string.gemini_invitado);
 
-        String promptText = "Eres el Asistente Virtual Oficial de la ETSIIT (Escuela Técnica Superior de " +
-                "Ingenierías Informática y de Telecomunicación) de la Universidad de Granada (UGR).\n\n" +
-                "REGLAS INVIOLABLES DE RESPUESTA - CERO ALUCINACIONES:\n" +
-                "1. Queda ESTRICTAMENTE PROHIBIDO inventar datos, menús de comida, platos, profesores, despachos, tutorías, asignaturas, horarios de clase, libros o trámites.\n" +
-                "2. Toda la información institucional, menús, actividades, profesores, asignaturas, biblioteca y secretaría facilitada a continuación proviene directamente de los scripts de población (TablasComedores, TablasActividades, TablasAcademico, TablasBiblioteca, TablasSecretaria). Debes responder basándote EXCLUSIVAMENTE en estos datos.\n" +
-                "3. NUNCA muestres nombres de funciones en crudo ni escribas textos como 'consultarMenuComedor(...)'. Responde siempre directamente en lenguaje natural y con viñetas amables.\n\n" +
-                "=== REGISTROS OFICIALES DE LA FACULTAD (DATOS DE LAS TABLAS) ===\n" +
-                datosBd + "\n" +
-                "===============================================================\n\n" +
-                "=== CONTEXTO DEL USUARIO EN SESIÓN ===\n" +
-                "- Usuario actual: " + nombre + " (" + (correoUsuario != null ? correoUsuario : "Invitado") + ")\n" +
-                "- Grado académico: " + grado + "\n" +
-                "- Fecha actual en el sistema: " + fechaHoy + "\n" +
-                "=======================================\n";
+        String promptText = context.getString(
+                R.string.gemini_system_prompt,
+                loc.getDisplayLanguage(loc),
+                datosBd,
+                nombre,
+                correoMostrado,
+                grado,
+                fechaHoy
+        );
 
         Content.Builder builder = new Content.Builder();
         builder.setRole("system");

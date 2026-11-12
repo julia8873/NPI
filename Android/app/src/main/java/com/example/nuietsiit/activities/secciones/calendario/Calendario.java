@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.calendario;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,7 +37,6 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -92,9 +92,9 @@ public class Calendario extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! En el futuro seré tu asistente inteligente con IA para resolver todas tus dudas sobre la ETSIIT, tus clases, entregas y la escuela.\n\nPor ahora puedes usar los accesos rápidos para navegar por las secciones y el calendario para tus exámenes.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.cal_asistente_titulo)
+                        .setMessage(R.string.cal_asistente_mensaje)
+                        .setPositiveButton(R.string.cal_asistente_btn, null)
                         .show();
             });
         }
@@ -124,7 +124,7 @@ public class Calendario extends BaseActivity {
         adapter = new EventosAdapter(listaEventos, correoUsuario, this::eliminarEventoPersonal);
         rvEventosCalendario.setAdapter(adapter);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
         fechaSeleccionadaStr = sdf.format(new Date());
 
         actualizarHeaderFecha(new Date());
@@ -156,12 +156,13 @@ public class Calendario extends BaseActivity {
     }
 
     private void actualizarHeaderFecha(Date date) {
-        SimpleDateFormat sdfFormat = new SimpleDateFormat("EEEE, d 'de' MMMM", new Locale("es", "ES"));
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+        SimpleDateFormat sdfFormat = new SimpleDateFormat(getString(R.string.cal_patron_fecha_header), localeActivo);
         String fechaLegible = sdfFormat.format(date);
         if (!fechaLegible.isEmpty()) {
-            fechaLegible = fechaLegible.substring(0, 1).toUpperCase() + fechaLegible.substring(1);
+            fechaLegible = fechaLegible.substring(0, 1).toUpperCase(localeActivo) + fechaLegible.substring(1);
         }
-        tvFechaSeleccionadaHeader.setText("Eventos: " + fechaLegible);
+        tvFechaSeleccionadaHeader.setText(getString(R.string.cal_header_eventos_fmt, fechaLegible));
     }
 
     private void cargarEventosFecha(String fechaStr) {
@@ -189,7 +190,7 @@ public class Calendario extends BaseActivity {
         if (evento.id > 0) {
             boolean ok = calendarioDB.eliminarEvento(evento.id);
             if (ok) {
-                Toast.makeText(this, "Evento eliminado", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.cal_toast_eliminado, Toast.LENGTH_SHORT).show();
                 cargarEventosFecha(fechaSeleccionadaStr);
                 actualizarFechasResaltadas();
             }
@@ -199,9 +200,9 @@ public class Calendario extends BaseActivity {
     private void mostrarDialogoAnadirEvento() {
         if (correoUsuario == null || correoUsuario.isEmpty()) {
             new AlertDialog.Builder(this)
-                    .setTitle("Usuario no registrado")
-                    .setMessage("Debes iniciar sesión para guardar tus exámenes y entregas personales en tu cuenta.")
-                    .setPositiveButton("Aceptar", null)
+                    .setTitle(R.string.cal_no_registrado_titulo)
+                    .setMessage(R.string.cal_no_registrado_mensaje)
+                    .setPositiveButton(R.string.cal_btn_aceptar, null)
                     .show();
             return;
         }
@@ -213,26 +214,36 @@ public class Calendario extends BaseActivity {
         EditText etDescripcion = view.findViewById(R.id.etDescripcionEvento);
 
         new AlertDialog.Builder(this)
-                .setTitle("Anotar Examen / Entrega")
+                .setTitle(R.string.cal_dialog_anadir_titulo)
                 .setView(view)
-                .setPositiveButton("Guardar", (dialog, which) -> {
+                .setPositiveButton(R.string.cal_btn_guardar, (dialog, which) -> {
                     String titulo = etTitulo.getText().toString().trim();
-                    String tipo = spTipo.getSelectedItem() != null ? spTipo.getSelectedItem().toString() : "Examen";
+                    String tipoSeleccionado = spTipo.getSelectedItem() != null ? spTipo.getSelectedItem().toString() : "";
+                    // Normalizamos la clave interna para la BD independientemente del idioma del Spinner
+                    String tipoBd = normalizarTipoParaBd(tipoSeleccionado);
                     String hora = etHora.getText().toString().trim();
                     String desc = etDescripcion.getText().toString().trim();
 
                     if (titulo.isEmpty()) {
-                        Toast.makeText(this, "Introduce un título para el evento", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.cal_toast_titulo_vacio, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    calendarioDB.insertarEvento(correoUsuario, titulo, tipo, fechaSeleccionadaStr, hora, desc);
-                    Toast.makeText(this, "Evento anotado para el calendario", Toast.LENGTH_LONG).show();
+                    calendarioDB.insertarEvento(correoUsuario, titulo, tipoBd, fechaSeleccionadaStr, hora, desc);
+                    Toast.makeText(this, R.string.cal_toast_anotado, Toast.LENGTH_LONG).show();
                     cargarEventosFecha(fechaSeleccionadaStr);
                     actualizarFechasResaltadas();
                 })
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(R.string.cal_btn_cancelar, null)
                 .show();
+    }
+
+    private String normalizarTipoParaBd(String textoSpinner) {
+        String lower = textoSpinner.toLowerCase(Locale.ROOT);
+        if (lower.contains("exam") || lower.contains("examen")) return "Examen";
+        if (lower.contains("assign") || lower.contains("entrega")) return "Entrega";
+        if (lower.contains("appoint") || lower.contains("cita")) return "Cita";
+        return textoSpinner.isEmpty() ? "Examen" : textoSpinner;
     }
 
     private static class EventosAdapter extends RecyclerView.Adapter<EventosAdapter.EventoViewHolder> {
@@ -261,23 +272,27 @@ public class Calendario extends BaseActivity {
 
         @Override
         public void onBindViewHolder(@NonNull EventoViewHolder holder, int position) {
+            Context ctx = holder.itemView.getContext();
             EventoCalendario ev = eventos.get(position);
             holder.tvTitulo.setText(ev.titulo);
-            holder.tvHora.setText(ev.hora != null && !ev.hora.isEmpty() ? ev.hora : "Todo el día");
-            holder.tvDescripcion.setText(ev.descripcion != null && !ev.descripcion.isEmpty() ? ev.descripcion : "Sin descripción");
-            holder.tvTipo.setText(ev.tipo != null ? ev.tipo : "Evento");
+            holder.tvHora.setText(ev.hora != null && !ev.hora.isEmpty() ? ev.hora : ctx.getString(R.string.cal_todo_el_dia));
+            holder.tvDescripcion.setText(ev.descripcion != null && !ev.descripcion.isEmpty() ? ev.descripcion : ctx.getString(R.string.cal_sin_descripcion));
 
-            String tipoLower = ev.tipo != null ? ev.tipo.toLowerCase() : "";
-            if (tipoLower.contains("examen")) {
+            String tipoLower = ev.tipo != null ? ev.tipo.toLowerCase(Locale.ROOT) : "";
+            if (tipoLower.contains("examen") || tipoLower.contains("exam")) {
+                holder.tvTipo.setText(R.string.cal_tipo_examen);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#FEE2E2"));
                 holder.tvTipo.setTextColor(Color.parseColor("#DC2626"));
-            } else if (tipoLower.contains("entrega")) {
+            } else if (tipoLower.contains("entrega") || tipoLower.contains("assign")) {
+                holder.tvTipo.setText(R.string.cal_tipo_entrega);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#FFEDD5"));
                 holder.tvTipo.setTextColor(Color.parseColor("#EA580C"));
-            } else if (tipoLower.contains("cita")) {
+            } else if (tipoLower.contains("cita") || tipoLower.contains("appoint")) {
+                holder.tvTipo.setText(R.string.cal_tipo_cita);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#F3E8FF"));
                 holder.tvTipo.setTextColor(Color.parseColor("#9333EA"));
             } else {
+                holder.tvTipo.setText(ev.tipo != null && !ev.tipo.isEmpty() ? ev.tipo : ctx.getString(R.string.cal_tipo_evento));
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#E0F2FE"));
                 holder.tvTipo.setTextColor(Color.parseColor("#0284C7"));
             }

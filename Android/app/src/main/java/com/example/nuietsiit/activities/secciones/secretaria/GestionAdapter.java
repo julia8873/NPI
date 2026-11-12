@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,32 +30,57 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         public final boolean esCita;
         public final int id;
         public final boolean cancelable; // solo citas activas y futuras
-        final String codigo, titulo, detalle, estado;
+        final String codigo, titulo, detalle;
+        @StringRes final int estadoResId; // 0 si se usa estadoTexto
+        final String estadoTexto;
         final int colorEstado; // recurso de color
 
         private Gestion(boolean esCita, int id, boolean cancelable, String codigo, String titulo,
-                        String detalle, String estado, int colorEstado) {
+                        String detalle, @StringRes int estadoResId, String estadoTexto, int colorEstado) {
             this.esCita = esCita;
             this.id = id;
             this.cancelable = cancelable;
             this.codigo = codigo;
             this.titulo = titulo;
             this.detalle = detalle;
-            this.estado = estado;
+            this.estadoResId = estadoResId;
+            this.estadoTexto = estadoTexto;
             this.colorEstado = colorEstado;
         }
 
         public static Gestion deCita(Cita c) {
             boolean futura = c.esFutura();
             String detalle = FechasUtil.capitalizar(FechasUtil.diaLargo(c.fechaHora())) + " · " + c.hora;
-            return new Gestion(true, c.id, futura, c.codigo(), c.motivo(), detalle,
-                    futura ? "Activa" : "Pasada", futura ? R.color.nui_acento_profundo : R.color.nui_apagado);
+            return new Gestion(
+                    true,
+                    c.id,
+                    futura,
+                    c.codigo(),
+                    c.motivo(),
+                    detalle,
+                    futura ? R.string.gestion_estado_cita_activa : R.string.gestion_estado_cita_pasada,
+                    null,
+                    futura ? R.color.nui_acento_profundo : R.color.nui_apagado
+            );
         }
 
         public static Gestion deSolicitud(Solicitud s) {
             String estado = s.estado();
-            return new Gestion(false, s.id, false, s.codigo(), s.nombreTramite, s.textoEnvio(),
-                    estado, Solicitud.colorEstado(estado));
+            return new Gestion(
+                    false,
+                    s.id,
+                    false,
+                    s.codigo(),
+                    s.nombreTramite,
+                    s.textoEnvio(),
+                    0,
+                    estado,
+                    Solicitud.colorEstado(estado)
+            );
+        }
+
+        String obtenerEstado(Context ctx) {
+            return estadoResId != 0 ? ctx.getString(estadoResId) : estadoTexto;
         }
     }
 
@@ -104,12 +131,13 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int position) {
+        Context ctx = h.itemView.getContext();
         Gestion g = gestiones.get(position);
         h.tvCodigo.setText(g.codigo);
         h.tvTitulo.setText(g.titulo);
         h.tvDetalle.setText(g.detalle);
         // el estado es un sello estampado en la ficha, del color del estado
-        Pastilla.sellar(h.tvEstado, g.estado, g.colorEstado);
+        Pastilla.sellar(h.tvEstado, g.obtenerEstado(ctx), g.colorEstado);
         h.ficha.setOnClickListener(v -> listener.alPulsar(g));
 
         boolean rasgable = g.cancelable && alRasgar != null;
@@ -121,7 +149,10 @@ public class GestionAdapter extends RecyclerView.Adapter<GestionAdapter.Holder> 
         } : null);
         if (h.accionCancelar != View.NO_ID) ViewCompat.removeAccessibilityAction(h.ficha, h.accionCancelar);
         h.accionCancelar = rasgable
-                ? ViewCompat.addAccessibilityAction(h.ficha, "Cancelar cita (rasgar el resguardo)", (v, a) -> {
+                ? ViewCompat.addAccessibilityAction(
+                h.ficha,
+                ctx.getString(R.string.gestion_accion_cancelar_cita),
+                (v, a) -> {
                     h.resguardo.completar();
                     return true;
                 })

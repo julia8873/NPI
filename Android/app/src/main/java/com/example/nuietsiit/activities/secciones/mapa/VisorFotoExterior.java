@@ -23,6 +23,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 
+import com.example.nuietsiit.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +85,7 @@ public final class VisorFotoExterior {
         cerrar.setTextSize(22);
         cerrar.setGravity(Gravity.CENTER);
         cerrar.setBackground(pastilla(Color.argb(120, 0, 0, 0), 24 * dp));
-        cerrar.setContentDescription("Cerrar");
+        cerrar.setContentDescription(ctx.getString(R.string.cerrar));
         cerrar.setOnClickListener(v -> dialogo.dismiss());
         arriba.addView(cerrar, new LinearLayout.LayoutParams((int) (48 * dp), (int) (48 * dp)));
         raiz.addView(arriba, new FrameLayout.LayoutParams(-1, -2, Gravity.TOP));
@@ -108,8 +110,8 @@ public final class VisorFotoExterior {
         abajo.addView(llPuntos, lpPuntos);
         TextView pista = new TextView(ctx);
         pista.setText(claves.size() > 1
-                ? "Desliza para ver más · pellizca para ampliar · baja para cerrar"
-                : "Pellizca para ampliar · baja para cerrar");
+                ? ctx.getString(R.string.mapa_pista_visor_mas)
+                : ctx.getString(R.string.mapa_pista_visor_solo));
         pista.setTextColor(Color.argb(170, 255, 255, 255));
         pista.setTextSize(12);
         pista.setGravity(Gravity.CENTER);

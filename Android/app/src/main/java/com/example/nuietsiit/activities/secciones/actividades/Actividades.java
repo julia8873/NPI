@@ -195,7 +195,7 @@ public class Actividades extends BaseActivity {
         ((TextView) findViewById(R.id.tvEmojiCarta)).setText(Actividad.emoji(a.tipo));
         ((TextView) findViewById(R.id.tvTipoCarta)).setText(Actividad.nombreTipo(a.tipo));
         ((TextView) findViewById(R.id.tvCuandoCarta)).setText(
-                "📅 " + FechasUtil.cuando(a.inicio) + " · " + FechasUtil.hora(a.inicio));
+                "📅 " + FechasUtil.cuando(this, a.inicio) + " · " + FechasUtil.hora(a.inicio));
         ((TextView) findViewById(R.id.tvTituloCarta)).setText(a.titulo);
         ((TextView) findViewById(R.id.tvDescCarta)).setText(a.descripcion);
 
