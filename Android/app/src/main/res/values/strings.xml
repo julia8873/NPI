@@ -1232,6 +1232,8 @@
     <string name="reciente_subtitulo_defecto">Última página abierta</string>
     <string name="reciente_asignaturas_defecto">Asignaturas ETSIIT</string>
 
+    <string name="boca_abajo_restaurado">🔔 Sonido del sistema restaurado</string>
+
     <!-- Mapa ETSIIT -->
     <string name="mapa_ubicacion_ejemplo">Ubicación de ejemplo</string>
     <string name="mapa_hacia_parada">Hacia %1$s: %2$s</string>

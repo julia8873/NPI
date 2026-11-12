@@ -1233,6 +1233,8 @@
     <string name="reciente_subtitulo_defecto">Last opened page</string>
     <string name="reciente_asignaturas_defecto">ETSIIT Courses</string>
 
+    <string name="boca_abajo_restaurado">🔔 System sound restored</string>
+
     <!-- Mapa ETSIIT -->
     <string name="mapa_ubicacion_ejemplo">Example location</string>
     <string name="mapa_hacia_parada">Towards %1$s: %2$s</string>
