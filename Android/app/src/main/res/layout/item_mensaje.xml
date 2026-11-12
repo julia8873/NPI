@@ -3,24 +3,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="48dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginEnd="@dimen/nui_espacio_xxl"
+    android:layout_marginBottom="@dimen/nui_espacio_s"
     android:background="@drawable/burbuja"
     android:orientation="vertical"
-    android:paddingHorizontal="12dp"
-    android:paddingVertical="8dp">
+    android:paddingHorizontal="@dimen/nui_espacio_m"
+    android:paddingVertical="@dimen/nui_espacio_s">
 
     <TextView
         android:id="@+id/tvAutor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textStyle="bold" />
+        android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
     <TextView
         android:id="@+id/tvMensaje"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#000000"
-        android:textSize="14sp" />
+        android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 </LinearLayout>

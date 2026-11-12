@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Notificaciones de avisos urgentes y actividades -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Noticias: leer los avisos por el auricular al acercar el móvil a la oreja y apagar la pantalla (Miguel) -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
@@ -97,6 +100,10 @@
         <!-- Alarma de "sal ya para llegar a clase" (Miguel) -->
         <receiver
             android:name=".util.AvisoSalidaClase$Receptor"
+            android:exported="false" />
+        <!-- Recordatorio de actividad con "Llévame" (Miguel) -->
+        <receiver
+            android:name=".util.RecordatorioActividad$Receptor"
             android:exported="false" />
     </application>
 

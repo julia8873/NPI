@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.Noticias;
 import com.example.nuietsiit.data.ActividadesDB;
@@ -35,6 +36,7 @@ import java.util.Set;
  * Notificaciones reales del sistema (las que salen arriba en el móvil):
  *  - Avisos urgentes que aún no has leído.
  *  - Actividades a las que estás apuntado que son hoy o mañana.
+ *  - Media hora antes de cada una, con botón "Llévame" (RecordatorioActividad).
  *  - Cuándo salir para llegar a la próxima clase (AvisoSalidaClase).
  * Cada aviso se notifica una sola vez. Se llama desde MenuPrincipal al abrir la app.
  * Los recordatorios de actividades solo salen si hay sesión iniciada.
@@ -71,7 +73,7 @@ public final class Notificador {
             String clave = "A" + a.id;
             if (!a.esUrgente() || leidos.contains(String.valueOf(a.id)) || enviadas.contains(clave)) continue;
             Intent abrir = new Intent(act, Noticias.class);
-            mostrar(act, 1000 + a.id, "🚨 " + a.titulo, a.contenido, abrir);
+            mostrar(act, 1000 + a.id, "Urgente: " + a.titulo, a.contenido, abrir);
             enviadas.add(clave);
         }
 
@@ -87,12 +89,16 @@ public final class Notificador {
             if (x.inicio.isBefore(ahora) || x.inicio.toLocalDate().isAfter(manana)) continue;
             Intent abrir = new Intent(act, Actividades.class);
             mostrar(act, 2000 + x.id,
-                    "⏰ " + FechasUtil.cuando(x.inicio) + " a las " + FechasUtil.hora(x.inicio) + ": " + x.titulo,
+                    FechasUtil.capitalizar(FechasUtil.cuando(x.inicio)) + " a las " + FechasUtil.hora(x.inicio) + ": " + x.titulo,
                     "Te apuntaste a esta actividad. ¡Que no se te olvide!", abrir);
             enviadas.add(clave);
         }
 
         prefs.edit().putStringSet(CLAVE, enviadas).apply();
+
+        // 2b) Recordatorio con "Llévame" media hora antes de cada actividad apuntada
+        //     (las alarmas se pierden al reiniciar el móvil: se vuelven a programar al abrir la app)
+        if (haySesion) RecordatorioActividad.reprogramarTodas(act);
 
         // 3) "Sal ya para llegar a clase" (avisa ahora o programa el aviso)
         AvisoSalidaClase.revisar(act);
@@ -113,21 +119,33 @@ public final class Notificador {
         c.getSystemService(NotificationManager.class).createNotificationChannel(canal);
     }
 
-    @SuppressLint("MissingPermission") // el permiso se comprueba en revisarAvisos
     static void mostrar(Context c, int id, String titulo, String texto, Intent intent) {
+        mostrar(c, id, titulo, texto, intent, null, null);
+    }
+
+    /** Igual, con un botón en la notificación (p. ej. "Llévame" abre el mapa con la ruta). */
+    @SuppressLint("MissingPermission") // el permiso se comprueba en revisarAvisos
+    static void mostrar(Context c, int id, String titulo, String texto, Intent intent,
+                        String textoAccion, Intent intentAccion) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pi = PendingIntent.getActivity(c, id, intent,
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder n = new NotificationCompat.Builder(c, CANAL)
                 .setSmallIcon(android.R.drawable.ic_popup_reminder)
-                .setColor(0xFFFF8C42)
+                .setColor(c.getColor(R.color.nui_resaltado))
                 .setContentTitle(titulo)
                 .setContentText(texto)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(texto))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pi);
+        if (textoAccion != null && intentAccion != null) {
+            intentAccion.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent piAccion = PendingIntent.getActivity(c, id + 100000, intentAccion,
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            n.addAction(R.drawable.ic_nui_mapa, textoAccion, piAccion);
+        }
         try {
             NotificationManagerCompat.from(c).notify(id, n.build());
         } catch (SecurityException ignorada) {

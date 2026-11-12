@@ -1,5 +1,9 @@
 package com.example.nuietsiit.data.modelo;
 
+import androidx.annotation.ColorRes;
+
+import com.example.nuietsiit.R;
+
 /** Un grupo de chat de la escuela (tabla COMUNIDAD_CHAT). */
 public class Comunidad {
 
@@ -12,19 +16,22 @@ public class Comunidad {
 
     // -------------------- Aspecto según la plataforma --------------------
 
-    public static int color(String plataforma) {
+    // Color de cada plataforma con los tokens NUI (no los colores de marca: DisenoNUI/DESIGN.md)
+    @ColorRes
+    public static int colorRes(String plataforma) {
         switch (plataforma) {
-            case "whatsapp": return 0xFF25D366; // verde WhatsApp
-            case "telegram": return 0xFF229ED9; // azul Telegram
-            default: return 0xFF5865F2;         // morado Discord
+            case "whatsapp": return R.color.nui_arrayan;
+            case "telegram": return R.color.nui_cobalto;
+            default: return R.color.nui_granada;  // Discord
         }
     }
 
-    public static String emoji(String plataforma) {
+    @ColorRes
+    public static int tinteRes(String plataforma) {
         switch (plataforma) {
-            case "whatsapp": return "💬";
-            case "telegram": return "✈️";
-            default: return "🎮";
+            case "whatsapp": return R.color.nui_arrayan_tinte;
+            case "telegram": return R.color.nui_cobalto_tinte;
+            default: return R.color.nui_granada_tinte;
         }
     }
 

@@ -1,127 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hoja que sube desde abajo al pulsar una actividad -->
+<!-- Hoja inferior con el detalle de una actividad (design system NUI) -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF">
+    android:background="@color/nui_superficie">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="@dimen/nui_espacio_l">
 
-        <TextView
-            android:id="@+id/tvTipoDetalle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/fondo_fecha"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvTituloDetalle"
+        <!-- La ficha: tipo en la cabecera, título y datos -->
+        <LinearLayout
+            style="@style/Widget.Nui.Ficha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="#000000"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvFechaDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="#333333"
-            android:textSize="15sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvLugarDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="#333333"
-            android:textSize="15sp" />
+                <ImageView
+                    android:id="@+id/ivIconoDetalle"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/nui_tesela"
+                    android:importantForAccessibility="no"
+                    android:padding="@dimen/nui_espacio_xs" />
 
-        <TextView
-            android:id="@+id/tvAbiertaDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="#1565C0"
-            android:textSize="15sp"
-            android:visibility="gone" />
+                <TextView
+                    android:id="@+id/tvTipoDetalle"
+                    style="@style/Widget.Nui.Etiqueta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/nui_espacio_s" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvPlazasDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textColor="#333333"
-            android:textSize="15sp" />
+            <TextView
+                android:id="@+id/tvTituloDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:textAppearance="@style/TextAppearance.Nui.Titular" />
 
-        <TextView
-            android:id="@+id/tvDescripcionDetalle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:lineSpacingExtra="4dp"
-            android:textColor="#000000"
-            android:textSize="15sp" />
+            <TextView
+                android:id="@+id/tvFechaDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:drawableStart="@drawable/ic_nui_calendario"
+                android:drawablePadding="@dimen/nui_espacio_s"
+                android:drawableTint="@color/nui_apagado"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
-        <Button
+            <TextView
+                android:id="@+id/tvLugarDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:drawableStart="@drawable/ic_nui_mapa"
+                android:drawablePadding="@dimen/nui_espacio_s"
+                android:drawableTint="@color/nui_apagado"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+
+            <TextView
+                android:id="@+id/tvPlazasDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:drawableStart="@drawable/ic_nui_usuario"
+                android:drawablePadding="@dimen/nui_espacio_s"
+                android:drawableTint="@color/nui_apagado"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+
+            <!-- Solo AbiertaUGR -->
+            <TextView
+                android:id="@+id/tvAbiertaDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:drawableStart="@drawable/nui_ic_creditos"
+                android:drawablePadding="@dimen/nui_espacio_s"
+                android:drawableTint="@color/nui_cobalto"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                android:textColor="@color/nui_cobalto"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvDescripcionDetalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+        </LinearLayout>
+
+        <!-- Acción principal: apuntarse (o iniciar sesión). Si ya estás apuntado sale el secundario. -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnApuntarme"
+            style="@style/Widget.Nui.Boton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/boton_redondeado"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:backgroundTint="@null" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_l" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDesapuntarme"
+            style="@style/Widget.Nui.Boton.Secundario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_l"
+            android:text="Ya no puedo ir: desapuntarme"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/nui_espacio_s"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCalendario"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Nui.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
                 android:layout_weight="1"
-                android:text="📅 Calendario"
-                android:textColor="#FF8C42"
-                app:strokeColor="#FF8C42" />
+                android:text="Calendario"
+                app:icon="@drawable/ic_nui_calendario"
+                app:iconGravity="textTop" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLlevame"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Nui.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="4dp"
+                android:layout_marginStart="@dimen/nui_espacio_s"
                 android:layout_weight="1"
-                android:text="📍 Llévame"
-                android:textColor="#FF8C42"
-                app:strokeColor="#FF8C42" />
+                android:text="Llévame"
+                app:icon="@drawable/ic_nui_mapa"
+                app:iconGravity="textTop" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMasInfo"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Nui.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="@dimen/nui_espacio_s"
                 android:layout_weight="1"
-                android:text="🔗 Info"
-                android:textColor="#FF8C42"
-                app:strokeColor="#FF8C42" />
+                android:text="Más info"
+                app:icon="@drawable/ic_globe"
+                app:iconGravity="textTop" />
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

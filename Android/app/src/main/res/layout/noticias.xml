@@ -1,98 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Noticias sin scroll: carrusel horizontal de tarjetas grandes (una por aviso) -->
+<!-- Noticias (design system NUI): yesería + arquería, pestañas de papel con las categorías y un carrusel
+     de fichas (una por aviso, sin scroll). Zócalo abajo. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/nui_superficie"
     android:orientation="vertical">
 
-    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
-    <LinearLayout
+    <!-- Cabecera de sala: yesería + arquería -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/nui_yeseria"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
-        <ImageButton
-            android:id="@+id/btnVolver"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/bg_circulo_blanco_volver"
-            android:contentDescription="Volver al menú principal"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_chevron_left"
-            app:tint="@color/nui_tinta" />
-
-        <TextView
-            android:id="@+id/tvTituloSeccion"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:letterSpacing="-0.02"
-            android:maxLines="1"
-            android:text="Avisos"
-            android:textColor="@color/nui_tinta"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:id="@+id/cardMascotaAyudante"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/bg_nui_chat"
-            android:clickable="true"
-            android:contentDescription="Abrir asistente"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="14dp">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_nui_bot"
-                app:tint="@android:color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="Chat"
-                android:textColor="@android:color/white"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/ivIcono"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_nui_circulo_suave"
-            android:clickable="true"
-            android:contentDescription="Perfil"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:src="@drawable/ic_nui_usuario"
-            app:tint="@color/nui_tinta" />
-    </LinearLayout>
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_arqueria"
+        android:importantForAccessibility="no"
+        app:tesela="@drawable/nui_arqueria" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingTop="@dimen/nui_espacio_s">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -105,36 +40,36 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#000000"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:accessibilityLiveRegion="polite"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
 
-            <TextView
+            <!-- Leer los avisos en voz alta (también acercándote el móvil a la oreja: LectorAvisos) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEscuchar"
+                style="@style/Widget.Nui.Boton.Texto"
+                android:layout_width="@dimen/nui_toque_min"
+                android:layout_height="@dimen/nui_toque_min"
+                android:contentDescription="Escuchar los avisos"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:padding="0dp"
+                app:icon="@drawable/nui_ic_altavoz"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/tvMarcarTodo"
+                style="@style/Widget.Nui.Boton.Texto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="8dp"
-                android:text="Marcar todo como leído"
-                android:textColor="#FF8C42"
-                android:textStyle="bold" />
+                android:text="Marcar leídos" />
         </LinearLayout>
 
-        <HorizontalScrollView
+        <!-- Categorías: pestañas de papel, todas a la vista (se crean en Noticias.crearPestanas) -->
+        <com.example.nuietsiit.ui.PestanasPapel
+            android:id="@+id/pestanasCategorias"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipsCategorias"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:selectionRequired="true"
-                app:singleLine="true"
-                app:singleSelection="true" />
-        </HorizontalScrollView>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <FrameLayout
@@ -142,13 +77,13 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- Se ve un trocito de la tarjeta anterior y la siguiente para que se note que se desliza -->
+        <!-- Se ve un trocito de la ficha anterior y la siguiente para que se note que se desliza -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/vpAnuncios"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingHorizontal="36dp"
-            android:paddingVertical="8dp" />
+            android:paddingHorizontal="@dimen/nui_espacio_xxl"
+            android:paddingVertical="@dimen/nui_espacio_m" />
 
         <TextView
             android:id="@+id/tvVacio"
@@ -156,9 +91,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="No hay avisos aquí 🎉"
-            android:textColor="#000000"
-            android:textSize="16sp"
+            android:text="No hay avisos aquí."
+            android:textAppearance="@style/TextAppearance.Nui.Titular.M"
             android:visibility="gone" />
     </FrameLayout>
 
@@ -166,8 +100,19 @@
         android:id="@+id/tvPagina"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
         android:gravity="center"
-        android:paddingBottom="12dp"
-        android:textColor="#999999"
-        android:textSize="12sp" />
+        android:paddingBottom="@dimen/nui_espacio_s"
+        android:textAppearance="@style/TextAppearance.Nui.Codigo" />
+
+    <!-- Zócalo: filete de oro + alicatado -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/nui_oro" />
+
+    <com.example.nuietsiit.ui.TramaAzulejo
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/nui_zocalo"
+        android:importantForAccessibility="no" />
 </LinearLayout>

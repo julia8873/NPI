@@ -1,9 +1,11 @@
 package com.example.nuietsiit.activities.secciones.noticias;
 
-import android.graphics.Typeface;
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,20 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Anuncio;
 import com.example.nuietsiit.util.FechasUtil;
-import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Páginas del carrusel de Noticias (pagina_anuncio.xml), una por anuncio. */
+/**
+ * Páginas del carrusel de Noticias (pagina_anuncio.xml), una ficha NUI por anuncio:
+ * tesela con el icono de la categoría, etiqueta "Nuevo" si no está leído y sello "Urgente".
+ */
 public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> {
 
     public interface OnAnuncioClick {
         void alPulsar(Anuncio anuncio);
     }
-
-    private static final int NARANJA = 0xFFFF8C42;
-    private static final int ROJO = 0xFFD32F2F;
 
     private List<Anuncio> anuncios = new ArrayList<>();
     private final OnAnuncioClick listener;
@@ -53,23 +54,24 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int posicion) {
         Anuncio a = anuncios.get(posicion);
-        float densidad = h.itemView.getResources().getDisplayMetrics().density;
+        Context ctx = h.itemView.getContext();
 
-        h.tvEmoji.setText(Anuncio.emoji(a.categoria));
+        // Un solo color fuerte por ficha: el de la categoría, en la tesela
+        h.ivIcono.setImageResource(Anuncio.iconoRes(a.categoria));
+        h.ivIcono.setImageTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.colorRes(a.categoria))));
+        h.ivIcono.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.tinteRes(a.categoria))));
+
         h.tvTitulo.setText(a.titulo);
         h.tvMeta.setText(Anuncio.nombreCategoria(a.categoria) + " · " + FechasUtil.hace(a.publicacion));
         h.tvContenido.setText(a.contenido);
 
-        // Urgentes: borde rojo más grueso y etiqueta
+        // Urgentes: sello granada. No leídos: etiqueta "Nuevo"
         h.tvUrgente.setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
-        h.card.setStrokeColor(a.esUrgente() ? ROJO : NARANJA);
-        h.card.setStrokeWidth(Math.round((a.esUrgente() ? 3 : 1) * densidad));
-
-        // No leídos: puntito naranja. Leídos: título normal
-        h.tvTitulo.setTypeface(null, a.leido ? Typeface.NORMAL : Typeface.BOLD);
         h.vNoLeido.setVisibility(a.leido ? View.INVISIBLE : View.VISIBLE);
 
-        h.itemView.setOnClickListener(v -> listener.alPulsar(a));
+        h.ficha.setContentDescription((a.esUrgente() ? "Urgente. " : "") + (a.leido ? "" : "Nuevo. ")
+                + Anuncio.nombreCategoria(a.categoria) + ". " + a.titulo);
+        h.ficha.setOnClickListener(v -> listener.alPulsar(a));
     }
 
     @Override
@@ -78,14 +80,14 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     }
 
     static class Holder extends RecyclerView.ViewHolder {
-        final MaterialCardView card;
-        final TextView tvEmoji, tvTitulo, tvMeta, tvContenido, tvUrgente;
-        final View vNoLeido;
+        final View ficha, vNoLeido;
+        final ImageView ivIcono;
+        final TextView tvTitulo, tvMeta, tvContenido, tvUrgente;
 
         Holder(View v) {
             super(v);
-            card = (MaterialCardView) v;
-            tvEmoji = v.findViewById(R.id.tvEmoji);
+            ficha = v.findViewById(R.id.fichaAnuncio);
+            ivIcono = v.findViewById(R.id.ivIcono);
             tvTitulo = v.findViewById(R.id.tvTitulo);
             tvMeta = v.findViewById(R.id.tvMeta);
             tvContenido = v.findViewById(R.id.tvContenido);

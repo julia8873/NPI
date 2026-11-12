@@ -246,7 +246,7 @@ class ManoGuia {
             case LEVANTAR: // está plano y se levanta
                 mover = ObjectAnimator.ofFloat(movil, View.ROTATION_X, 70, 70, 0, 0, 70).setDuration(2000);
                 break;
-            default: // ESCANEAR: acercar y alejar el móvil del código
+            default: // ESCANEAR y OREJA: acercar y alejar el móvil
                 AnimatorSet s = new AnimatorSet();
                 s.playTogether(ObjectAnimator.ofFloat(movil, View.SCALE_X, 1f, 1.25f, 1f, 1.25f, 1f),
                         ObjectAnimator.ofFloat(movil, View.SCALE_Y, 1f, 1.25f, 1f, 1.25f, 1f));

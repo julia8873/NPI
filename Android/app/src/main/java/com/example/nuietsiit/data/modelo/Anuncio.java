@@ -1,5 +1,10 @@
 package com.example.nuietsiit.data.modelo;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+
+import com.example.nuietsiit.R;
+
 import java.time.LocalDateTime;
 
 /** Un anuncio general (tabla ANUNCIO_GENERAL). */
@@ -28,12 +33,35 @@ public class Anuncio {
         return "alta".equals(prioridad);
     }
 
-    public static String emoji(String categoria) {
+    // Colores e iconos del design system NUI (DisenoNUI/DESIGN.md)
+
+    @ColorRes
+    public static int colorRes(String categoria) {
         switch (categoria) {
-            case "beca": return "💰";
-            case "plazo": return "⏰";
-            case "transporte": return "🚌";
-            default: return "📢";
+            case "beca": return R.color.nui_arrayan;
+            case "plazo": return R.color.nui_granada;      // plazos y convocatorias = granada
+            case "transporte": return R.color.nui_cobalto;
+            default: return R.color.nui_tema_certificados; // madera
+        }
+    }
+
+    @ColorRes
+    public static int tinteRes(String categoria) {
+        switch (categoria) {
+            case "beca": return R.color.nui_arrayan_tinte;
+            case "plazo": return R.color.nui_granada_tinte;
+            case "transporte": return R.color.nui_cobalto_tinte;
+            default: return R.color.nui_tema_certificados_tinte;
+        }
+    }
+
+    @DrawableRes
+    public static int iconoRes(String categoria) {
+        switch (categoria) {
+            case "beca": return R.drawable.nui_ic_creditos;
+            case "plazo": return R.drawable.nui_ic_reloj_arena;
+            case "transporte": return R.drawable.ic_nui_mapa;
+            default: return R.drawable.nui_ic_sobre;
         }
     }
 

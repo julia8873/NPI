@@ -40,6 +40,9 @@ public final class TablasActividades {
     //                  ACTIVIDADES
     // -------------------------------------------------
     public static void poblarActividades(SQLiteDatabase db) {
+        // Si ya están, no se vuelven a meter: el bot (GeminiManager) llama a esto cada vez que se abre el chat
+        // y, como ACTIVIDAD no tiene nada único, salían todas las actividades repetidas
+        if (android.database.DatabaseUtils.queryNumEntries(db, "ACTIVIDAD") > 0) return;
         LocalDate hoy = LocalDate.now();
 
         long charlaIA = actividad(db, "IA generativa: del laboratorio a la empresa",

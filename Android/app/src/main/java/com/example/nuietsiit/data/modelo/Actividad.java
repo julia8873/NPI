@@ -1,5 +1,10 @@
 package com.example.nuietsiit.data.modelo;
 
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+
+import com.example.nuietsiit.R;
+
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.TextoUtil;
 
@@ -68,8 +73,8 @@ public class Actividad {
         if (hoy.isAfter(plazoFin)) return "Inscripción cerrada";
         if (completa()) return "Plazas agotadas";
         long dias = FechasUtil.diasHasta(plazoFin);
-        if (dias == 0) return "⏳ ¡Hoy es el último día para inscribirte!";
-        if (dias <= 3) return "⏳ Quedan " + dias + (dias == 1 ? " día" : " días") + " para inscribirte";
+        if (dias == 0) return "¡Hoy es el último día para inscribirte!";
+        if (dias <= 3) return "Quedan " + dias + (dias == 1 ? " día" : " días") + " para inscribirte";
         return "Inscripción abierta hasta el " + FechasUtil.diaCorto(plazoFin);
     }
 
@@ -87,15 +92,6 @@ public class Actividad {
 
     // -------------------- Aspecto según el tipo --------------------
 
-    public static String emoji(String tipo) {
-        switch (tipo) {
-            case "charla": return "🎤";
-            case "bibliomaker": return "🛠️";
-            case "abiertaugr": return "🎓";
-            case "dia_etsiit": return "🎉";
-            default: return "✨";
-        }
-    }
 
     public static String nombreTipo(String tipo) {
         switch (tipo) {
@@ -121,13 +117,39 @@ public class Actividad {
         }
     }
 
-    public static int color(String tipo) {
+    // Colores e iconos del design system NUI (DisenoNUI/DESIGN.md): un color fuerte por tipo
+    // y su tinte claro para el fondo de la tesela y de la etiqueta
+
+    @ColorRes
+    public static int colorRes(String tipo) {
         switch (tipo) {
-            case "charla": return 0xFF8E24AA;      // morado
-            case "bibliomaker": return 0xFF2E7D32; // verde
-            case "abiertaugr": return 0xFF1565C0;  // azul
-            case "dia_etsiit": return 0xFFFF8C42;  // naranja de la app
-            default: return 0xFF546E7A;            // gris azulado
+            case "charla": return R.color.nui_granada;
+            case "bibliomaker": return R.color.nui_arrayan;
+            case "abiertaugr": return R.color.nui_cobalto;      // créditos = cobalto
+            case "dia_etsiit": return R.color.nui_resaltado;    // almagra, la de la escuela
+            default: return R.color.nui_tema_certificados;      // madera
+        }
+    }
+
+    @ColorRes
+    public static int tinteRes(String tipo) {
+        switch (tipo) {
+            case "charla": return R.color.nui_granada_tinte;
+            case "bibliomaker": return R.color.nui_arrayan_tinte;
+            case "abiertaugr": return R.color.nui_cobalto_tinte;
+            case "dia_etsiit": return R.color.nui_resaltado_tinte;
+            default: return R.color.nui_tema_certificados_tinte;
+        }
+    }
+
+    @DrawableRes
+    public static int iconoRes(String tipo) {
+        switch (tipo) {
+            case "charla": return R.drawable.nui_ic_consulta;
+            case "bibliomaker": return R.drawable.nui_ic_hoja;
+            case "abiertaugr": return R.drawable.nui_ic_creditos;
+            case "dia_etsiit": return R.drawable.nui_ic_granada;
+            default: return R.drawable.ic_nui_actividades;
         }
     }
 }

@@ -106,7 +106,8 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
     private List<FotosRutaExterior.PuntoFoto> puntosTramo = Collections.emptyList();
     private int indiceFoto, indiceAuto = -1;
     private String instruccionRuta = "";
-    private boolean plegada;
+    // Empieza plegada: con el móvil en la mano se ve el mapa; la foto en grande sale al levantarlo
+    private boolean plegada = true;
     // Viaje en curso (de "¿A dónde vas?"): con hora límite se dice si llegas a tiempo
     private DestinoViaje viaje;
     private Puntualidad puntualidad;
@@ -561,6 +562,8 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         if (postura == Postura.Tipo.LEVANTADO) {
             levantada.copiar(fotos.isEmpty() ? null : fotos.get(indiceFoto), tvInstruccion, tvMetros);
             levantada.girar(ivFlecha);
+        } else if (postura == Postura.Tipo.NORMAL && !plegada) {
+            plegar(true); // al bajar el móvil se vuelve a ver el mapa (Miguel)
         } else if (postura == Postura.Tipo.BOCA_ABAJO && voz.activa()) {
             voz.activar(false);
             pintarVoz();

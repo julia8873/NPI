@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Altavoz (leer en voz alta). Mismo trazo que los nui_ic_*: línea de tinta de 2, puntas redondas -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:strokeColor="@color/nui_tinta" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M4,9h4l5,-4v14l-5,-4h-4zM16.5,9.5c1.2,1.4 1.2,3.6 0,5M19,7c2.6,2.8 2.6,7.2 0,10" />
+</vector>
