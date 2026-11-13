@@ -1,5 +1,7 @@
 package com.example.nuietsiit.data.modelo;
 
+import android.content.Context;
+
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 
@@ -78,6 +80,19 @@ public class Actividad {
         return "Inscripción abierta hasta el " + FechasUtil.diaCorto(plazoFin);
     }
 
+    /** Estado de inscripción en el idioma de la app (pantallas). */
+    public String estadoInscripcion(Context ctx) {
+        if (!esAbiertaUGR()) return "";
+        LocalDate hoy = LocalDate.now();
+        if (hoy.isBefore(plazoInicio)) return ctx.getString(R.string.nui_insc_desde_fmt, FechasUtil.diaCorto(plazoInicio));
+        if (hoy.isAfter(plazoFin)) return ctx.getString(R.string.nui_insc_cerrada);
+        if (completa()) return ctx.getString(R.string.nui_act_btn_agotadas);
+        long dias = FechasUtil.diasHasta(plazoFin);
+        if (dias == 0) return ctx.getString(R.string.nui_insc_hoy);
+        if (dias <= 3) return ctx.getResources().getQuantityString(R.plurals.nui_insc_quedan, (int) dias, (int) dias);
+        return ctx.getString(R.string.nui_insc_abierta_hasta_fmt, FechasUtil.diaCorto(plazoFin));
+    }
+
     // Pone el texto de creditos bonito
     public String creditosTexto() {
         if (creditos == null) return "";
@@ -92,6 +107,28 @@ public class Actividad {
 
     // -------------------- Aspecto según el tipo --------------------
 
+
+    /** Nombre del tipo en el idioma de la app (pantallas). */
+    public static String nombreTipo(Context ctx, String tipo) {
+        switch (tipo) {
+            case "charla": return ctx.getString(R.string.nui_tipo_charla);
+            case "bibliomaker": return ctx.getString(R.string.nui_tipo_bibliomaker);
+            case "abiertaugr": return ctx.getString(R.string.nui_tipo_abiertaugr);
+            case "dia_etsiit": return ctx.getString(R.string.nui_tipo_dia_etsiit);
+            default: return ctx.getString(R.string.nui_tipo_otro);
+        }
+    }
+
+    /** Texto de la pestaña de filtro del tipo, en el idioma de la app. */
+    public static String nombreFiltro(Context ctx, String tipo) {
+        switch (tipo) {
+            case "charla": return ctx.getString(R.string.nui_tipo_f_charla);
+            case "bibliomaker": return ctx.getString(R.string.nui_tipo_f_bibliomaker);
+            case "abiertaugr": return ctx.getString(R.string.nui_tipo_f_abiertaugr);
+            case "dia_etsiit": return ctx.getString(R.string.nui_tipo_f_dia_etsiit);
+            default: return ctx.getString(R.string.nui_tipo_f_otro);
+        }
+    }
 
     public static String nombreTipo(String tipo) {
         switch (tipo) {
@@ -117,28 +154,27 @@ public class Actividad {
         }
     }
 
-    // Colores e iconos del design system NUI (DisenoNUI/DESIGN.md): un color fuerte por tipo
-    // y su tinte claro para el fondo de la tesela y de la etiqueta
+    // Colores e iconos de cada tipo (colores_secciones.xml)
 
     @ColorRes
     public static int colorRes(String tipo) {
         switch (tipo) {
-            case "charla": return R.color.nui_granada;
-            case "bibliomaker": return R.color.nui_arrayan;
-            case "abiertaugr": return R.color.nui_cobalto;      // créditos = cobalto
-            case "dia_etsiit": return R.color.nui_resaltado;    // almagra, la de la escuela
-            default: return R.color.nui_tema_certificados;      // madera
+            case "charla": return R.color.sec_tipo_charla;
+            case "bibliomaker": return R.color.sec_tipo_bibliomaker;
+            case "abiertaugr": return R.color.sec_tipo_abiertaugr;
+            case "dia_etsiit": return R.color.nui_acento;
+            default: return R.color.sec_tipo_otro;
         }
     }
 
     @ColorRes
     public static int tinteRes(String tipo) {
         switch (tipo) {
-            case "charla": return R.color.nui_granada_tinte;
-            case "bibliomaker": return R.color.nui_arrayan_tinte;
-            case "abiertaugr": return R.color.nui_cobalto_tinte;
-            case "dia_etsiit": return R.color.nui_resaltado_tinte;
-            default: return R.color.nui_tema_certificados_tinte;
+            case "charla": return R.color.sec_tipo_charla_tinte;
+            case "bibliomaker": return R.color.sec_tipo_bibliomaker_tinte;
+            case "abiertaugr": return R.color.sec_tipo_abiertaugr_tinte;
+            case "dia_etsiit": return R.color.nui_tinte;
+            default: return R.color.sec_tipo_otro_tinte;
         }
     }
 

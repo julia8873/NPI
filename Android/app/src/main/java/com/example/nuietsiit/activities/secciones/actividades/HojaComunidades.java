@@ -29,7 +29,7 @@ import java.util.Set;
  * 1) mostrar(): hoja con la lista de grupos del grado del usuario + los generales.
  * 2) Al pulsar uno: vista previa SIMULADA del grupo (no abre WhatsApp/Telegram/Discord de verdad).
  * 3) "Unirme" se guarda en el móvil (ComunidadesUnidas). Sin sesión iniciada no se puede unir.
- * Diseño NUI: papel pulsable, teselas con el color de la plataforma (tokens, no colores de marca).
+ * Tarjetas blancas con el icono en el color de cada plataforma (colores_secciones.xml).
  */
 public final class HojaComunidades {
 
@@ -49,9 +49,9 @@ public final class HojaComunidades {
         // Sin grado elegido (0 = "Ninguno") se enseñan todas
         TextView tvSubtitulo = v.findViewById(R.id.tvSubtituloComunidades);
         if (idGrado == null || idGrado == 0) {
-            tvSubtitulo.setText("Todas las comunidades de la ETSIIT");
+            tvSubtitulo.setText(R.string.nui_com_todas);
         } else {
-            tvSubtitulo.setText("De tu grado (" + usuarios.obtenerGradoUsuario(correo) + ") y generales de la escuela");
+            tvSubtitulo.setText(act.getString(R.string.nui_com_grado_fmt, usuarios.obtenerGradoUsuario(correo)));
         }
 
         LinearLayout lista = v.findViewById(R.id.listaComunidades);
@@ -63,7 +63,7 @@ public final class HojaComunidades {
     private static void pintarLista(AppCompatActivity act, LinearLayout lista, List<Comunidad> comunidades,
                                     String correo) {
         lista.removeAllViews();
-        Set<String> unidas = ComunidadesUnidas.unidas(act);
+        Set<String> unidas = ComunidadesUnidas.unidas(act, correo);
         LayoutInflater inflater = act.getLayoutInflater();
 
         for (Comunidad c : comunidades) {
@@ -78,19 +78,20 @@ public final class HojaComunidades {
 
             boolean unido = unidas.contains(String.valueOf(c.id));
             TextView tvPlataforma = item.findViewById(R.id.tvPlataforma);
-            tvPlataforma.setText(unido ? "Unido" : Comunidad.nombrePlataforma(c.plataforma));
-            tvPlataforma.setTextColor(act.getColor(unido ? R.color.nui_ok : Comunidad.colorRes(c.plataforma)));
+            tvPlataforma.setText(unido ? act.getString(R.string.nui_com_unido) : Comunidad.nombrePlataforma(c.plataforma));
+            tvPlataforma.setTextColor(act.getColor(unido ? R.color.sec_ok : Comunidad.colorRes(c.plataforma)));
             item.setContentDescription(c.nombre + ", " + tvPlataforma.getText());
 
             // al volver de la vista previa se repinta la lista (por si se ha unido)
-            item.setOnClickListener(x -> mostrarGrupo(act, c, correo != null,
+            item.setOnClickListener(x -> mostrarGrupo(act, c, correo,
                     () -> pintarLista(act, lista, comunidades, correo)));
             lista.addView(item);
         }
     }
 
     // Vista previa simulada del grupo (vista_grupo.xml)
-    private static void mostrarGrupo(AppCompatActivity act, Comunidad c, boolean haySesion, Runnable alCambiar) {
+    private static void mostrarGrupo(AppCompatActivity act, Comunidad c, String correo, Runnable alCambiar) {
+        boolean haySesion = correo != null;
         BottomSheetDialog hoja = new BottomSheetDialog(act);
         View v = act.getLayoutInflater().inflate(R.layout.vista_grupo, null);
         hoja.setContentView(v);
@@ -102,7 +103,7 @@ public final class HojaComunidades {
         tvPlataforma.setText(Comunidad.nombrePlataforma(c.plataforma));
         tvPlataforma.setTextColor(color);
         ((TextView) v.findViewById(R.id.tvNombreGrupo)).setText(c.nombre);
-        ((TextView) v.findViewById(R.id.tvMiembros)).setText(c.miembrosSimulados() + " miembros");
+        ((TextView) v.findViewById(R.id.tvMiembros)).setText(act.getString(R.string.nui_com_miembros_fmt, c.miembrosSimulados()));
 
         // Burbujas de mensajes de ejemplo
         LinearLayout mensajes = v.findViewById(R.id.listaMensajes);
@@ -117,7 +118,7 @@ public final class HojaComunidades {
 
         Button btnUnirme = v.findViewById(R.id.btnUnirme);
         if (!haySesion) {
-            btnUnirme.setText("Inicia sesión para unirte");
+            btnUnirme.setText(R.string.nui_com_login);
             btnUnirme.setOnClickListener(x -> {
                 hoja.dismiss();
                 act.startActivity(new Intent(act, Login.class));
@@ -125,21 +126,21 @@ public final class HojaComunidades {
             hoja.show();
             return;
         }
-        actualizarBoton(act, btnUnirme, c);
+        actualizarBoton(act, btnUnirme, c, correo);
         btnUnirme.setOnClickListener(x -> {
-            ComunidadesUnidas.alternar(act, c.id);
-            actualizarBoton(act, btnUnirme, c);
+            ComunidadesUnidas.alternar(act, correo, c.id);
+            actualizarBoton(act, btnUnirme, c, correo);
             alCambiar.run();
-            boolean unido = ComunidadesUnidas.estaUnido(act, c.id);
-            Toast.makeText(act, unido ? "Te has unido a «" + c.nombre + "»"
-                    : "Has salido de «" + c.nombre + "»", Toast.LENGTH_SHORT).show();
+            boolean unido = ComunidadesUnidas.estaUnido(act, correo, c.id);
+            Toast.makeText(act, act.getString(unido ? R.string.nui_com_unido_fmt : R.string.nui_com_salido_fmt, c.nombre),
+                    Toast.LENGTH_SHORT).show();
         });
 
         hoja.show();
     }
 
-    private static void actualizarBoton(AppCompatActivity act, Button btn, Comunidad c) {
-        boolean unido = ComunidadesUnidas.estaUnido(act, c.id);
-        btn.setText(unido ? "Ya eres miembro · Salir del grupo" : "Unirme al grupo");
+    private static void actualizarBoton(AppCompatActivity act, Button btn, Comunidad c, String correo) {
+        boolean unido = ComunidadesUnidas.estaUnido(act, correo, c.id);
+        btn.setText(unido ? R.string.nui_com_miembro_salir : R.string.nui_com_unirme);
     }
 }

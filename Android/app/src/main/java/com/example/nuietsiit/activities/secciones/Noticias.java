@@ -21,14 +21,13 @@ import com.example.nuietsiit.data.AnunciosDB;
 import com.example.nuietsiit.data.AnunciosLeidos;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Anuncio;
-import com.example.nuietsiit.ui.CabeceraNui;
-import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -37,8 +36,8 @@ import java.util.Set;
 
 /**
  * Pantalla de Noticias SIN SCROLL: carrusel horizontal con una ficha grande por aviso.
- * Diseño NUI (DisenoNUI/DESIGN.md), igual que Secretaría y Biblioteca: yesería + arquería, pestañas de papel,
- * fichas con tesela, sello "Urgente" y zócalo. Nada de colores ni tamaños a mano.
+ * Mismo aspecto que Asignaturas, Profesorado y Calendario: cabecera unificada, fondo gris claro, tarjetas
+ * blancas y el naranja de la app (colores_secciones.xml y estilos_secciones.xml).
  * - Los urgentes van primero, con sello granada.
  * - Un aviso cuenta como leído si te quedas en él un momento o lo abres entero.
  * - Tocar la tarjeta = aviso completo en una hoja (con su enlace si tiene).
@@ -74,16 +73,10 @@ public class Noticias extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.noticias);
-        overridePendingTransition(R.anim.nui_papel_entra, R.anim.nui_quieto);
 
-        // Barra de yesería (como Secretaría y Biblioteca): atrás, título, chat y perfil
-        MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        CabeceraNui.preparar(barra);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Noticias y avisos");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        // Cabecera unificada (como Asignaturas y Profesorado): volver, título, chat y perfil
+        configurarCabeceraUnificada(getString(R.string.seccion_noticias));
+        Actividades.margenBarraEstado(findViewById(R.id.rootNoticias));
 
         anunciosDB = new AnunciosDB(DBHelper.getInstance(this));
 
@@ -146,7 +139,7 @@ public class Noticias extends BaseActivity {
             @Override public void alBocaAbajo() {
                 pintarBotonEscuchar();
                 avisarTutorial(Gesto.BOCA_ABAJO);
-                Snackbar.make(raiz, "Boca abajo: dejo de leer", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(raiz, R.string.nui_not_boca_abajo, Snackbar.LENGTH_SHORT).show();
             }
         });
         btnEscuchar.setOnClickListener(v -> {
@@ -196,26 +189,27 @@ public class Noticias extends BaseActivity {
         aplicarFiltro();
     }
 
-    /**
-     * Pestañas de papel (ui/PestanasPapel, de Izaro) en dos filas, todas a la vista:
-     * Todos · Sin leer · Plazos / Becas · Transporte · General
-     */
+    /** Chips de filtro (bajan de línea si no caben): Todos · Sin leer · Plazos · Becas · Transporte · General */
     private void crearPestanas() {
-        PestanasPapel pestanas = findViewById(R.id.pestanasCategorias);
-        pestanas.nuevaFila();
-        pestanas.anadir(FILTRO_TODOS, "Todos", null, 0, 0);
-        pestanas.anadir(FILTRO_NO_LEIDOS, "Sin leer", null, 0, 0);
-        for (int i = 0; i < Anuncio.CATEGORIAS.length; i++) {
-            if (i == 1) pestanas.nuevaFila(); // 3 arriba y 3 abajo
-            String cat = Anuncio.CATEGORIAS[i][0];
-            pestanas.anadir(cat, Anuncio.CATEGORIAS[i][1], null, 0, 0);
-        }
-        pestanas.completarFila(3);
-        pestanas.marcar(FILTRO_TODOS);
-        pestanas.setOnElegir(clave -> {
-            filtroSeleccionado = FILTRO_TODOS.equals(clave) ? null : (String) clave;
+        ChipGroup chips = findViewById(R.id.pestanasCategorias);
+        anadirChip(chips, FILTRO_TODOS, getString(R.string.nui_not_todos));
+        anadirChip(chips, FILTRO_NO_LEIDOS, getString(R.string.nui_not_sin_leer_pestana));
+        for (String[] c : Anuncio.CATEGORIAS) anadirChip(chips, c[0], Anuncio.nombreFiltro(this, c[0]));
+        chips.check(chips.getChildAt(0).getId());
+        chips.setOnCheckedStateChangeListener((grupo, ids) -> {
+            if (ids.isEmpty()) return;
+            String clave = (String) grupo.findViewById(ids.get(0)).getTag();
+            filtroSeleccionado = FILTRO_TODOS.equals(clave) ? null : clave;
             aplicarFiltro();
         });
+    }
+
+    private void anadirChip(ChipGroup chips, String clave, String texto) {
+        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_chip_filtro, chips, false);
+        chip.setId(View.generateViewId());
+        chip.setText(texto);
+        chip.setTag(clave);
+        chips.addView(chip);
     }
 
     private void aplicarFiltro() {
@@ -240,9 +234,9 @@ public class Noticias extends BaseActivity {
         int sinLeer = 0;
         for (Anuncio a : todos) if (!a.leido) sinLeer++;
         if (sinLeer == 0) {
-            tvSinLeer.setText("Estás al día");
+            tvSinLeer.setText(R.string.nui_not_al_dia);
         } else {
-            tvSinLeer.setText(sinLeer + (sinLeer == 1 ? " aviso sin leer" : " avisos sin leer"));
+            tvSinLeer.setText(getResources().getQuantityString(R.plurals.nui_not_sin_leer, sinLeer, sinLeer));
         }
         tvMarcarTodo.setVisibility(sinLeer > 0 ? View.VISIBLE : View.GONE);
     }
@@ -256,7 +250,7 @@ public class Noticias extends BaseActivity {
         int actual = vpAnuncios.getCurrentItem();
         tvPagina.setText((actual > 0 ? "‹  " : "   ") + (actual + 1) + " / " + visibles.size()
                 + (actual < visibles.size() - 1 ? "  ›" : "   "));
-        tvPagina.setContentDescription("Aviso " + (actual + 1) + " de " + visibles.size());
+        tvPagina.setContentDescription(getString(R.string.nui_not_pagina_desc_fmt, actual + 1, visibles.size()));
     }
 
     // -------------------------------------------------
@@ -290,7 +284,7 @@ public class Noticias extends BaseActivity {
     /** Lee los avisos sin leer de lo que se está viendo; si están todos leídos, todos desde el actual. */
     private void empezarLectura() {
         if (!lector.disponible()) {
-            Snackbar.make(raiz, "Este móvil no tiene voz en español para leer los avisos", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(raiz, R.string.nui_not_sin_voz, Snackbar.LENGTH_LONG).show();
             return;
         }
         cola = new ArrayList<>();
@@ -300,7 +294,7 @@ public class Noticias extends BaseActivity {
 
         List<String> textos = new ArrayList<>();
         for (Anuncio a : cola) {
-            textos.add((a.esUrgente() ? "Urgente. " : "") + Anuncio.nombreCategoria(a.categoria) + ". "
+            textos.add((a.esUrgente() ? getString(R.string.nui_not_urgente) + ". " : "") + Anuncio.nombreCategoria(this, a.categoria) + ". "
                     + a.titulo + ". " + a.contenido);
         }
         lector.leer(textos);
@@ -310,7 +304,7 @@ public class Noticias extends BaseActivity {
     private void pintarBotonEscuchar() {
         boolean leyendo = lector.leyendo();
         btnEscuchar.setIconResource(leyendo ? R.drawable.nui_ic_parar : R.drawable.nui_ic_altavoz);
-        btnEscuchar.setContentDescription(leyendo ? "Dejar de leer" : "Escuchar los avisos");
+        btnEscuchar.setContentDescription(getString(leyendo ? R.string.nui_not_desc_parar : R.string.nui_not_desc_escuchar));
     }
 
     // -------------------------------------------------
@@ -326,18 +320,17 @@ public class Noticias extends BaseActivity {
         ivIcono.setImageResource(Anuncio.iconoRes(a.categoria));
         ivIcono.setImageTintList(ColorStateList.valueOf(getColor(Anuncio.colorRes(a.categoria))));
         ivIcono.setBackgroundTintList(ColorStateList.valueOf(getColor(Anuncio.tinteRes(a.categoria))));
-        ((TextView) v.findViewById(R.id.tvCategoriaDetalle)).setText(Anuncio.nombreCategoria(a.categoria));
+        ((TextView) v.findViewById(R.id.tvCategoriaDetalle)).setText(Anuncio.nombreCategoria(this, a.categoria));
         v.findViewById(R.id.tvUrgenteDetalle).setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
 
         ((TextView) v.findViewById(R.id.tvTituloDetalle)).setText(a.titulo);
-        ((TextView) v.findViewById(R.id.tvFechaDetalle)).setText("Publicado " + FechasUtil.hace(a.publicacion)
-                + " · " + FechasUtil.diaLargo(a.publicacion));
+        ((TextView) v.findViewById(R.id.tvFechaDetalle)).setText(getString(R.string.nui_not_publicado_fmt, FechasUtil.hace(this, a.publicacion), FechasUtil.diaLargo(a.publicacion)));
         ((TextView) v.findViewById(R.id.tvContenidoDetalle)).setText(a.contenido);
 
         if (a.caducidad != null) {
             TextView tvCaducidad = v.findViewById(R.id.tvCaducidadDetalle);
             tvCaducidad.setVisibility(View.VISIBLE);
-            tvCaducidad.setText("Válido hasta el " + FechasUtil.diaLargo(a.caducidad));
+            tvCaducidad.setText(getString(R.string.nui_not_valido_hasta_fmt, FechasUtil.diaLargo(a.caducidad)));
         }
 
         if (a.enlace != null && !a.enlace.isEmpty()) {
@@ -347,7 +340,7 @@ public class Noticias extends BaseActivity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(a.enlace)));
                 } catch (ActivityNotFoundException e) {
-                    Snackbar.make(raiz, "No hay navegador para abrir el enlace", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(raiz, R.string.nui_sin_navegador, Snackbar.LENGTH_SHORT).show();
                 }
             });
         }
@@ -363,30 +356,22 @@ public class Noticias extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "noticias", 3)
-                .info(R.id.pestanasCategorias, "Filtra los avisos: los que no has leído, plazos, becas, transporte...")
-                .gesto(R.id.vpAnuncios, Gesto.DESLIZAR_IZQ, "Desliza a la izquierda para pasar al siguiente aviso. "
-                        + "Si te quedas un momento en uno, cuenta como leído")
+        return new Tutorial(this, "noticias", 4)
+                .info(R.id.pestanasCategorias, getString(R.string.nui_tut_not_pestanas))
+                .gesto(R.id.vpAnuncios, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_not_deslizar))
                 .soloSi(() -> visibles.size() > 1 && vpAnuncios.getCurrentItem() < visibles.size() - 1)
                 // Voz y sensores: se prueban de verdad, como los pasos de sensor de Izaro
-                .tocar(R.id.btnEscuchar, "Toca el altavoz y te leo en voz alta los avisos sin leer")
+                .tocar(R.id.btnEscuchar, getString(R.string.nui_tut_not_altavoz))
                 .soloSi(() -> lector.disponible() && !visibles.isEmpty())
-                .sensor(Gesto.BOCA_ABAJO, "Ahora pon el móvil boca abajo: me callo")
+                .sensor(Gesto.BOCA_ABAJO, getString(R.string.nui_tut_not_boca_abajo))
                 .soloSi(() -> lector.leyendo())
-                .sensor(Gesto.OREJA, "Acércate el móvil a la oreja, como para escuchar un audio: "
-                        + "te leo los avisos por el auricular. Al separarlo, paro")
+                .sensor(Gesto.OREJA, getString(R.string.nui_tut_not_oreja))
                 .soloSi(() -> lector.disponible() && lector.hayProximidad() && !visibles.isEmpty())
-                .info(R.id.tvMarcarTodo, "¿Ya te has enterado de todo? Márcalos todos como leídos de una vez")
+                .info(R.id.tvMarcarTodo, getString(R.string.nui_tut_not_marcar))
                 .soloSiSeVe()
                 // el último: al tocar se abre el aviso entero encima
-                .tocar(R.id.vpAnuncios, "Toca la ficha para leer el aviso entero y abrir su enlace")
+                .tocar(R.id.vpAnuncios, getString(R.string.nui_tut_not_tocar))
                 .soloSi(() -> !visibles.isEmpty());
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.nui_quieto, R.anim.nui_papel_sale);
     }
 
     @Override

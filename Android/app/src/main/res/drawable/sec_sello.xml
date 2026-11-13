@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Marco de los sellos ME APUNTO / PASO al arrastrar la tarjeta (el color se pone con backgroundTint) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="3dp" android:color="@color/sec_texto" />
+    <corners android:radius="10dp" />
+</shape>

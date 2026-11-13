@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Vista previa SIMULADA de un grupo de chat (no se abre la app real). Design system NUI. -->
+<!-- Vista previa SIMULADA de un grupo de chat (no se abre la app real) -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/nui_superficie">
+    android:background="@color/sec_fondo">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,22 +17,22 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/nui_espacio_l">
+            android:padding="20dp">
 
             <ImageView
                 android:id="@+id/ivIconoGrupo"
-                android:layout_width="@dimen/nui_icono_objeto"
-                android:layout_height="@dimen/nui_icono_objeto"
-                android:background="@drawable/nui_tesela"
-                android:backgroundTint="@color/nui_papel"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/sec_circulo"
+                android:backgroundTint="@color/sec_tarjeta"
                 android:importantForAccessibility="no"
-                android:padding="@dimen/nui_espacio_s"
+                android:padding="11dp"
                 android:src="@drawable/nui_ic_movil" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nui_espacio_m"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
@@ -40,20 +40,21 @@
                     android:id="@+id/tvPlataformaGrupo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvNombreGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/nui_espacio_xs"
-                    android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.Seccion.Titulo" />
 
                 <TextView
                     android:id="@+id/tvMiembros"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+                    android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
             </LinearLayout>
         </LinearLayout>
 
@@ -62,23 +63,21 @@
             android:id="@+id/listaMensajes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/nui_suave"
             android:orientation="vertical"
-            android:padding="@dimen/nui_espacio_l" />
+            android:padding="16dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_s"
             android:gravity="center"
-            android:text="Vista previa simulada"
-            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+            android:text="@string/nui_com_vista_previa"
+            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUnirme"
-            style="@style/Widget.Nui.Boton"
+            style="@style/Widget.Seccion.Boton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/nui_espacio_l" />
+            android:layout_margin="16dp" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -63,9 +63,12 @@ public final class LectorAvisos implements SensorEventListener {
     private List<String> textos = new ArrayList<>();
     private int actual = -1;
     private boolean leyendo, enOreja, empezoPorOreja;
+    private boolean auricularPuesto; // solo se devuelve el audio a su sitio si lo cambiamos nosotros
     private long bocaAbajoDesde;
 
     public LectorAvisos(Context context, Oyente oyente) {
+        // idioma de la app (Ajustes): se coge de la pantalla, que es la que tiene el idioma aplicado
+        Locale idioma = context.getResources().getConfiguration().getLocales().get(0);
         this.ctx = context.getApplicationContext();
         this.oyente = oyente;
         audio = ctx.getSystemService(AudioManager.class);
@@ -80,7 +83,7 @@ public final class LectorAvisos implements SensorEventListener {
 
         tts = new TextToSpeech(ctx, estado -> {
             if (estado != TextToSpeech.SUCCESS || tts == null) return;
-            int r = tts.setLanguage(new Locale("es", "ES"));
+            int r = tts.setLanguage(idioma);
             listo = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
             tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                 @Override public void onStart(String id) {
@@ -181,6 +184,7 @@ public final class LectorAvisos implements SensorEventListener {
             } else {
                 empezoPorOreja = true;
                 oyente.alAcercarOreja();
+                if (!leyendo) empezoPorOreja = false; // no había nada que leer
             }
         } else if (leyendo) {
             if (empezoPorOreja) parar();           // como un audio de WhatsApp: al separarlo se para
@@ -214,7 +218,8 @@ public final class LectorAvisos implements SensorEventListener {
 
     /** Auricular (oreja) o altavoz. */
     private void usarAuricular(boolean si) {
-        if (audio == null) return;
+        if (audio == null || si == auricularPuesto) return;
+        auricularPuesto = si;
         try {
             audio.setMode(si ? AudioManager.MODE_IN_COMMUNICATION : AudioManager.MODE_NORMAL);
             if (Build.VERSION.SDK_INT >= 31) {

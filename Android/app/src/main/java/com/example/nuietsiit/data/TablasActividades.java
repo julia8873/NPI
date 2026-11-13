@@ -1,6 +1,8 @@
 package com.example.nuietsiit.data;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.nuietsiit.util.FechasUtil;
@@ -34,6 +36,7 @@ public final class TablasActividades {
         poblarActividades(db);
         poblarAnuncios(db);
         poblarComunidades(db);
+        completar(db);
     }
 
     // -------------------------------------------------
@@ -42,7 +45,10 @@ public final class TablasActividades {
     public static void poblarActividades(SQLiteDatabase db) {
         // Si ya están, no se vuelven a meter: el bot (GeminiManager) llama a esto cada vez que se abre el chat
         // y, como ACTIVIDAD no tiene nada único, salían todas las actividades repetidas
-        if (android.database.DatabaseUtils.queryNumEntries(db, "ACTIVIDAD") > 0) return;
+        if (android.database.DatabaseUtils.queryNumEntries(db, "ACTIVIDAD") > 0) {
+            completar(db);
+            return;
+        }
         LocalDate hoy = LocalDate.now();
 
         long charlaIA = actividad(db, "IA generativa: del laboratorio a la empresa",
@@ -170,6 +176,111 @@ public final class TablasActividades {
                 "Canal no oficial con los avisos importantes de la escuela.", null);
         comunidad(db, "ETSIIT Gaming & Hackathons", "discord",
                 "Torneos de videojuegos, CTF, hackathons y quedadas.", null);
+    }
+
+    // -------------------------------------------------
+    //                  MÁS DATOS DE EJEMPLO
+    // -------------------------------------------------
+
+    /**
+     * Datos de ejemplo añadidos después: se meten también en las BD que ya existían (sin subir la versión
+     * de la BD) y solo si no están ya (se busca por título). Lo llaman poblar(), poblarActividades()
+     * y ActividadesDB la primera vez que se usa en cada arranque.
+     */
+    public static void completar(SQLiteDatabase db) {
+        LocalDate hoy = LocalDate.now();
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if (!existe(db, "ACTIVIDAD", "Taller de Git y GitHub")) {
+            actividad(db, "Taller de Git y GitHub",
+                    "Aprende a usar Git sin miedo: ramas, merge, conflictos y pull requests en GitHub. " +
+                    "Trae tu portátil con Git instalado.",
+                    "bibliomaker", en(hoy, 2, 17, 0), en(hoy, 2, 19, 0), null);
+        }
+        if (!existe(db, "ACTIVIDAD", "Cómo preparar tu TFG")) {
+            actividad(db, "Cómo preparar tu TFG",
+                    "Profesores de la escuela explican cómo elegir tema y tutor, los plazos de entrega " +
+                    "y qué se valora en la defensa. Con preguntas al final.",
+                    "charla", en(hoy, 4, 12, 0), en(hoy, 4, 13, 30), "https://etsiit.ugr.es");
+        }
+        if (!existe(db, "ACTIVIDAD", "Feria de empleo TIC")) {
+            actividad(db, "Feria de empleo TIC",
+                    "Empresas tecnológicas de Granada y de toda España buscan estudiantes para prácticas " +
+                    "y primer empleo. Lleva tu CV impreso.",
+                    "otro", en(hoy, 8, 10, 0), en(hoy, 8, 14, 0), "https://etsiit.ugr.es");
+        }
+        if (!existe(db, "ACTIVIDAD", "Hackathon ETSIIT 24 h")) {
+            actividad(db, "Hackathon ETSIIT 24 h",
+                    "24 horas para crear una app en equipos de 3 o 4 personas. Hay comida, mentores y premios " +
+                    "para los tres mejores proyectos.",
+                    "otro", en(hoy, 16, 10, 0), en(hoy, 17, 10, 0), null);
+        }
+        if (!existe(db, "ACTIVIDAD", "Introducción a la ciberseguridad")) {
+            long id = actividad(db, "Introducción a la ciberseguridad",
+                    "Curso práctico de seguridad en redes y aplicaciones web: contraseñas, cifrado, ataques " +
+                    "habituales y cómo defenderse.",
+                    "abiertaugr", en(hoy, 22, 16, 0), en(hoy, 40, 18, 0), "https://abierta.ugr.es");
+            if (id > 0) curso(db, id, 2, hoy.minusDays(2), hoy.plusDays(10), 25);
+        }
+        // Curso ya terminado: sus créditos cuentan como conseguidos para la cuenta de prueba
+        if (!existe(db, "ACTIVIDAD", "LaTeX para el TFG")) {
+            long id = actividad(db, "LaTeX para el TFG",
+                    "Aprende a maquetar tu TFG con LaTeX: plantilla de la escuela, bibliografía, figuras y tablas.",
+                    "abiertaugr", en(hoy, -40, 16, 0), en(hoy, -12, 18, 0), "https://abierta.ugr.es");
+            if (id > 0) curso(db, id, 2, hoy.minusDays(60), hoy.minusDays(45), 30);
+        }
+        inscribirSiFalta(db, CORREO_INVITADO, "LaTeX para el TFG");
+        inscribirSiFalta(db, CORREO_INVITADO, "Fotografía digital con el móvil");
+
+        if (!existe(db, "ANUNCIO_GENERAL", "Simulacro de evacuación el jueves")) {
+            anuncio(db, "Simulacro de evacuación el jueves",
+                    "El jueves a las 11:30 sonará la alarma de incendios en todo el edificio. Sal por la salida " +
+                    "más cercana y espera en el punto de reunión del aparcamiento.",
+                    "general", "alta", ahora.minusHours(1), hoy.plusDays(3), null);
+        }
+        if (!existe(db, "ANUNCIO_GENERAL", "Cambios en la línea 9 por obras")) {
+            anuncio(db, "Cambios en la línea 9 por obras",
+                    "Por obras en Camino de Ronda, la línea 9 puede retrasarse hasta 10 minutos esta semana. " +
+                    "Las paradas no cambian.",
+                    "transporte", "normal", ahora.minusHours(3), hoy.plusDays(7), null);
+        }
+        if (!existe(db, "ANUNCIO_GENERAL", "Abierta la convocatoria de prácticas en empresa")) {
+            anuncio(db, "Abierta la convocatoria de prácticas en empresa",
+                    "Ya puedes apuntarte a las prácticas externas del segundo cuatrimestre. Consulta las " +
+                    "ofertas y pide plaza antes de que acabe el plazo.",
+                    "plazo", "normal", ahora.minusDays(1).minusHours(2), hoy.plusDays(15), "https://www.ugr.es");
+        }
+        if (!existe(db, "ANUNCIO_GENERAL", "Reunión informativa de becas Erasmus+")) {
+            anuncio(db, "Reunión informativa de becas Erasmus+",
+                    "La Oficina de Relaciones Internacionales explica destinos, plazos y ayudas para el " +
+                    "próximo curso. En el salón de actos.",
+                    "beca", "normal", ahora.minusDays(2), hoy.plusDays(10), "https://www.ugr.es");
+        }
+        if (!existe(db, "ANUNCIO_GENERAL", "Nueva sala de estudio en el Edificio Auxiliar")) {
+            anuncio(db, "Nueva sala de estudio en el Edificio Auxiliar",
+                    "Abre una sala de estudio con 60 puestos y enchufes en la planta baja del Edificio Auxiliar.",
+                    "general", "baja", ahora.minusDays(5), null, null);
+        }
+    }
+
+    private static boolean existe(SQLiteDatabase db, String tabla, String titulo) {
+        return DatabaseUtils.queryNumEntries(db, tabla, "titulo = ?", new String[]{titulo}) > 0;
+    }
+
+    /** Apunta al estudiante a la actividad con ese título, si existe y no estaba ya apuntado. */
+    private static void inscribirSiFalta(SQLiteDatabase db, String correo, String titulo) {
+        long id;
+        try (Cursor c = db.rawQuery("SELECT idActividad FROM ACTIVIDAD WHERE titulo = ? LIMIT 1", new String[]{titulo})) {
+            if (!c.moveToFirst()) return;
+            id = c.getLong(0);
+        }
+        if (DatabaseUtils.queryNumEntries(db, "INSCRIPCION_ACTIVIDAD", "idActividad = ? AND correoEstudiante = ?",
+                new String[]{String.valueOf(id), correo}) > 0) return;
+        ContentValues cv = new ContentValues();
+        cv.put("correoEstudiante", correo);
+        cv.put("idActividad", id);
+        cv.put("fechaInscripcion", FechasUtil.ahoraBD());
+        db.insert("INSCRIPCION_ACTIVIDAD", null, cv);
     }
 
     // -------------------------------------------------

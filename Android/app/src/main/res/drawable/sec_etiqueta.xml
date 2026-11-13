@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Etiqueta redondeada (tipo, "Apuntado", "Urgente"); el color se pone con backgroundTint -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/sec_borde" />
+    <corners android:radius="12dp" />
+</shape>

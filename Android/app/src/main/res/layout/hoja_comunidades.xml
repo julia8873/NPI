@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hoja con la lista de comunidades de chat (design system NUI) -->
+<!-- Hoja con la lista de comunidades de chat -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/nui_superficie">
+    android:background="@color/sec_tarjeta">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/nui_espacio_l">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Comunidades de chat"
-            android:textAppearance="@style/TextAppearance.Nui.Titular" />
+            android:text="@string/nui_com_titulo"
+            android:textAppearance="@style/TextAppearance.Seccion.Titulo" />
 
         <TextView
             android:id="@+id/tvSubtituloComunidades"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_xs"
-            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_xs"
-            android:text="Pulsa un grupo para ver cómo es antes de unirte"
-            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+            android:layout_marginTop="2dp"
+            android:text="@string/nui_com_instrucciones"
+            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
         <!-- Aquí se añaden las tarjetas por código -->
         <LinearLayout
             android:id="@+id/listaComunidades"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:layout_marginTop="12dp"
             android:orientation="vertical" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

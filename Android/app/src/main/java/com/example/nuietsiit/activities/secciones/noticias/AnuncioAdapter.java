@@ -14,13 +14,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Anuncio;
 import com.example.nuietsiit.util.FechasUtil;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Páginas del carrusel de Noticias (pagina_anuncio.xml), una ficha NUI por anuncio:
- * tesela con el icono de la categoría, etiqueta "Nuevo" si no está leído y sello "Urgente".
+ * Páginas del carrusel de Noticias (pagina_anuncio.xml), una tarjeta por anuncio:
+ * icono de la categoría, puntito si no está leído y etiqueta y borde rojos si es urgente.
  */
 public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> {
 
@@ -56,21 +57,25 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         Anuncio a = anuncios.get(posicion);
         Context ctx = h.itemView.getContext();
 
-        // Un solo color fuerte por ficha: el de la categoría, en la tesela
+        // Icono de la categoría en un círculo de su color
         h.ivIcono.setImageResource(Anuncio.iconoRes(a.categoria));
         h.ivIcono.setImageTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.colorRes(a.categoria))));
         h.ivIcono.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.tinteRes(a.categoria))));
 
         h.tvTitulo.setText(a.titulo);
-        h.tvMeta.setText(Anuncio.nombreCategoria(a.categoria) + " · " + FechasUtil.hace(a.publicacion));
+        h.tvMeta.setText(Anuncio.nombreCategoria(ctx, a.categoria) + " · " + FechasUtil.hace(ctx, a.publicacion));
         h.tvContenido.setText(a.contenido);
 
-        // Urgentes: sello granada. No leídos: etiqueta "Nuevo"
+        // Urgentes: etiqueta roja. No leídos: puntito naranja
         h.tvUrgente.setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
         h.vNoLeido.setVisibility(a.leido ? View.INVISIBLE : View.VISIBLE);
+        // Urgentes: además, borde rojo más grueso
+        MaterialCardView tarjeta = (MaterialCardView) h.ficha;
+        tarjeta.setStrokeColor(ctx.getColor(a.esUrgente() ? R.color.sec_error : R.color.sec_borde));
+        tarjeta.setStrokeWidth(Math.round((a.esUrgente() ? 2 : 1) * ctx.getResources().getDisplayMetrics().density));
 
-        h.ficha.setContentDescription((a.esUrgente() ? "Urgente. " : "") + (a.leido ? "" : "Nuevo. ")
-                + Anuncio.nombreCategoria(a.categoria) + ". " + a.titulo);
+        h.ficha.setContentDescription((a.esUrgente() ? ctx.getString(R.string.nui_not_urgente) + ". " : "") + (a.leido ? "" : ctx.getString(R.string.nui_not_nuevo) + ". ")
+                + Anuncio.nombreCategoria(ctx, a.categoria) + ". " + a.titulo);
         h.ficha.setOnClickListener(v -> listener.alPulsar(a));
     }
 

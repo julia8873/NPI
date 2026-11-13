@@ -73,7 +73,7 @@ public final class Notificador {
             String clave = "A" + a.id;
             if (!a.esUrgente() || leidos.contains(String.valueOf(a.id)) || enviadas.contains(clave)) continue;
             Intent abrir = new Intent(act, Noticias.class);
-            mostrar(act, 1000 + a.id, "Urgente: " + a.titulo, a.contenido, abrir);
+            mostrar(act, 1000 + a.id, act.getString(R.string.nui_notif_urgente_fmt, a.titulo), a.contenido, abrir);
             enviadas.add(clave);
         }
 
@@ -89,8 +89,9 @@ public final class Notificador {
             if (x.inicio.isBefore(ahora) || x.inicio.toLocalDate().isAfter(manana)) continue;
             Intent abrir = new Intent(act, Actividades.class);
             mostrar(act, 2000 + x.id,
-                    FechasUtil.capitalizar(FechasUtil.cuando(x.inicio)) + " a las " + FechasUtil.hora(x.inicio) + ": " + x.titulo,
-                    "Te apuntaste a esta actividad. ¡Que no se te olvide!", abrir);
+                    act.getString(R.string.nui_notif_actividad_fmt, FechasUtil.cuando(act, x.inicio),
+                            FechasUtil.hora(x.inicio), x.titulo),
+                    act.getString(R.string.nui_notif_actividad_texto), abrir);
             enviadas.add(clave);
         }
 
@@ -113,9 +114,9 @@ public final class Notificador {
     }
 
     static void crearCanal(Context c) {
-        NotificationChannel canal = new NotificationChannel(CANAL, "Avisos de la ETSIIT",
+        NotificationChannel canal = new NotificationChannel(CANAL, c.getString(R.string.notif_canal_nombre),
                 NotificationManager.IMPORTANCE_HIGH);
-        canal.setDescription("Avisos urgentes y recordatorios de actividades");
+        canal.setDescription(c.getString(R.string.notif_canal_descripcion));
         c.getSystemService(NotificationManager.class).createNotificationChannel(canal);
     }
 

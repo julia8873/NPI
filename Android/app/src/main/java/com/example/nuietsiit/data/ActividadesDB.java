@@ -20,8 +20,44 @@ public class ActividadesDB {
 
     private final DBHelper dbHelper;
 
+    /** Los datos de ejemplo nuevos se añaden una vez por arranque de la app (también en BD que ya existían). */
+    private static boolean datosCompletados;
+
     public ActividadesDB(DBHelper dbHelper) {
         this.dbHelper = dbHelper;
+        if (!datosCompletados) {
+            datosCompletados = true;
+            try {
+                TablasActividades.completar(dbHelper.getWritableDatabase());
+            } catch (Exception ignorada) {
+                // si falla (p. ej. falta la cuenta de prueba), la app sigue con los datos que haya
+            }
+        }
+    }
+
+    /**
+     * Créditos AbiertaUGR del estudiante: {conseguidos, en curso}.
+     * Conseguidos = cursos a los que se apuntó que ya han terminado; en curso = los que aún no han terminado.
+     */
+    public double[] creditosAbiertaUGR(String correoEstudiante, String ahoraISO) {
+        double[] creditos = {0, 0};
+        if (correoEstudiante == null) return creditos;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try (Cursor c = db.rawQuery(
+                "SELECT C.creditos, COALESCE(A.fechaFin, A.fechaInicio) " +
+                "FROM INSCRIPCION_ACTIVIDAD I " +
+                "JOIN CURSO_ABIERTAUGR C ON C.idActividad = I.idActividad " +
+                "JOIN ACTIVIDAD A ON A.idActividad = I.idActividad " +
+                "WHERE LOWER(I.correoEstudiante) = ?",
+                new String[]{correoEstudiante.toLowerCase()})) {
+            while (c.moveToNext()) {
+                String fin = c.getString(1);
+                // las fechas van como 'YYYY-MM-DD HH:MM': se pueden comparar como texto
+                if (fin != null && fin.compareTo(ahoraISO) < 0) creditos[0] += c.getDouble(0);
+                else creditos[1] += c.getDouble(0);
+            }
+        }
+        return creditos;
     }
 
     // --------------------------------------------------------------
@@ -167,8 +203,17 @@ public class ActividadesDB {
         cv.put("correoEstudiante", correoEstudiante.toLowerCase());
         cv.put("idActividad", idActividad);
         cv.put("fechaInscripcion", fechaInscripcion);
-        long resultado = db.insert("INSCRIPCION_ACTIVIDAD", null, cv);
-        return resultado != -1;
+        try {
+            db.insertOrThrow("INSCRIPCION_ACTIVIDAD", null, cv);
+            return true;
+        } catch (android.database.SQLException e) {
+            // ya estaba inscrito (clave repetida): para el usuario es lo mismo que haberse apuntado
+            if (estaInscrito(correoEstudiante.toLowerCase(), idActividad)) return true;
+            // si no, se apunta el motivo en el Logcat (filtrar por "ActividadesDB")
+            android.util.Log.e("ActividadesDB", "No se pudo inscribir a " + correoEstudiante
+                    + " en la actividad " + idActividad + ": " + e.getMessage());
+            return false;
+        }
     }
 
     /** Comprueba si un estudiante ya está inscrito en una actividad. */

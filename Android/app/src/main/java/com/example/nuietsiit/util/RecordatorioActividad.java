@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.Actividades;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.ActividadesDB;
@@ -82,16 +83,16 @@ public final class RecordatorioActividad {
 
             long minutos = Math.max(1, java.time.Duration.between(LocalDateTime.now(), a.inicio).toMinutes());
             String sitio = a.sitioEnMapa();
-            String titulo = "En " + minutos + " min: " + a.titulo;
-            String texto = "Empieza a las " + FechasUtil.hora(a.inicio)
-                    + (sitio != null ? " en " + sitio : " en la ETSIIT") + ". ¿Te llevo?";
+            String titulo = ctx.getString(R.string.nui_rec_titulo_fmt, (int) minutos, a.titulo);
+            String texto = ctx.getString(R.string.nui_rec_texto_fmt, FechasUtil.hora(a.inicio),
+                    sitio != null ? sitio : ctx.getString(R.string.nui_rec_escuela));
 
             Intent abrir = new Intent(ctx, Actividades.class);
             Intent llevame = new Intent(ctx, Mapa.class).putExtra("CORREO", correo);
             if (sitio != null) llevame.putExtra("RUTA_A_MARCADOR", sitio);
 
             Notificador.crearCanal(ctx);
-            Notificador.mostrar(ctx, BASE_CODIGO + id, titulo, texto, abrir, "Llévame", llevame);
+            Notificador.mostrar(ctx, BASE_CODIGO + id, titulo, texto, abrir, ctx.getString(R.string.nui_rec_llevame), llevame);
         }
     }
 }

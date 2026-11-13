@@ -1,160 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Hoja inferior con el detalle de una actividad (design system NUI) -->
+<!-- Hoja inferior con el detalle de una actividad -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/nui_superficie">
+    android:background="@color/sec_tarjeta">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/nui_espacio_l">
+        android:padding="20dp">
 
-        <!-- La ficha: tipo en la cabecera, título y datos -->
         <LinearLayout
-            style="@style/Widget.Nui.Ficha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/ivIconoDetalle"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/nui_tesela"
-                    android:importantForAccessibility="no"
-                    android:padding="@dimen/nui_espacio_xs" />
-
-                <TextView
-                    android:id="@+id/tvTipoDetalle"
-                    style="@style/Widget.Nui.Etiqueta"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/nui_espacio_s" />
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/ivIconoDetalle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/sec_circulo"
+                android:importantForAccessibility="no"
+                android:padding="8dp" />
 
             <TextView
-                android:id="@+id/tvTituloDetalle"
-                android:layout_width="match_parent"
+                android:id="@+id/tvTipoDetalle"
+                style="@style/Widget.Seccion.Etiqueta"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_m"
-                android:textAppearance="@style/TextAppearance.Nui.Titular" />
+                android:layout_marginStart="10dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvTituloDetalle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textAppearance="@style/TextAppearance.Seccion.Titulo" />
 
             <TextView
                 android:id="@+id/tvFechaDetalle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_m"
+                android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_nui_calendario"
-                android:drawablePadding="@dimen/nui_espacio_s"
-                android:drawableTint="@color/nui_apagado"
+                android:drawablePadding="10dp"
+                android:drawableTint="@color/sec_texto_suave"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
-
+                android:textAppearance="@style/TextAppearance.Seccion.Cuerpo" />
             <TextView
                 android:id="@+id/tvLugarDetalle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_nui_mapa"
-                android:drawablePadding="@dimen/nui_espacio_s"
-                android:drawableTint="@color/nui_apagado"
+                android:drawablePadding="10dp"
+                android:drawableTint="@color/sec_texto_suave"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
-
+                android:textAppearance="@style/TextAppearance.Seccion.Cuerpo" />
             <TextView
                 android:id="@+id/tvPlazasDetalle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_s"
+                android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_nui_usuario"
-                android:drawablePadding="@dimen/nui_espacio_s"
-                android:drawableTint="@color/nui_apagado"
+                android:drawablePadding="10dp"
+                android:drawableTint="@color/sec_texto_suave"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+                android:textAppearance="@style/TextAppearance.Seccion.Cuerpo" />
 
-            <!-- Solo AbiertaUGR -->
-            <TextView
-                android:id="@+id/tvAbiertaDetalle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_s"
-                android:drawableStart="@drawable/nui_ic_creditos"
-                android:drawablePadding="@dimen/nui_espacio_s"
-                android:drawableTint="@color/nui_cobalto"
-                android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
-                android:textColor="@color/nui_cobalto"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/tvDescripcionDetalle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/nui_espacio_m"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
-        </LinearLayout>
-
-        <!-- Acción principal: apuntarse (o iniciar sesión). Si ya estás apuntado sale el secundario. -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnApuntarme"
-            style="@style/Widget.Nui.Boton"
+        <!-- Solo AbiertaUGR -->
+        <TextView
+            android:id="@+id/tvAbiertaDetalle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_l" />
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/nui_ic_creditos"
+            android:drawablePadding="10dp"
+            android:drawableTint="@color/sec_info"
+            android:gravity="center_vertical"
+            android:textColor="@color/sec_info"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvDescripcionDetalle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:lineSpacingExtra="3dp"
+            android:textAppearance="@style/TextAppearance.Seccion.Cuerpo" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnApuntarme"
+            style="@style/Widget.Seccion.Boton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDesapuntarme"
-            style="@style/Widget.Nui.Boton.Secundario"
+            style="@style/Widget.Seccion.Boton.Secundario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_l"
-            android:text="Ya no puedo ir: desapuntarme"
+            android:layout_marginTop="20dp"
+            android:text="@string/nui_act_btn_desapuntarme"
             android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_s"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCalendario"
-                style="@style/Widget.Nui.Boton.Secundario"
+                style="@style/Widget.Seccion.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Calendario"
+                android:text="@string/btn_calendario"
+                android:textSize="13sp"
                 app:icon="@drawable/ic_nui_calendario"
                 app:iconGravity="textTop" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLlevame"
-                style="@style/Widget.Nui.Boton.Secundario"
+                style="@style/Widget.Seccion.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nui_espacio_s"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Llévame"
+                android:text="@string/nui_rec_llevame"
+                android:textSize="13sp"
                 app:icon="@drawable/ic_nui_mapa"
                 app:iconGravity="textTop" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMasInfo"
-                style="@style/Widget.Nui.Boton.Secundario"
+                style="@style/Widget.Seccion.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nui_espacio_s"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Más info"
+                android:text="@string/nui_act_mas_info"
+                android:textSize="13sp"
                 app:icon="@drawable/ic_globe"
                 app:iconGravity="textTop" />
         </LinearLayout>

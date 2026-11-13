@@ -16,27 +16,31 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
+import com.example.nuietsiit.activities.secciones.actividades.CapturaVertical;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
-import com.example.nuietsiit.activities.secciones.secretaria.AvisoDeshacer;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.Actividad;
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
-import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.CalendarioUtil;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.RecordatorioActividad;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
@@ -47,8 +51,8 @@ import java.util.Locale;
 
 /**
  * Pantalla de Actividades SIN SCROLL: un "mazo" con una ficha grande cada vez.
- * Diseño NUI (DisenoNUI/DESIGN.md), igual que Secretaría y Biblioteca: yesería + arquería, pestañas de papel,
- * fichas, sellos y zócalo. Nada de colores ni tamaños a mano: todo sale de los tokens nui_*.
+ * Mismo aspecto que Asignaturas, Profesorado y Calendario: cabecera unificada, fondo gris claro, tarjetas
+ * blancas y el naranja de la app (colores_secciones.xml y estilos_secciones.xml).
  * - Deslizar a la derecha (o "Me apunto") = me apunto y pasa a la siguiente.
  * - Deslizar a la izquierda (o "Paso") = paso, siguiente.
  * - SENSOR (acelerómetro): inclinar el móvil a la derecha = me apunto, a la izquierda = paso.
@@ -67,6 +71,8 @@ public class Actividades extends BaseActivity {
     private static final String FILTRO_TODAS = "__todas";       // pestaña "Todas"
     private static final String FILTRO_APUNTADO = "__apuntado"; // pestaña "Mis actividades"
     private static final int MS_DESHACER = 5000;
+    /** ECTS que se pueden reconocer por actividades universitarias en un grado (tope del contador). */
+    private static final double CREDITOS_RECONOCIBLES = 6;
     /** Lo que llevan los QR de los carteles: este prefijo y el título en forma de clave (o el id). */
     public static final String PREFIJO_QR = "NUIETSIIT:ACTIVIDAD:";
 
@@ -79,9 +85,11 @@ public class Actividades extends BaseActivity {
 
     private View raiz, botonera, vacio;
     private View carta;
-    private PestanasPapel pestanasTipos;
+    private ChipGroup pestanasTipos;
     private TextView tvVacio, tvContador, selloSi, selloNo;
     private InclinarParaPasar inclinar;
+    /** La carta está saliendo volando: hasta que acabe no se acepta otra decisión (doble toque, botón + inclinar…). */
+    private boolean decidiendo;
 
     // Órdenes por voz: reconocedor de Google (pantalla del sistema) y respuesta hablada
     private final ActivityResultLauncher<Intent> reconocedor = registerForActivityResult(
@@ -101,17 +109,9 @@ public class Actividades extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividades);
-        // Entra como una hoja de papel, igual que las pantallas de Secretaría
-        overridePendingTransition(R.anim.nui_papel_entra, R.anim.nui_quieto);
-
-        // Barra de yesería (como Secretaría y Biblioteca): atrás, título, chat y perfil
-        MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        CabeceraNui.preparar(barra);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Actividades");
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        // Cabecera unificada (como Asignaturas y Profesorado): volver, título, chat y perfil
+        configurarCabeceraUnificada(getString(R.string.titulo_actividades));
+        margenBarraEstado(findViewById(R.id.rootActividades));
 
         // Sesión guardada al iniciar sesión (SharedPreferences "SesionUsuario")
         correoUsuario = correoSesion();
@@ -133,14 +133,15 @@ public class Actividades extends BaseActivity {
         findViewById(R.id.btnVoz).setOnClickListener(v -> escucharOrden());
         voz = new TextToSpeech(this, estado -> {
             if (estado != TextToSpeech.SUCCESS || voz == null) return;
-            int r = voz.setLanguage(new Locale("es", "ES"));
+            int r = voz.setLanguage(idioma());
             vozLista = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
         });
         findViewById(R.id.btnEscanear).setOnClickListener(v -> escaner.launch(new ScanOptions()
                 .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                .setPrompt("Apunta al QR del cartel de la actividad")
+                .setPrompt(getString(R.string.nui_act_escaner_prompt))
                 .setBeepEnabled(false)
-                .setOrientationLocked(false)));
+                .setOrientationLocked(true)
+                .setCaptureActivity(CapturaVertical.class)));
 
         // Botonera y gesto de arrastrar la carta
         findViewById(R.id.btnPasar).setOnClickListener(v -> decidir(-1));
@@ -148,6 +149,8 @@ public class Actividades extends BaseActivity {
         findViewById(R.id.btnAnterior).setOnClickListener(v -> anterior());
         findViewById(R.id.btnReiniciar).setOnClickListener(v -> { posicion = 0; mostrarCarta(); });
         carta.setOnTouchListener(new ArrastrarCarta());
+        // Con TalkBack no hay arrastre: el doble toque abre el detalle (los toques normales los gestiona ArrastrarCarta)
+        carta.setOnClickListener(v -> { if (posicion < mazo.size()) mostrarDetalle(mazo.get(posicion)); });
 
         // Sensor: inclinar el móvil hace lo mismo que los botones (+1 derecha = me apunto, -1 izquierda = paso)
         inclinar = new InclinarParaPasar(carta, this::alInclinar, () -> posicion < mazo.size());
@@ -170,7 +173,10 @@ public class Actividades extends BaseActivity {
     /** Correo del usuario con sesión iniciada, o null si no hay sesión. */
     private String correoSesion() {
         String correo = getSharedPreferences("SesionUsuario", MODE_PRIVATE).getString("CORREO", null);
-        return correo == null || correo.isEmpty() ? null : correo;
+        if (correo == null || correo.isEmpty()) return null;
+        // Si la cuenta ya no está en la BD (al subir de versión la BD se vuelve a crear y se borran las cuentas
+        // registradas), se trata como sin sesión: así pide iniciar sesión en vez de fallar al apuntarse
+        return new UsuariosDB(DBHelper.getInstance(this)).existeEstudiante(correo) ? correo : null;
     }
 
     // -------------------------------------------------
@@ -182,26 +188,33 @@ public class Actividades extends BaseActivity {
         aplicarFiltro();
     }
 
-    /**
-     * Pestañas de papel (ui/PestanasPapel, de Izaro) en dos filas, todas a la vista:
-     * Todas · Mis actividades · Charlas · Bibliomaker / AbiertaUGR · Día ETSIIT · Otras
-     */
+    /** Chips de filtro (bajan de línea si no caben): Todas · Mis actividades · Charlas · Bibliomaker · AbiertaUGR · Día ETSIIT · Otras */
     private void crearPestanas() {
-        pestanasTipos.nuevaFila();
-        pestanasTipos.anadir(FILTRO_TODAS, "Todas", null, R.drawable.ic_nui_actividades, 0);
-        pestanasTipos.anadir(FILTRO_APUNTADO, "Mis actividades", null, R.drawable.nui_ic_cita, R.color.nui_arrayan);
-        for (int i = 0; i < Actividad.TIPOS.length; i++) {
-            if (i == 2) pestanasTipos.nuevaFila(); // 4 arriba y 3 abajo
-            String tipo = Actividad.TIPOS[i][0];
-            pestanasTipos.anadir(tipo, Actividad.TIPOS[i][1], null,
-                    Actividad.iconoRes(tipo), Actividad.colorRes(tipo));
-        }
-        pestanasTipos.completarFila(4);
-        pestanasTipos.marcar(FILTRO_TODAS);
-        pestanasTipos.setOnElegir(clave -> {
-            filtroSeleccionado = FILTRO_TODAS.equals(clave) ? null : (String) clave;
+        anadirChip(FILTRO_TODAS, getString(R.string.chip_todas));
+        anadirChip(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
+        for (String[] t : Actividad.TIPOS) anadirChip(t[0], Actividad.nombreFiltro(this, t[0]));
+        marcarFiltro(FILTRO_TODAS);
+        pestanasTipos.setOnCheckedStateChangeListener((grupo, ids) -> {
+            if (ids.isEmpty()) return;
+            String clave = (String) grupo.findViewById(ids.get(0)).getTag();
+            filtroSeleccionado = FILTRO_TODAS.equals(clave) ? null : clave;
             aplicarFiltro();
         });
+    }
+
+    private void anadirChip(String clave, String texto) {
+        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_chip_filtro, pestanasTipos, false);
+        chip.setId(View.generateViewId());
+        chip.setText(texto);
+        chip.setTag(clave);
+        pestanasTipos.addView(chip);
+    }
+
+    private void marcarFiltro(String clave) {
+        for (int i = 0; i < pestanasTipos.getChildCount(); i++) {
+            View chip = pestanasTipos.getChildAt(i);
+            if (clave.equals(chip.getTag())) pestanasTipos.check(chip.getId());
+        }
     }
 
     // Prepara el mazo con las actividades del chip seleccionado y vuelve a la primera
@@ -224,6 +237,7 @@ public class Actividades extends BaseActivity {
 
     /** Pinta la carta de la posición actual, o el mensaje de "no hay" / "has visto todas". */
     private void mostrarCarta() {
+        actualizarCreditos();
         carta.setTranslationX(0);
         carta.setRotation(0);
         selloSi.setAlpha(0);
@@ -243,42 +257,56 @@ public class Actividades extends BaseActivity {
             findViewById(R.id.btnReiniciar).setVisibility(visteTodas ? View.VISIBLE : View.GONE);
             tvContador.setText("");
             if (visteTodas) {
-                tvVacio.setText("¡Has visto todas!");
+                tvVacio.setText(R.string.nui_act_vacio_todas);
             } else if (!FILTRO_APUNTADO.equals(filtroSeleccionado)) {
-                tvVacio.setText("No hay actividades de este tipo.");
+                tvVacio.setText(R.string.nui_act_vacio_tipo);
             } else if (correoUsuario == null) {
-                tvVacio.setText("Inicia sesión para ver las actividades a las que te apuntes.");
+                tvVacio.setText(R.string.nui_act_vacio_sin_sesion);
             } else {
-                tvVacio.setText("Todavía no te has apuntado a nada.");
+                tvVacio.setText(R.string.nui_act_vacio_sin_inscripciones);
             }
             return;
         }
 
         Actividad a = mazo.get(posicion);
-        // Un solo color fuerte por ficha: el del tipo, en la tesela del icono
+        // Icono del tipo en un círculo de su color
         pintarTesela(findViewById(R.id.ivIconoCarta), a.tipo);
-        ((TextView) findViewById(R.id.tvTipoCarta)).setText(Actividad.nombreTipo(a.tipo));
+        TextView tvTipoCarta = findViewById(R.id.tvTipoCarta);
+        tvTipoCarta.setText(Actividad.nombreTipo(this, a.tipo));
+        pintarEtiqueta(tvTipoCarta, a.tipo);
         ((TextView) findViewById(R.id.tvCuandoCarta)).setText(
-                FechasUtil.cuando(a.inicio) + " · " + FechasUtil.hora(a.inicio));
+                FechasUtil.cuando(this, a.inicio) + " · " + FechasUtil.hora(a.inicio));
         ((TextView) findViewById(R.id.tvTituloCarta)).setText(a.titulo);
         ((TextView) findViewById(R.id.tvDescCarta)).setText(a.descripcion);
 
         TextView tvExtra = findViewById(R.id.tvExtraCarta);
         if (a.esAbiertaUGR()) {
             tvExtra.setVisibility(View.VISIBLE);
-            tvExtra.setText(a.creditosTexto() + " · " + a.estadoInscripcion());
-            tvExtra.setTextColor(getColor(a.inscripcionUrgente() ? R.color.nui_granada : R.color.nui_cobalto));
+            tvExtra.setText(a.creditosTexto() + " · " + a.estadoInscripcion(this));
+            tvExtra.setTextColor(getColor(a.inscripcionUrgente() ? R.color.sec_error : R.color.sec_info));
         } else {
             tvExtra.setVisibility(View.GONE);
         }
-        findViewById(R.id.tvInscritoCarta).setVisibility(a.inscrito ? View.VISIBLE : View.GONE);
+        // Estado de inscripción bien visible: verde si estás apuntado, gris si no (sin sesión no se enseña)
+        TextView tvInscrito = findViewById(R.id.tvInscritoCarta);
+        tvInscrito.setVisibility(correoUsuario != null ? View.VISIBLE : View.GONE);
+        tvInscrito.setText(a.inscrito ? R.string.nui_act_sello_apuntado : R.string.nui_act_estado_no);
+        tvInscrito.setTextColor(getColor(a.inscrito ? R.color.sec_ok : R.color.sec_texto_suave));
+        tvInscrito.setBackgroundTintList(ColorStateList.valueOf(getColor(a.inscrito ? R.color.sec_ok_tinte : R.color.sec_borde)));
+        ((TextView) findViewById(R.id.btnApuntar)).setText(a.inscrito ? R.string.nui_act_btn_ya_apuntado : R.string.nui_act_btn_apunto);
         tvContador.setText((posicion + 1) + " / " + mazo.size());
-        carta.setContentDescription(Actividad.nombreTipo(a.tipo) + ". " + a.titulo + ". "
-                + FechasUtil.cuando(a.inicio) + (a.inscrito ? ". Ya estás apuntado" : ""));
+        carta.setContentDescription(Actividad.nombreTipo(this, a.tipo) + ". " + a.titulo + ". "
+                + FechasUtil.cuando(this, a.inicio) + (a.inscrito ? getString(R.string.nui_act_desc_ya_apuntado) : ""));
         if (inclinar != null) inclinar.actualizar();
     }
 
-    /** Tesela del icono del tipo: icono en su color fuerte sobre su tinte. */
+    /** Etiqueta del tipo: texto de su color sobre su tinte. */
+    private void pintarEtiqueta(TextView tv, String tipo) {
+        tv.setTextColor(getColor(Actividad.colorRes(tipo)));
+        tv.setBackgroundTintList(ColorStateList.valueOf(getColor(Actividad.tinteRes(tipo))));
+    }
+
+    /** Icono del tipo en un círculo: su color sobre su tinte. */
     private void pintarTesela(ImageView iv, String tipo) {
         iv.setImageResource(Actividad.iconoRes(tipo));
         iv.setImageTintList(ColorStateList.valueOf(getColor(Actividad.colorRes(tipo))));
@@ -290,19 +318,22 @@ public class Actividades extends BaseActivity {
      * Si no se puede apuntar (sin sesión, plazo cerrado…) la carta vuelve a su sitio con un aviso.
      */
     private void decidir(int direccion) {
-        if (posicion >= mazo.size()) return;
+        if (decidiendo || posicion >= mazo.size()) return;
         Actividad a = mazo.get(posicion);
         if (direccion > 0 && !puedeApuntarse(a)) {
             volverAlCentro();
             return;
         }
         // La carta sale volando hacia ese lado y aparece la siguiente
+        decidiendo = true;
+        int esta = posicion;
         float ancho = raiz.getWidth();
         carta.animate().translationX(direccion * ancho * 1.5f).rotation(direccion * 25f)
                 .setDuration(220)
                 .withEndAction(() -> {
+                    decidiendo = false;
                     if (direccion > 0) apuntar(a);
-                    posicion++;
+                    if (posicion == esta) posicion++; // si mientras tanto se cambió de filtro, no se salta ninguna
                     mostrarCarta();
                     // pequeña entrada de la nueva carta
                     carta.setScaleX(0.92f);
@@ -314,7 +345,7 @@ public class Actividades extends BaseActivity {
 
     /** Inclinar el móvil: enseña el sello un momento y decide, como si se hubiera arrastrado la carta. */
     private void alInclinar(int direccion) {
-        if (posicion >= mazo.size()) return;
+        if (decidiendo || posicion >= mazo.size()) return;
         TextView sello = direccion > 0 ? selloSi : selloNo;
         sello.setAlpha(1f);
         carta.animate().rotation(direccion * 8f).setDuration(120)
@@ -322,7 +353,7 @@ public class Actividades extends BaseActivity {
     }
 
     private void anterior() {
-        if (posicion == 0) return;
+        if (decidiendo || posicion == 0) return;
         posicion--;
         mostrarCarta();
         carta.setTranslationX(-raiz.getWidth());
@@ -348,6 +379,7 @@ public class Actividades extends BaseActivity {
         public boolean onTouch(View v, MotionEvent e) {
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    if (decidiendo) return false; // aún sale volando la anterior
                     xInicial = e.getRawX();
                     return true;
                 case MotionEvent.ACTION_MOVE: {
@@ -395,13 +427,13 @@ public class Actividades extends BaseActivity {
     private void escucharOrden() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                 .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, idioma().toLanguageTag())
                 .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                .putExtra(RecognizerIntent.EXTRA_PROMPT, "Di «paso», «me apunto», «llévame», «¿cuándo es?»...");
+                .putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.nui_act_voz_prompt));
         try {
             reconocedor.launch(intent);
         } catch (ActivityNotFoundException e) {
-            avisar("Este móvil no tiene reconocimiento de voz (hace falta la app de Google)");
+            avisar(getString(R.string.nui_act_voz_sin_reconocedor));
         }
     }
 
@@ -411,8 +443,8 @@ public class Actividades extends BaseActivity {
             if (interpretar(normalizar(frase))) return;
         }
         String oido = frases.get(0);
-        avisar("No te he entendido («" + oido + "»). Prueba con «paso», «me apunto» o «llévame»");
-        decir("No te he entendido");
+        avisar(getString(R.string.nui_act_voz_no_entendido_fmt, oido));
+        decir(getString(R.string.nui_act_voz_no_entendido));
     }
 
     /** Ejecuta la orden si la reconoce. La frase llega sin tildes y en minúsculas. */
@@ -420,68 +452,77 @@ public class Actividades extends BaseActivity {
         Actividad a = posicion < mazo.size() ? mazo.get(posicion) : null;
 
         // Antes los filtros y lo que no depende de la ficha
-        if (contiene(" " + f, "escanea", "cartel", "codigo qr", " qr")) {
+        if (contiene(" " + f, "escanea", "cartel", "codigo qr", " qr", "scan", "poster")) {
             findViewById(R.id.btnEscanear).performClick();
             return true;
         }
-        if (contiene(f, "grupo", "comunidad", "chat")) {
+        if (contiene(f, "grupo", "comunidad", "chat", "group", "communit")) {
             HojaComunidades.mostrar(this, correoUsuario);
             return true;
         }
-        if (contiene(f, "mis actividades", "apuntado", "las mias")) return elegirFiltro(FILTRO_APUNTADO, "Tus actividades");
-        if (contiene(f, "charla")) return elegirFiltro("charla", "Charlas");
-        if (contiene(f, "bibliomaker", "biblio maker", "taller")) return elegirFiltro("bibliomaker", "Bibliomaker");
-        if (contiene(f, "abierta", "curso", "credito")) return elegirFiltro("abiertaugr", "Cursos de AbiertaUGR");
-        if (contiene(f, "dia de la", "fiesta")) return elegirFiltro("dia_etsiit", "Día de la ETSIIT");
-        if (contiene(f, "otras")) return elegirFiltro("otro", "Otras actividades");
-        if (contiene(f, "todas")) return elegirFiltro(FILTRO_TODAS, "Todas las actividades");
-        if (contiene(f, "anterior", "atras", "vuelve", "volver")) {
-            if (posicion == 0) decir("Ya estás en la primera");
+        if (contiene(f, "mis actividades", "apuntado", "las mias", "my activities", "signed up")) return elegirFiltro(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
+        if (contiene(f, "charla", "talk")) return elegirFiltro("charla", Actividad.nombreFiltro(this, "charla"));
+        if (contiene(f, "bibliomaker", "biblio maker", "taller", "workshop")) return elegirFiltro("bibliomaker", Actividad.nombreFiltro(this, "bibliomaker"));
+        if (contiene(f, "cuantos creditos", "mis creditos", "how many credits", "my credits")) {
+            if (correoUsuario == null) {
+                pedirSesion(getString(R.string.nui_act_accion_apuntarte));
+                return true;
+            }
+            elegirFiltro(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
+            decir(((TextView) findViewById(R.id.tvCreditosDetalle)).getText().toString());
+            return true;
+        }
+        if (contiene(f, "abierta", "curso", "credito", "course", "credit")) return elegirFiltro("abiertaugr", Actividad.nombreFiltro(this, "abiertaugr"));
+        if (contiene(f, "dia de la", "fiesta", "etsiit day", "party")) return elegirFiltro("dia_etsiit", Actividad.nombreFiltro(this, "dia_etsiit"));
+        if (contiene(f, "otras", "other")) return elegirFiltro("otro", Actividad.nombreFiltro(this, "otro"));
+        if (contiene(f, "todas", "all ", "everything") || f.equals("all")) return elegirFiltro(FILTRO_TODAS, getString(R.string.chip_todas));
+        if (contiene(f, "anterior", "atras", "vuelve", "volver", "previous", "back")) {
+            if (posicion == 0) decir(getString(R.string.nui_act_voz_primera));
             anterior();
             return true;
         }
 
         if (a == null) {
-            if (contiene(f, "paso", "siguiente", "apunta", "llevame", "cuando", "lee")) {
-                decir("No hay ninguna actividad delante");
+            if (contiene(f, "paso", "siguiente", "apunta", "llevame", "cuando", "lee", "skip", "next", "join", "sign", "take me", "when", "read")) {
+                decir(getString(R.string.nui_act_voz_ninguna_delante));
                 return true;
             }
             return false;
         }
         // "no me apunto" va antes que "me apunto"
-        if (contiene(f, "no me apunto", "paso", "pasa", "siguiente", "no me interesa", "descarta")) {
+        if (contiene(f, "no me apunto", "paso", "pasa", "siguiente", "no me interesa", "descarta", "skip", "next", "pass", "not interested")) {
             decidir(-1);
             return true;
         }
-        if (contiene(f, "desapunta", "borrame", "ya no puedo")) {
+        if (contiene(f, "desapunta", "borrame", "ya no puedo", "unregister", "leave", "can't go", "cant go")) {
             if (a.inscrito) desapuntar(a);
-            else decir("No estabas apuntado");
+            else decir(getString(R.string.nui_act_voz_no_estabas));
             return true;
         }
-        if (contiene(f, "apunta", "apunto", "me interesa", "inscribe") || f.equals("si")) {
+        if (contiene(f, "apunta", "apunto", "me interesa", "inscribe", "sign me up", "sign up", "join", "i'm in", "im in") || f.equals("si") || f.equals("yes")) {
             decidir(+1);
             return true;
         }
-        if (contiene(f, "llevame", "como llego", "donde es", "ruta", "mapa")) {
-            decir(a.sitioEnMapa() != null ? "Te llevo a " + a.sitioEnMapa() : "Te abro el mapa");
+        if (contiene(f, "llevame", "como llego", "donde es", "ruta", "mapa", "take me", "how do i get", "where is", "route", "map")) {
+            decir(a.sitioEnMapa() != null ? getString(R.string.nui_act_voz_te_llevo_fmt, a.sitioEnMapa()) : getString(R.string.nui_act_voz_abro_mapa));
             llevarme(a);
             return true;
         }
-        if (contiene(f, "cuando", "hora", "que dia", "donde")) {
-            String texto = a.titulo + ": " + textoFechas(a).replace("\n", ", ") + ", en " + lugar(a);
+        if (contiene(f, "cuando", "hora", "que dia", "donde", "when", "time", "what day", "where")) {
+            String texto = getString(R.string.nui_act_voz_cuando_fmt, a.titulo, textoFechas(a).replace("\n", ", "), lugar(a));
             decir(texto);
             avisar(texto);
             return true;
         }
-        if (contiene(f, "lee", "de que va", "cuentame", "que es")) {
+        if (contiene(f, "lee", "de que va", "cuentame", "que es", "read", "about", "tell me")) {
             decir(a.titulo + ". " + a.descripcion);
             return true;
         }
-        if (contiene(f, "calendario", "agenda")) {
+        if (contiene(f, "calendario", "agenda", "calendar")) {
             anadirACalendario(a);
             return true;
         }
-        if (contiene(f, "detalle", "informacion", "mas info", "abre")) {
+        if (contiene(f, "detalle", "informacion", "mas info", "abre", "detail", "info", "open")) {
             mostrarDetalle(a);
             return true;
         }
@@ -489,10 +530,10 @@ public class Actividades extends BaseActivity {
     }
 
     private boolean elegirFiltro(String clave, String nombre) {
-        pestanasTipos.marcar(clave);
+        marcarFiltro(clave);
         filtroSeleccionado = FILTRO_TODAS.equals(clave) ? null : clave;
         aplicarFiltro();
-        decir(nombre + (mazo.isEmpty() ? ": no hay ninguna" : ": " + mazo.size()));
+        decir(mazo.isEmpty() ? getString(R.string.nui_act_voz_filtro_ninguna_fmt, nombre) : getString(R.string.nui_act_voz_filtro_fmt, nombre, mazo.size()));
         return true;
     }
 
@@ -500,9 +541,43 @@ public class Actividades extends BaseActivity {
         if (vozLista && voz != null) voz.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "orden");
     }
 
+    /** Idioma de la app (español o inglés, según Ajustes): para la voz y el reconocedor. */
+    private Locale idioma() {
+        return getResources().getConfiguration().getLocales().get(0);
+    }
+
     private static boolean contiene(String frase, String... palabras) {
         for (String p : palabras) if (frase.contains(p)) return true;
         return false;
+    }
+
+    // -------------------------------------------------
+    //              CRÉDITOS ABIERTAUGR («Mis actividades»)
+    // -------------------------------------------------
+
+    /** Créditos conseguidos (cursos ya acabados) y en curso, sobre los que se pueden reconocer. */
+    private void actualizarCreditos() {
+        View panel = findViewById(R.id.panelCreditos);
+        boolean ver = correoUsuario != null && FILTRO_APUNTADO.equals(filtroSeleccionado);
+        panel.setVisibility(ver ? View.VISIBLE : View.GONE);
+        if (!ver) return;
+        double[] creditos = actividadesDB.creditosAbiertaUGR(correoUsuario, FechasUtil.ahoraBD());
+        double total = creditos[0] + creditos[1];
+        String textoTotal = getString(R.string.nui_cred_total_fmt, ects(total), ects(CREDITOS_RECONOCIBLES));
+        ((TextView) findViewById(R.id.tvCreditosTotal)).setText(textoTotal);
+        LinearProgressIndicator barra = findViewById(R.id.barraCreditos);
+        barra.setMax((int) Math.round(CREDITOS_RECONOCIBLES * 10));
+        barra.setProgressCompat((int) Math.round(Math.min(total, CREDITOS_RECONOCIBLES) * 10), true);
+        String detalle = total >= CREDITOS_RECONOCIBLES
+                ? getString(R.string.nui_cred_completo_fmt, ects(CREDITOS_RECONOCIBLES))
+                : getString(R.string.nui_cred_detalle_fmt, ects(creditos[0]), ects(creditos[1]));
+        ((TextView) findViewById(R.id.tvCreditosDetalle)).setText(detalle);
+        panel.setContentDescription(getString(R.string.nui_cred_titulo) + ": " + textoTotal + ". " + detalle);
+    }
+
+    /** 3.0 → "3", 1.5 → "1.5" */
+    private static String ects(double c) {
+        return c == Math.floor(c) ? String.valueOf((int) c) : String.valueOf(c);
     }
 
     private static String normalizar(String texto) {
@@ -518,7 +593,7 @@ public class Actividades extends BaseActivity {
     private void alEscanear(String contenido) {
         String clave = contenido.trim();
         if (!clave.toUpperCase(java.util.Locale.ROOT).startsWith(PREFIJO_QR)) {
-            avisar("Ese QR no es de ninguna actividad de la ETSIIT");
+            avisar(getString(R.string.nui_act_qr_no_es));
             return;
         }
         clave = clave.substring(PREFIJO_QR.length()).trim();
@@ -527,12 +602,12 @@ public class Actividades extends BaseActivity {
             if (claveQR(a.titulo).equals(claveQR(clave)) || String.valueOf(a.id).equals(clave)) encontrada = a;
         }
         if (encontrada == null) {
-            avisar("Esa actividad ya ha pasado o no está en la app");
+            avisar(getString(R.string.nui_act_qr_no_esta));
             return;
         }
         avisarTutorial(Gesto.ESCANEAR);
         filtroSeleccionado = null;
-        pestanasTipos.marcar(FILTRO_TODAS);
+        marcarFiltro(FILTRO_TODAS);
         aplicarFiltro();
         posicion = Math.max(0, mazo.indexOf(encontrada));
         mostrarCarta();
@@ -553,16 +628,16 @@ public class Actividades extends BaseActivity {
     /** Comprueba si se puede apuntar; si no, enseña el motivo. */
     private boolean puedeApuntarse(Actividad a) {
         if (correoUsuario == null) {
-            pedirSesion("apuntarte");
+            pedirSesion(getString(R.string.nui_act_accion_apuntarte));
             return false;
         }
         if (a.inscrito) return true; // ya lo estaba: simplemente pasa a la siguiente
         if (!a.plazoAbierto()) {
-            avisar("El plazo de inscripción no está abierto: " + a.estadoInscripcion());
+            avisar(getString(R.string.act_plazo_cerrado_fmt, a.estadoInscripcion(this)));
             return false;
         }
         if (a.completa()) {
-            avisar("No quedan plazas");
+            avisar(getString(R.string.nui_act_sin_plazas));
             return false;
         }
         return true;
@@ -570,25 +645,28 @@ public class Actividades extends BaseActivity {
 
     private void apuntar(Actividad a) {
         if (a.inscrito) {
-            avisar("Ya estabas apuntado a «" + a.titulo + "»");
+            avisar(getString(R.string.act_ya_apuntado_fmt, a.titulo));
             return;
         }
         if (!actividadesDB.insertarInscripcion(correoUsuario, a.id, FechasUtil.ahoraBD())) {
-            avisar("No se ha podido completar la inscripción");
+            avisar(getString(R.string.act_error_inscripcion));
             return;
         }
         a.inscrito = true;
         a.inscritos++;
         RecordatorioActividad.programar(this, a); // aviso con "Llévame" media hora antes
         mostrarCarta();
-        // Nota de papel con mecha (AvisoDeshacer, de Izaro). Lo de añadir al calendario está en el detalle.
-        AvisoDeshacer.mostrar(botonera, "Apuntado", "Te has apuntado a «" + a.titulo + "»", MS_DESHACER, () -> {
-            actividadesDB.borrarInscripcion(correoUsuario, a.id);
-            RecordatorioActividad.cancelar(this, a.id);
-            a.inscrito = false;
-            a.inscritos--;
-            mostrarCarta();
-        });
+        // Aviso con "Deshacer". Lo de añadir al calendario está en el detalle.
+        Snackbar.make(raiz, getString(R.string.nui_act_aviso_apuntado_fmt, a.titulo), MS_DESHACER)
+                .setAnchorView(botonera)
+                .setActionTextColor(getColor(R.color.nui_acento))
+                .setAction(R.string.deshacer, x -> {
+                    actividadesDB.borrarInscripcion(correoUsuario, a.id);
+                    RecordatorioActividad.cancelar(this, a.id);
+                    a.inscrito = false;
+                    a.inscritos--;
+                    mostrarCarta();
+                }).show();
     }
 
     private void desapuntar(Actividad a) {
@@ -597,13 +675,16 @@ public class Actividades extends BaseActivity {
         a.inscrito = false;
         a.inscritos--;
         mostrarCarta();
-        AvisoDeshacer.mostrar(botonera, "Desapuntado", "Ya no estás apuntado a «" + a.titulo + "»", MS_DESHACER, () -> {
-            actividadesDB.insertarInscripcion(correoUsuario, a.id, FechasUtil.ahoraBD());
-            a.inscrito = true;
-            a.inscritos++;
-            RecordatorioActividad.programar(this, a);
-            mostrarCarta();
-        });
+        Snackbar.make(raiz, getString(R.string.nui_act_aviso_desapuntado_fmt, a.titulo), MS_DESHACER)
+                .setAnchorView(botonera)
+                .setActionTextColor(getColor(R.color.nui_acento))
+                .setAction(R.string.deshacer, x -> {
+                    actividadesDB.insertarInscripcion(correoUsuario, a.id, FechasUtil.ahoraBD());
+                    a.inscrito = true;
+                    a.inscritos++;
+                    RecordatorioActividad.programar(this, a);
+                    mostrarCarta();
+                }).show();
     }
 
     private void avisar(String texto) {
@@ -612,9 +693,10 @@ public class Actividades extends BaseActivity {
 
     /** Aviso de que hace falta iniciar sesión, con botón para ir al login. */
     private void pedirSesion(String accion) {
-        Snackbar.make(raiz, "Inicia sesión para " + accion, Snackbar.LENGTH_LONG)
+        Snackbar.make(raiz, getString(R.string.nui_act_inicia_sesion_para_fmt, accion), Snackbar.LENGTH_LONG)
                 .setAnchorView(botonera)
-                .setAction("Iniciar sesión", v -> startActivity(new Intent(this, Login.class)))
+                .setAction(R.string.nui_act_iniciar_sesion, v -> startActivity(new Intent(this, Login.class)))
+                .setActionTextColor(getColor(R.color.nui_acento))
                 .show();
     }
 
@@ -628,7 +710,9 @@ public class Actividades extends BaseActivity {
         hoja.setContentView(v);
 
         pintarTesela(v.findViewById(R.id.ivIconoDetalle), a.tipo);
-        ((TextView) v.findViewById(R.id.tvTipoDetalle)).setText(Actividad.nombreTipo(a.tipo));
+        TextView tvTipoDetalle = v.findViewById(R.id.tvTipoDetalle);
+        tvTipoDetalle.setText(Actividad.nombreTipo(this, a.tipo));
+        pintarEtiqueta(tvTipoDetalle, a.tipo);
 
         ((TextView) v.findViewById(R.id.tvTituloDetalle)).setText(a.titulo);
         ((TextView) v.findViewById(R.id.tvFechaDetalle)).setText(textoFechas(a));
@@ -638,16 +722,16 @@ public class Actividades extends BaseActivity {
         TextView tvAbierta = v.findViewById(R.id.tvAbiertaDetalle);
         if (a.esAbiertaUGR()) {
             tvAbierta.setVisibility(View.VISIBLE);
-            tvAbierta.setText(a.creditosTexto() + "\n" + a.estadoInscripcion());
+            tvAbierta.setText(a.creditosTexto() + "\n" + a.estadoInscripcion(this));
             if (a.inscripcionUrgente()) {
-                tvAbierta.setTextColor(getColor(R.color.nui_granada));
-                tvAbierta.setCompoundDrawableTintList(ColorStateList.valueOf(getColor(R.color.nui_granada)));
+                tvAbierta.setTextColor(getColor(R.color.sec_error));
+                tvAbierta.setCompoundDrawableTintList(ColorStateList.valueOf(getColor(R.color.sec_error)));
             }
         }
 
         String plazas = a.plazasTotales != null
-                ? a.inscritos + " de " + a.plazasTotales + " plazas ocupadas"
-                : a.inscritos + (a.inscritos == 1 ? " persona apuntada" : " personas apuntadas");
+                ? getString(R.string.nui_act_plazas_ocupadas_fmt, a.inscritos, a.plazasTotales)
+                : getResources().getQuantityString(R.plurals.nui_act_personas, a.inscritos, a.inscritos);
         ((TextView) v.findViewById(R.id.tvPlazasDetalle)).setText(plazas);
 
         // Botón principal según el estado (si ya estás apuntado, sale el secundario para desapuntarte)
@@ -658,16 +742,16 @@ public class Actividades extends BaseActivity {
             btnDesapuntarme.setVisibility(View.VISIBLE);
             btnDesapuntarme.setOnClickListener(x -> { hoja.dismiss(); desapuntar(a); });
         } else if (!a.plazoAbierto() || a.completa()) {
-            btnApuntarme.setText(a.completa() ? "Plazas agotadas" : a.estadoInscripcion());
+            btnApuntarme.setText(a.completa() ? getString(R.string.nui_act_btn_agotadas) : a.estadoInscripcion(this));
             btnApuntarme.setEnabled(false);
         } else if (correoUsuario == null) {
-            btnApuntarme.setText("Inicia sesión para apuntarte");
+            btnApuntarme.setText(R.string.nui_act_btn_login);
             btnApuntarme.setOnClickListener(x -> {
                 hoja.dismiss();
                 startActivity(new Intent(this, Login.class));
             });
         } else {
-            btnApuntarme.setText("Apuntarme");
+            btnApuntarme.setText(R.string.nui_act_btn_apuntarme);
             btnApuntarme.setOnClickListener(x -> { hoja.dismiss(); apuntar(a); });
         }
 
@@ -691,7 +775,7 @@ public class Actividades extends BaseActivity {
             if (a.fin.toLocalDate().equals(a.inicio.toLocalDate())) {
                 texto += " – " + FechasUtil.hora(a.fin);
             } else {
-                texto += "\nhasta el " + FechasUtil.diaLargo(a.fin);
+                texto = getString(R.string.nui_act_hasta_fmt, texto, FechasUtil.diaLargo(a.fin));
             }
         }
         return texto;
@@ -699,7 +783,7 @@ public class Actividades extends BaseActivity {
 
     private String lugar(Actividad a) {
         String sitio = a.sitioEnMapa();
-        return sitio != null ? sitio + " · ETSIIT" : "ETSIIT · Universidad de Granada";
+        return sitio != null ? getString(R.string.nui_act_lugar_fmt, sitio) : getString(R.string.nui_act_lugar_escuela);
     }
 
     /**
@@ -723,14 +807,14 @@ public class Actividades extends BaseActivity {
         boolean mismoDia = a.fin != null && a.fin.toLocalDate().equals(a.inicio.toLocalDate());
         boolean ok = CalendarioUtil.anadirEvento(this, a.titulo, a.descripcion, lugar(a),
                 a.inicio, mismoDia ? a.fin : a.inicio.plusHours(2));
-        if (!ok) avisar("No hay ninguna app de calendario en este móvil");
+        if (!ok) avisar(getString(R.string.nui_act_sin_calendario));
     }
 
     private void abrirEnlace(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         } catch (ActivityNotFoundException e) {
-            avisar("No hay navegador para abrir el enlace");
+            avisar(getString(R.string.nui_sin_navegador));
         }
     }
 
@@ -741,31 +825,31 @@ public class Actividades extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "actividades", 3)
-                .info(R.id.pestanasTipos, "Elige qué actividades ver: charlas, Bibliomaker, AbiertaUGR... "
-                        + "En «Mis actividades» están a las que te has apuntado")
-                .gesto(R.id.carta, Gesto.DESLIZAR_IZQ, "Desliza la ficha a la izquierda para pasar a la siguiente. "
-                        + "A la derecha te apuntas")
+        return new Tutorial(this, "actividades", 5)
+                .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_pestanas))
+                .gesto(R.id.carta, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_act_deslizar))
                 .soloSi(() -> posicion < mazo.size() - 1)
-                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil: a la izquierda pasas, "
-                        + "a la derecha te apuntas")
+                .sensor(Gesto.INCLINAR, getString(R.string.nui_tut_act_inclinar))
                 .soloSi(() -> posicion < mazo.size() - 1 && inclinar != null && inclinar.escuchando())
-                .info(R.id.btnAnterior, "Si te has pasado una, vuelve atrás con la flecha")
-                .info(R.id.btnVoz, "También me puedes hablar: toca el micrófono y di «paso», «me apunto», "
-                        + "«¿cuándo es?», «llévame» o «charlas»")
-                .info(R.id.btnEscanear, "¿Ves el cartel de una actividad por la escuela? Escanea su QR "
-                        + "con la cámara y te la abro aquí para apuntarte")
-                .info(R.id.btnComunidades, "Aquí están los grupos de chat de tu grado y de la escuela")
+                .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_creditos))
+                .soloSi(() -> correoUsuario != null)
+                .info(R.id.btnAnterior, getString(R.string.nui_tut_act_anterior))
+                .info(R.id.btnVoz, getString(R.string.nui_tut_act_voz))
+                .info(R.id.btnEscanear, getString(R.string.nui_tut_act_escanear))
+                .info(R.id.btnComunidades, getString(R.string.nui_tut_act_grupos))
                 // el último: al tocar se abre el detalle encima
-                .tocar(R.id.carta, "Toca la ficha para ver los detalles, añadirla al calendario "
-                        + "o que el mapa te lleve")
+                .tocar(R.id.carta, getString(R.string.nui_tut_act_tocar))
                 .soloSi(() -> posicion < mazo.size());
     }
 
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.nui_quieto, R.anim.nui_papel_sale);
+    /** La app va de borde a borde: la cabecera baja lo que ocupa la barra de estado (como en Asignaturas). */
+    static void margenBarraEstado(View raiz) {
+        if (raiz == null) return;
+        ViewCompat.setOnApplyWindowInsetsListener(raiz, (v, insets) -> {
+            Insets arriba = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(v.getPaddingLeft(), arriba.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
     }
 
     @Override

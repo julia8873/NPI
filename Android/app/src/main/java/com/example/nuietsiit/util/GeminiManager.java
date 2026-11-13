@@ -113,16 +113,8 @@ public class GeminiManager {
                 }
             }
 
-            // 3. Actividades (TablasActividades)
-            sb.append("\n[ACTIVIDADES Y CURSOS - TABLAS ACTIVIDADES]\n");
-            try (Cursor c = db.rawQuery("SELECT titulo, tipoActividad, fechaInicio, descripcion FROM ACTIVIDAD", null)) {
-                while (c != null && c.moveToNext()) {
-                    sb.append("- Actividad: ").append(c.getString(0))
-                            .append(" | Tipo: ").append(c.getString(1))
-                            .append(" | Fecha: ").append(c.getString(2))
-                            .append(" | Desc: ").append(c.getString(3)).append("\n");
-                }
-            }
+            // 3. Actividades, inscripciones, créditos AbiertaUGR y avisos (sección de Miguel): ver TextoBotActividades
+            sb.append(TextoBotActividades.generar(context, correoUsuarioRef));
 
             // 4. Académico, Profesores, Despachos y Asignaturas
             sb.append("\n[PROFESORES Y ASIGNATURAS - TABLAS ACADÉMICO]\n");

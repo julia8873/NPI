@@ -16,22 +16,22 @@ public class Comunidad {
 
     // -------------------- Aspecto según la plataforma --------------------
 
-    // Color de cada plataforma con los tokens NUI (no los colores de marca: DisenoNUI/DESIGN.md)
+    // Color de cada plataforma: el de su marca (colores_secciones.xml)
     @ColorRes
     public static int colorRes(String plataforma) {
         switch (plataforma) {
-            case "whatsapp": return R.color.nui_arrayan;
-            case "telegram": return R.color.nui_cobalto;
-            default: return R.color.nui_granada;  // Discord
+            case "whatsapp": return R.color.sec_whatsapp;
+            case "telegram": return R.color.sec_telegram;
+            default: return R.color.sec_discord;
         }
     }
 
     @ColorRes
     public static int tinteRes(String plataforma) {
         switch (plataforma) {
-            case "whatsapp": return R.color.nui_arrayan_tinte;
-            case "telegram": return R.color.nui_cobalto_tinte;
-            default: return R.color.nui_granada_tinte;
+            case "whatsapp": return R.color.sec_whatsapp_tinte;
+            case "telegram": return R.color.sec_telegram_tinte;
+            default: return R.color.sec_discord_tinte;
         }
     }
 

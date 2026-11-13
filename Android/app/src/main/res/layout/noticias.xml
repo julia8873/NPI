@@ -1,33 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Noticias (design system NUI): yesería + arquería, pestañas de papel con las categorías y un carrusel
-     de fichas (una por aviso, sin scroll). Zócalo abajo. -->
+<!-- Noticias (mismo estilo que Asignaturas y Profesorado): cabecera unificada, filtros y un carrusel
+     de tarjetas (una por aviso, sin scroll). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootNoticias"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="@color/sec_fondo"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala: yesería + arquería -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil (igual que Asignaturas y Profesorado) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria"
-        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
 
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="@string/volver_menu_principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
+
+        <TextView
+            android:id="@+id/tvTituloSeccion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="@string/seccion_noticias"
+            android:textColor="@color/nui_tinta"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="@string/abrir_asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
+            android:clickable="true"
+            android:contentDescription="@string/perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/nui_espacio_l"
-        android:paddingTop="@dimen/nui_espacio_s">
+        android:paddingHorizontal="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,15 +108,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:accessibilityLiveRegion="polite"
-                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
+                android:textAppearance="@style/TextAppearance.Seccion.Subtitulo" />
 
             <!-- Leer los avisos en voz alta (también acercándote el móvil a la oreja: LectorAvisos) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEscuchar"
-                style="@style/Widget.Nui.Boton.Texto"
-                android:layout_width="@dimen/nui_toque_min"
-                android:layout_height="@dimen/nui_toque_min"
-                android:contentDescription="Escuchar los avisos"
+                style="@style/Widget.Seccion.Boton.Texto"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/nui_not_desc_escuchar"
                 android:insetLeft="0dp"
                 android:insetRight="0dp"
                 android:padding="0dp"
@@ -59,17 +126,21 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/tvMarcarTodo"
-                style="@style/Widget.Nui.Boton.Texto"
+                style="@style/Widget.Seccion.Boton.Texto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Marcar leídos" />
+                android:text="@string/nui_not_marcar_leidos" />
         </LinearLayout>
 
-        <!-- Categorías: pestañas de papel, todas a la vista (se crean en Noticias.crearPestanas) -->
-        <com.example.nuietsiit.ui.PestanasPapel
+        <!-- Categorías: chips que bajan de línea si no caben (Noticias.crearPestanas) -->
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/pestanasCategorias"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:chipSpacingVertical="2dp"
+            app:selectionRequired="true"
+            app:singleLine="false"
+            app:singleSelection="true" />
     </LinearLayout>
 
     <FrameLayout
@@ -77,13 +148,13 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- Se ve un trocito de la ficha anterior y la siguiente para que se note que se desliza -->
+        <!-- Se ve un trocito de la tarjeta anterior y la siguiente para que se note que se desliza -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/vpAnuncios"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingHorizontal="@dimen/nui_espacio_xxl"
-            android:paddingVertical="@dimen/nui_espacio_m" />
+            android:paddingHorizontal="32dp"
+            android:paddingVertical="10dp" />
 
         <TextView
             android:id="@+id/tvVacio"
@@ -91,8 +162,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="No hay avisos aquí."
-            android:textAppearance="@style/TextAppearance.Nui.Titular.M"
+            android:text="@string/nui_not_vacio"
+            android:textAppearance="@style/TextAppearance.Seccion.Subtitulo"
             android:visibility="gone" />
     </FrameLayout>
 
@@ -102,17 +173,6 @@
         android:layout_height="wrap_content"
         android:accessibilityLiveRegion="polite"
         android:gravity="center"
-        android:paddingBottom="@dimen/nui_espacio_s"
-        android:textAppearance="@style/TextAppearance.Nui.Codigo" />
-
-    <!-- Zócalo: filete de oro + alicatado -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/nui_oro" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_zocalo"
-        android:importantForAccessibility="no" />
+        android:paddingBottom="14dp"
+        android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 </LinearLayout>

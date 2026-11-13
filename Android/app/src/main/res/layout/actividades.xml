@@ -1,184 +1,371 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Actividades (design system NUI, como Secretaría y Biblioteca): yesería + arquería, pestañas de papel
-     con los tipos, un mazo de fichas (una cada vez, sin scroll) y la botonera. Zócalo abajo. -->
+<!-- Actividades (mismo estilo que Asignaturas y Profesorado): cabecera unificada, filtros, un mazo de
+     tarjetas (una cada vez, sin scroll) y la botonera. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootActividades"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="@color/sec_fondo"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala: yesería + arquería -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil (igual que Asignaturas y Profesorado) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria"
-        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
 
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="@string/volver_menu_principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
+
+        <TextView
+            android:id="@+id/tvTituloSeccion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="@string/titulo_actividades"
+            android:textColor="@color/nui_tinta"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="@string/abrir_asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
+            android:clickable="true"
+            android:contentDescription="@string/perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/nui_espacio_l"
-        android:paddingTop="@dimen/nui_espacio_m"
-        android:paddingBottom="@dimen/nui_espacio_s">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="10dp">
 
-        <!-- Tipos de actividad: pestañas de papel, todas a la vista (se crean en Actividades.crearPestanas) -->
-        <com.example.nuietsiit.ui.PestanasPapel
+        <!-- Tipos de actividad: chips que bajan de línea si no caben (Actividades.crearPestanas) -->
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/pestanasTipos"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:chipSpacingVertical="2dp"
+            app:selectionRequired="true"
+            app:singleLine="false"
+            app:singleSelection="true" />
 
-        <!-- El mazo: la ficha de arriba se arrastra; los sellos aparecen al moverla -->
+        <!-- Solo en «Mis actividades»: créditos AbiertaUGR conseguidos y en curso (Actividades.actualizarCreditos) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/panelCreditos"
+            style="@style/Widget.Seccion.Tarjeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="2dp"
+            android:layout_marginTop="8dp"
+            android:focusable="true"
+            android:visibility="gone"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/sec_circulo"
+                    android:backgroundTint="@color/sec_tipo_abiertaugr_tinte"
+                    android:importantForAccessibility="no"
+                    android:padding="8dp"
+                    android:src="@drawable/nui_ic_titulo"
+                    app:tint="@color/sec_info" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/nui_cred_titulo"
+                            android:textColor="@color/sec_texto"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvCreditosTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/sec_info"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/barraCreditos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:importantForAccessibility="no"
+                        app:indicatorColor="@color/sec_info"
+                        app:trackColor="@color/sec_borde"
+                        app:trackCornerRadius="3dp"
+                        app:trackThickness="6dp" />
+
+                    <TextView
+                        android:id="@+id/tvCreditosDetalle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/nui_cred_explicacion"
+                        android:textColor="@color/sec_texto_suave"
+                        android:textSize="11sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- El mazo: la tarjeta de arriba se arrastra; los sellos aparecen al moverla -->
         <FrameLayout
             android:id="@+id/zonaMazo"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:clipChildren="false">
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/carta"
-                style="@style/Widget.Nui.Ficha"
+                style="@style/Widget.Seccion.Tarjeta"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="2dp"
                 android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <!-- Cabecera de la ficha (sobre la línea granada): tipo y cuándo -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tvTipoCarta"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
-
-                    <TextView
-                        android:id="@+id/tvCuandoCarta"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Nui.Codigo" />
-                </LinearLayout>
+                android:focusable="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/nui_espacio_m"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="18dp">
 
-                    <!-- Tesela con el icono del tipo (color y tinte por código) -->
-                    <ImageView
-                        android:id="@+id/ivIconoCarta"
-                        android:layout_width="@dimen/nui_icono_objeto"
-                        android:layout_height="@dimen/nui_icono_objeto"
-                        android:background="@drawable/nui_tesela"
-                        android:importantForAccessibility="no"
-                        android:padding="@dimen/nui_espacio_s" />
+                    <!-- Tipo (etiqueta de su color) y cuándo -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvTipoCarta"
+                            style="@style/Widget.Seccion.Etiqueta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <!-- ¿Estás apuntado? (verde) o no (gris); sin sesión no se enseña -->
+                        <TextView
+                            android:id="@+id/tvInscritoCarta"
+                            style="@style/Widget.Seccion.Etiqueta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:visibility="gone" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:id="@+id/tvCuandoCarta"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Seccion.Etiqueta" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Icono del tipo en un círculo de su color (por código) -->
+                        <ImageView
+                            android:id="@+id/ivIconoCarta"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/sec_circulo"
+                            android:importantForAccessibility="no"
+                            android:padding="11dp" />
+
+                        <TextView
+                            android:id="@+id/tvTituloCarta"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="3"
+                            android:textAppearance="@style/TextAppearance.Seccion.Titulo" />
+                    </LinearLayout>
+
+                    <!-- Solo AbiertaUGR: créditos y estado del plazo -->
+                    <TextView
+                        android:id="@+id/tvExtraCarta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
 
                     <TextView
-                        android:id="@+id/tvTituloCarta"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/nui_espacio_m"
+                        android:id="@+id/tvDescCarta"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="10dp"
                         android:layout_weight="1"
                         android:ellipsize="end"
-                        android:maxLines="3"
-                        android:textAppearance="@style/TextAppearance.Nui.Titular" />
-                </LinearLayout>
+                        android:lineSpacingExtra="3dp"
+                        android:textAppearance="@style/TextAppearance.Seccion.Cuerpo" />
 
-                <!-- Solo AbiertaUGR: créditos y estado del plazo -->
-                <TextView
-                    android:id="@+id/tvExtraCarta"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/nui_espacio_s"
-                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/tvDescCarta"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="@dimen/nui_espacio_m"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/nui_espacio_s"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Toca la ficha para ver los detalles"
-                        android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <!-- Ya inscrito: sello de arrayán -->
-                    <TextView
-                        android:id="@+id/tvInscritoCarta"
-                        style="@style/Widget.Nui.Sello"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/nui_arrayan"
-                        android:text="Apuntado"
-                        android:textColor="@color/nui_arrayan"
-                        android:visibility="gone" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/nui_act_toca_detalles"
+                            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
+
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Sellos que se ven al arrastrar o inclinar (alpha por código) -->
             <TextView
                 android:id="@+id/selloSi"
-                style="@style/Widget.Nui.Sello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|start"
-                android:layout_marginStart="@dimen/nui_espacio_l"
-                android:layout_marginTop="@dimen/nui_espacio_xxl"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="70dp"
                 android:alpha="0"
-                android:backgroundTint="@color/nui_arrayan"
+                android:background="@drawable/sec_sello"
+                android:backgroundTint="@color/sec_ok"
+                android:elevation="4dp"
                 android:importantForAccessibility="no"
-                android:text="Me apunto"
-                android:textColor="@color/nui_arrayan"
-                android:textSize="@dimen/nui_texto_l" />
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:rotation="-12"
+                android:text="@string/nui_act_sello_si"
+                android:textAllCaps="true"
+                android:textColor="@color/sec_ok"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/selloNo"
-                style="@style/Widget.Nui.Sello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|end"
-                android:layout_marginTop="@dimen/nui_espacio_xxl"
-                android:layout_marginEnd="@dimen/nui_espacio_l"
+                android:layout_marginTop="70dp"
+                android:layout_marginEnd="20dp"
                 android:alpha="0"
+                android:background="@drawable/sec_sello"
+                android:backgroundTint="@color/sec_error"
+                android:elevation="4dp"
                 android:importantForAccessibility="no"
-                android:rotation="6"
-                android:text="Paso"
-                android:textSize="@dimen/nui_texto_l" />
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:rotation="12"
+                android:text="@string/nui_act_sello_no"
+                android:textAllCaps="true"
+                android:textColor="@color/sec_error"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-            <!-- Sin fichas: no hay de este tipo, o ya se han visto todas -->
+            <!-- Sin tarjetas: no hay de este tipo, o ya se han visto todas -->
             <LinearLayout
                 android:id="@+id/vacio"
                 android:layout_width="match_parent"
@@ -193,33 +380,33 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+                    android:textAppearance="@style/TextAppearance.Seccion.Subtitulo" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReiniciar"
-                    style="@style/Widget.Nui.Boton.Secundario"
+                    style="@style/Widget.Seccion.Boton.Secundario"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/nui_espacio_l"
-                    android:text="Volver a verlas" />
+                    android:layout_marginTop="16dp"
+                    android:text="@string/nui_act_volver_a_verlas" />
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Botonera: pasar, apuntarse (el principal) y volver a la anterior -->
+        <!-- Botonera: volver, pasar, apuntarse y micrófono -->
         <LinearLayout
             android:id="@+id/botonera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAnterior"
-                style="@style/Widget.Nui.Boton.Texto"
-                android:layout_width="@dimen/nui_toque_min"
-                android:layout_height="@dimen/nui_toque_min"
-                android:contentDescription="Volver a la anterior"
+                style="@style/Widget.Seccion.Boton.Texto"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/nui_act_desc_anterior"
                 android:insetLeft="0dp"
                 android:insetRight="0dp"
                 android:padding="0dp"
@@ -229,30 +416,29 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPasar"
-                style="@style/Widget.Nui.Boton.Secundario"
+                style="@style/Widget.Seccion.Boton.Secundario"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nui_espacio_s"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
-                android:text="Paso" />
+                android:text="@string/nui_act_btn_paso" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApuntar"
-                style="@style/Widget.Nui.Boton"
+                style="@style/Widget.Seccion.Boton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nui_espacio_s"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Me apunto" />
+                android:text="@string/nui_act_btn_apunto" />
 
-            <!-- Órdenes por voz: "paso", "me apunto", "llévame"... (Actividades.escucharOrden) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVoz"
-                style="@style/Widget.Nui.Boton.Texto"
-                android:layout_width="@dimen/nui_toque_min"
-                android:layout_height="@dimen/nui_toque_min"
-                android:layout_marginStart="@dimen/nui_espacio_xs"
-                android:contentDescription="Dar una orden por voz"
+                style="@style/Widget.Seccion.Boton.Texto"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
+                android:contentDescription="@string/nui_act_desc_voz"
                 android:insetLeft="0dp"
                 android:insetRight="0dp"
                 android:padding="0dp"
@@ -273,38 +459,25 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:accessibilityLiveRegion="polite"
-                android:textAppearance="@style/TextAppearance.Nui.Codigo" />
+                android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
-            <!-- Escanear el QR del cartel de una actividad (cámara) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEscanear"
-                style="@style/Widget.Nui.Boton.Texto"
+                style="@style/Widget.Seccion.Boton.Texto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="Escanear el QR de un cartel"
-                android:text="Escanear"
+                android:contentDescription="@string/nui_act_desc_escanear"
+                android:text="@string/nui_act_escanear"
                 app:icon="@drawable/nui_ic_escaner" />
 
-            <!-- Grupos de chat (WhatsApp/Telegram/Discord simulados) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnComunidades"
-                style="@style/Widget.Nui.Boton.Texto"
+                style="@style/Widget.Seccion.Boton.Texto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="Comunidades de chat"
-                android:text="Grupos"
+                android:contentDescription="@string/nui_act_desc_grupos"
+                android:text="@string/nui_act_grupos"
                 app:icon="@drawable/nui_ic_movil" />
         </LinearLayout>
     </LinearLayout>
-
-    <!-- Zócalo: filete de oro + alicatado -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/nui_oro" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_zocalo"
-        android:importantForAccessibility="no" />
 </LinearLayout>
