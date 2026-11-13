@@ -15,7 +15,7 @@
         android:orientation="horizontal"
         android:layout_marginTop="8dp"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="25dp"
         android:paddingBottom="6dp">
 
         <ImageButton
@@ -24,7 +24,7 @@
             android:layout_height="44dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_circulo_blanco_volver"
-            android:contentDescription="@string/volver_menu_principal"
+            android:contentDescription="Volver al menú principal"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
             android:scaleType="fitCenter"
@@ -38,7 +38,7 @@
             android:layout_weight="1"
             android:letterSpacing="-0.02"
             android:maxLines="1"
-            android:text="@string/titulo_profesorado"
+            android:text="Profesorado"
             android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -50,7 +50,7 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_nui_chat"
             android:clickable="true"
-            android:contentDescription="@string/abrir_asistente"
+            android:contentDescription="Abrir asistente"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
@@ -69,7 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="@string/chat"
+                android:text="Chat"
                 android:textColor="@android:color/white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -81,7 +81,7 @@
             android:layout_height="40dp"
             android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="@string/perfil"
+            android:contentDescription="Perfil"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
@@ -130,7 +130,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginHorizontal="16dp"
                             android:gravity="center"
-                            android:text="@string/aviso_no_session_tutorias"
+                            android:text="No has iniciado sesión aún.\nPara gestionar y ver tus tutorías reservadas accede con tus credenciales."
                             android:textColor="#666666"
                             android:textSize="15sp" />
 
@@ -139,7 +139,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="@string/iniciar_sesion" />
+                            android:text="Iniciar sesión" />
                     </LinearLayout>
 
                     <!-- 2. VISTA CON SESIÓN INICIADA (Tutorías reservadas) -->
@@ -155,7 +155,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="12dp"
-                            android:text="@string/tus_tutorias_reservadas"
+                            android:text="Tus tutorías reservadas:"
                             android:textColor="#000000"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -181,7 +181,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:padding="16dp"
-                android:text="@string/btn_buscar_profesorado_tutorias"
+                android:text="¿Quieres buscar profesorado o tutorías?"
                 android:textSize="16sp"
                 app:cornerRadius="24dp" />
 

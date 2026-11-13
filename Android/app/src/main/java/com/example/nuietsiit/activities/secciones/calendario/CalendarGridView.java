@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,14 +23,25 @@ public class CalendarGridView extends View {
     private Paint paintTexto;
     private Paint paintTextoDiaSemana;
     private Paint paintSeleccion;
+    private Paint paintSeleccionHalo;
+    private Paint paintHoyBorde;
     private Paint paintDot;
     private Paint paintHeader;
-    private String[] diasSemana;
+    private Paint paintBtnNavBg;
+    private Paint paintFlecha;
+    private Paint paintDivider;
 
+    private String[] diasSemana;
     private Calendar calendarActual;
+    private final Calendar hoyCalendar = Calendar.getInstance();
+
     private int selectedDay = -1;
     private Set<String> fechasConEventos = new HashSet<>();
     private OnDateSelectedListener listener;
+
+    private final SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
+    private final RectF rectBtnPrev = new RectF();
+    private final RectF rectBtnNext = new RectF();
 
     public interface OnDateSelectedListener {
         void onDateSelected(String fechaYYYYMMDD);
@@ -55,28 +68,54 @@ public class CalendarGridView extends View {
         calendarActual = Calendar.getInstance();
         selectedDay = calendarActual.get(Calendar.DAY_OF_MONTH);
 
+        int colorNaranja = Color.parseColor("#FF8C42");
+        int colorTinta = Color.parseColor("#0F172A");
+
         paintTexto = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintTexto.setColor(Color.parseColor("#0F172A"));
+        paintTexto.setColor(colorTinta);
         paintTexto.setTextAlign(Paint.Align.CENTER);
         paintTexto.setFakeBoldText(true);
 
         paintTextoDiaSemana = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintTextoDiaSemana.setColor(Color.parseColor("#64748B"));
+        paintTextoDiaSemana.setColor(Color.parseColor("#94A3B8"));
         paintTextoDiaSemana.setTextAlign(Paint.Align.CENTER);
         paintTextoDiaSemana.setFakeBoldText(true);
+        paintTextoDiaSemana.setLetterSpacing(0.05f);
 
         paintSeleccion = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintSeleccion.setColor(Color.parseColor("#FF8C42"));
+        paintSeleccion.setColor(colorNaranja);
         paintSeleccion.setStyle(Paint.Style.FILL);
 
+        paintSeleccionHalo = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintSeleccionHalo.setColor(Color.parseColor("#26FF8C42"));
+        paintSeleccionHalo.setStyle(Paint.Style.FILL);
+
+        paintHoyBorde = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintHoyBorde.setColor(colorNaranja);
+        paintHoyBorde.setStyle(Paint.Style.STROKE);
+        paintHoyBorde.setStrokeWidth(3.5f);
+
         paintDot = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintDot.setColor(Color.parseColor("#FF8C42"));
+        paintDot.setColor(colorNaranja);
         paintDot.setStyle(Paint.Style.FILL);
 
         paintHeader = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintHeader.setColor(Color.parseColor("#0F172A"));
+        paintHeader.setColor(colorTinta);
         paintHeader.setTextAlign(Paint.Align.CENTER);
         paintHeader.setFakeBoldText(true);
+
+        paintBtnNavBg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintBtnNavBg.setColor(Color.parseColor("#FFF3EB"));
+        paintBtnNavBg.setStyle(Paint.Style.FILL);
+
+        paintFlecha = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintFlecha.setColor(colorNaranja);
+        paintFlecha.setTextAlign(Paint.Align.CENTER);
+        paintFlecha.setFakeBoldText(true);
+
+        paintDivider = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintDivider.setColor(Color.parseColor("#F1F5F9"));
+        paintDivider.setStrokeWidth(2f);
     }
 
     public void setFechasConEventos(Set<String> fechas) {
@@ -90,16 +129,25 @@ public class CalendarGridView extends View {
 
     public void cambiarMes(int delta) {
         calendarActual.add(Calendar.MONTH, delta);
-        calendarActual.set(Calendar.DAY_OF_MONTH, 1);
-        selectedDay = 1;
+        if (esMesActual()) {
+            selectedDay = hoyCalendar.get(Calendar.DAY_OF_MONTH);
+        } else {
+            selectedDay = 1;
+        }
+        calendarActual.set(Calendar.DAY_OF_MONTH, selectedDay);
         notificarSeleccion();
         invalidate();
+    }
+
+    private boolean esMesActual() {
+        return calendarActual.get(Calendar.YEAR) == hoyCalendar.get(Calendar.YEAR)
+                && calendarActual.get(Calendar.MONTH) == hoyCalendar.get(Calendar.MONTH);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = (int) (width * 1.12f); // Amplio y cómodo
+        int height = (int) (width * 1.06f);
         setMeasuredDimension(width, height);
     }
 
@@ -109,17 +157,20 @@ public class CalendarGridView extends View {
 
         float w = getWidth();
         float h = getHeight();
+        float paddingH = w * 0.03f;
+        float usableW = w - (paddingH * 2);
 
-        float cellW = w / 7f;
-        float headerH = h * 0.24f; // Separación holgada de la cabecera
-        float bodyH = h - headerH;
+        float cellW = usableW / 7f;
+        float headerH = h * 0.25f;
+        float bodyH = h - headerH - (h * 0.02f);
         float rowH = bodyH / 6f;
 
-        paintTexto.setTextSize(cellW * 0.36f);
-        paintTextoDiaSemana.setTextSize(cellW * 0.28f);
-        paintHeader.setTextSize(cellW * 0.42f);
+        paintTexto.setTextSize(cellW * 0.35f);
+        paintTextoDiaSemana.setTextSize(cellW * 0.25f);
+        paintHeader.setTextSize(cellW * 0.40f);
+        paintFlecha.setTextSize(cellW * 0.48f);
 
-        // 1. Dibujar Mes y Año actual con flechas ‹  Mes y Año  › según el Locale activo
+        // 1. Título del Mes y Año
         Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", localeActivo);
         String mesAno = sdf.format(calendarActual.getTime());
@@ -127,27 +178,41 @@ public class CalendarGridView extends View {
             mesAno = mesAno.substring(0, 1).toUpperCase(localeActivo) + mesAno.substring(1);
         }
 
-        float titleY = headerH * 0.38f;
-        canvas.drawText(mesAno, w / 2f, titleY, paintHeader);
+        float titleCenterY = headerH * 0.36f;
+        Paint.FontMetrics fmHeader = paintHeader.getFontMetrics();
+        float titleBaselineY = titleCenterY - (fmHeader.ascent + fmHeader.descent) / 2f;
+        canvas.drawText(mesAno, w / 2f, titleBaselineY, paintHeader);
 
-        // Flechitas visibles e interactivas para cambiar de mes
-        Paint paintFlecha = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintFlecha.setColor(Color.parseColor("#FF8C42"));
-        paintFlecha.setTextSize(cellW * 0.60f);
-        paintFlecha.setTextAlign(Paint.Align.CENTER);
-        paintFlecha.setFakeBoldText(true);
+        // 2. Botones circulares ‹ y ›
+        float btnRadius = cellW * 0.36f;
+        float btnPrevX = paddingH + cellW * 0.55f;
+        float btnNextX = w - paddingH - cellW * 0.55f;
 
-        canvas.drawText("‹", w * 0.12f, titleY + cellW * 0.08f, paintFlecha);
-        canvas.drawText("›", w * 0.88f, titleY + cellW * 0.08f, paintFlecha);
+        rectBtnPrev.set(btnPrevX - btnRadius * 1.4f, titleCenterY - btnRadius * 1.4f,
+                btnPrevX + btnRadius * 1.4f, titleCenterY + btnRadius * 1.4f);
+        rectBtnNext.set(btnNextX - btnRadius * 1.4f, titleCenterY - btnRadius * 1.4f,
+                btnNextX + btnRadius * 1.4f, titleCenterY + btnRadius * 1.4f);
 
-        // 2. Días de la semana con mayor separación
-        float diasSemanaY = headerH * 0.82f;
+        canvas.drawCircle(btnPrevX, titleCenterY, btnRadius, paintBtnNavBg);
+        canvas.drawCircle(btnNextX, titleCenterY, btnRadius, paintBtnNavBg);
+
+        Paint.FontMetrics fmFlecha = paintFlecha.getFontMetrics();
+        float flechaBaselineY = titleCenterY - (fmFlecha.ascent + fmFlecha.descent) / 2f;
+        canvas.drawText("‹", btnPrevX, flechaBaselineY, paintFlecha);
+        canvas.drawText("›", btnNextX, flechaBaselineY, paintFlecha);
+
+        // 3. Cabecera de días de la semana
+        float diasSemanaY = headerH * 0.78f;
         for (int i = 0; i < 7; i++) {
-            float cx = (i + 0.5f) * cellW;
-            canvas.drawText(diasSemana[i], cx, diasSemanaY, paintTextoDiaSemana);
+            float cx = paddingH + (i + 0.5f) * cellW;
+            paintTextoDiaSemana.setColor(i >= 5 ? Color.parseColor("#FF8C42") : Color.parseColor("#94A3B8"));
+            canvas.drawText(diasSemana[i].toUpperCase(localeActivo), cx, diasSemanaY, paintTextoDiaSemana);
         }
 
-        // 3. Calcular días del mes
+        // Línea divisoria sutil
+        canvas.drawLine(paddingH + cellW * 0.2f, headerH * 0.93f, w - paddingH - cellW * 0.2f, headerH * 0.93f, paintDivider);
+
+        // 4. Celdas de los días
         Calendar calTemp = (Calendar) calendarActual.clone();
         calTemp.set(Calendar.DAY_OF_MONTH, 1);
 
@@ -155,42 +220,52 @@ public class CalendarGridView extends View {
         int offset = (primerDiaSemana + 5) % 7;
         int diasEnMes = calendarActual.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
         int year = calendarActual.get(Calendar.YEAR);
         int month = calendarActual.get(Calendar.MONTH);
+        int hoyDia = hoyCalendar.get(Calendar.DAY_OF_MONTH);
+        boolean mesEsHoy = esMesActual();
+
+        float radioDia = Math.min(cellW, rowH) * 0.37f;
+        Paint.FontMetrics fmTexto = paintTexto.getFontMetrics();
 
         for (int day = 1; day <= diasEnMes; day++) {
             int index = offset + day - 1;
             int col = index % 7;
             int row = index / 7;
 
-            float cx = (col + 0.5f) * cellW;
+            float cx = paddingH + (col + 0.5f) * cellW;
             float cy = headerH + (row + 0.5f) * rowH;
 
             calTemp.set(year, month, day);
             String fechaStr = sdfDb.format(calTemp.getTime());
 
-            if (day == selectedDay) {
-                canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintSeleccion);
+            boolean isSelected = (day == selectedDay);
+            boolean isToday = (mesEsHoy && day == hoyDia);
+            boolean hasEvent = fechasConEventos.contains(fechaStr);
+
+            if (isSelected) {
+                canvas.drawCircle(cx, cy, radioDia * 1.18f, paintSeleccionHalo);
+                canvas.drawCircle(cx, cy, radioDia, paintSeleccion);
                 paintTexto.setColor(Color.WHITE);
-            } else if (fechasConEventos.contains(fechaStr)) {
-                Paint paintEventBg = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paintEventBg.setColor(Color.parseColor("#FFE0B2")); // Naranja suave clarito
-                paintEventBg.setStyle(Paint.Style.FILL);
-                canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintEventBg);
-
-                Paint paintEventBorder = new Paint(Paint.ANTI_ALIAS_FLAG);
-                paintEventBorder.setColor(Color.parseColor("#FF8C42")); // Borde naranja vivo
-                paintEventBorder.setStyle(Paint.Style.STROKE);
-                paintEventBorder.setStrokeWidth(3f);
-                canvas.drawCircle(cx, cy - cellW * 0.05f, cellW * 0.38f, paintEventBorder);
-
-                paintTexto.setColor(Color.parseColor("#C2410C"));
             } else {
-                paintTexto.setColor(Color.parseColor("#0F172A"));
+                if (isToday) {
+                    canvas.drawCircle(cx, cy, radioDia, paintHoyBorde);
+                    paintTexto.setColor(Color.parseColor("#FF8C42"));
+                } else if (col >= 5) {
+                    paintTexto.setColor(Color.parseColor("#64748B"));
+                } else {
+                    paintTexto.setColor(Color.parseColor("#0F172A"));
+                }
             }
 
-            canvas.drawText(String.valueOf(day), cx, cy + (paintTexto.getTextSize() / 3f), paintTexto);
+            float textY = cy - (fmTexto.ascent + fmTexto.descent) / 2f;
+            canvas.drawText(String.valueOf(day), cx, textY, paintTexto);
+
+            if (hasEvent) {
+                paintDot.setColor(isSelected ? Color.WHITE : Color.parseColor("#FF8C42"));
+                float dotY = cy + radioDia * 0.65f;
+                canvas.drawCircle(cx, dotY, cellW * 0.055f, paintDot);
+            }
         }
     }
 
@@ -200,24 +275,32 @@ public class CalendarGridView extends View {
             float x = event.getX();
             float y = event.getY();
 
-            float w = getWidth();
-            float h = getHeight();
-            float headerH = h * 0.24f;
-
-            if (y < headerH) {
-                if (x < w * 0.35f) {
-                    cambiarMes(-1);
-                } else if (x > w * 0.65f) {
-                    cambiarMes(1);
-                }
+            if (rectBtnPrev.contains(x, y)) {
+                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                cambiarMes(-1);
+                return true;
+            }
+            if (rectBtnNext.contains(x, y)) {
+                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                cambiarMes(1);
                 return true;
             }
 
-            float cellW = w / 7f;
-            float bodyH = h - headerH;
+            float w = getWidth();
+            float h = getHeight();
+            float paddingH = w * 0.03f;
+            float usableW = w - (paddingH * 2);
+            float headerH = h * 0.25f;
+
+            if (y < headerH || x < paddingH || x > w - paddingH) {
+                return true;
+            }
+
+            float cellW = usableW / 7f;
+            float bodyH = h - headerH - (h * 0.02f);
             float rowH = bodyH / 6f;
 
-            int col = (int) (x / cellW);
+            int col = (int) ((x - paddingH) / cellW);
             int row = (int) ((y - headerH) / rowH);
 
             Calendar calTemp = (Calendar) calendarActual.clone();
@@ -229,8 +312,9 @@ public class CalendarGridView extends View {
             int day = index - offset + 1;
 
             int diasEnMes = calendarActual.getActualMaximum(Calendar.DAY_OF_MONTH);
-            if (day >= 1 && day <= diasEnMes) {
+            if (day >= 1 && day <= diasEnMes && day != selectedDay) {
                 selectedDay = day;
+                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
                 invalidate();
                 notificarSeleccion();
             }
@@ -242,7 +326,6 @@ public class CalendarGridView extends View {
         if (listener == null) return;
         Calendar calTemp = (Calendar) calendarActual.clone();
         calTemp.set(Calendar.DAY_OF_MONTH, selectedDay);
-        SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
         listener.onDateSelected(sdfDb.format(calTemp.getTime()));
     }
 }

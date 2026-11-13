@@ -45,7 +45,8 @@ import java.util.Set;
 public class Calendario extends BaseActivity {
 
     private CalendarGridView calendarView;
-    private TextView tvFechaSeleccionadaHeader, tvSinEventos;
+    private TextView tvFechaSeleccionadaHeader;
+    private View tvSinEventos;
     private RecyclerView rvEventosCalendario;
     private View btnAnadirEventoRapido;
 
@@ -145,7 +146,10 @@ public class Calendario extends BaseActivity {
 
         actualizarFechasResaltadas();
 
-        btnAnadirEventoRapido.setOnClickListener(v -> mostrarDialogoAnadirEvento());
+        btnAnadirEventoRapido.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            mostrarDialogoAnadirEvento();
+        });
     }
 
     private void actualizarFechasResaltadas() {
@@ -178,10 +182,14 @@ public class Calendario extends BaseActivity {
 
         if (listaEventos.isEmpty()) {
             tvSinEventos.setVisibility(View.VISIBLE);
+            tvSinEventos.setAlpha(0f);
+            tvSinEventos.animate().alpha(1f).setDuration(180).start();
             rvEventosCalendario.setVisibility(View.GONE);
         } else {
             tvSinEventos.setVisibility(View.GONE);
             rvEventosCalendario.setVisibility(View.VISIBLE);
+            rvEventosCalendario.setAlpha(0f);
+            rvEventosCalendario.animate().alpha(1f).setDuration(180).start();
         }
         adapter.notifyDataSetChanged();
     }
@@ -219,7 +227,6 @@ public class Calendario extends BaseActivity {
                 .setPositiveButton(R.string.cal_btn_guardar, (dialog, which) -> {
                     String titulo = etTitulo.getText().toString().trim();
                     String tipoSeleccionado = spTipo.getSelectedItem() != null ? spTipo.getSelectedItem().toString() : "";
-                    // Normalizamos la clave interna para la BD independientemente del idioma del Spinner
                     String tipoBd = normalizarTipoParaBd(tipoSeleccionado);
                     String hora = etHora.getText().toString().trim();
                     String desc = etDescripcion.getText().toString().trim();
@@ -279,32 +286,41 @@ public class Calendario extends BaseActivity {
             holder.tvDescripcion.setText(ev.descripcion != null && !ev.descripcion.isEmpty() ? ev.descripcion : ctx.getString(R.string.cal_sin_descripcion));
 
             String tipoLower = ev.tipo != null ? ev.tipo.toLowerCase(Locale.ROOT) : "";
+            int colorAcento;
+
             if (tipoLower.contains("examen") || tipoLower.contains("exam")) {
                 holder.tvTipo.setText(R.string.cal_tipo_examen);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#FEE2E2"));
-                holder.tvTipo.setTextColor(Color.parseColor("#DC2626"));
+                colorAcento = Color.parseColor("#DC2626");
             } else if (tipoLower.contains("entrega") || tipoLower.contains("assign")) {
                 holder.tvTipo.setText(R.string.cal_tipo_entrega);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#FFEDD5"));
-                holder.tvTipo.setTextColor(Color.parseColor("#EA580C"));
+                colorAcento = Color.parseColor("#EA580C");
             } else if (tipoLower.contains("cita") || tipoLower.contains("appoint")) {
                 holder.tvTipo.setText(R.string.cal_tipo_cita);
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#F3E8FF"));
-                holder.tvTipo.setTextColor(Color.parseColor("#9333EA"));
+                colorAcento = Color.parseColor("#9333EA");
             } else {
                 holder.tvTipo.setText(ev.tipo != null && !ev.tipo.isEmpty() ? ev.tipo : ctx.getString(R.string.cal_tipo_evento));
                 holder.cardTipoBadge.setCardBackgroundColor(Color.parseColor("#E0F2FE"));
-                holder.tvTipo.setTextColor(Color.parseColor("#0284C7"));
+                colorAcento = Color.parseColor("#0284C7");
+            }
+
+            holder.tvTipo.setTextColor(colorAcento);
+            if (holder.viewIndicadorLateral != null) {
+                holder.viewIndicadorLateral.setBackgroundColor(colorAcento);
             }
 
             if (ev.id > 0 && correoActual != null && correoActual.equalsIgnoreCase(ev.correoUsuario)) {
                 holder.btnEliminar.setVisibility(View.VISIBLE);
-                holder.btnEliminar.setOnClickListener(v -> eliminarListener.onEliminar(ev));
+                holder.btnEliminar.setOnClickListener(v -> {
+                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                    eliminarListener.onEliminar(ev);
+                });
             } else {
                 holder.btnEliminar.setVisibility(View.GONE);
             }
 
-            // Enlace directo si es una Actividad (ID negativo)
             if (ev.id < 0 || tipoLower.contains("actividad")) {
                 holder.itemView.setOnClickListener(v -> {
                     Intent intent = new Intent(v.getContext(), Actividades.class);
@@ -324,6 +340,7 @@ public class Calendario extends BaseActivity {
             TextView tvTitulo, tvHora, tvDescripcion, tvTipo;
             MaterialCardView cardTipoBadge;
             ImageView btnEliminar;
+            View viewIndicadorLateral;
 
             public EventoViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -333,6 +350,7 @@ public class Calendario extends BaseActivity {
                 tvTipo = itemView.findViewById(R.id.tvTipoEvento);
                 cardTipoBadge = itemView.findViewById(R.id.cardTipoBadge);
                 btnEliminar = itemView.findViewById(R.id.btnEliminarEvento);
+                viewIndicadorLateral = itemView.findViewById(R.id.viewIndicadorLateral);
             }
         }
     }

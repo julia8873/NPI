@@ -161,7 +161,7 @@
 
     <!-- Calendario & Eventos -->
     <string name="eventos_para_hoy">Eventos para hoy</string>
-    <string name="anadir_evento">+ Añadir</string>
+    <string name="anadir_evento">Añadir</string>
     <string name="no_hay_actividades_fecha">No hay actividades ni entregas anotadas para esta fecha.</string>
     <string name="tipo_evento">Tipo de evento:</string>
     <string name="titulo_examen_entrega_hint">Título del examen o entrega</string>

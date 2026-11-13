@@ -113,11 +113,8 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Iniciar con la fecha del 10 de noviembre de 2026
+        // Iniciar con la fecha actual del sistema
         calendarioSeleccionado = Calendar.getInstance();
-        calendarioSeleccionado.set(Calendar.YEAR, 2026);
-        calendarioSeleccionado.set(Calendar.MONTH, Calendar.NOVEMBER);
-        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 10);
         limpiarHora(calendarioSeleccionado);
 
         // Enlazar vistas del layout XML

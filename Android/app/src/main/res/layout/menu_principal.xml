@@ -4,183 +4,322 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/nui_superficie"
-    android:clipChildren="false">
+    android:clipChildren="false"
+    android:fitsSystemWindows="true">
 
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/contenidoMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp">
 
+        <!-- 1. CABECERA: título · bola de inclinación · chat · perfil -->
         <LinearLayout
-            android:id="@+id/contenidoMenu"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:layout_marginBottom="20dp"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:paddingBottom="16dp">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <!-- 1. CABECERA: título · bola de inclinación · chat · perfil -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:text="@string/titulo_app"
+                android:textColor="@color/nui_tinta"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <com.example.nuietsiit.activities.main.NivelInclinacionView
+                android:id="@+id/nivelInclinacion"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/inclinacion_indicador_desc"
+                android:focusable="true" />
+
+            <LinearLayout
+                android:id="@+id/fabAsistenteChat"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bg_nui_chat"
+                android:clickable="true"
+                android:contentDescription="@string/abrir_asistente"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_bot"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/chat"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivIcono"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_nui_circulo_suave"
+                android:clickable="true"
+                android:contentDescription="@string/perfil"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_nui_usuario"
+                app:tint="@color/nui_tinta" />
+        </LinearLayout>
+
+        <!-- 2. SLIDER DE NOTICIAS (se adapta al alto disponible con peso 1.1) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="10dp"
+            android:layout_weight="1.1"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="#FFE3D1"
+            app:strokeWidth="1dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vpNoticias"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- Badge cápsula: Novedades ETSIIT -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_margin="8dp"
+                    app:cardBackgroundColor="#E6FFFFFF"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="1dp"
+                    app:strokeColor="#FFD8BE"
+                    app:strokeWidth="0.8dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="7dp"
+                        android:paddingVertical="3dp">
+
+                        <View
+                            android:layout_width="5dp"
+                            android:layout_height="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:background="@drawable/circulo_dia_seleccionado"
+                            android:backgroundTint="#FF8C42" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/novedades_etsiit"
+                            android:textColor="#0F172A"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 3. TARJETA CALENDARIO / EVENTOS DE HOY -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardEventoHoy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="#F8F8FD"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="1dp"
+            app:strokeColor="#E0E2FE"
+            app:strokeWidth="1dp">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp">
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:letterSpacing="-0.02"
-                    android:maxLines="1"
-                    android:text="@string/titulo_app"
-                    android:textColor="@color/nui_tinta"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <com.example.nuietsiit.activities.main.NivelInclinacionView
-                    android:id="@+id/nivelInclinacion"
+                <FrameLayout
+                    android:id="@+id/flIconoCalendario"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/inclinacion_indicador_desc"
-                    android:focusable="true" />
-
-                <LinearLayout
-                    android:id="@+id/fabAsistenteChat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/bg_nui_chat"
-                    android:clickable="true"
-                    android:contentDescription="@string/abrir_asistente"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="14dp">
+                    android:background="@drawable/bg_nui_icono_ficha"
+                    android:backgroundTint="#6366F1">
 
                     <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
                         android:importantForAccessibility="no"
-                        android:src="@drawable/ic_nui_bot"
+                        android:src="@drawable/ic_nui_calendario"
                         app:tint="@android:color/white" />
+                </FrameLayout>
 
-                    <TextView
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/chat"
-                        android:textColor="@android:color/white"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvHoraEvento"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_nui_etiqueta"
+                            android:backgroundTint="#EEF0FE"
+                            android:paddingHorizontal="7dp"
+                            android:paddingVertical="2dp"
+                            android:text="@string/tag_hoy"
+                            android:textColor="#6366F1"
+                            android:textSize="9.5sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="@string/calendario_etsiit"
+                            android:textColor="@color/nui_apagado"
+                            android:textSize="10sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvTituloEventoHoy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/titulo_calendario_etsiit"
+                        android:textColor="@color/nui_tinta"
                         android:textSize="13sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvSubtituloEventoHoy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/subtitulo_calendario_etsiit"
+                        android:textColor="@color/nui_apagado"
+                        android:textSize="10.5sp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/ivIcono"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_nui_circulo_suave"
-                    android:clickable="true"
-                    android:contentDescription="@string/perfil"
-                    android:foreground="?attr/selectableItemBackgroundBorderless"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_nui_usuario"
-                    app:tint="@color/nui_tinta" />
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="6dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_chevron_der"
+                    app:tint="#6366F1" />
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <!-- ESPACIO EQ 1 -->
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+        <!-- 4. HUB 3x3 de fichas (ocupa la mayor parte del espacio restante con peso 2.6) -->
+        <com.example.nuietsiit.activities.main.HubSeccionesView
+            android:id="@+id/hubSecciones"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="2.6" />
 
-            <!-- 2. SLIDER DE NOTICIAS -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="110dp"
-                android:layout_marginHorizontal="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeColor="#FFE3D1"
-                app:strokeWidth="1dp">
+        <!-- 5. ACCESO DIRECTO CONTEXTUAL / PÁGINAS RECIENTES -->
+        <LinearLayout
+            android:id="@+id/seccionAccesoDirecto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/vpNoticias"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <!-- Badge cápsula: Novedades ETSIIT -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_margin="8dp"
-                        app:cardBackgroundColor="#E6FFFFFF"
-                        app:cardCornerRadius="8dp"
-                        app:cardElevation="1dp"
-                        app:strokeColor="#FFD8BE"
-                        app:strokeWidth="0.8dp">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="7dp"
-                            android:paddingVertical="3dp">
-
-                            <View
-                                android:layout_width="5dp"
-                                android:layout_height="5dp"
-                                android:layout_marginEnd="5dp"
-                                android:background="@drawable/circulo_dia_seleccionado"
-                                android:backgroundTint="#FF8C42" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/novedades_etsiit"
-                                android:textColor="#0F172A"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ESPACIO EQ 2 -->
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <!-- 3. TARJETA CALENDARIO / EVENTOS DE HOY -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardEventoHoy"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="5dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvTituloCabeceraAccesoDirecto"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:letterSpacing="0.06"
+                    android:text="@string/cabecera_acceso_rapido"
+                    android:textColor="@color/nui_apagado"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnCambiarModoAcceso"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_boton_cambiar_acceso"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="@string/btn_cambiar_ultimo_visto"
+                    android:textColor="#FF7A2F"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAccesoDirecto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="#F8F8FD"
+                app:cardBackgroundColor="#FFFBF7"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="1dp"
-                app:strokeColor="#E0E2FE"
+                app:strokeColor="#FFE7D6"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -189,21 +328,22 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="10dp">
 
                     <FrameLayout
-                        android:id="@+id/flIconoCalendario"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
+                        android:id="@+id/flIconoAccesoDirecto"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/bg_nui_icono_ficha"
-                        android:backgroundTint="#6366F1">
+                        android:backgroundTint="#FF7A2F">
 
                         <ImageView
+                            android:id="@+id/ivIconoAccesoDirecto"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_gravity="center"
                             android:importantForAccessibility="no"
-                            android:src="@drawable/ic_nui_calendario"
+                            android:src="@drawable/ic_nui_mapa"
                             app:tint="@android:color/white" />
                     </FrameLayout>
 
@@ -221,232 +361,63 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/tvHoraEvento"
+                                android:id="@+id/tvTagAccesoDirecto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_nui_etiqueta"
-                                android:backgroundTint="#EEF0FE"
                                 android:paddingHorizontal="7dp"
                                 android:paddingVertical="2dp"
-                                android:text="@string/tag_hoy"
-                                android:textColor="#6366F1"
+                                android:text="@string/tag_hora_de_comer"
+                                android:textColor="@color/nui_acento"
                                 android:textSize="9.5sp"
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvSubinfoAccesoDirecto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
-                                android:text="@string/calendario_etsiit"
+                                android:text="@string/subinfo_horario_etsiit"
                                 android:textColor="@color/nui_apagado"
                                 android:textSize="10sp" />
                         </LinearLayout>
 
                         <TextView
-                            android:id="@+id/tvTituloEventoHoy"
+                            android:id="@+id/tvTituloAccesoDirecto"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="@string/titulo_calendario_etsiit"
+                            android:text="@string/titulo_acceso_directo_ejemplo"
                             android:textColor="@color/nui_tinta"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/tvSubtituloEventoHoy"
+                            android:id="@+id/tvDescAccesoDirecto"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:text="@string/subtitulo_calendario_etsiit"
+                            android:text="@string/desc_acceso_directo_ejemplo"
                             android:textColor="@color/nui_apagado"
                             android:textSize="10.5sp" />
                     </LinearLayout>
 
                     <ImageView
+                        android:id="@+id/ivChevronAccesoDirecto"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:layout_marginStart="6dp"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_nui_chevron_der"
-                        app:tint="#6366F1" />
+                        app:tint="@color/nui_acento" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- ESPACIO EQ 3 -->
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <!-- 4. HUB 3x3 de fichas cuadradas -->
-            <com.example.nuietsiit.activities.main.HubSeccionesView
-                android:id="@+id/hubSecciones"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp" />
-
-            <!-- ESPACIO EQ 4 -->
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <!-- 5. ACCESO DIRECTO CONTEXTUAL / PÁGINAS RECIENTES -->
-            <LinearLayout
-                android:id="@+id/seccionAccesoDirecto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="4dp">
-
-                    <TextView
-                        android:id="@+id/tvTituloCabeceraAccesoDirecto"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:letterSpacing="0.06"
-                        android:text="@string/cabecera_acceso_rapido"
-                        android:textColor="@color/nui_apagado"
-                        android:textSize="10.5sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/btnCambiarModoAcceso"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_boton_cambiar_acceso"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="4dp"
-                        android:text="@string/btn_cambiar_ultimo_visto"
-                        android:textColor="#FF7A2F"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardAccesoDirecto"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    app:cardBackgroundColor="#FFFBF7"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp"
-                    app:strokeColor="#FFE7D6"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp">
-
-                        <FrameLayout
-                            android:id="@+id/flIconoAccesoDirecto"
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:background="@drawable/bg_nui_icono_ficha"
-                            android:backgroundTint="#FF7A2F">
-
-                            <ImageView
-                                android:id="@+id/ivIconoAccesoDirecto"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:layout_gravity="center"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_nui_mapa"
-                                app:tint="@android:color/white" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:id="@+id/tvTagAccesoDirecto"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/bg_nui_etiqueta"
-                                    android:paddingHorizontal="7dp"
-                                    android:paddingVertical="2dp"
-                                    android:text="@string/tag_hora_de_comer"
-                                    android:textColor="@color/nui_acento"
-                                    android:textSize="9.5sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:id="@+id/tvSubinfoAccesoDirecto"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="6dp"
-                                    android:text="@string/subinfo_horario_etsiit"
-                                    android:textColor="@color/nui_apagado"
-                                    android:textSize="10sp" />
-                            </LinearLayout>
-
-                            <TextView
-                                android:id="@+id/tvTituloAccesoDirecto"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="@string/titulo_acceso_directo_ejemplo"
-                                android:textColor="@color/nui_tinta"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tvDescAccesoDirecto"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:text="@string/desc_acceso_directo_ejemplo"
-                                android:textColor="@color/nui_apagado"
-                                android:textSize="10.5sp" />
-                        </LinearLayout>
-
-                        <ImageView
-                            android:id="@+id/ivChevronAccesoDirecto"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_marginStart="6dp"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_nui_chevron_der"
-                            app:tint="@color/nui_acento" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-            </LinearLayout>
-
         </LinearLayout>
-    </ScrollView>
+
+    </LinearLayout>
 
     <!-- Animación de la ola al regresar al menú principal por agitación -->
     <com.example.nuietsiit.activities.main.WaveView

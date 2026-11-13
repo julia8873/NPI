@@ -8,8 +8,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,12 +23,13 @@ import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
 
 public class BuscadorProfesores extends BaseActivity {
 
-    private ScrollView scrollGrados;
+    private LinearLayout scrollGrados;
     private LinearLayout layoutRuletaCursos;
     private ScrollView scrollResultados;
     private LinearLayout contenedorBotonesGrados;
@@ -64,9 +65,7 @@ public class BuscadorProfesores extends BaseActivity {
         etBuscadorRapido = findViewById(R.id.etBuscadorRapido);
         ruletaCursosView = findViewById(R.id.ruletaCursosView);
 
-        ruletaCursosView.setOnCursoSelectedListener(curso -> {
-            mostrarResultadosPorRuleta(curso);
-        });
+        ruletaCursosView.setOnCursoSelectedListener(this::mostrarResultadosPorRuleta);
 
         etBuscadorRapido.addTextChangedListener(new TextWatcher() {
             @Override
@@ -120,39 +119,64 @@ public class BuscadorProfesores extends BaseActivity {
         Cursor cursor = db.rawQuery("SELECT idGrado, nombreGrado FROM GRADO WHERE idGrado > 0", null);
 
         if (cursor.moveToFirst()) {
+            int total = cursor.getCount();
+            int index = 0;
             do {
                 int idGrado = cursor.getInt(0);
                 String nombreGrado = cursor.getString(1);
+                boolean esUltimo = (index == total - 1);
 
-                View tarjeta = crearTarjetaGrado(idGrado, nombreGrado);
+                View tarjeta = crearTarjetaGrado(idGrado, nombreGrado, esUltimo);
                 contenedorBotonesGrados.addView(tarjeta);
-
+                index++;
             } while (cursor.moveToNext());
         }
         cursor.close();
     }
 
-    private View crearTarjetaGrado(int idGrado, String nombreGrado) {
+    private View crearTarjetaGrado(int idGrado, String nombreGrado, boolean esUltimo) {
+        float density = getResources().getDisplayMetrics().density;
+
+        MaterialCardView card = new MaterialCardView(this);
+        card.setRadius(14 * density);
+        card.setCardElevation(2 * density);
+        card.setStrokeWidth((int) density);
+        card.setStrokeColor(Color.parseColor("#FFE0B2"));
+
+        LinearLayout.LayoutParams paramsCard = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f // Cada grado ocupa exactamente la misma fracción del alto sin scroll
+        );
+        paramsCard.setMargins(0, 0, 0, esUltimo ? 0 : (int) (10 * density));
+        card.setLayoutParams(paramsCard);
+
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout.LayoutParams paramsTarjeta = new LinearLayout.LayoutParams(
+        tarjeta.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        paramsTarjeta.setMargins(0, 0, 0, 80);
-        tarjeta.setLayoutParams(paramsTarjeta);
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
 
-        Button btnGrado = new Button(this);
-        btnGrado.setText(nombreGrado);
-        btnGrado.setAllCaps(false);
-        btnGrado.setTextSize(16f);
-        btnGrado.setBackgroundColor(Color.parseColor("#FF9800"));
-        btnGrado.setTextColor(Color.WHITE);
+        // Cabecera compacta del grado
+        TextView tvGrado = new TextView(this);
+        tvGrado.setText(nombreGrado);
+        tvGrado.setTextSize(14f);
+        tvGrado.setTypeface(null, Typeface.BOLD);
+        tvGrado.setGravity(Gravity.CENTER);
+        tvGrado.setMaxLines(1);
+        tvGrado.setBackgroundColor(Color.parseColor("#FF9800"));
+        tvGrado.setTextColor(Color.WHITE);
+        int padV = (int) (7 * density);
+        int padH = (int) (10 * density);
+        tvGrado.setPadding(padH, padV, padH, padV);
 
+        // Imagen adaptable que llena el resto de la tarjeta
         ImageView ivPortada = new ImageView(this);
         LinearLayout.LayoutParams paramsImg = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 450
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f
         );
         ivPortada.setLayoutParams(paramsImg);
         ivPortada.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -165,14 +189,13 @@ public class BuscadorProfesores extends BaseActivity {
             ivPortada.setBackgroundColor(Color.parseColor("#EEEEEE"));
         }
 
-        tarjeta.addView(btnGrado);
+        tarjeta.addView(tvGrado);
         tarjeta.addView(ivPortada);
+        card.addView(tarjeta);
 
-        View.OnClickListener clickListener = v -> prepararRuletaParaGrado(idGrado, nombreGrado);
-        btnGrado.setOnClickListener(clickListener);
-        ivPortada.setOnClickListener(clickListener);
+        card.setOnClickListener(v -> prepararRuletaParaGrado(idGrado, nombreGrado));
 
-        return tarjeta;
+        return card;
     }
 
     private void prepararRuletaParaGrado(int idGrado, String nombreGrado) {

@@ -162,7 +162,7 @@
 
     <!-- Calendario & Eventos -->
     <string name="eventos_para_hoy">Today\'s events</string>
-    <string name="anadir_evento">+ Add</string>
+    <string name="anadir_evento">Add</string>
     <string name="no_hay_actividades_fecha">No activities or assignments scheduled for this date.</string>
     <string name="tipo_evento">Event type:</string>
     <string name="titulo_examen_entrega_hint">Exam or assignment title</string>
