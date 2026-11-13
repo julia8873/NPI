@@ -2,6 +2,7 @@ package com.example.nuietsiit.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -13,10 +14,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.os.LocaleListCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
@@ -26,6 +30,8 @@ import com.example.nuietsiit.activities.main.MenuPrincipal;
 import com.example.nuietsiit.activities.main.ShakeDetector;
 import com.example.nuietsiit.activities.main.WaveView;
 import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
+import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorBocaAbajo;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
@@ -44,6 +50,38 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+        // 1. Determinar cuál es el idioma que debe aplicarse (prioridad: BD > SharedPreferences > "es")
+        String idiomaAplica = "es";
+
+        SharedPreferences prefsSesion = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        String correo = prefsSesion.getString("CORREO", null);
+
+        if (correo != null && !correo.isEmpty()) {
+            DBHelper db = DBHelper.getInstance(this);
+            UsuariosDB usuariosDB = new UsuariosDB(db);
+            String idiomaDb = usuariosDB.obtenerCodigoIdiomaUsuario(correo);
+            if (idiomaDb != null && !idiomaDb.isEmpty()) {
+                idiomaAplica = idiomaDb;
+            }
+        } else {
+            // Si no hay sesión, leemos el idioma guardado globalmente en las preferencias
+            SharedPreferences prefsConfig = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+            idiomaAplica = prefsConfig.getString("CODIGO_IDIOMA", "es");
+        }
+
+        // 2. Comprobar si el idioma activo en la app YA ES el que corresponde
+        LocaleListCompat localesActuales = AppCompatDelegate.getApplicationLocales();
+
+        boolean necesitaCambiar = localesActuales.isEmpty()
+                || localesActuales.get(0) == null
+                || !idiomaAplica.equals(localesActuales.get(0).getLanguage());
+
+        // 3. Aplicar solo si realmente difiere (evita bucles infinitos de recreación de pantalla)
+        if (necesitaCambiar) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(idiomaAplica));
+        }
+
         super.onCreate(savedInstanceState);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -183,6 +221,7 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
+        aplicarMargenesSistema();
         configurarCabeceraUnificada(null);
 
         if (!(this instanceof MenuPrincipal) && !(this instanceof Login) && !(this instanceof SignUp)) {
@@ -270,7 +309,7 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
         boton.setColorFilter(getColor(R.color.nui_tinta));
         boton.setBackgroundResource(R.drawable.bg_circulo_blanco_volver);
         boton.setPadding(lado / 5, lado / 5, lado / 5, lado / 5);
-        boton.setContentDescription("Repetir el tutorial de esta pantalla");
+        boton.setContentDescription(getString(R.string.base_desc_repetir_tutorial));
         boton.setOnClickListener(v -> {
             v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             Tutorial t = tutorialParaAyuda();
@@ -324,5 +363,17 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
             mDetectorBocaAbajo.parar();
         }
         super.onPause();
+    }
+
+    private void aplicarMargenesSistema() {
+        if (this instanceof MenuPrincipal) return;
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

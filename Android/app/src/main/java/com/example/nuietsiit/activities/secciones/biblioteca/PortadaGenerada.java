@@ -55,6 +55,7 @@ public class PortadaGenerada extends Drawable {
         int lomo = r.width() / 12;
         int margen = r.width() / 10;
         int ancho = r.width() - lomo - 2 * margen;
+
         if (ancho <= 0) {
             bloqueTitulo = null;
             bloqueAutor = null;

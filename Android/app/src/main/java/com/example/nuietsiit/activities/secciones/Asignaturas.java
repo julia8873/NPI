@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -23,6 +24,10 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
 import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,11 +68,11 @@ public class Asignaturas extends BaseActivity {
             return horaInicio.compareTo(slotInicio) <= 0 && horaFin.compareTo(slotInicio) > 0;
         }
 
-        String textoCelda() {
+        String textoCelda(Context ctx) {
             String nombreAbreviado = nombreAsignatura.length() > 15
                     ? nombreAsignatura.substring(0, 15) + "..."
                     : nombreAsignatura;
-            return nombreAbreviado + "\n" + horaInicio + " - " + horaFin + "\n(" + tipoSesion + " " + grupo + ")";
+            return ctx.getString(R.string.asig_celda_horario_fmt, nombreAbreviado, horaInicio, horaFin, tipoSesion, grupo);
         }
     }
 
@@ -75,6 +80,7 @@ public class Asignaturas extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.asignaturas);
+        aplicarMargenesSistema();
 
         BD = DBHelper.getInstance(this);
 
@@ -128,12 +134,12 @@ public class Asignaturas extends BaseActivity {
         List<SesionHorarioInfo> sesiones = obtenerSesionesDesdeBD();
 
         // 2. Crear cabecera
-        String[] dias = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+        String[] dias = getResources().getStringArray(R.array.asig_cabecera_horario);
         TableRow rowCabecera = new TableRow(this);
         rowCabecera.setBackgroundColor(Color.parseColor("#E0E0E0"));
 
-        for (String dia : dias) {
-            TextView tv = crearCelda(dia, true, dia.equals("Hora"), null);
+        for (int i = 0; i < dias.length; i++) {
+            TextView tv = crearCelda(dias[i], true, i == 0, null);
             rowCabecera.addView(tv);
         }
         tablaHorario.addView(rowCabecera);
@@ -165,7 +171,7 @@ public class Asignaturas extends BaseActivity {
                 }
 
                 if (encontrada != null) {
-                    row.addView(crearCelda(encontrada.textoCelda(), false, false, encontrada.codigoAsignatura));
+                    row.addView(crearCelda(encontrada.textoCelda(this), false, false, encontrada.codigoAsignatura));
                 } else {
                     row.addView(crearCelda("---", false, false, null));
                 }
@@ -234,5 +240,16 @@ public class Asignaturas extends BaseActivity {
             }
         }
         return tv;
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

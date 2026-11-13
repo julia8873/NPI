@@ -29,7 +29,7 @@ public class GravedadBalda implements SensorEventListener, Choreographer.FrameCa
     private static final float GIRO_MAX = 5f;           // grados
     private static final float DESLIZ_MAX_DP = 2f;      // lo que resbala el libro hacia el lado bajo
     private static final float PLANO_Z = 9.0f;          // gravedad en Z por encima de esto = móvil sobre la mesa
-    private static final float CONTRA_PARED = 0.35f; // el libro pegado al lateral apenas puede inclinarse
+    private static final float CONTRA_PARED = 0.35f;    // el libro pegado al lateral apenas puede inclinarse
     private static final float RIGIDEZ = 140f;          // muelle (1/s²)
     private static final float AMORTIGUAMIENTO = 0.3f;  // < 1: rebota un poco antes de quedarse quieto
     private static final float FILTRO = 0.85f;          // paso bajo si solo hay acelerómetro
@@ -179,7 +179,7 @@ public class GravedadBalda implements SensorEventListener, Choreographer.FrameCa
     @Override
     public void onSensorChanged(SensorEvent event) {
         float x = event.values[0];
-        if (filtrar && !primeraLectura) x = FILTRO * gx + (1 - FILTRO) * x;
+        if (filtrar && !primeraLectura) x = FILTRO * gx + (1f - FILTRO) * x;
         primeraLectura = false;
         gx = x;
 

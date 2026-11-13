@@ -36,7 +36,7 @@
                 android:layout_height="44dp"
                 android:layout_marginEnd="12dp"
                 android:background="@drawable/bg_circulo_blanco_volver"
-                android:contentDescription="Volver al menú principal"
+                android:contentDescription="@string/volver_menu_principal"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:padding="12dp"
                 android:scaleType="fitCenter"
@@ -49,7 +49,7 @@
                 android:layout_weight="1"
                 android:letterSpacing="-0.02"
                 android:maxLines="1"
-                android:text="Comedores"
+                android:text="@string/seccion_comedores"
                 android:textColor="@color/nui_tinta"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -61,7 +61,7 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/bg_nui_chat"
                 android:clickable="true"
-                android:contentDescription="Abrir asistente"
+                android:contentDescription="@string/abrir_asistente"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center_vertical"
@@ -80,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:text="Chat"
+                    android:text="@string/chat"
                     android:textColor="@android:color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -92,7 +92,7 @@
                 android:layout_height="40dp"
                 android:background="@drawable/bg_nui_circulo_suave"
                 android:clickable="true"
-                android:contentDescription="Perfil"
+                android:contentDescription="@string/perfil"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
@@ -160,7 +160,7 @@
                             android:background="@drawable/bg_nui_etiqueta"
                             android:paddingHorizontal="7dp"
                             android:paddingVertical="2dp"
-                            android:text="📍 COMEDOR MÁS CERCANO"
+                            android:text="@string/tag_comedor_cercano"
                             android:textColor="@color/nui_acento"
                             android:textSize="9.5sp"
                             android:textStyle="bold" />
@@ -173,7 +173,7 @@
                         android:layout_marginTop="2dp"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:text="¡Tu comedor más cercano!\nComedor Aynadamar"
+                        android:text="@string/mensaje_comedor_cercano"
                         android:textColor="@color/nui_tinta"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -209,7 +209,7 @@
                 app:strokeColor="#FFE3D1"
                 app:strokeWidth="1dp"
                 android:paddingHorizontal="4dp"
-                android:text="🕒 Horario"
+                android:text="@string/btn_horario"
                 android:textColor="@color/nui_tinta"
                 android:textSize="11.5sp"
                 android:textStyle="bold" />
@@ -226,7 +226,7 @@
                 app:strokeColor="#FFE3D1"
                 app:strokeWidth="1dp"
                 android:paddingHorizontal="4dp"
-                android:text="💰 Precios"
+                android:text="@string/btn_precios"
                 android:textColor="@color/nui_tinta"
                 android:textSize="11.5sp"
                 android:textStyle="bold" />
@@ -240,11 +240,27 @@
                 android:backgroundTint="#FF7A2F"
                 app:cornerRadius="12dp"
                 android:paddingHorizontal="4dp"
-                android:text="🥩 Menú ▾"
+                android:text="@string/btn_tipo_menu"
                 android:textColor="@android:color/white"
                 android:textSize="11.5sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerEnMapa"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/nui_suave"
+            app:cornerRadius="12dp"
+            app:strokeColor="#FFE3D1"
+            app:strokeWidth="1dp"
+            android:text="@string/btn_ver_en_mapa"
+            android:textColor="@color/nui_tinta"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <!-- 4. CARTEL DEL MENÚ CON LA FOTO DE FONDO CONSERVADA -->
         <RelativeLayout
@@ -300,7 +316,7 @@
                             android:translationX="-4dp"
                             android:fontFamily="serif"
                             android:letterSpacing="0.04"
-                            android:text="Día"
+                            android:text="@string/dia_default"
                             android:textColor="@android:color/white"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -338,7 +354,7 @@
                                     android:layout_marginStart="8dp"
                                     android:fontFamily="serif"
                                     android:letterSpacing="0.06"
-                                    android:text="PRIMER PLATO"
+                                    android:text="@string/primer_plato_titulo"
                                     android:textColor="#FFA726"
                                     android:textSize="13sp"
                                     android:textStyle="bold" />
@@ -360,7 +376,7 @@
                                 android:layout_marginStart="30dp"
                                 android:fontFamily="serif"
                                 android:lineSpacingExtra="2dp"
-                                android:text="Primer plato"
+                                android:text="@string/primer_plato_default"
                                 android:textColor="@android:color/white"
                                 android:textSize="14.5sp" />
                         </LinearLayout>
@@ -398,7 +414,7 @@
                                     android:layout_marginStart="8dp"
                                     android:fontFamily="serif"
                                     android:letterSpacing="0.06"
-                                    android:text="SEGUNDO PLATO"
+                                    android:text="@string/segundo_plato_titulo"
                                     android:textColor="#FFA726"
                                     android:textSize="13sp"
                                     android:textStyle="bold" />
@@ -420,7 +436,7 @@
                                 android:layout_marginStart="30dp"
                                 android:fontFamily="serif"
                                 android:lineSpacingExtra="2dp"
-                                android:text="Segundo plato"
+                                android:text="@string/segundo_plato_default"
                                 android:textColor="@android:color/white"
                                 android:textSize="14.5sp" />
                         </LinearLayout>
@@ -458,7 +474,7 @@
                                     android:layout_marginStart="8dp"
                                     android:fontFamily="serif"
                                     android:letterSpacing="0.06"
-                                    android:text="POSTRE"
+                                    android:text="@string/postre_titulo"
                                     android:textColor="#FFA726"
                                     android:textSize="13sp"
                                     android:textStyle="bold" />
@@ -480,7 +496,7 @@
                                 android:layout_marginStart="30dp"
                                 android:fontFamily="serif"
                                 android:lineSpacingExtra="2dp"
-                                android:text="Postre"
+                                android:text="@string/postre_default"
                                 android:textColor="@android:color/white"
                                 android:textSize="14.5sp" />
                         </LinearLayout>
@@ -500,7 +516,7 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginStart="90dp"
                 android:background="@drawable/boton_circular"
-                android:contentDescription="Día anterior"
+                android:contentDescription="@string/dia_anterior_desc"
                 android:elevation="10dp"
                 android:padding="7dp"
                 android:scaleType="fitCenter"
@@ -518,7 +534,7 @@
                 android:layout_marginBottom="10dp"
                 android:layout_marginEnd="90dp"
                 android:background="@drawable/boton_circular"
-                android:contentDescription="Día siguiente"
+                android:contentDescription="@string/dia_siguiente_desc"
                 android:elevation="10dp"
                 android:padding="7dp"
                 android:scaleType="fitCenter"
@@ -541,7 +557,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:letterSpacing="0.06"
-                android:text="📅 SEMANA: 01/11/2026"
+                android:text="@string/titulo_semana_default"
                 android:textColor="@color/nui_apagado"
                 android:textSize="10.5sp"
                 android:textStyle="bold" />
@@ -565,7 +581,7 @@
                 android:background="@drawable/circulo_dia_deshabilitado"
                 android:gravity="center"
                 android:paddingHorizontal="2dp"
-                android:text="Lun"
+                android:text="@string/dia_lun"
                 android:textColor="#AAAAAA"
                 android:textStyle="bold"
                 android:textSize="11.5sp"
@@ -584,7 +600,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:paddingHorizontal="2dp"
-                android:text="Mar"
+                android:text="@string/dia_mar"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:textSize="11.5sp"
@@ -603,7 +619,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:paddingHorizontal="2dp"
-                android:text="Mié"
+                android:text="@string/dia_mie"
                 android:textColor="#FF8C42"
                 android:textStyle="bold"
                 android:textSize="11.5sp"
@@ -622,7 +638,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:paddingHorizontal="2dp"
-                android:text="Jue"
+                android:text="@string/dia_jue"
                 android:textColor="#FF8C42"
                 android:textStyle="bold"
                 android:textSize="11.5sp"
@@ -640,7 +656,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:paddingHorizontal="2dp"
-                android:text="Vie"
+                android:text="@string/dia_vie"
                 android:textColor="#FF8C42"
                 android:textStyle="bold"
                 android:textSize="11.5sp"

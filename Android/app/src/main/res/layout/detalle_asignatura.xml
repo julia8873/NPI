@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootAsignaturas"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F8FAFC"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
@@ -22,7 +24,7 @@
             android:layout_height="44dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_circulo_blanco_volver"
-            android:contentDescription="Volver al menú principal"
+            android:contentDescription="@string/volver_menu_principal"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
             android:scaleType="fitCenter"
@@ -36,7 +38,7 @@
             android:layout_weight="1"
             android:letterSpacing="-0.02"
             android:maxLines="1"
-            android:text="Ficha Asignatura"
+            android:text="@string/ficha_asignatura"
             android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -48,7 +50,7 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_nui_chat"
             android:clickable="true"
-            android:contentDescription="Abrir asistente"
+            android:contentDescription="@string/abrir_asistente"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
@@ -67,7 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="Chat"
+                android:text="@string/chat"
                 android:textColor="@android:color/white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -79,7 +81,7 @@
             android:layout_height="40dp"
             android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="Perfil"
+            android:contentDescription="@string/perfil"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
@@ -104,7 +106,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="Nombre de la Asignatura"
+                android:text="@string/nombre_asignatura_default"
                 android:textColor="#333333"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -114,7 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:text="Código: N/A"
+                android:text="@string/codigo_default"
                 android:textColor="#666666"
                 android:textSize="15sp" />
 
@@ -137,7 +139,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Créditos ECTS"
+                        android:text="@string/creditos_ects"
                         android:textColor="#666666"
                         android:textSize="14sp" />
 
@@ -167,7 +169,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cuatrimestre"
+                        android:text="@string/cuatrimestre"
                         android:textColor="#666666"
                         android:textSize="14sp" />
 
@@ -187,7 +189,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Horarios de Clase e Impartición:"
+                android:text="@string/horarios_clase_titulo"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -205,7 +207,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Profesorado Impartidor:"
+                android:text="@string/profesorado_impartidor_titulo"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -224,7 +226,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:backgroundTint="#FF9800"
-                android:text="Ver Guía Docente"
+                android:text="@string/ver_guia_docente"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />

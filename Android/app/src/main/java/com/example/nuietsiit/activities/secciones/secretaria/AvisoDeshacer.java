@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ public final class AvisoDeshacer {
 
     public static Snackbar mostrar(@NonNull View ancla, String etiqueta, String texto, int duracionMs,
                                    @NonNull Runnable deshacer) {
+        Context ctx = ancla.getContext();
         Snackbar aviso = Snackbar.make(ancla, "", duracionMs);
         ViewGroup caja = (ViewGroup) aviso.getView();
         // fuera el aspecto de Material (caja negra con sombra suave): solo queda nuestro papel
@@ -33,7 +35,7 @@ public final class AvisoDeshacer {
         caja.setPadding(0, 0, 0, 0);
         caja.getChildAt(0).setVisibility(View.GONE);
 
-        View papel = LayoutInflater.from(ancla.getContext()).inflate(R.layout.aviso_deshacer, caja, false);
+        View papel = LayoutInflater.from(ctx).inflate(R.layout.aviso_deshacer, caja, false);
         ((TextView) papel.findViewById(R.id.tvAvisoEtiqueta)).setText(etiqueta);
         ((TextView) papel.findViewById(R.id.tvAvisoTexto)).setText(texto);
         MaterialButton boton = papel.findViewById(R.id.btnAvisoDeshacer);
@@ -55,7 +57,7 @@ public final class AvisoDeshacer {
             public void run() {
                 long quedan = (fin - SystemClock.uptimeMillis() + 999) / 1000;
                 if (quedan <= 0 || !aviso.isShownOrQueued()) return;
-                boton.setText("Deshacer · " + quedan);
+                boton.setText(ctx.getString(R.string.sec_aviso_deshacer_fmt, quedan));
                 boton.postDelayed(this, 250);
             }
         };

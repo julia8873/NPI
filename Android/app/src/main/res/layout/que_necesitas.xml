@@ -94,7 +94,7 @@
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
         android:layout_marginTop="@dimen/nui_espacio_s"
         android:minHeight="56dp"
-        android:text="Ver qué necesito y empezar"
+        android:text="@string/ver_que_necesito_y_empezar"
         android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
@@ -103,7 +103,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
-        android:text="← Volver a la pregunta anterior"
+        android:text="@string/volver_pregunta_anterior"
         android:textColor="@color/nui_apagado" />
 
     <!-- Zócalo: filete de oro + alicatado -->

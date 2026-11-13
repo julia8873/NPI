@@ -36,7 +36,7 @@
                 android:layout_width="42dp"
                 android:layout_height="42dp"
                 android:background="@drawable/bg_circulo_blanco_volver"
-                android:contentDescription="Volver"
+                android:contentDescription="@string/volver_menu_principal"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:padding="11dp"
                 android:scaleType="fitCenter"
@@ -50,7 +50,7 @@
                 android:layout_weight="1"
                 android:letterSpacing="-0.02"
                 android:maxLines="1"
-                android:text="Ajustes"
+                android:text="@string/ajustes"
                 android:textColor="#1A1A1A"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -61,7 +61,7 @@
                 android:layout_height="38dp"
                 android:background="@drawable/bg_nui_chat"
                 android:clickable="true"
-                android:contentDescription="Abrir asistente"
+                android:contentDescription="@string/abrir_asistente"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center_vertical"
@@ -80,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:text="Chat"
+                    android:text="@string/chat"
                     android:textColor="@android:color/white"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -125,7 +125,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:letterSpacing="-0.01"
-                    android:text="Tu perfil"
+                    android:text="@string/tu_perfil"
                     android:textColor="#1A1A1A"
                     android:textSize="15.5sp"
                     android:textStyle="bold" />
@@ -137,7 +137,7 @@
                     android:layout_marginTop="2dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="tu.correo@correo.ugr.es"
+                    android:text="@string/hint_correo"
                     android:textColor="#666666"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -157,7 +157,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
             android:letterSpacing="0.08"
-            android:text="PREFERENCIAS"
+            android:text="@string/preferencias"
             android:textColor="#666666"
             android:textSize="10.5sp"
             android:textStyle="bold" />
@@ -201,7 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Cuenta"
+                    android:text="@string/cuenta"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -240,7 +240,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Notificaciones"
+                    android:text="@string/notificaciones"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -287,7 +287,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Apariencia"
+                    android:text="@string/apariencia"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -326,7 +326,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Idioma"
+                    android:text="@string/idioma"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -373,7 +373,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Privacidad"
+                    android:text="@string/privacidad"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -412,7 +412,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Ayuda"
+                    android:text="@string/ayuda"
                     android:textColor="#1A1A1A"
                     android:textSize="13.5sp"
                     android:textStyle="bold" />
@@ -425,7 +425,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="6dp"
             android:letterSpacing="0.08"
-            android:text="AJUSTES RÁPIDOS"
+            android:text="@string/ajustes_rapidos"
             android:textColor="#666666"
             android:textSize="10.5sp"
             android:textStyle="bold" />
@@ -450,7 +450,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Avisos de clase"
+                    android:text="@string/avisos_de_clase"
                     android:textColor="#1A1A1A"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -479,7 +479,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Vegetariano"
+                    android:text="@string/vegetariano"
                     android:textColor="#1A1A1A"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -524,7 +524,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="14dp"
-                android:text="Cerrar sesión"
+                android:text="@string/cerrar_sesion"
                 android:textColor="#991B1B"
                 android:textSize="15sp"
                 android:textStyle="bold" />

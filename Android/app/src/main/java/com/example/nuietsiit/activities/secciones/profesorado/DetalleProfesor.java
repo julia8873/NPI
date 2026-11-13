@@ -15,6 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -28,6 +31,7 @@ import com.example.nuietsiit.util.RecienteUtil;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Locale;
 
 public class DetalleProfesor extends BaseActivity {
 
@@ -76,14 +80,14 @@ public class DetalleProfesor extends BaseActivity {
             cargarClases();
             cargarTutorias();
         } else {
-            Toast.makeText(this, "Profesor no encontrado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.prof_no_encontrado, Toast.LENGTH_SHORT).show();
             finish();
         }
 
         btnEmail.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_SENDTO);
             intent.setData(Uri.parse("mailto:" + correoProfesor));
-            startActivity(Intent.createChooser(intent, "Enviar correo a " + correoProfesor));
+            startActivity(Intent.createChooser(intent, getString(R.string.prof_enviar_correo_fmt, correoProfesor)));
         });
 
         btnWeb.setOnClickListener(v -> {
@@ -91,7 +95,7 @@ public class DetalleProfesor extends BaseActivity {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(enlaceWebDocente));
                 startActivity(browserIntent);
             } else {
-                Toast.makeText(this, "Página web docente no disponible", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.prof_web_no_disponible, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -106,7 +110,15 @@ public class DetalleProfesor extends BaseActivity {
             tvCorreoProfesor.setText(correoProfesor);
             cursor.close();
 
-            RecienteUtil.guardar(this, DetalleProfesor.class, "Profesor: " + nombre, "Profesorado ETSIIT", "CORREO_PROFESOR", correoProfesor, 3);
+            RecienteUtil.guardar(
+                    this,
+                    DetalleProfesor.class,
+                    getString(R.string.prof_reciente_titulo_fmt, nombre),
+                    getString(R.string.prof_reciente_subtitulo),
+                    "CORREO_PROFESOR",
+                    correoProfesor,
+                    3
+            );
         }
     }
 
@@ -119,7 +131,7 @@ public class DetalleProfesor extends BaseActivity {
             cursor.close();
         } else {
             if (cursor != null) cursor.close();
-            tvDespacho.setText("Sin despacho asignado en la base de datos.");
+            tvDespacho.setText(R.string.prof_sin_despacho);
         }
     }
 
@@ -138,7 +150,15 @@ public class DetalleProfesor extends BaseActivity {
                 String grupo = cursor.getString(cursor.getColumnIndexOrThrow("grupo"));
 
                 String diaNombre = obtenerNombreDia(diaSemana);
-                String textoClase = "📚 " + nombreAsignatura + " (" + tipoSesion + " " + grupo + ")\n⏰ " + diaNombre + " de " + horaInicio + " a " + horaFin + " (Toca para ver asignatura)";
+                String textoClase = getString(
+                        R.string.prof_clase_item_fmt,
+                        nombreAsignatura,
+                        tipoSesion,
+                        grupo,
+                        diaNombre,
+                        horaInicio,
+                        horaFin
+                );
 
                 TextView tvClase = new TextView(this);
                 tvClase.setText(textoClase);
@@ -167,7 +187,7 @@ public class DetalleProfesor extends BaseActivity {
         } else {
             if (cursor != null) cursor.close();
             TextView tvVacio = new TextView(this);
-            tvVacio.setText("No hay clases registradas para este profesor.");
+            tvVacio.setText(R.string.prof_sin_clases);
             tvVacio.setTextSize(14f);
             tvVacio.setTextColor(Color.GRAY);
             contenedorClases.addView(tvVacio);
@@ -194,7 +214,7 @@ public class DetalleProfesor extends BaseActivity {
         } else {
             if (cursor != null) cursor.close();
             TextView tvVacio = new TextView(this);
-            tvVacio.setText("No hay horarios de tutoría disponibles actualmente.");
+            tvVacio.setText(R.string.prof_sin_tutorias);
             tvVacio.setTextSize(14f);
             tvVacio.setTextColor(Color.GRAY);
             contenedorTutorias.addView(tvVacio);
@@ -214,21 +234,22 @@ public class DetalleProfesor extends BaseActivity {
         tarjeta.setLayoutParams(params);
 
         String diaNombre = obtenerNombreDia(diaSemana);
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
 
         TextView tvTitulo = new TextView(this);
-        tvTitulo.setText(diaNombre + ": " + horaInicio + " - " + horaFin);
+        tvTitulo.setText(getString(R.string.prof_tutoria_horario_fmt, diaNombre, horaInicio, horaFin));
         tvTitulo.setTextSize(16f);
         tvTitulo.setTypeface(null, Typeface.BOLD);
         tvTitulo.setTextColor(Color.BLACK);
 
         TextView tvModalidad = new TextView(this);
-        tvModalidad.setText("Modalidad: " + modalidad.toUpperCase());
+        tvModalidad.setText(getString(R.string.prof_tutoria_modalidad_fmt, modalidad.toUpperCase(localeActivo)));
         tvModalidad.setTextSize(13f);
         tvModalidad.setTextColor(Color.DKGRAY);
         tvModalidad.setPadding(0, 4, 0, 12);
 
         Button btnReservar = new Button(this);
-        btnReservar.setText("Reservar Tutoría");
+        btnReservar.setText(R.string.prof_btn_reservar_tutoria);
         btnReservar.setBackgroundColor(Color.parseColor("#FF9800"));
         btnReservar.setTextColor(Color.WHITE);
 
@@ -247,12 +268,12 @@ public class DetalleProfesor extends BaseActivity {
 
         if (correoEstudiante == null || correoEstudiante.isEmpty()) {
             new AlertDialog.Builder(this)
-                    .setTitle("Sesión requerida")
-                    .setMessage("Para reservar una tutoría debes haber iniciado sesión previamente con tus credenciales. ¿Deseas iniciar sesión ahora?")
-                    .setPositiveButton("Iniciar sesión", (dialog, which) -> {
+                    .setTitle(R.string.prof_sesion_requerida_titulo)
+                    .setMessage(R.string.prof_sesion_requerida_mensaje)
+                    .setPositiveButton(R.string.prof_btn_iniciar_sesion, (dialog, which) -> {
                         startActivity(new Intent(DetalleProfesor.this, Login.class));
                     })
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton(R.string.prof_btn_cancelar, null)
                     .show();
         } else {
             mostrarDialogoConfirmarReserva(idHorario, correoEstudiante, diaSemana, horaInicio, horaFin, modalidad, enlaceOnline);
@@ -264,42 +285,50 @@ public class DetalleProfesor extends BaseActivity {
         String fechaStr = proximaFecha.toString();
 
         if (tutoriasDB.slotOcupado(idHorario, fechaStr)) {
-            Toast.makeText(this, "Esta franja ya está reservada para el día " + fechaStr, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.prof_tutoria_ocupada_fmt, fechaStr), Toast.LENGTH_LONG).show();
             return;
         }
 
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Confirmar Reserva de Tutoría");
+        builder.setTitle(R.string.prof_confirmar_reserva_titulo);
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 10);
 
         TextView tvInfo = new TextView(this);
-        tvInfo.setText("Fecha sugerida: " + fechaStr + "\nHorario: " + horaInicio + " - " + horaFin + "\nModalidad: " + modalidad.toUpperCase());
+        tvInfo.setText(getString(
+                R.string.prof_confirmar_reserva_info_fmt,
+                fechaStr,
+                horaInicio,
+                horaFin,
+                modalidad.toUpperCase(localeActivo)
+        ));
         tvInfo.setTextSize(14f);
         tvInfo.setTextColor(Color.BLACK);
         layout.addView(tvInfo);
 
         EditText etMotivo = new EditText(this);
-        etMotivo.setHint("Escribe el motivo o asunto de la tutoría (opcional)");
+        etMotivo.setHint(R.string.prof_motivo_tutoria_hint);
         etMotivo.setTextSize(14f);
         layout.addView(etMotivo);
 
         builder.setView(layout);
 
-        builder.setPositiveButton("Confirmar Reserva", (dialog, which) -> {
+        builder.setPositiveButton(R.string.prof_btn_confirmar_reserva, (dialog, which) -> {
             String motivo = etMotivo.getText().toString().trim();
             long res = tutoriasDB.insertarReserva(idHorario, correoEstudiante, fechaStr, motivo, enlaceOnline);
             if (res != -1) {
-                Toast.makeText(this, "¡Reserva realizada con éxito!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.prof_reserva_exito, Toast.LENGTH_LONG).show();
                 finish();
             } else {
-                Toast.makeText(this, "Error al guardar la reserva.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.prof_reserva_error, Toast.LENGTH_SHORT).show();
             }
         });
 
-        builder.setNegativeButton("Cancelar", null);
+        builder.setNegativeButton(R.string.prof_btn_cancelar, null);
         builder.show();
     }
 
@@ -313,15 +342,10 @@ public class DetalleProfesor extends BaseActivity {
     }
 
     private String obtenerNombreDia(int diaSemana) {
-        switch (diaSemana) {
-            case 1: return "Lunes";
-            case 2: return "Martes";
-            case 3: return "Miércoles";
-            case 4: return "Jueves";
-            case 5: return "Viernes";
-            case 6: return "Sábado";
-            case 7: return "Domingo";
-            default: return "Día " + diaSemana;
+        String[] dias = getResources().getStringArray(R.array.prof_dias_semana);
+        if (diaSemana >= 1 && diaSemana <= dias.length) {
+            return dias[diaSemana - 1];
         }
+        return getString(R.string.prof_dia_fallback_fmt, diaSemana);
     }
 }

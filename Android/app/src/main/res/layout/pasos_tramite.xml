@@ -48,7 +48,7 @@
             style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Paso anterior"
+            android:contentDescription="@string/paso_anterior"
             android:text="◀" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/nui_espacio_m"
             android:layout_weight="1"
-            android:text="Inclinar para pasar"
+            android:text="@string/inclinar_para_pasar"
             android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
         <com.google.android.material.button.MaterialButton
@@ -65,7 +65,7 @@
             style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Paso siguiente"
+            android:contentDescription="@string/paso_siguiente"
             android:text="▶" />
     </LinearLayout>
 

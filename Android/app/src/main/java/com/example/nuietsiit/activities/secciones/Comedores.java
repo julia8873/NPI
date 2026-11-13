@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,7 +27,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -38,8 +36,9 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
-import com.example.nuietsiit.data.Comedores.ComedoresDB;
+import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.Comedores.Comedor;
+import com.example.nuietsiit.data.Comedores.ComedoresDB;
 import com.example.nuietsiit.data.Comedores.MenuInfo;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorInclinacion;
@@ -115,11 +114,8 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Iniciar con la fecha del 10 de noviembre de 2026
+        // Iniciar con la fecha actual del sistema
         calendarioSeleccionado = Calendar.getInstance();
-        calendarioSeleccionado.set(Calendar.YEAR, 2026);
-        calendarioSeleccionado.set(Calendar.MONTH, Calendar.NOVEMBER);
-        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 10);
         limpiarHora(calendarioSeleccionado);
 
         // Enlazar vistas del layout XML
@@ -159,12 +155,16 @@ public class Comedores extends BaseActivity {
 
         TextView tvTituloSeleccionDia = findViewById(R.id.tvTituloSeleccionDia);
         if (tvTituloSeleccionDia != null) {
-            SimpleDateFormat sdfSemana = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat sdfSemana = new SimpleDateFormat("dd/MM/yyyy", Locale.ROOT);
             Calendar inicio = (Calendar) calendarioSeleccionado.clone();
             inicio.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
             Calendar fin = (Calendar) calendarioSeleccionado.clone();
             fin.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
-            tvTituloSeleccionDia.setText("📅 SEMANA: " + sdfSemana.format(inicio.getTime()) + " - " + sdfSemana.format(fin.getTime()));
+            tvTituloSeleccionDia.setText(getString(
+                    R.string.com_semana_fmt,
+                    sdfSemana.format(inicio.getTime()),
+                    sdfSemana.format(fin.getTime())
+            ));
         }
 
         btnHorario.setOnClickListener(v -> {
@@ -182,15 +182,24 @@ public class Comedores extends BaseActivity {
             mostrarBottomSheetTipoMenu();
         });
 
+        View btnVerEnMapa = findViewById(R.id.btnVerEnMapa);
+        if (btnVerEnMapa != null) {
+            btnVerEnMapa.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                Intent intent = new Intent(Comedores.this, Mapa.class);
+                startActivity(intent);
+            });
+        }
+
         View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! Soy tu asistente de Comedores. Aquí puedes consultar el menú del día de la UGR, ver los horarios y cambiar entre menú normal o vegetariano.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.com_asistente_titulo)
+                        .setMessage(R.string.com_asistente_mensaje)
+                        .setPositiveButton(R.string.com_asistente_btn, null)
                         .show();
             });
         }
@@ -208,8 +217,6 @@ public class Comedores extends BaseActivity {
                 mostrarBottomSheetComedores();
             });
         }
-
-
 
         // Configurar selección directa mediante los botones de los días
         btnDiaL.setOnClickListener(v -> seleccionarDiaSemana(Calendar.MONDAY));
@@ -246,7 +253,7 @@ public class Comedores extends BaseActivity {
         });
 
         // Detector de inclinación hacia atrás: alterna entre menú normal y vegetariano
-        detectorInclinacionAtras = new DetectorInclinacionFrontal(this, () -> alternarTipoMenu());
+        detectorInclinacionAtras = new DetectorInclinacionFrontal(this, this::alternarTipoMenu);
 
         // Detector de inclinación lateral: derecha = día siguiente, izquierda = día anterior
         detectorInclinacionDias = new DetectorInclinacion(this, direccion -> {
@@ -457,10 +464,10 @@ public class Comedores extends BaseActivity {
     private void actualizarBotonTipoMenu() {
         if (btnTipoMenu == null) return;
         if (esModoVegetariano) {
-            btnTipoMenu.setText("🌱 Menú Vegetariano ▾");
+            btnTipoMenu.setText(R.string.com_btn_menu_vegetariano);
             btnTipoMenu.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2E7D32")));
         } else {
-            btnTipoMenu.setText("🥩 Menú ▾");
+            btnTipoMenu.setText(R.string.com_btn_menu_normal);
             btnTipoMenu.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF8C42")));
         }
     }
@@ -477,13 +484,13 @@ public class Comedores extends BaseActivity {
         limpiarHora(hoy);
 
         if (temp.before(hoy)) {
-            Toast.makeText(this, "No se pueden ver días que ya han pasado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.com_toast_dia_pasado, Toast.LENGTH_SHORT).show();
             return;
         }
 
         Calendar max = obtenerFechaMaximaSemana();
         if (temp.after(max)) {
-            Toast.makeText(this, "No puedes salir de la semana actual", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.com_toast_fuera_semana, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -539,7 +546,7 @@ public class Comedores extends BaseActivity {
             btn.setBackgroundResource(R.drawable.circulo_dia_deshabilitado);
             btn.setTextColor(Color.parseColor("#AAAAAA"));
             btn.setEnabled(false);
-            btn.setOnClickListener(v -> Toast.makeText(this, "Este día ya ha pasado", Toast.LENGTH_SHORT).show());
+            btn.setOnClickListener(v -> Toast.makeText(this, R.string.com_toast_este_dia_pasado, Toast.LENGTH_SHORT).show());
         } else {
             btn.setEnabled(true);
             // Restaurar listener de selección
@@ -631,9 +638,10 @@ public class Comedores extends BaseActivity {
 
         tvComedor.setText(comedorSeleccionado.getNombreComedor());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("d 'de' MMMM", Locale.forLanguageTag("es"));
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+        SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.com_patron_dia_mes), localeActivo);
         String fechaFormateada = sdf.format(calendarioSeleccionado.getTime());
-        tvDia.setText("📅 " + fechaFormateada);
+        tvDia.setText(getString(R.string.com_horario_dia_fmt, fechaFormateada));
 
         String horario = comedoresDB.obtenerHorarioParaFecha(comedorSeleccionado.getIdComedor(), calendarioSeleccionado);
         tvDetalle.setText(horario);
@@ -679,7 +687,7 @@ public class Comedores extends BaseActivity {
             textoNombre.append(i + 1).append(". ").append(comedor.getNombreComedor());
 
             if (i == 0) {
-                textoNombre.append(" (Más cercano)");
+                textoNombre.append(getString(R.string.com_item_mas_cercano));
             }
 
             if (comedorSeleccionado != null && comedor.getIdComedor() == comedorSeleccionado.getIdComedor()) {
@@ -836,8 +844,6 @@ public class Comedores extends BaseActivity {
         double userLat = location.getLatitude();
         double userLon = location.getLongitude();
 
-
-
         calcularDistanciasYOrdenar(userLat, userLon);
     }
 
@@ -877,10 +883,10 @@ public class Comedores extends BaseActivity {
     private void mostrarComedorPrincipal(Comedor comedor) {
         boolean esElMasCercano = !listaComedores.isEmpty() && listaComedores.get(0).getIdComedor() == comedor.getIdComedor();
         if (esElMasCercano) {
-            if (tvTagComedorCercano != null) tvTagComedorCercano.setText("📍 COMEDOR MÁS CERCANO");
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText(R.string.com_tag_mas_cercano);
             tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         } else {
-            if (tvTagComedorCercano != null) tvTagComedorCercano.setText("📍 COMEDOR SELECCIONADO");
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText(R.string.com_tag_seleccionado);
             tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         }
 
@@ -902,12 +908,13 @@ public class Comedores extends BaseActivity {
                 cardMenu.setVisibility(View.VISIBLE);
             }
 
-            // Mostrar el día y mes (ej: "3 de noviembre") e indicar si es menú vegetariano
-            SimpleDateFormat sdf = new SimpleDateFormat("d 'de' MMMM", Locale.forLanguageTag("es"));
+            // Mostrar el día y mes (ej: "3 de noviembre" / "November 3")
+            Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.com_patron_dia_mes), localeActivo);
             String fechaFormateada = sdf.format(calendarioSeleccionado.getTime());
             tvDia.setText(fechaFormateada);
 
-            SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
             String fechaStr = sdfDb.format(calendarioSeleccionado.getTime());
 
             MenuInfo menuInfo = comedoresDB.obtenerMenuParaComedorYFecha(comedor.getIdComedor(), fechaStr, esModoVegetariano);

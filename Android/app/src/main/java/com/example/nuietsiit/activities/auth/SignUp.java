@@ -68,9 +68,9 @@ public class SignUp extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Bienvenido al registro! Introduce tu nombre completo, correo institucional de la UGR y una contraseña. Podrás usar esta cuenta en toda la aplicación.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.asistente_virtual_titulo)
+                        .setMessage(R.string.signup_asistente_msg)
+                        .setPositiveButton(R.string.btn_entendido, null)
                         .show();
             });
         }
@@ -111,31 +111,36 @@ public class SignUp extends BaseActivity {
 
         // Validar que ninguno de los campos esté vacío
         if (nombre.isEmpty() || correo.isEmpty() || password.isEmpty() || (etConfirmPassword != null && confirmPassword.isEmpty())) {
-            Toast.makeText(SignUp.this, "Por favor, rellena todos los datos", Toast.LENGTH_LONG).show();
+            Toast.makeText(SignUp.this, R.string.toast_rellena_datos, Toast.LENGTH_LONG).show();
             return;
         }
 
         // Validar que las contraseñas coincidan
         if (etConfirmPassword != null && !password.equals(confirmPassword)) {
-            Toast.makeText(SignUp.this, "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
+            Toast.makeText(SignUp.this, R.string.toast_passwords_no_coinciden, Toast.LENGTH_LONG).show();
             return;
         }
 
         // Comprobación de existencia del correo en la base de datos
         if (BD.existeEstudiante(correo)) {
-            Toast.makeText(SignUp.this, "Ya existe una cuenta asociada a este correo", Toast.LENGTH_LONG).show();
+            Toast.makeText(SignUp.this, R.string.toast_correo_existente, Toast.LENGTH_LONG).show();
         } else {
             // Inserción del nuevo usuario
             boolean creado = BD.insertarEstudiante(correo, nombre, password);
 
             if (creado) {
-                Toast.makeText(SignUp.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignUp.this, R.string.toast_cuenta_creada_exito, Toast.LENGTH_SHORT).show();
 
                 // Guardamos el correo en SharedPreferences para iniciar sesión automáticamente
                 SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("CORREO", correo);
                 editor.apply();
+
+                // Guardamos la preferencia de idioma por defecto en la configuración global
+                SharedPreferences prefsConfig = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+                String idiomaActual = prefsConfig.getString("CODIGO_IDIOMA", "es");
+                BD.actualizarIdiomaEstudiante(correo, idiomaActual);
 
                 // Navegación directa al Menú Principal
                 Intent intent = new Intent(SignUp.this, MenuPrincipal.class);
@@ -148,7 +153,7 @@ public class SignUp extends BaseActivity {
                 // Finaliza la pantalla de registro para evitar volver a ella pulsando el botón "Atrás"
                 finish();
             } else {
-                Toast.makeText(SignUp.this, "Error al crear la cuenta", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SignUp.this, R.string.toast_error_crear_cuenta, Toast.LENGTH_SHORT).show();
             }
         }
     }

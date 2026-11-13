@@ -13,7 +13,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
+import androidx.core.os.LocaleListCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -62,9 +64,9 @@ public class Login extends BaseActivity {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
                         .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle("Asistente Virtual ETSIIT 🤖")
-                        .setMessage("¡Hola! Para iniciar sesión introduce tu correo institucional y contraseña de la UGR. Si aún no tienes cuenta, pulsa en 'Crear cuenta nueva'.")
-                        .setPositiveButton("¡Entendido!", null)
+                        .setTitle(R.string.asistente_virtual_titulo)
+                        .setMessage(R.string.login_asistente_msg)
+                        .setPositiveButton(R.string.btn_entendido, null)
                         .show();
             });
         }
@@ -75,9 +77,9 @@ public class Login extends BaseActivity {
             tvOlvidePassword.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 new AlertDialog.Builder(this)
-                        .setTitle("Recuperar contraseña 🔑")
-                        .setMessage("Para restablecer la contraseña de tu cuenta universitaria, debes acceder al portal de gestión de cuentas de la UGR o contactar con el CSIRC (csirc@ugr.es).")
-                        .setPositiveButton("Entendido", null)
+                        .setTitle(R.string.recuperar_password_titulo)
+                        .setMessage(R.string.recuperar_password_msg)
+                        .setPositiveButton(R.string.btn_entendido, null)
                         .show();
             });
         }
@@ -125,21 +127,32 @@ public class Login extends BaseActivity {
 
         // Validar que los campos no estén vacíos
         if (correo.isEmpty() || password.isEmpty()) {
-            Toast.makeText(Login.this, "Por favor, rellena todos los datos", Toast.LENGTH_LONG).show();
+            Toast.makeText(Login.this, R.string.toast_rellena_datos, Toast.LENGTH_LONG).show();
             return;
         }
 
         // Comprobaciones contra la base de datos local
         if (!BD.existeEstudiante(correo)) {
-            Toast.makeText(Login.this, "Usuario incorrecto", Toast.LENGTH_LONG).show();
+            Toast.makeText(Login.this, R.string.toast_usuario_incorrecto, Toast.LENGTH_LONG).show();
         } else if (!BD.autenticarEstudiante(correo, password)) {
-            Toast.makeText(Login.this, "Contraseña incorrecta", Toast.LENGTH_LONG).show();
+            Toast.makeText(Login.this, R.string.toast_password_incorrecta, Toast.LENGTH_LONG).show();
         } else {
             // Guardamos el correo en SharedPreferences
             SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("CORREO", correo);
             editor.apply();
+
+            String idiomaUsuario = BD.obtenerCodigoIdiomaUsuario(correo);
+            if (idiomaUsuario != null && !idiomaUsuario.isEmpty()) {
+                getSharedPreferences("ConfiguracionApp", MODE_PRIVATE)
+                        .edit()
+                        .putString("CODIGO_IDIOMA", idiomaUsuario)
+                        .apply();
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(idiomaUsuario));
+            } else {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"));
+            }
 
             // Inicio de sesión exitoso: Navegación al Menú Principal
             Intent intent = new Intent(Login.this, MenuPrincipal.class);

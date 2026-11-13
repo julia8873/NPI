@@ -40,7 +40,7 @@
                 android:id="@+id/ivGuiaFoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Foto del camino. Toca para verla en grande"
+                android:contentDescription="@string/foto_camino_desc"
                 android:scaleType="centerCrop" />
 
             <!-- Contador "3/8" -->
@@ -72,7 +72,7 @@
                     android:id="@+id/ivGuiaFlecha"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:contentDescription="Dirección a seguir"
+                    android:contentDescription="@string/direccion_seguir"
                     android:src="@drawable/ic_flecha_guia" />
 
                 <TextView
@@ -182,7 +182,7 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:backgroundTint="@color/nui_suave"
-            android:text="▶ Simular"
+            android:text="@string/simular"
             android:textAllCaps="false"
             android:textColor="@color/nui_tinta"
             android:textStyle="bold"
@@ -197,7 +197,7 @@
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
             android:backgroundTint="@color/nui_suave"
-            android:contentDescription="Voz de la guía"
+            android:contentDescription="@string/voz_guia"
             android:insetLeft="0dp"
             android:insetRight="0dp"
             android:padding="0dp"
@@ -213,7 +213,7 @@
             android:layout_height="48dp"
             android:layout_weight="1"
             android:backgroundTint="@color/nui_tinta"
-            android:text="Terminar"
+            android:text="@string/btn_terminar"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textStyle="bold"

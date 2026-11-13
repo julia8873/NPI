@@ -8,8 +8,8 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
-import android.content.pm.PackageManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -52,13 +52,13 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.Documento;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.util.LienzoFirma;
 import com.example.nuietsiit.util.SesionUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
@@ -92,7 +92,6 @@ public class SolicitudTramite extends PantallaSecretaria {
 
     // fases: documentos fuera → carpeta cerrada (firma y sello) → sellada (lanzar)
     private static final int DOCUMENTOS = 0, FIRMA = 1, LANZAR = 2;
-    private static final String[] NOMBRES_PASO = {"Documentos", "Firma", "Sello", "Envío"};
     private static final long DURACION_SELLO = 1500;
     private static final long ESPERA_BOTON_ENVIAR = 4000;
     private static final float VELOCIDAD_LANZAR_DP = 1200; // dp/s hacia arriba
@@ -124,6 +123,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     private ActivityResultLauncher<String[]> lanzadorArchivo;
     private AlertDialog dialogo;
     private Tutorial tutorialDocumentos, tutorialFirma; // se crean al pedirlos (ver tutorialParaAyuda)
+    private String[] nombresPaso;
 
     private Vibrator vibrador;
     private ValueAnimator animSello, animTapa;
@@ -152,16 +152,21 @@ public class SolicitudTramite extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         db = new SecretariaDB(DBHelper.getInstance(this));
         tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
         if (tramite == null || !tramite.sePuedeSolicitar()) {
-            Toast.makeText(this, "Este trámite no se puede solicitar ahora", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_no_solicitable, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        getSupportActionBar().setTitle("Solicitud"); // el trámite va en la etiqueta de la carpeta
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.sol_titulo); // el trámite va en la etiqueta de la carpeta
+        }
+        nombresPaso = getResources().getStringArray(R.array.sol_nombres_paso);
         documentos = db.getDocumentos(tramite.id);
 
         correoUsuario = SesionUtil.correo(getIntent());
@@ -254,11 +259,10 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (fase == DOCUMENTOS) {
             if (tutorialDocumentos == null) {
                 tutorialDocumentos = new Tutorial(this, "solicitud_documentos", 2)
-                        .tocar(R.id.mesaScroll, "Toca un documento para hacerle una foto (o mantenlo para elegir un archivo). "
-                                + "Ahora, para practicar, te ponemos uno de prueba")
-                        .gesto(R.id.mesaScroll, Gesto.ARRASTRAR, "Arrastra el documento hacia abajo, hasta la carpeta")
+                        .tocar(R.id.mesaScroll, getString(R.string.sol_tut_docs_tocar))
+                        .gesto(R.id.mesaScroll, Gesto.ARRASTRAR, getString(R.string.sol_tut_docs_arrastrar))
                         .soloSi(this::hayDocumentosFuera)
-                        .info(R.id.carpeta, "Con todos los documentos dentro, la carpeta se cierra sola. Te metemos el resto de prueba")
+                        .info(R.id.carpeta, getString(R.string.sol_tut_docs_carpeta))
                         .alLlegar(this::completarCarpetaPractica)
                         .soloSi(() -> fase == DOCUMENTOS)
                         // si se queda a medias, lo de prueba no puede llegar a enviarse
@@ -268,15 +272,14 @@ public class SolicitudTramite extends PantallaSecretaria {
         }
         if (tutorialFirma == null) {
             tutorialFirma = new Tutorial(this, "solicitud_firma", 2)
-                    .gesto(R.id.lienzoFirma, Gesto.DIBUJAR, "Firma con el dedo en la tapa de la carpeta (con la goma la borras)")
+                    .gesto(R.id.lienzoFirma, Gesto.DIBUJAR, getString(R.string.sol_tut_firma_dibujar))
                     .soloSi(() -> fase == FIRMA);
-            if (hayHuella) tutorialFirma.info(R.id.btnFirmarHuella, "Si lo prefieres, aquí firmas con tu huella").soloSiSeVe();
-            tutorialFirma.info(R.id.tvNota, "Aquí puedes añadir una nota para Secretaría (es opcional)").soloSiSeVe()
-                    .info(R.id.btnAbrirCarpeta, "¿Te falta algo? Abre la carpeta para cambiar los documentos").soloSiSeVe()
-                    .gesto(R.id.sello, Gesto.MANTENER, "Mantén el dedo en el sello hasta que se complete el anillo")
+            if (hayHuella) tutorialFirma.info(R.id.btnFirmarHuella, getString(R.string.sol_tut_firma_huella)).soloSiSeVe();
+            tutorialFirma.info(R.id.tvNota, getString(R.string.sol_tut_firma_nota)).soloSiSeVe()
+                    .info(R.id.btnAbrirCarpeta, getString(R.string.sol_tut_firma_abrir)).soloSiSeVe()
+                    .gesto(R.id.sello, Gesto.MANTENER, getString(R.string.sol_tut_sello))
                     .soloSiSeVe()
-                    .gesto(R.id.carpeta, Gesto.LANZAR, "Lanza la carpeta hacia arriba para enviarla. "
-                            + "Ahora es de práctica: no se envía")
+                    .gesto(R.id.carpeta, Gesto.LANZAR, getString(R.string.sol_tut_lanzar))
                     .soloSi(() -> fase == LANZAR)
                     .alTerminar(this::quitarPractica);
         }
@@ -319,8 +322,8 @@ public class SolicitudTramite extends PantallaSecretaria {
         pincel.setTextSize(52);
         pincel.setFakeBoldText(true);
         pincel.setTextAlign(android.graphics.Paint.Align.CENTER);
-        lienzo.drawText("DOCUMENTO", 300, 110, pincel);
-        lienzo.drawText("DE PRUEBA", 300, 170, pincel);
+        lienzo.drawText(getString(R.string.sol_practica_doc_l1), 300, 110, pincel);
+        lienzo.drawText(getString(R.string.sol_practica_doc_l2), 300, 170, pincel);
         File archivo = new File(carpetaArchivos, PREFIJO_PRACTICA + idDocumento + "_" + System.currentTimeMillis() + ".png");
         if (guardarPng(hoja, archivo)) ponerArchivo(idDocumento, archivo.getAbsolutePath());
     }
@@ -354,7 +357,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         construirMesa();
         construirPapeles(-1);
         aplicarFase(false);
-        Toast.makeText(this, "Práctica terminada: ahora con tus documentos de verdad", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.sol_toast_practica_fin, Toast.LENGTH_LONG).show();
     }
 
     // ------------------------------------------------------------
@@ -374,7 +377,9 @@ public class SolicitudTramite extends PantallaSecretaria {
         carpeta.setLayoutParams(lpCarpeta);
         boolean cerrable = fase == DOCUMENTOS && sePuedeCerrar();
         btnCerrarCarpeta.setVisibility(cerrable ? View.VISIBLE : View.GONE);
-        btnCerrarCarpeta.setText(todosDentro() ? "Cerrar la carpeta" : "Cerrar la carpeta sin los opcionales");
+        btnCerrarCarpeta.setText(todosDentro()
+                ? R.string.sol_btn_cerrar_carpeta
+                : R.string.sol_btn_cerrar_sin_opcionales);
         btnAbrirCarpeta.setVisibility(cerrada && !documentos.isEmpty() && !enviando ? View.VISIBLE : View.GONE);
         if (!conTransicion) {
             ViewGroup.LayoutParams lp = tapa.getLayoutParams();
@@ -389,14 +394,16 @@ public class SolicitudTramite extends PantallaSecretaria {
         mostrarEstadoFirma(firmada);
         botonesFirma.setVisibility(fase == LANZAR ? View.GONE : View.VISIBLE);
         tvNota.setVisibility(fase == LANZAR ? View.GONE : View.VISIBLE);
-        tvNota.setText(observaciones == null ? "✎ Añadir una nota (opcional)" : "✎ Nota: " + observaciones);
+        tvNota.setText(observaciones == null
+                ? getString(R.string.sol_nota_anadir)
+                : getString(R.string.sol_nota_con_texto_fmt, observaciones));
         // ya sellada: la firma no se puede tocar
         lienzoFirma.setOnTouchListener(fase == LANZAR ? (v, e) -> true : null);
 
         // sello y lanzar
         sello.setVisibility(fase == FIRMA && firmada ? View.VISIBLE : View.GONE);
         marcaSello.setVisibility(fase == LANZAR ? View.VISIBLE : View.GONE);
-        marcaSello.setText("REGISTRADO\nETSIIT · " + LocalDate.now().format(FORMATO_SELLO));
+        marcaSello.setText(getString(R.string.sol_sello_registrado_fmt, LocalDate.now().format(FORMATO_SELLO)));
         capaLanzar.setVisibility(fase == LANZAR ? View.VISIBLE : View.GONE);
         zonaSoltar.setVisibility(fase == DOCUMENTOS && enCarpeta.isEmpty() ? View.VISIBLE : View.GONE);
         // la flecha señala a dónde ir: abajo a la carpeta con documentos fuera, arriba para lanzar
@@ -418,8 +425,8 @@ public class SolicitudTramite extends PantallaSecretaria {
         }
 
         tvContador.setText(fase == DOCUMENTOS
-                ? enCarpeta.size() + " de " + documentos.size() + " documentos dentro"
-                : "A nombre de " + nombreUsuario);
+                ? getString(R.string.sol_contador_docs_fmt, enCarpeta.size(), documentos.size())
+                : getString(R.string.sol_contador_nombre_fmt, nombreUsuario));
         mostrarTextos(firmada);
     }
 
@@ -436,34 +443,32 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (fase == DOCUMENTOS) {
             paso = 1;
             if (faltaAlgunaFoto()) {
-                ponerTextos("Haz una foto de cada documento",
-                        "Toca una tarjeta para abrir la cámara · mantenla pulsada para subir un archivo");
+                ponerTextos(R.string.sol_inst_foto, R.string.sol_ayuda_foto);
             } else if (hayDocumentosFuera()) {
-                ponerTextos("Arrastra los documentos a la carpeta",
-                        "Desliza cada tarjeta hacia abajo y suéltala sobre la carpeta");
+                ponerTextos(R.string.sol_inst_arrastrar, R.string.sol_ayuda_arrastrar);
             } else if (todosDentro()) {
-                ponerTextos("Todo está en la carpeta", "Toca una hoja para verla o cambiarla, o cierra la carpeta");
+                ponerTextos(R.string.sol_inst_todos_dentro, R.string.sol_ayuda_todos_dentro);
             } else {
-                ponerTextos("Lo obligatorio ya está dentro", "Añade los opcionales o cierra la carpeta");
+                ponerTextos(R.string.sol_inst_obligatorios, R.string.sol_ayuda_obligatorios);
             }
         } else if (fase == FIRMA && !firmada) {
             paso = 2;
-            ponerTextos("Firma en la carpeta",
-                    "Con el dedo, en el recuadro" + (hayHuella ? " · o usa tu huella" : ""));
+            ponerTextos(R.string.sol_inst_firma,
+                    hayHuella ? R.string.sol_ayuda_firma_dedo_huella : R.string.sol_ayuda_firma_dedo);
         } else if (fase == FIRMA) {
             paso = 3;
-            ponerTextos("Mantén el dedo sobre el sello", "Hasta que se complete el anillo y suene el «clac»");
+            ponerTextos(R.string.sol_inst_sello, R.string.sol_ayuda_sello);
         } else {
             paso = 4;
-            ponerTextos("Lanza la carpeta hacia arriba", "Arrástrala y suéltala con un gesto rápido para enviarla");
+            ponerTextos(R.string.sol_inst_lanzar, R.string.sol_ayuda_lanzar);
         }
-        tvPaso.setText("Paso " + paso + " de 4 · " + NOMBRES_PASO[paso - 1]);
+        tvPaso.setText(getString(R.string.sol_paso_fmt, paso, nombresPaso[paso - 1]));
         progreso.setProgressCompat(paso, true);
     }
 
-    private void ponerTextos(String instruccion, String ayuda) {
-        tvInstruccion.setText(instruccion);
-        tvAyuda.setText(ayuda);
+    private void ponerTextos(int instruccionRes, int ayudaRes) {
+        tvInstruccion.setText(instruccionRes);
+        tvAyuda.setText(ayudaRes);
     }
 
     private boolean faltaAlgunaFoto() {
@@ -507,7 +512,7 @@ public class SolicitudTramite extends PantallaSecretaria {
             vacia.setPadding(dp(16), 0, dp(16), 0);
             vacia.setBackgroundResource(R.drawable.fondo_documento_vacio);
             vacia.setTextColor(getColor(R.color.nui_apagado));
-            vacia.setText("La mesa está vacía\n\nArrastra aquí una hoja de la carpeta para sacarla");
+            vacia.setText(R.string.sol_mesa_vacia);
             mesa.addView(vacia);
         }
     }
@@ -546,8 +551,8 @@ public class SolicitudTramite extends PantallaSecretaria {
             tarjeta.findViewById(R.id.grupoVacio).setVisibility(View.GONE);
             tarjeta.findViewById(R.id.tvALaCarpeta).setVisibility(View.VISIBLE);
             if (miniatura == null) ivMiniatura.setImageResource(android.R.drawable.ic_menu_agenda); // PDF ilegible
-            tarjeta.setContentDescription(d.nombre + ", añadido. Arrástralo a la carpeta o tócalo para cambiarlo");
-            ViewCompat.addAccessibilityAction(tarjeta, "Meter en la carpeta", (v, args) -> {
+            tarjeta.setContentDescription(getString(R.string.sol_desc_tarjeta_llena_fmt, d.nombre));
+            ViewCompat.addAccessibilityAction(tarjeta, getString(R.string.sol_accion_meter_carpeta), (v, args) -> {
                 meterEnCarpeta(d.id);
                 return true;
             });
@@ -567,8 +572,10 @@ public class SolicitudTramite extends PantallaSecretaria {
                 }
             });
         } else {
-            tarjeta.setContentDescription(d.nombre + (d.obligatorio ? "" : ", opcional")
-                    + ". Toca para fotografiarlo; mantén pulsado para subir un archivo");
+            tarjeta.setContentDescription(getString(
+                    d.obligatorio ? R.string.sol_desc_tarjeta_vacia_oblig_fmt : R.string.sol_desc_tarjeta_vacia_opc_fmt,
+                    d.nombre
+            ));
         }
 
         tarjeta.setOnClickListener(v -> {
@@ -626,7 +633,7 @@ public class SolicitudTramite extends PantallaSecretaria {
                 if (fase != DOCUMENTOS || !(e.getLocalState() instanceof Integer)
                         || enCarpeta.contains((Integer) e.getLocalState())) return false;
                 escalarTapa(1.03f);
-                tvContador.setText("Suéltalo aquí");
+                tvContador.setText(R.string.sol_drag_suelta_carpeta);
                 return true;
             case DragEvent.ACTION_DRAG_ENTERED:
                 escalarTapa(1.07f);
@@ -658,7 +665,7 @@ public class SolicitudTramite extends PantallaSecretaria {
                 if (fase != DOCUMENTOS || !(e.getLocalState() instanceof Integer)
                         || !enCarpeta.contains((Integer) e.getLocalState())) return false;
                 mesaScroll.setBackgroundResource(R.drawable.fondo_seccion);
-                tvInstruccion.setText("Suéltala en la mesa para sacarla");
+                tvInstruccion.setText(R.string.sol_drag_suelta_mesa);
                 return true;
             case DragEvent.ACTION_DRAG_ENTERED:
                 mesaScroll.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
@@ -730,9 +737,9 @@ public class SolicitudTramite extends PantallaSecretaria {
             hoja.addView(nombre, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
             hoja.setRotation(i % 2 == 0 ? -3f : 3f);
-            hoja.setContentDescription(d.nombre + ", dentro de la carpeta. Toca para cambiarlo o sacarlo");
+            hoja.setContentDescription(getString(R.string.sol_desc_hoja_fmt, d.nombre));
             hoja.setOnClickListener(v -> opcionesHoja(d));
-            ViewCompat.addAccessibilityAction(hoja, "Sacar de la carpeta", (v, args) -> {
+            ViewCompat.addAccessibilityAction(hoja, getString(R.string.sol_accion_sacar_carpeta), (v, args) -> {
                 sacarDeCarpeta(d.id);
                 return true;
             });
@@ -803,10 +810,10 @@ public class SolicitudTramite extends PantallaSecretaria {
             return;
         }
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
-                .setTitle("¿Abrir la carpeta?")
-                .setMessage("Se romperá el sello. Tu firma se queda; solo tendrás que volver a sellar.")
-                .setPositiveButton("Abrirla", (d, w) -> abrirCarpeta())
-                .setNegativeButton("Cancelar", null));
+                .setTitle(R.string.sol_dlg_abrir_titulo)
+                .setMessage(R.string.sol_dlg_abrir_msg)
+                .setPositiveButton(R.string.sol_dlg_abrir_btn, (d, w) -> abrirCarpeta())
+                .setNegativeButton(R.string.sol_btn_cancelar, null));
     }
 
     // la tapa baja y las hojas vuelven a asomar
@@ -841,8 +848,16 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (fase != DOCUMENTOS) return;
         boolean lleno = archivos.containsKey(d.id);
         String[] opciones = lleno
-                ? new String[]{"Verlo en grande", "Hacer otra foto", "Elegir otro archivo", "Quitar"}
-                : new String[]{"Hacer una foto", "Subir un archivo (imagen o PDF)"};
+                ? new String[]{
+                getString(R.string.sol_op_ver),
+                getString(R.string.sol_op_otra_foto),
+                getString(R.string.sol_op_otro_archivo),
+                getString(R.string.sol_op_quitar)
+        }
+                : new String[]{
+                getString(R.string.sol_op_hacer_foto),
+                getString(R.string.sol_op_subir_archivo)
+        };
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
                 .setTitle(d.nombre)
                 .setItems(opciones, (dlg, i) -> {
@@ -852,21 +867,26 @@ public class SolicitudTramite extends PantallaSecretaria {
                     else if (i == 1) elegirArchivo(d.id);
                     else quitarArchivo(d.id);
                 })
-                .setNegativeButton("Cancelar", null));
+                .setNegativeButton(R.string.sol_btn_cancelar, null));
     }
 
     private void opcionesHoja(Documento d) {
         if (fase != DOCUMENTOS) return;
+        String[] opciones = new String[]{
+                getString(R.string.sol_op_ver),
+                getString(R.string.sol_op_otra_foto),
+                getString(R.string.sol_op_otro_archivo),
+                getString(R.string.sol_op_sacar_carpeta)
+        };
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
                 .setTitle(d.nombre)
-                .setItems(new String[]{"Verlo en grande", "Hacer otra foto", "Elegir otro archivo",
-                        "Sacar de la carpeta"}, (dlg, i) -> {
+                .setItems(opciones, (dlg, i) -> {
                     if (i == 0) verDocumento(d);
                     else if (i == 1) hacerFoto(d.id);
                     else if (i == 2) elegirArchivo(d.id);
                     else sacarDeCarpeta(d.id);
                 })
-                .setNegativeButton("Cancelar", null));
+                .setNegativeButton(R.string.sol_btn_cancelar, null));
     }
 
     // el documento a pantalla casi completa, con atajo para rehacer la foto
@@ -875,7 +895,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (ruta == null) return;
         Bitmap imagen = MiniaturaDocumento.grande(ruta);
         if (imagen == null) {
-            Toast.makeText(this, "No se puede mostrar este archivo", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_toast_no_mostrar, Toast.LENGTH_SHORT).show();
             return;
         }
         ImageView iv = new ImageView(this);
@@ -887,8 +907,8 @@ public class SolicitudTramite extends PantallaSecretaria {
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
                 .setTitle(d.nombre)
                 .setView(iv)
-                .setPositiveButton("Cerrar", null)
-                .setNeutralButton("Repetir foto", (dlg, w) -> hacerFoto(d.id)));
+                .setPositiveButton(R.string.sol_btn_cerrar, null)
+                .setNeutralButton(R.string.sol_btn_repetir_foto, (dlg, w) -> hacerFoto(d.id)));
     }
 
     private void sacarDeCarpeta(int idDocumento) {
@@ -902,7 +922,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     private void editarNota() {
         EditText et = new EditText(this);
         et.setText(observaciones);
-        et.setHint("Algo que deba saber Secretaría");
+        et.setHint(R.string.sol_nota_hint);
         et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         et.setMaxLines(4);
@@ -910,14 +930,14 @@ public class SolicitudTramite extends PantallaSecretaria {
         marco.setPadding(dp(24), dp(8), dp(24), 0);
         marco.addView(et);
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
-                .setTitle("Nota para Secretaría")
+                .setTitle(R.string.sol_nota_titulo)
                 .setView(marco)
-                .setPositiveButton("Guardar", (dlg, w) -> {
+                .setPositiveButton(R.string.sol_btn_guardar, (dlg, w) -> {
                     String texto = et.getText().toString().trim();
                     observaciones = texto.isEmpty() ? null : texto;
                     aplicarFase(false);
                 })
-                .setNegativeButton("Cancelar", null));
+                .setNegativeButton(R.string.sol_btn_cancelar, null));
     }
 
     private void mostrarDialogo(MaterialAlertDialogBuilder constructor) {
@@ -932,8 +952,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     private void configurarDocumentos() {
         lanzadorPermisoCamara = registerForActivityResult(new ActivityResultContracts.RequestPermission(), concedido -> {
             if (concedido) abrirCamara(idDocumentoPendiente);
-            else Toast.makeText(this, "Sin permiso de cámara: mantén pulsada la tarjeta para subir un archivo",
-                    Toast.LENGTH_LONG).show();
+            else Toast.makeText(this, R.string.sol_toast_sin_permiso_camara, Toast.LENGTH_LONG).show();
         });
         lanzadorFoto = registerForActivityResult(new ActivityResultContracts.TakePicture(), hecha -> {
             if (rutaFotoPendiente == null) return;
@@ -963,7 +982,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (rutaFotoPendiente != null) return; // doble toque: la cámara ya se está abriendo
         File carpetaArchivos = carpetaSecretaria();
         if (carpetaArchivos == null) {
-            Toast.makeText(this, "No se ha podido preparar la foto", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_toast_error_prep_foto, Toast.LENGTH_SHORT).show();
             return;
         }
         File foto = new File(carpetaArchivos, "doc_" + idDocumento + "_" + System.currentTimeMillis() + ".jpg");
@@ -973,8 +992,7 @@ public class SolicitudTramite extends PantallaSecretaria {
             lanzadorFoto.launch(FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", foto));
         } catch (ActivityNotFoundException e) {
             rutaFotoPendiente = null;
-            Toast.makeText(this, "No hay ninguna app de cámara: mantén pulsada la tarjeta para subir un archivo",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.sol_toast_sin_app_camara, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -983,7 +1001,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         try {
             lanzadorArchivo.launch(new String[]{"image/*", "application/pdf"});
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "No hay ninguna app para elegir archivos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_toast_sin_app_archivos, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -993,7 +1011,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         String tipo = getContentResolver().getType(uri);
         String extension = tipo != null ? MimeTypeMap.getSingleton().getExtensionFromMimeType(tipo) : null;
         if (carpetaArchivos == null || tipo == null || (!tipo.startsWith("image/") && !tipo.equals("application/pdf"))) {
-            Toast.makeText(this, "Elige una imagen o un PDF", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_toast_tipo_invalido, Toast.LENGTH_SHORT).show();
             return;
         }
         File copia = new File(carpetaArchivos, "doc_" + idDocumento + "_" + System.currentTimeMillis()
@@ -1009,14 +1027,14 @@ public class SolicitudTramite extends PantallaSecretaria {
                 if (total > TAMANO_MAXIMO_ARCHIVO) {
                     salida.close();
                     copia.delete();
-                    Toast.makeText(this, "El archivo es demasiado grande (máximo 10 MB)", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.sol_toast_archivo_grande, Toast.LENGTH_LONG).show();
                     return;
                 }
                 salida.write(bufer, 0, leidos);
             }
         } catch (IOException | SecurityException e) {
             copia.delete();
-            Toast.makeText(this, "No se ha podido leer el archivo", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.sol_toast_error_leer_archivo, Toast.LENGTH_SHORT).show();
             return;
         }
         ponerArchivo(idDocumento, copia.getAbsolutePath());
@@ -1113,9 +1131,9 @@ public class SolicitudTramite extends PantallaSecretaria {
                     }
                 });
         BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Firmar la solicitud")
+                .setTitle(getString(R.string.sol_bio_titulo))
                 .setSubtitle(tramite.nombre)
-                .setNegativeButtonText("Firmar a mano")
+                .setNegativeButtonText(getString(R.string.sol_bio_negativo))
                 .setAllowedAuthenticators(autenticador)
                 .build();
         btnFirmarHuella.setOnClickListener(v -> prompt.authenticate(info));
@@ -1180,7 +1198,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (vibrador != null) vibrador.cancel();
         anilloSello.setProgressCompat(0, true);
         sello.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
-        tvAyuda.setText("Mantén el dedo hasta que se complete el anillo");
+        tvAyuda.setText(R.string.sol_ayuda_sello_incompleto);
     }
 
     // 15 tramos de 100 ms cada vez más fuertes; sin control de intensidad, pulsos cada vez más seguidos
@@ -1313,20 +1331,20 @@ public class SolicitudTramite extends PantallaSecretaria {
                 .setInterpolator(new OvershootInterpolator()).start();
         animarFlecha(true);
         if (explicar && carpeta.getTranslationY() < -dp(10)) {
-            tvAyuda.setText("Más rápido: desliza hacia arriba y suelta sin frenar");
+            tvAyuda.setText(R.string.sol_ayuda_lanzar_flojo);
         }
     }
 
     private void confirmarEnvio() {
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
-                .setTitle("¿Enviar la solicitud?")
+                .setTitle(R.string.sol_dlg_enviar_titulo)
                 .setMessage(tramite.nombre)
-                .setPositiveButton("Enviar", (d, w) -> {
+                .setPositiveButton(R.string.sol_btn_enviar, (d, w) -> {
                     if (enviando) return;
                     vibrar(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
                     enviar();
                 })
-                .setNegativeButton("Cancelar", null));
+                .setNegativeButton(R.string.sol_btn_cancelar, null));
     }
 
     private void animarFlecha(boolean arriba) {
@@ -1354,7 +1372,7 @@ public class SolicitudTramite extends PantallaSecretaria {
 
     private void enviar() {
         if (hayPractica()) { // red de seguridad: lo de prueba nunca llega a Secretaría
-            fallo("Esto era de práctica: no se envía");
+            fallo(getString(R.string.sol_toast_practica_no_envia));
             return;
         }
         enviando = true;
@@ -1362,7 +1380,7 @@ public class SolicitudTramite extends PantallaSecretaria {
         if (!firmaConHuella) {
             rutaFirma = guardarFirma();
             if (rutaFirma == null) {
-                fallo("No se ha podido guardar la firma");
+                fallo(getString(R.string.sol_toast_error_firma));
                 return;
             }
         }
@@ -1370,7 +1388,7 @@ public class SolicitudTramite extends PantallaSecretaria {
                 rutaFirma != null ? rutaFirma.getAbsolutePath() : null, archivos);
         if (idSolicitud == -1) {
             if (rutaFirma != null) rutaFirma.delete();
-            fallo("No se ha podido enviar la solicitud");
+            fallo(getString(R.string.sol_toast_error_enviar));
             return;
         }
         enviada = true;
@@ -1413,11 +1431,11 @@ public class SolicitudTramite extends PantallaSecretaria {
     // ------------------------------------------------------------
 
     private void salir() {
-        salir("¿Salir sin enviar?", "Salir", this::finish);
+        salir(R.string.sol_dlg_salir_titulo, R.string.sol_dlg_salir_btn, this::finish);
     }
 
     // atrás y agitar: si hay algo rellenado, confirmar antes de tirarlo
-    private void salir(String titulo, String boton, Runnable accion) {
+    private void salir(int tituloRes, int botonRes, Runnable accion) {
         boolean hayAlgo = !archivos.isEmpty() || observaciones != null || fase == LANZAR
                 || firmaConHuella || lienzoFirma.tieneFirma();
         if (enviando) return; // la carpeta va volando: el envío ya está en marcha
@@ -1426,10 +1444,10 @@ public class SolicitudTramite extends PantallaSecretaria {
             return;
         }
         mostrarDialogo(new MaterialAlertDialogBuilder(this, R.style.DialogoSecretaria)
-                .setTitle(titulo)
-                .setMessage("Se perderán las fotos y la firma.")
-                .setPositiveButton(boton, (d, w) -> accion.run())
-                .setNegativeButton("Seguir", null));
+                .setTitle(tituloRes)
+                .setMessage(R.string.sol_dlg_salir_msg)
+                .setPositiveButton(botonRes, (d, w) -> accion.run())
+                .setNegativeButton(R.string.sol_btn_seguir, null));
     }
 
     private void aparecer(View v) {
@@ -1455,7 +1473,7 @@ public class SolicitudTramite extends PantallaSecretaria {
     @Override
     protected void alAgitar() {
         if (dialogo != null && dialogo.isShowing()) return; // ya hay una pregunta abierta
-        salir("¿Volver al menú sin enviar?", "Volver al menú", this::volverAlMenu);
+        salir(R.string.sol_dlg_menu_titulo, R.string.sol_dlg_menu_btn, this::volverAlMenu);
     }
 
     // ------------------------------------------------------------

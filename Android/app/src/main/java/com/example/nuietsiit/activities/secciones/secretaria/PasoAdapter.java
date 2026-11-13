@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +39,9 @@ public class PasoAdapter extends RecyclerView.Adapter<PasoAdapter.Holder> {
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int position) {
+        Context ctx = h.itemView.getContext();
         Paso p = pasos.get(position);
-        h.tvNumero.setText("Paso " + (position + 1) + " de " + pasos.size());
+        h.tvNumero.setText(ctx.getString(R.string.paso_numero_fmt, position + 1, pasos.size()));
         h.tvTitulo.setText(p.titulo);
         h.tvDescripcion.setText(p.descripcion);
 

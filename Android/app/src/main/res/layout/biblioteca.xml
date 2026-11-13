@@ -29,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/nui_espacio_l"
-                android:hint="Título, autor, editorial o ISBN"
+                android:hint="@string/hint_buscador_libros"
                 app:boxBackgroundColor="@color/nui_superficie"
                 app:boxStrokeColor="@color/nui_oro"
                 app:boxStrokeWidth="@dimen/nui_borde"
@@ -41,7 +41,7 @@
                     android:id="@+id/etBuscar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Título, autor, editorial o ISBN"
+                    android:hint="@string/hint_buscador_libros"
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Solo disponibles" />
+                android:text="@string/solo_disponibles" />
         </LinearLayout>
 
         <!-- Estantería: marco de madera; las baldas las pinta BaldaDecoration -->
@@ -125,7 +125,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/nui_espacio_xxl"
                 android:gravity="center"
-                android:text="No hay libros en estas baldas."
+                android:text="@string/no_hay_libros_baldas"
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                 android:visibility="gone" />
 
@@ -138,7 +138,7 @@
                 android:layout_margin="@dimen/nui_espacio_m"
                 android:background="@drawable/nui_flotante_cobalto"
                 android:clickable="true"
-                android:contentDescription="Modo estudio: deja el móvil sobre la mesa para concentrarte 25 minutos"
+                android:contentDescription="@string/modo_estudio_desc"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
@@ -159,7 +159,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/nui_espacio_xs"
                     android:importantForAccessibility="no"
-                    android:text="Estudiar"
+                    android:text="@string/estudiar"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
                     android:textColor="@color/nui_sobre_resaltado" />
             </LinearLayout>
@@ -192,7 +192,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/nui_espacio_s"
-                    android:text="Escanear"
+                    android:text="@string/escanear"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
                     android:textColor="@color/nui_sobre_resaltado" />
             </LinearLayout>
@@ -291,7 +291,7 @@
                 android:background="@drawable/nui_tesela"
                 android:paddingHorizontal="@dimen/nui_espacio_m"
                 android:paddingVertical="@dimen/nui_espacio_xs"
-                android:text="Suelta para devolverlo · Desliza arriba para abrirlo"
+                android:text="@string/suelta_para_devolverlo"
                 android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
                 android:textColor="@color/nui_tinta" />
         </LinearLayout>

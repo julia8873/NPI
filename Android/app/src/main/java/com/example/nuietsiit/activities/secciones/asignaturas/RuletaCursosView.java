@@ -11,6 +11,8 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.example.nuietsiit.R;
+
 public class RuletaCursosView extends View {
 
     private Paint paintSector;
@@ -47,6 +49,11 @@ public class RuletaCursosView extends View {
 
     public RuletaCursosView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        init();
+    }
+
+    public RuletaCursosView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         init();
     }
 
@@ -121,12 +128,12 @@ public class RuletaCursosView extends View {
             canvas.drawText((i + 1) + "º", textoX, textoY, paintTexto);
         }
 
-        // 2. Dibujar el botón central "IR"
+        // 2. Dibujar el botón central "IR" / "GO"
         canvas.drawCircle(centroX, centroY, radioBotonCentro, paintCentro);
 
         Paint paintTextoIr = new Paint(paintTexto);
         paintTextoIr.setTextSize(radioBotonCentro * 0.5f);
-        canvas.drawText("IR", centroX, centroY + (paintTextoIr.getTextSize() / 3f), paintTextoIr);
+        canvas.drawText(getContext().getString(R.string.btn_ir), centroX, centroY + (paintTextoIr.getTextSize() / 3f), paintTextoIr);
 
         // 3. Dibujar marcador superior (flecha o indicador fija arriba)
         float tamañoIndicador = 25f;
@@ -143,7 +150,7 @@ public class RuletaCursosView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                // Comprobar si ha pulsado sobre el botón central "IR"
+                // Comprobar si ha pulsado sobre el botón central
                 float distDesdeCentro = (float) Math.hypot(x - centroX, y - centroY);
                 if (distDesdeCentro <= radioBotonCentro) {
                     confirmarSeleccionCurso();

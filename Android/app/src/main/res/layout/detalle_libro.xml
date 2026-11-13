@@ -61,7 +61,7 @@
                     android:paddingHorizontal="@dimen/nui_espacio_s"
                     android:paddingVertical="@dimen/biblio_marca_vertical"
                     android:rotation="-8"
-                    android:text="Prestado"
+                    android:text="@string/prestado_label"
                     android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
                     android:textColor="@color/nui_granada"
                     android:visibility="gone" />
@@ -124,7 +124,7 @@
 
                     <TextView
                         style="@style/NombreDatoLibro"
-                        android:text="Ubicación" />
+                        android:text="@string/ubicacion_label" />
 
                     <TextView
                         android:id="@+id/tvUbicacion"
@@ -141,14 +141,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/nui_espacio_l"
                 android:minHeight="@dimen/biblio_flotante_alto"
-                android:text="Cómo llegar a la biblioteca"
+                android:text="@string/btn_como_llegar_biblio"
                 app:icon="@drawable/ic_nui_mapa" />
 
             <!-- Datos de edición: papel aparte, en letra de oficina -->
             <TextView
                 style="@style/TituloExplorar"
                 android:layout_marginTop="@dimen/nui_espacio_xl"
-                android:text="Datos de edición" />
+                android:text="@string/datos_edicion_titulo" />
 
             <LinearLayout
                 android:id="@+id/papelEdicion"
@@ -164,7 +164,7 @@
 
                     <TextView
                         style="@style/NombreDatoLibro"
-                        android:text="Editorial" />
+                        android:text="@string/editorial_label" />
 
                     <TextView
                         android:id="@+id/tvEditorial"
@@ -180,7 +180,7 @@
 
                     <TextView
                         style="@style/NombreDatoLibro"
-                        android:text="Edición" />
+                        android:text="@string/edicion_label" />
 
                     <TextView
                         android:id="@+id/tvEdicion"
@@ -196,7 +196,7 @@
 
                     <TextView
                         style="@style/NombreDatoLibro"
-                        android:text="Año" />
+                        android:text="@string/anio_label" />
 
                     <TextView
                         android:id="@+id/tvAnio"
@@ -212,7 +212,7 @@
 
                     <TextView
                         style="@style/NombreDatoLibro"
-                        android:text="ISBN" />
+                        android:text="@string/isbn_label" />
 
                     <TextView
                         android:id="@+id/tvIsbn"

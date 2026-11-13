@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
         android:layout_marginTop="@dimen/nui_espacio_m"
-        android:hint="Motivo de la cita">
+        android:hint="@string/motivo_cita_hint">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
             android:id="@+id/actvMotivo"
@@ -57,7 +57,7 @@
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
         android:layout_marginTop="@dimen/nui_espacio_l"
         android:accessibilityHeading="true"
-        android:text="Elige el día"
+        android:text="@string/elige_el_dia"
         android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
     <!-- Hojas de taco: dos semanas laborables, cinco por fila (se rellenan en CitaPrevia) -->
@@ -83,7 +83,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/nui_espacio_l"
-        android:text="Las horas tachadas ya están ocupadas. Desliza o inclina el móvil para cambiar de hora"
+        android:text="@string/horas_tachadas"
         android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
 
     <!-- Una pestaña por hora (9 a 13) con cuántos huecos quedan; debajo, sus seis franjas -->

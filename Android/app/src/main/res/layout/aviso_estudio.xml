@@ -61,7 +61,7 @@
             android:background="?attr/selectableItemBackground"
             android:gravity="center_vertical"
             android:minHeight="@dimen/nui_toque_min"
-            android:text="Ahora no"
+            android:text="@string/ahora_no"
             android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
             android:textColor="@color/nui_cobalto" />
     </LinearLayout>

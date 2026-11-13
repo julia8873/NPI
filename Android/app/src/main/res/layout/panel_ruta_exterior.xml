@@ -54,7 +54,7 @@
                         android:background="?attr/selectableItemBackground"
                         android:minHeight="48dp"
                         android:gravity="center_vertical"
-                        android:text="Cómo llegar"
+                        android:text="@string/como_llegar_titulo"
                         android:textColor="@color/nui_apagado"
                         android:textSize="13sp"
                         android:textStyle="bold" />
@@ -64,7 +64,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Cómo funciona"
+                        android:contentDescription="@string/como_funciona_desc"
                         android:padding="12dp"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_help"
@@ -75,7 +75,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Cerrar"
+                        android:contentDescription="@string/cerrar_desc"
                         android:padding="6dp"
                         android:src="@android:drawable/ic_menu_close_clear_cancel"
                         app:tint="@color/nui_apagado" />
@@ -122,7 +122,7 @@
                             android:layout_weight="1.4"
                             android:backgroundTint="@color/nui_acento"
                             android:enabled="false"
-                            android:text="Empezar guía"
+                            android:text="@string/btn_empezar_guia"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
                             android:textStyle="bold"
@@ -137,7 +137,7 @@
                             android:layout_height="48dp"
                             android:layout_weight="1"
                             android:backgroundTint="@color/nui_suave"
-                            android:text="Google Maps"
+                            android:text="@string/btn_google_maps"
                             android:textAllCaps="false"
                             android:textColor="@color/nui_tinta"
                             android:textStyle="bold"
@@ -160,7 +160,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Desde"
+                        android:text="@string/etiqueta_desde"
                         android:textColor="@color/nui_apagado"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -182,7 +182,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="👆 Mantén pulsado el mapa para salir desde cualquier otro punto."
+                        android:text="@string/pista_mantener_pulsado_mapa"
                         android:textColor="@color/nui_apagado"
                         android:textSize="12sp" />
 
@@ -190,7 +190,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Hasta"
+                        android:text="@string/etiqueta_hasta"
                         android:textColor="@color/nui_apagado"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -222,7 +222,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Otros buses"
+                        android:text="@string/etiqueta_otros_buses"
                         android:textColor="@color/nui_apagado"
                         android:textSize="12sp"
                         android:textStyle="bold" />

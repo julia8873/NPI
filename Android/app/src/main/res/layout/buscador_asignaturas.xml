@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootAsignaturas"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F8FAFC"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
-    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
+    <!-- CABECERA UNIFICADA ORIGINAL: Botón volver · Título · Chat · Perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:layout_marginTop="8dp"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
         <ImageButton
@@ -23,7 +25,7 @@
             android:layout_height="44dp"
             android:layout_marginEnd="12dp"
             android:background="@drawable/bg_circulo_blanco_volver"
-            android:contentDescription="Volver al menú principal"
+            android:contentDescription="@string/volver_menu_principal"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="12dp"
             android:scaleType="fitCenter"
@@ -37,7 +39,7 @@
             android:layout_weight="1"
             android:letterSpacing="-0.02"
             android:maxLines="1"
-            android:text="Buscador"
+            android:text="@string/buscador"
             android:textColor="@color/nui_tinta"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -49,7 +51,7 @@
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_nui_chat"
             android:clickable="true"
-            android:contentDescription="Abrir asistente"
+            android:contentDescription="@string/abrir_asistente"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:gravity="center_vertical"
@@ -68,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="Chat"
+                android:text="@string/chat"
                 android:textColor="@android:color/white"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -80,7 +82,7 @@
             android:layout_height="40dp"
             android:background="@drawable/bg_nui_circulo_suave"
             android:clickable="true"
-            android:contentDescription="Perfil"
+            android:contentDescription="@string/perfil"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
@@ -90,55 +92,55 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="12dp">
 
         <!-- Barra de búsqueda directa -->
         <EditText
             android:id="@+id/etBuscadorRapido"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_height="44dp"
+            android:layout_marginBottom="10dp"
             android:background="@android:drawable/editbox_background_normal"
             android:drawableStart="@android:drawable/ic_menu_search"
             android:drawablePadding="8dp"
-            android:hint="Buscar asignatura por nombre..."
-            android:padding="12dp" />
+            android:hint="@string/buscar_asignatura_hint"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:textSize="14sp" />
 
-        <!-- CONTENEDOR 1: Lista de Grados (Con Scroll) -->
-        <ScrollView
+        <!-- CONTENEDOR 1: Lista de Grados SIN SCROLL -->
+        <LinearLayout
             android:id="@+id/scrollGrados"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:fillViewport="true"
+            android:orientation="vertical"
             android:visibility="visible">
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/selecciona_tu_grado_label"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorBotonesGrados"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="Selecciona tu Grado:"
-                    android:textColor="#333333"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:id="@+id/contenedorBotonesGrados"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <!-- Las tarjetas dinámicas se insertan aquí desde Java -->
-                </LinearLayout>
+                <!-- Las tarjetas dinámicas se insertan aquí repartiendo el alto -->
             </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
 
         <!-- CONTENEDOR 2: La Ruleta Mágica de Cursos -->
         <LinearLayout
@@ -154,26 +156,26 @@
                 android:id="@+id/tvTituloGradoSeleccionado"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="6dp"
                 android:gravity="center"
-                android:text="[Nombre del Grado]"
+                android:text="@string/nombre_grado"
                 android:textColor="#FF9800"
-                android:textSize="20sp"
+                android:textSize="19sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Desliza para elegir el curso"
+                android:layout_marginBottom="16dp"
+                android:text="@string/desliza_elegir_curso"
                 android:textColor="#666666"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
 
             <!-- Ruleta Mágica personalizada -->
             <com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView
                 android:id="@+id/ruletaCursosView"
-                android:layout_width="280dp"
-                android:layout_height="280dp"
+                android:layout_width="260dp"
+                android:layout_height="260dp"
                 android:layout_gravity="center" />
         </LinearLayout>
 
@@ -195,10 +197,10 @@
                     android:id="@+id/tvTituloResultados"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="Resultados:"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/resultados"
                     android:textColor="#333333"
-                    android:textSize="18sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <LinearLayout

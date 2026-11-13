@@ -29,7 +29,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Volver"
+                android:contentDescription="@string/volver_menu_principal"
                 android:src="@drawable/ic_arrow_back" />
 
             <LinearLayout
@@ -43,7 +43,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Asistente ETSIIT"
+                    android:text="@string/asistente_etsiit"
                     android:textColor="#1A1A1A"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -63,7 +63,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="IA Conversacional · Gemini"
+                        android:text="@string/ia_gemini_subtitle"
                         android:textColor="#777777"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -106,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@null"
-                android:hint="Haz una pregunta o pide una acción..."
+                android:hint="@string/hint_chat_input"
                 android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="4"
                 android:paddingHorizontal="8dp"
@@ -119,7 +119,7 @@
                 android:id="@+id/btnEnviarMensaje"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="Enviar mensaje"
+                android:contentDescription="@string/enviar_mensaje"
                 android:src="@drawable/ic_send"
                 app:backgroundTint="#FF8C42"
                 app:fabCustomSize="42dp"

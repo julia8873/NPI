@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.ColorUtils;
 
@@ -18,34 +19,35 @@ import com.example.nuietsiit.R;
 import com.google.android.material.card.MaterialCardView;
 
 /**
- * Cuadrícula 3x3 de fichas cuadradas del menú principal (toma todo el ancho, sin estirarse a lo alto); la ficha seleccionada
- * se agranda y toda la cuadrícula se inclina ligeramente hacia ella (efecto 3D).
+ * Cuadrícula 3x3 de fichas cuadradas del menú principal (toma todo el ancho, sin estirarse a lo alto);
+ * la ficha seleccionada se agranda y toda la cuadrícula se inclina ligeramente hacia ella (efecto 3D).
  */
 public class HubSeccionesView extends ViewGroup {
 
     public static class Seccion {
-        public final String titulo;
+        @StringRes public final int tituloRes;
         @DrawableRes public final int icono;
         public final int color;
+        public String titulo; // Se asigna dinámicamente según el contexto de la vista
 
-        Seccion(String titulo, @DrawableRes int icono, String color) {
-            this.titulo = titulo;
+        Seccion(@StringRes int tituloRes, @DrawableRes int icono, String color) {
+            this.tituloRes = tituloRes;
             this.icono = icono;
             this.color = Color.parseColor(color);
         }
     }
 
-    /** Orden de la cuadrícula (fila a fila). */
+    /** Orden de la cuadrícula (fila a fila) utilizando referencias a R.string. */
     public static final Seccion[] SECCIONES = {
-            new Seccion("Avisos", R.drawable.ic_nui_avisos, "#FF7A2F"),
-            new Seccion("Mapa", R.drawable.ic_nui_mapa, "#3B82F6"),
-            new Seccion("Actividades", R.drawable.ic_nui_actividades, "#A855F7"),
-            new Seccion("Profesorado", R.drawable.ic_nui_profesorado, "#EC4899"),
-            new Seccion("Asignaturas", R.drawable.ic_nui_asignaturas, "#10B981"),
-            new Seccion("Secretaría", R.drawable.ic_nui_secretaria, "#F59E0B"),
-            new Seccion("Comedores", R.drawable.ic_nui_comedores, "#EF4444"),
-            new Seccion("Biblioteca", R.drawable.ic_nui_biblioteca, "#14B8A6"),
-            new Seccion("Calendario", R.drawable.ic_nui_calendario, "#6366F1"),
+            new Seccion(R.string.sec_avisos, R.drawable.ic_nui_avisos, "#FF7A2F"),
+            new Seccion(R.string.sec_mapa, R.drawable.ic_nui_mapa, "#3B82F6"),
+            new Seccion(R.string.sec_actividades, R.drawable.ic_nui_actividades, "#A855F7"),
+            new Seccion(R.string.sec_profesorado, R.drawable.ic_nui_profesorado, "#EC4899"),
+            new Seccion(R.string.sec_asignaturas, R.drawable.ic_nui_asignaturas, "#10B981"),
+            new Seccion(R.string.sec_secretaria, R.drawable.ic_nui_secretaria, "#F59E0B"),
+            new Seccion(R.string.sec_comedores, R.drawable.ic_nui_comedores, "#EF4444"),
+            new Seccion(R.string.sec_biblioteca, R.drawable.ic_nui_biblioteca, "#14B8A6"),
+            new Seccion(R.string.sec_calendario, R.drawable.ic_nui_calendario, "#6366F1"),
     };
 
     public interface OnSeccionListener {
@@ -82,12 +84,14 @@ public class HubSeccionesView extends ViewGroup {
 
         setClipChildren(false);
         setClipToPadding(false);
-        // perspectiva suave para la inclinación 3D
+        // Perspectiva suave para la inclinación 3D
         setCameraDistance(840f * dp * 2f);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         for (int i = 0; i < N; i++) {
             Seccion s = SECCIONES[i];
+            s.titulo = context.getString(s.tituloRes); // Actualiza la propiedad pública según el idioma actual
+
             MaterialCardView ficha = (MaterialCardView) inflater.inflate(R.layout.item_nui_ficha, this, false);
             ficha.setCardBackgroundColor(ColorUtils.blendARGB(colorSuperficie, s.color, 0.13f));
             ficha.setOutlineSpotShadowColor(s.color);
@@ -127,7 +131,7 @@ public class HubSeccionesView extends ViewGroup {
         aplicarSeleccion(animar);
     }
 
-    /** Resalta aún más la ficha seleccionada: el móvil está vertical y soltarlo en horizontal entra. */
+    /** Resalta aún más la ficha seleccionada. */
     public void setListo(boolean listo) {
         this.listo = listo;
         aplicarSeleccion(true);
@@ -175,8 +179,7 @@ public class HubSeccionesView extends ViewGroup {
             }
         }
 
-        // La cuadrícula se inclina hacia la ficha seleccionada.
-        // rotationY de Android tiene el signo contrario al rotateY de CSS, de ahí (c-1)*7.
+        // La cuadrícula se inclina hacia la ficha seleccionada
         int c = seleccion % 3, r = seleccion / 3;
         float ry = (c - 1) * 7f;
         float rx = (1 - r) * 6f;
@@ -198,7 +201,6 @@ public class HubSeccionesView extends ViewGroup {
         int ladoPorAncho = (w - 2 * hueco) / 3;
         lado = ladoPorAncho;
         if (MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED) {
-            // si no cabe a lo alto, las fichas se reducen (siguen siendo cuadradas)
             int ladoPorAlto = (MeasureSpec.getSize(heightMeasureSpec) - 2 * hueco) / 3;
             lado = Math.min(lado, ladoPorAlto);
         }
@@ -218,7 +220,7 @@ public class HubSeccionesView extends ViewGroup {
             int y = fila * (lado + hueco);
             getChildAt(i).layout(x, y, x + lado, y + lado);
         }
-        // el centro de giro es el centro de la cuadrícula
+        // El centro de giro es el centro de la cuadrícula
         setPivotX((r - l) / 2f);
         setPivotY((b - t) / 2f);
     }

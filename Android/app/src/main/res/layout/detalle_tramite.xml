@@ -81,7 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:accessibilityHeading="true"
-                    android:text="Requisitos"
+                    android:text="@string/requisitos"
                     android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <TextView
@@ -104,7 +104,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:accessibilityHeading="true"
-                    android:text="Plazos"
+                    android:text="@string/plazos"
                     android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <TextView
@@ -127,7 +127,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:accessibilityHeading="true"
-                    android:text="Documentos que necesitas"
+                    android:text="@string/documentos_necesitas"
                     android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
 
                 <LinearLayout

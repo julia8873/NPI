@@ -9,15 +9,14 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.tutorial.Gesto;
@@ -28,7 +27,6 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import java.util.List;
 
 public class PasosTramite extends PantallaSecretaria {
-
 
     private ViewPager2 vpPasos;
     private LinearLayout llPuntos;
@@ -46,28 +44,34 @@ public class PasosTramite extends PantallaSecretaria {
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
         CabeceraNui.preparar(barra);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
         Tramite tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
         List<Paso> pasos = tramite != null ? db.getPasos(tramite.id) : null;
         if (pasos == null || pasos.isEmpty()) {
-            Toast.makeText(this, "Este trámite no tiene pasos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pasos_sin_pasos, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        getSupportActionBar().setTitle("Paso a paso");
-        getSupportActionBar().setSubtitle(tramite.nombre);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.pasos_titulo);
+            getSupportActionBar().setSubtitle(tramite.nombre);
+        }
         numPasos = pasos.size();
 
-        String textoFinal = tramite.sePuedeSolicitar() ? "Solicitar ahora" : "Pedir cita";
+        String textoFinal = getString(tramite.sePuedeSolicitar()
+                ? R.string.pasos_btn_solicitar_ahora
+                : R.string.pasos_btn_pedir_cita);
         View.OnClickListener accionFinal = tramite.sePuedeSolicitar()
                 ? v -> startActivity(new Intent(this, SolicitudTramite.class)
-                        .putExtra("idProcedimiento", tramite.id)
-                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
                 : v -> startActivity(new Intent(this, CitaPrevia.class)
-                        .putExtra("idProcedimiento", tramite.id)
-                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
         vpPasos = findViewById(R.id.vpPasos);
         vpPasos.setAdapter(new PasoAdapter(pasos, textoFinal, accionFinal));
         // se pasa una ficha del fichero: la que se va se inclina y baja un poco
@@ -130,8 +134,7 @@ public class PasosTramite extends PantallaSecretaria {
             InclinarParaPasar.setActivado(this, activado);
             if (activado) {
                 detector.iniciar();
-                Toast.makeText(this, "Inclina a la derecha para avanzar y a la izquierda para volver",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.pasos_toast_inclinar, Toast.LENGTH_LONG).show();
             } else {
                 detector.parar();
             }
@@ -144,8 +147,8 @@ public class PasosTramite extends PantallaSecretaria {
         Tutorial t = new Tutorial(this, "pasos_tramite", 2)
                 .alEmpezar(() -> irA(0));
         if (numPasos > 1) {
-            t.gesto(R.id.vpPasos, Gesto.DESLIZAR_IZQ, "Desliza la ficha a la izquierda para ver el siguiente paso")
-                    .tocar(R.id.btnSiguiente, "O toca la flecha para avanzar (y la de la izquierda para volver)")
+            t.gesto(R.id.vpPasos, Gesto.DESLIZAR_IZQ, getString(R.string.pasos_tut_deslizar))
+                    .tocar(R.id.btnSiguiente, getString(R.string.pasos_tut_flecha))
                     .soloSi(() -> btnSiguiente.isEnabled());
         }
         if (detector.disponible() && numPasos > 1) {
@@ -154,8 +157,8 @@ public class PasosTramite extends PantallaSecretaria {
                         detector.iniciar();
                     })
                     .alTerminar(() -> { if (!swInclinar.isChecked()) detector.parar(); })
-                    .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil: a la derecha avanzas y a la izquierda vuelves")
-                    .info(R.id.swInclinar, "Con este interruptor lo activas o lo apagas cuando quieras");
+                    .sensor(Gesto.INCLINAR, getString(R.string.pasos_tut_inclinar))
+                    .info(R.id.swInclinar, getString(R.string.pasos_tut_interruptor));
         }
         return t;
     }

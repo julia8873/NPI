@@ -11,14 +11,14 @@ import android.os.SystemClock;
  * Gestos de inclinación del menú principal (acelerómetro).
  *
  * <ul>
- *   <li><b>Selección</b>:
- *       - Izquierda/Derecha (roll): elige columna (0: izq, 1: centro, 2: der).
- *       - Adelante/Hacia mí (pitch): inclinar el móvil hacia uno mismo selecciona abajo (fila 2);
+ *    <li><b>Selección</b>:
+ *       Izquierda/Derecha (roll): elige columna (0: izq, 1: centro, 2: der).
+ *       Adelante/Hacia mí (pitch): inclinar el móvil hacia uno mismo selecciona abajo (fila 2);
  *         inclinarlo hacia adelante selecciona arriba (fila 0).
  *       Una zona sólo se confirma si se mantiene {@link #DWELL_MS} ms.</li>
- *   <li><b>Entrar</b>: se realiza agitando el móvil (manejado por ShakeDetector en BaseActivity / MenuPrincipal).
+ *    <li><b>Entrar</b>: se realiza agitando el móvil (manejado por ShakeDetector en BaseActivity / MenuPrincipal).
  *       Se ha eliminado el gesto de entrar al pasar de vertical a horizontal.</li>
- * </ul>
+ *  </ul>
  */
 public class DetectorInclinacionMenu implements SensorEventListener {
 

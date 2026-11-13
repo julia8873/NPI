@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/nui_espacio_xs"
             android:gravity="center"
-            android:text="Toca para\nfotografiar"
+            android:text="@string/toca_para_fotografiar"
             android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
             android:textSize="@dimen/nui_texto_etiqueta" />
     </LinearLayout>
@@ -53,7 +53,7 @@
         android:layout_gravity="top|end"
         android:layout_margin="6dp"
         android:background="@drawable/fondo_papel"
-        android:text="Opcional"
+        android:text="@string/opcional"
         android:textColor="@color/nui_apagado"
         android:visibility="gone" />
 
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="@dimen/nui_espacio_s"
-        android:text="↓ A la carpeta"
+        android:text="@string/a_la_carpeta"
         android:visibility="gone" />
 
     <TextView

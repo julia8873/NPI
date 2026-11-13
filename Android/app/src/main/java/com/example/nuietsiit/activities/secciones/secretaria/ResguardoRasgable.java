@@ -20,12 +20,12 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
-import java.util.Collections;
-
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.example.nuietsiit.R;
+
+import java.util.Collections;
 
 /**
  * Resguardo de una cita con su línea perforada. Arrastrar el dedo por la línea, de izquierda a derecha, lo va rasgando:
@@ -49,6 +49,8 @@ public class ResguardoRasgable extends View {
     private final Path linea = new Path();
     private final RectF rect = new RectF();
     private final Vibrator vibrador;
+    private final String textoInicial;
+    private final String textoArrastrando;
 
     private float progreso;       // 0..1, cuánto se ha rasgado
     private float tijerasPista = -1; // 0..1 mientras las tijeras enseñan el gesto; -1 = sin pista
@@ -62,6 +64,8 @@ public class ResguardoRasgable extends View {
         super(context, attrs);
         dp = getResources().getDisplayMetrics().density;
         vibrador = context.getSystemService(Vibrator.class);
+        textoInicial = context.getString(R.string.resguardo_texto_inicial);
+        textoArrastrando = context.getString(R.string.resguardo_texto_arrastrando);
 
         papel.setColor(context.getColor(R.color.nui_superficie));
         sombra.setColor(context.getColor(R.color.nui_papel_sombra));
@@ -77,7 +81,8 @@ public class ResguardoRasgable extends View {
         desgarro.setStrokeWidth(1.5f * dp);
         texto.setColor(context.getColor(R.color.nui_apagado));
         texto.setTextSize(getResources().getDimension(R.dimen.nui_texto_etiqueta));
-        texto.setTypeface(Typeface.create(ResourcesCompat.getFont(context, R.font.nui_texto), Typeface.BOLD));
+        Typeface fuente = ResourcesCompat.getFont(context, R.font.nui_texto);
+        texto.setTypeface(Typeface.create(fuente, Typeface.BOLD));
         texto.setTextAlign(Paint.Align.CENTER);
         tijeras.setColor(context.getColor(R.color.nui_granada));
         tijeras.setStyle(Paint.Style.STROKE);
@@ -190,8 +195,7 @@ public class ResguardoRasgable extends View {
         rect.set(0, yLinea, w - s, h - s);
         c.drawRoundRect(rect, r, r, papel);
         c.drawRoundRect(rect, r, r, borde);
-        String t = arrastrando || progreso > 0 ? "Sigue hasta el final para cancelar"
-                : "Rasga por la línea para cancelar la cita";
+        String t = arrastrando || progreso > 0 ? textoArrastrando : textoInicial;
         float y = (yLinea + h - s) / 2f - (texto.descent() + texto.ascent()) / 2f;
         c.drawText(t, (w - s) / 2f + 10 * dp, y, texto);
     }

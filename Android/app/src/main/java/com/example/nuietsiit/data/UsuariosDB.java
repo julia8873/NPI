@@ -226,6 +226,16 @@ public class UsuariosDB {
         return filas > 0;
     }
 
+    // Actualiza el código de idioma de un estudiante.
+    public boolean actualizarIdiomaEstudiante(String correo, String codigoIdioma) {
+        if (correo == null || correo.isEmpty() || codigoIdioma == null || codigoIdioma.isEmpty()) return false;
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("codigoIdioma", codigoIdioma);
+        int filas = db.update("ESTUDIANTE", cv, "correoEstudiante = ?", new String[]{correo.toLowerCase()});
+        return filas > 0;
+    }
+
     // Actualiza los datos de un estudiante. Solo modifica los campos no nulos.
     public boolean actualizarAjustesEstudiante(String correo, String nuevoNombre, String nuevaPassword,
                                                Integer nuevoIdGrado, String nuevoCodigoIdioma,

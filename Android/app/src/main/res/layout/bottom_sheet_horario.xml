@@ -18,7 +18,7 @@
         android:id="@+id/tvBsHorarioTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🕒 Horario de Apertura"
+        android:text="@string/horario_apertura"
         android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="Comedor"
+        android:text="@string/comedor_label"
         android:textColor="#FF8C42"
         android:textSize="15sp"
         android:textStyle="bold" />
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Fecha seleccionada"
+        android:text="@string/fecha_seleccionada"
         android:textColor="#666666"
         android:textSize="13sp" />
 
@@ -52,9 +52,8 @@
         android:id="@+id/tvBsHorarioDetalle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Horario: 13:00 - 16:30"
+        android:text="@string/horario_13_16"
         android:textColor="#333333"
         android:textSize="16sp" />
 
 </LinearLayout>
-

@@ -1,5 +1,9 @@
 package com.example.nuietsiit.activities.secciones.mapa;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,16 +25,26 @@ public final class PlanificadorRuta {
     private static final Duration EMPATE = Duration.ofMinutes(1);
     private static final int SIGUIENTES_ALTERNATIVAS = 2;
 
+    private final Context ctx;
     private final RedTransporte red;
     private final RutaAPie aPie;
 
+    public PlanificadorRuta(Context ctx, RedTransporte red) {
+        this(ctx, red, RutaAPie.local(red));
+    }
+
+    public PlanificadorRuta(Context ctx, RedTransporte red, RutaAPie aPie) {
+        this.ctx = ctx;
+        this.red = red;
+        this.aPie = aPie;
+    }
+
     public PlanificadorRuta(RedTransporte red) {
-        this(red, RutaAPie.local(red));
+        this(null, red, RutaAPie.local(red));
     }
 
     public PlanificadorRuta(RedTransporte red, RutaAPie aPie) {
-        this.red = red;
-        this.aPie = aPie;
+        this(null, red, aPie);
     }
 
     /** Combinación fija subida/bajada; el bus concreto depende de la hora. */
@@ -169,32 +183,42 @@ public final class PlanificadorRuta {
         LocalDateTime llegada = bajada.plus(minutos(op.vuelta.minutos()));
         String linea = op.linea.id;
 
-        List<PlanRuta.Tramo> tramos = new ArrayList<>();
-        tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.A_PIE, op.ida.puntos, salida, enParada,
-                "Camina " + textoAPie(op.ida) + " hasta la parada " + op.subida.nombre,
-                op.subida.id, op.ida.metros, null, null, null, null));
-        tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.ESPERA, Collections.singletonList(op.subida.punto),
-                enParada, paso.hora,
-                "Espera el " + linea + " hacia " + op.sentido.hacia + " (pasa a las " + PlanRuta.hora(paso.hora) + ")",
-                op.subida.id, 0, op.linea, op.sentido, op.subida, op.bajada));
+        String inst1 = ctx != null ? ctx.getString(R.string.mapa_instruccion_camina_parada, textoAPie(op.ida), op.subida.nombre)
+                : "Camina " + textoAPie(op.ida) + " hasta la parada " + op.subida.nombre;
+        String inst2 = ctx != null ? ctx.getString(R.string.mapa_instruccion_espera_bus, linea, op.sentido.hacia, PlanRuta.hora(paso.hora))
+                : "Espera el " + linea + " hacia " + op.sentido.hacia + " (pasa a las " + PlanRuta.hora(paso.hora) + ")";
+
         List<Punto> forma = op.sentido.formaEntre(op.subida, op.bajada);
         int nParadas = op.sentido.paradas.indexOf(op.bajada) - op.sentido.paradas.indexOf(op.subida);
+
+        String inst3 = ctx != null ? (nParadas == 1
+                ? ctx.getString(R.string.mapa_instruccion_sube_bus_sing, linea, op.sentido.hacia, op.bajada.nombre, nParadas)
+                : ctx.getString(R.string.mapa_instruccion_sube_bus_plur, linea, op.sentido.hacia, op.bajada.nombre, nParadas))
+                : "Sube al " + linea + " hacia " + op.sentido.hacia + " y bájate en " + op.bajada.nombre
+                + " (" + nParadas + (nParadas == 1 ? " parada)" : " paradas)");
+
+        String inst4 = ctx != null ? ctx.getString(R.string.mapa_instruccion_camina_hasta, textoAPie(op.vuelta), destino.corto)
+                : "Camina " + textoAPie(op.vuelta) + " hasta " + destino.corto;
+
+        List<PlanRuta.Tramo> tramos = new ArrayList<>();
+        tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.A_PIE, op.ida.puntos, salida, enParada,
+                inst1, op.subida.id, op.ida.metros, null, null, null, null));
+        tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.ESPERA, Collections.singletonList(op.subida.punto),
+                enParada, paso.hora, inst2, op.subida.id, 0, op.linea, op.sentido, op.subida, op.bajada));
         tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.BUS, forma, paso.hora, bajada,
-                "Sube al " + linea + " hacia " + op.sentido.hacia + " y bájate en " + op.bajada.nombre
-                        + " (" + nParadas + (nParadas == 1 ? " parada)" : " paradas)"),
-                "bus_" + linea, longitud(forma), op.linea, op.sentido, op.subida, op.bajada));
+                inst3, "bus_" + linea, longitud(forma), op.linea, op.sentido, op.subida, op.bajada));
         tramos.add(new PlanRuta.Tramo(PlanRuta.TipoTramo.A_PIE, op.vuelta.puntos, bajada, llegada,
-                "Camina " + textoAPie(op.vuelta) + " hasta " + destino.corto,
-                destino.id, op.vuelta.metros, null, null, null, null));
+                inst4, destino.id, op.vuelta.metros, null, null, null, null));
         return new PlanRuta(PlanRuta.Tipo.BUS, origen, destino, tramos, salida, llegada);
     }
 
-    private static PlanRuta planAPie(Punto origen, RedTransporte.Lugar destino, RutaAPie.Camino camino,
-                                     LocalDateTime ahora) {
+    private PlanRuta planAPie(Punto origen, RedTransporte.Lugar destino, RutaAPie.Camino camino,
+                              LocalDateTime ahora) {
         LocalDateTime llegada = ahora.plus(minutos(camino.minutos()));
+        String inst = ctx != null ? ctx.getString(R.string.mapa_instruccion_camina_hasta, textoAPie(camino), destino.corto)
+                : "Camina " + textoAPie(camino) + " hasta " + destino.corto;
         PlanRuta.Tramo tramo = new PlanRuta.Tramo(PlanRuta.TipoTramo.A_PIE, camino.puntos, ahora, llegada,
-                "Camina " + textoAPie(camino) + " hasta " + destino.corto,
-                destino.id, camino.metros, null, null, null, null);
+                inst, destino.id, camino.metros, null, null, null, null);
         return new PlanRuta(PlanRuta.Tipo.A_PIE, origen, destino, Collections.singletonList(tramo), ahora, llegada);
     }
 

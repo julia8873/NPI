@@ -126,8 +126,8 @@ public final class PanelRutaExterior {
             } else if (++intentosGps < INTENTOS_GPS) {
                 handler.postDelayed(this, 1000);
             } else {
-                mostrarAviso("No encuentro tu ubicación",
-                        "Mantén pulsado el mapa para elegir desde dónde sales, o elige un lugar.");
+                mostrarAviso(act.getString(R.string.mapa_panel_no_encuentro_ubicacion),
+                        act.getString(R.string.mapa_panel_mantén_pulsado_mapa));
             }
         }
     };
@@ -216,15 +216,15 @@ public final class PanelRutaExterior {
         });
 
         // Desde: GPS, punto del mapa (tras mantener pulsado) y los lugares de la red
-        chipsDesde.addView(chip("📍 Mi ubicación", DESDE_GPS));
-        chipPuntoMapa = chip("📌 Punto del mapa", DESDE_MAPA);
+        chipsDesde.addView(chip(act.getString(R.string.mapa_panel_mi_ubicacion), DESDE_GPS));
+        chipPuntoMapa = chip(act.getString(R.string.mapa_panel_punto_del_mapa), DESDE_MAPA);
         chipPuntoMapa.setVisibility(View.GONE);
         chipsDesde.addView(chipPuntoMapa);
         for (RedTransporte.Lugar l : red.lugares) {
-            chipsDesde.addView(chip(l.icono + " " + l.corto + (l.ejemplo ? " (ejemplo)" : ""), l.id));
+            chipsDesde.addView(chip(l.icono + " " + l.corto + (l.ejemplo ? act.getString(R.string.mapa_panel_ejemplo) : ""), l.id));
         }
         // Hasta: automático según el horario y los lugares de la red
-        chipsHasta.addView(chip("🎓 Automático", HASTA_AUTO));
+        chipsHasta.addView(chip(act.getString(R.string.mapa_panel_automatico), HASTA_AUTO));
         for (RedTransporte.Lugar l : red.lugares) {
             chipsHasta.addView(chip(l.icono + " " + l.corto, l.id));
         }
@@ -354,7 +354,7 @@ public final class PanelRutaExterior {
         handler.removeCallbacks(refrescar);
         if (guiando) {
             handler.removeCallbacks(seguirGps);
-            tvTitulo.setText("Te llevo a " + planActual.destino.corto);
+            tvTitulo.setText(act.getString(R.string.mapa_panel_te_llevo_a, planActual.destino.corto));
             llGuia.addOnLayoutChangeListener(ajustarPeek);
             llGuia.post(() -> hoja.setState(BottomSheetBehavior.STATE_COLLAPSED));
         } else {
@@ -391,11 +391,10 @@ public final class PanelRutaExterior {
         btnMaps.setEnabled(true);
 
         if (lejos) {
-            tvLlegada.setText(String.format(Locale.getDefault(), "Estás a %.1f km", plan.metrosRecta / 1000));
-            tvSalida.setText("Desde aquí no hay ruta a pie ni en bus: usa Google Maps");
+            tvLlegada.setText(act.getString(R.string.mapa_panel_estas_a_km, plan.metrosRecta / 1000));
+            tvSalida.setText(act.getString(R.string.mapa_panel_sin_ruta_pie_bus));
         } else {
-            tvLlegada.setText("Llegas a las " + PlanRuta.horaArriba(plan.llegada) + " · "
-                    + plan.minutosTotales() + " min");
+            tvLlegada.setText(act.getString(R.string.mapa_panel_llegas_a_las, PlanRuta.horaArriba(plan.llegada), plan.minutosTotales()));
             actualizarSalida();
         }
         pintarPasos(plan);
@@ -477,8 +476,8 @@ public final class PanelRutaExterior {
         RedTransporte.Lugar lugar = red.lugar(clase != null ? clase.idEdificio : ProximaClase.ETSIIT);
         tvPista.setVisibility(View.VISIBLE);
         tvPista.setText(clase != null
-                ? "Según tu horario: " + clase.texto() + " → " + lugar.corto
-                : "Hoy no tienes más clases: te llevo a la " + lugar.corto);
+                ? act.getString(R.string.mapa_panel_segun_horario, clase.texto(act), lugar.corto)
+                : act.getString(R.string.mapa_panel_hoy_no_mas_clases, lugar.corto));
         return lugar;
     }
 
@@ -490,13 +489,12 @@ public final class PanelRutaExterior {
     private void actualizarSalida() {
         if (planActual == null || planActual.tipo == PlanRuta.Tipo.LEJOS) return;
         if (planActual.tipo == PlanRuta.Tipo.A_PIE) {
-            tvSalida.setText(String.format(Locale.getDefault(), "🚶 Todo a pie · %d m · sal cuando quieras",
-                    Math.round(planActual.metrosAPie)));
+            tvSalida.setText(act.getString(R.string.mapa_panel_todo_a_pie, Math.round(planActual.metrosAPie)));
             return;
         }
         long min = PlanRuta.minutosArriba(Duration.between(ahora(), planActual.salida));
-        tvSalida.setText(min <= 0 ? "¡Sal ya! (" + PlanRuta.hora(planActual.salida) + ")"
-                : "Sal a las " + PlanRuta.hora(planActual.salida) + " (en " + min + " min)");
+        tvSalida.setText(min <= 0 ? act.getString(R.string.mapa_panel_sal_ya, PlanRuta.hora(planActual.salida))
+                : act.getString(R.string.mapa_panel_sal_a_las_en_min, PlanRuta.hora(planActual.salida), min));
     }
 
     /**
@@ -515,22 +513,22 @@ public final class PanelRutaExterior {
         String origen = nombreOrigen();
         // Sin posición no sabemos dónde estás: no decir "no estás en…" (puede que acabes de elegirlo tú)
         AlertDialog.Builder dialogo = new AlertDialog.Builder(act)
-                .setTitle(gps == null ? "No te encuentro con el GPS" : "No estás en " + origen)
+                .setTitle(gps == null ? act.getString(R.string.mapa_panel_no_te_encuentro_gps) : act.getString(R.string.mapa_panel_no_estas_en, origen))
                 .setMessage(gps == null
                         ? "La guía te sigue con el GPS. Si empiezas, te irá guiando desde " + origen
                         + " en cuanto el GPS te encuentre.\n\nTambién puedes simular el trayecto para ver cómo sería."
                         : "La guía te sigue con el GPS, y esta ruta sale desde " + origen + ".\n\n"
                         + "Puedes simular el trayecto para ver cómo sería, o calcular la ruta desde donde estás.")
-                .setPositiveButton("▶ Simular trayecto", (d, w) -> {
+                .setPositiveButton(act.getString(R.string.mapa_panel_simular_trayecto), (d, w) -> {
                     alEmpezar.accept(planActual);
                     // El botón "Simular" es de la guía (guia_ruta_exterior.xml va dentro de este panel)
                     llGuia.findViewById(R.id.btnGuiaSimular).performClick();
                 })
-                .setNeutralButton("Cancelar", null);
+                .setNeutralButton(act.getString(R.string.cancelar), null);
         if (gps != null) {
-            dialogo.setNegativeButton("📍 Desde mi ubicación", (d, w) -> marcar(chipsDesde, DESDE_GPS));
+            dialogo.setNegativeButton(act.getString(R.string.mapa_panel_desde_mi_ubicacion), (d, w) -> marcar(chipsDesde, DESDE_GPS));
         } else {
-            dialogo.setNegativeButton("Empezar", (d, w) -> alEmpezar.accept(planActual));
+            dialogo.setNegativeButton(act.getString(R.string.mapa_panel_empezar), (d, w) -> alEmpezar.accept(planActual));
         }
         dialogo.show();
     }
@@ -546,7 +544,7 @@ public final class PanelRutaExterior {
                 + origen.substring(0, 1).toUpperCase(Locale.getDefault()) + origen.substring(1)
                 + (desdeProvisional ? " (sin GPS)" : "") + "  →  " + destino.icono + " " + destino.corto);
         int ini = sb.length();
-        sb.append("   cambiar ▾");
+        sb.append(act.getString(R.string.mapa_panel_cambiar));
         sb.setSpan(new ForegroundColorSpan(ContextCompat.getColor(act, R.color.nui_acento)),
                 ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         tvTitulo.setText(sb);
@@ -554,8 +552,8 @@ public final class PanelRutaExterior {
 
     private String nombreOrigen() {
         String tag = tagMarcado(chipsDesde);
-        return DESDE_MAPA.equals(tag) ? "el punto elegido"
-                : tag == null || DESDE_GPS.equals(tag) ? "tu ubicación" : red.lugar(tag).corto;
+        return DESDE_MAPA.equals(tag) ? act.getString(R.string.mapa_panel_punto_elegido)
+                : tag == null || DESDE_GPS.equals(tag) ? act.getString(R.string.mapa_panel_tu_ubicacion) : red.lugar(tag).corto;
     }
 
     /** Instrucciones del panel; salen solas la primera vez y luego con el botón "?". */
@@ -563,19 +561,9 @@ public final class PanelRutaExterior {
         if (act.isFinishing()) return;
         prefs().edit().putBoolean(AYUDA_VISTA, true).apply();
         new AlertDialog.Builder(act)
-                .setTitle("Cómo llegar")
-                .setMessage("📍 Desde: por defecto sales de tu ubicación (GPS). Si te mueves, la ruta se recalcula sola.\n\n"
-                        + "👆 Mantén pulsado cualquier punto del mapa para salir desde ahí, o elige un lugar en «Desde».\n\n"
-                        + "🎓 Hasta: «Automático» te lleva al edificio de tu próxima clase según tu horario.\n\n"
-                        + "🚌 Si compensa, te propone el bus 9 con la hora a la que tienes que salir. "
-                        + "En «Otros buses» puedes elegir uno antes o después.\n\n"
-                        + "📷 Toca un paso de la lista para ver una foto del sitio.\n\n"
-                        + "▶ «Empezar guía» te acompaña paso a paso: flecha, cuenta atrás y vibración "
-                        + "al salir, al llegar el bus y al bajarte.\n\n"
-                        + "📱 Durante la guía, levanta el móvil en vertical para ver la foto del camino en grande "
-                        + "con la flecha; bájalo para volver al mapa. Ponlo boca abajo para silenciar la voz.\n\n"
-                        + "Arrastra el panel hacia arriba para ver todo y hacia abajo para ver el mapa.")
-                .setPositiveButton("Entendido", null)
+                .setTitle(act.getString(R.string.mapa_panel_como_llegar_titulo))
+                .setMessage(act.getString(R.string.mapa_panel_como_llegar_ayuda))
+                .setPositiveButton(act.getString(R.string.mapa_panel_entendido), null)
                 .show();
     }
 
@@ -589,8 +577,8 @@ public final class PanelRutaExterior {
         for (PlanRuta p : opciones) {
             PlanRuta.Tramo bus = p.tramoBus();
             String texto = bus != null
-                    ? "🚌 " + bus.linea.id + " · " + PlanRuta.hora(bus.inicio) + " → " + PlanRuta.horaArriba(p.llegada)
-                    : "🚶 A pie → " + PlanRuta.horaArriba(p.llegada);
+                    ? act.getString(R.string.mapa_panel_chip_bus, bus.linea.id, PlanRuta.hora(bus.inicio), PlanRuta.horaArriba(p.llegada))
+                    : act.getString(R.string.mapa_panel_chip_pie, PlanRuta.horaArriba(p.llegada));
             Chip c = chip(texto, null);
             c.setTag(p);
             chipsAlternativas.addView(c);
@@ -621,25 +609,25 @@ public final class PanelRutaExterior {
         if (plan.tipo == PlanRuta.Tipo.LEJOS) return;
         String tag = tagMarcado(chipsDesde);
         String icono = tag == null || DESDE_GPS.equals(tag) || DESDE_MAPA.equals(tag) ? "📍" : "🏠";
-        llPasos.addView(fila(PlanRuta.hora(plan.salida), icono, null, "Sal desde " + nombreOrigen(), null, null));
+        llPasos.addView(fila(PlanRuta.hora(plan.salida), icono, null, act.getString(R.string.mapa_panel_sal_desde, nombreOrigen()), null, null));
         for (PlanRuta.Tramo t : plan.tramos) {
             switch (t.tipo) {
                 case A_PIE:
                     llPasos.addView(fila(PlanRuta.hora(t.inicio), "🚶", null, t.instruccion,
-                            t.minutos() + " min a pie", t));
+                            act.getString(R.string.mapa_panel_min_a_pie, (int) t.minutos()), t));
                     break;
                 case ESPERA:
                     llPasos.addView(fila(PlanRuta.hora(t.inicio), "🕒", null, t.instruccion,
-                            t.minutos() + " min de margen en la parada", t));
+                            act.getString(R.string.mapa_panel_min_margen_parada, (int) t.minutos()), t));
                     break;
                 case BUS:
                     llPasos.addView(fila(PlanRuta.hora(t.inicio), t.linea.id, colorDe(t.linea.color),
-                            t.instruccion, t.minutos() + " min en bus · bájate a las " + PlanRuta.hora(t.fin), t));
+                            t.instruccion, act.getString(R.string.mapa_panel_min_bus_bajate, (int) t.minutos(), PlanRuta.hora(t.fin)), t));
                     break;
             }
         }
         llPasos.addView(fila(PlanRuta.horaArriba(plan.llegada), "🏁", null,
-                "Llegas a " + plan.destino.nombre, null, null));
+                act.getString(R.string.mapa_panel_llegas_a, plan.destino.nombre), null, null));
     }
 
     /** Fila: hora · icono (o pastilla de la línea si color != null) · texto y detalle en gris. */
@@ -702,7 +690,7 @@ public final class PanelRutaExterior {
         bloque.addView(fila);
         int sangria = (int) (82 * dp);
         TextView titulo = new TextView(act);
-        titulo.setText("📷 Ver el camino (" + fotos.size() + " fotos)");
+        titulo.setText(act.getString(R.string.mapa_panel_ver_camino, fotos.size()));
         titulo.setTextColor(ContextCompat.getColor(act, R.color.nui_acento));
         titulo.setTypeface(Typeface.DEFAULT_BOLD);
         titulo.setTextSize(12);

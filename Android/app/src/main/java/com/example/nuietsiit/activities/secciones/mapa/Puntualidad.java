@@ -1,5 +1,9 @@
 package com.example.nuietsiit.activities.secciones.mapa;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,6 +36,15 @@ public final class Puntualidad {
         long margen = Math.floorDiv(Duration.between(llegada, limite).getSeconds(), 60);
         Nivel nivel = margen < 0 ? Nivel.ROJO : margen < MARGEN_JUSTO_MIN ? Nivel.AMBAR : Nivel.VERDE;
         return new Puntualidad(nivel, margen);
+    }
+
+    public String texto(Context ctx) {
+        if (ctx == null) return texto();
+        switch (nivel) {
+            case VERDE: return ctx.getString(R.string.mapa_llegas_min_antes, margen);
+            case AMBAR: return ctx.getString(R.string.mapa_llegas_justo);
+            default: return ctx.getString(R.string.mapa_llegaras_min_tarde, -margen);
+        }
     }
 
     public String texto() {

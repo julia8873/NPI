@@ -72,9 +72,11 @@ public class DetectorMesa implements SensorEventListener {
             primeraLectura = false;
             return;
         }
-        for (int i = 0; i < 3; i++) g[i] = FILTRO_G * g[i] + (1 - FILTRO_G) * a[i];
+        for (int i = 0; i < 3; i++) {
+            g[i] = FILTRO_G * g[i] + (1f - FILTRO_G) * a[i];
+        }
         float dx = a[0] - g[0], dy = a[1] - g[1], dz = a[2] - g[2];
-        movimiento = FILTRO_MOV * movimiento + (1 - FILTRO_MOV) * (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        movimiento = FILTRO_MOV * movimiento + (1f - FILTRO_MOV) * (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
 
         float norma = (float) Math.sqrt(g[0] * g[0] + g[1] * g[1] + g[2] * g[2]);
         float cos = norma > 0 ? g[2] / norma : 0f; // 1 = boca arriba y plano

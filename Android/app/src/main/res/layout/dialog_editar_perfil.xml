@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nombre completo"
+        android:text="@string/nombre_y_apellidos"
         android:textColor="#666666"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -20,7 +20,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_input_box"
-        android:hint="Tu nombre"
+        android:hint="@string/tu_nombre"
         android:paddingHorizontal="14dp"
         android:textColor="#1A1A1A"
         android:textSize="14sp" />
@@ -28,7 +28,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nueva contraseña (opcional)"
+        android:text="@string/nueva_contrasena_opcional"
         android:textColor="#666666"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -40,7 +40,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp"
         android:background="@drawable/bg_input_box"
-        android:hint="Dejar vacío para no cambiar"
+        android:hint="@string/dejar_vacio_para_no_cambiar"
         android:inputType="textPassword"
         android:paddingHorizontal="14dp"
         android:textColor="#1A1A1A"
@@ -49,7 +49,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Grado universitario"
+        android:text="@string/grado_universitario"
         android:textColor="#666666"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -60,10 +60,9 @@
         android:layout_height="48dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/bg_input_box"
-        android:hint="Selecciona tu grado"
+        android:hint="@string/selecciona_tu_grado"
         android:paddingHorizontal="14dp"
         android:textColor="#1A1A1A"
         android:textSize="14sp" />
 
 </LinearLayout>
-

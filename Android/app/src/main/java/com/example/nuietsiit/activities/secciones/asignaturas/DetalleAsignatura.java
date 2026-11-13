@@ -51,24 +51,24 @@ public class DetalleAsignatura extends BaseActivity {
             if (cursor.moveToFirst()) {
                 String codigo = cursor.getString(0);
                 String nombre = cursor.getString(1);
-                tvCodigoAsignatura.setText("Código: " + codigo);
+                tvCodigoAsignatura.setText(getString(R.string.codigo_fmt, codigo));
                 tvNombreAsignatura.setText(nombre);
-                tvCuatrimestre.setText(cursor.getInt(2) + "º");
+                tvCuatrimestre.setText(getString(R.string.cuatrimestre_fmt, cursor.getInt(2)));
                 tvCreditos.setText(String.valueOf(cursor.getDouble(3)));
                 enlaceGuiaDocente = cursor.getString(4);
 
-                RecienteUtil.guardar(this, DetalleAsignatura.class, nombre, "Detalle de asignatura", "CODIGO_ASIGNATURA", codigo, 4);
+                RecienteUtil.guardar(this, DetalleAsignatura.class, nombre, getString(R.string.detalle_asignatura_subtitulo), "CODIGO_ASIGNATURA", codigo, 4);
             }
             cursor.close();
 
             // 1. Cargar horarios de impartición de esta asignatura
             Cursor cSesiones = bd.getReadableDatabase().rawQuery(
                     "SELECT S.diaSemana, S.horaInicio, S.horaFin, S.grupo, S.tipoSesion, P.nombreProfesor, P.correoProfesor, E.nombreEspacio " +
-                    "FROM SESION_CLASE S " +
-                    "LEFT JOIN PROFESOR P ON S.correoProfesor = P.correoProfesor " +
-                    "LEFT JOIN ESPACIO E ON S.idEspacio = E.idEspacio " +
-                    "WHERE S.codigoAsignatura = ? " +
-                    "ORDER BY S.diaSemana, S.horaInicio",
+                            "FROM SESION_CLASE S " +
+                            "LEFT JOIN PROFESOR P ON S.correoProfesor = P.correoProfesor " +
+                            "LEFT JOIN ESPACIO E ON S.idEspacio = E.idEspacio " +
+                            "WHERE S.codigoAsignatura = ? " +
+                            "ORDER BY S.diaSemana, S.horaInicio",
                     new String[]{codigoAsignatura});
 
             if (contenedorHorarios != null) {
@@ -85,8 +85,9 @@ public class DetalleAsignatura extends BaseActivity {
                         String espacioNombre = cSesiones.getString(7);
 
                         String diaNombre = obtenerNombreDia(diaSemana);
-                        String tipoTexto = (tipo != null ? tipo.toUpperCase() : "CLASE") + " (Grupo " + (grupo != null ? grupo : "A") + ")";
-                        String horarioTexto = "🗓️ " + diaNombre + " de " + hIni + " a " + hFin;
+                        String tipoEtiqueta = tipo != null ? tipo.toUpperCase() : getString(R.string.clase_mayus);
+                        String tipoTexto = getString(R.string.sesion_grupo_fmt, tipoEtiqueta, grupo != null ? grupo : "A");
+                        String horarioTexto = getString(R.string.horario_fmt, diaNombre, hIni, hFin);
                         if (espacioNombre != null && !espacioNombre.isEmpty()) {
                             horarioTexto += " · " + espacioNombre;
                         }
@@ -121,7 +122,7 @@ public class DetalleAsignatura extends BaseActivity {
                 } else {
                     if (cSesiones != null) cSesiones.close();
                     TextView tvVacio = new TextView(this);
-                    tvVacio.setText("No hay sesiones de clase registradas para esta asignatura.");
+                    tvVacio.setText(R.string.sin_sesiones_registradas);
                     tvVacio.setTextSize(14f);
                     tvVacio.setTextColor(Color.GRAY);
                     contenedorHorarios.addView(tvVacio);
@@ -163,7 +164,7 @@ public class DetalleAsignatura extends BaseActivity {
                 } else {
                     if (cursorProf != null) cursorProf.close();
                     TextView tvVacio = new TextView(this);
-                    tvVacio.setText("No hay profesores asignados en esta asignatura.");
+                    tvVacio.setText(R.string.sin_profesores_asignados);
                     tvVacio.setTextSize(14f);
                     tvVacio.setTextColor(Color.GRAY);
                     contenedorProfesorado.addView(tvVacio);
@@ -177,21 +178,21 @@ public class DetalleAsignatura extends BaseActivity {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(enlaceGuiaDocente));
                 startActivity(browserIntent);
             } else {
-                Toast.makeText(this, "Enlace no disponible", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.enlace_no_disponible, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private String obtenerNombreDia(int diaSemana) {
         switch (diaSemana) {
-            case 1: return "Lunes";
-            case 2: return "Martes";
-            case 3: return "Miércoles";
-            case 4: return "Jueves";
-            case 5: return "Viernes";
-            case 6: return "Sábado";
-            case 7: return "Domingo";
-            default: return "Día " + diaSemana;
+            case 1: return getString(R.string.dia_lunes);
+            case 2: return getString(R.string.dia_martes);
+            case 3: return getString(R.string.dia_miercoles);
+            case 4: return getString(R.string.dia_jueves);
+            case 5: return getString(R.string.dia_viernes);
+            case 6: return getString(R.string.dia_sabado);
+            case 7: return getString(R.string.dia_domingo);
+            default: return getString(R.string.dia_generico_fmt, diaSemana);
         }
     }
 }

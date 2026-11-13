@@ -72,10 +72,9 @@ public class HojasPaginadas extends FrameLayout {
      * (se decide entonces: al crear el tutorial aún no se ha medido nada).
      */
     public Tutorial pasosTutorial(Tutorial t) {
-        return t.gesto(getId(), Gesto.DESLIZAR_IZQ,
-                        "No cabe todo en una hoja: desliza a la izquierda (o toca el lado derecho del pie) para pasar")
+        return t.gesto(getId(), Gesto.DESLIZAR_IZQ, getContext().getString(R.string.hojas_tut_deslizar))
                 .soloSi(() -> hoja < cortes.size() - 1)
-                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a la derecha o a la izquierda para pasar de hoja")
+                .sensor(Gesto.INCLINAR, getContext().getString(R.string.hojas_tut_inclinar))
                 .soloSi(inclinar::escuchando);
     }
 
@@ -124,7 +123,9 @@ public class HojasPaginadas extends FrameLayout {
         hoja = Math.max(0, Math.min(nueva, cortes.size() - 1));
         scrollTo(0, cortes.get(hoja));
         invalidate();
-        if (anunciar && cortes.size() > 1) announceForAccessibility("Hoja " + (hoja + 1) + " de " + cortes.size());
+        if (anunciar && cortes.size() > 1) {
+            announceForAccessibility(getContext().getString(R.string.hojas_anuncio_pagina_fmt, hoja + 1, cortes.size()));
+        }
         if (alCambiarHoja != null) alCambiarHoja.alCambiar(hoja, getHojas());
     }
 

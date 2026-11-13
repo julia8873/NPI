@@ -1,5 +1,9 @@
 package com.example.nuietsiit.activities.secciones.mapa;
 
+import android.content.Context;
+
+import com.example.nuietsiit.R;
+
 import java.text.Normalizer;
 import java.util.Locale;
 
@@ -54,6 +58,18 @@ public class UbicacionUsuario {
     /** Y en píxeles del plano, dado el alto del drawable que se está mostrando. */
     public float yPx(int altoPlano) {
         return normalizada ? y * altoPlano : y;
+    }
+
+    public String descripcionMetodo(Context ctx) {
+        if (ctx == null) return descripcionMetodo();
+        switch (metodo) {
+            case HORARIO: return ctx.getString(R.string.mapa_metodo_horario);
+            case ENTRADA: return ctx.getString(R.string.mapa_metodo_entrada);
+            case QR:      return ctx.getString(R.string.mapa_metodo_qr);
+            case GPS:     return ctx.getString(R.string.mapa_metodo_gps);
+            case MANUAL:  return ctx.getString(R.string.mapa_metodo_manual);
+            default:      return "";
+        }
     }
 
     public String descripcionMetodo() {

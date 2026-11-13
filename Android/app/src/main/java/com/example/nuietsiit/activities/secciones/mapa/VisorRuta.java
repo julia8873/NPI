@@ -207,17 +207,17 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         });
 
         if (!brujula.disponible()) {
-            tvEstadoFoto.setText("Sin sensor de orientación: usa el control manual");
+            tvEstadoFoto.setText(getString(R.string.mapa_sin_sensor_orientacion));
             activarModoManual(true);
         } else if (!esRutaGuiada) {
-            tvEstadoFoto.setText("Esperando al sensor de orientación...");
+            tvEstadoFoto.setText(getString(R.string.mapa_esperando_sensor_orientacion));
         }
     }
 
     private void avanzarPasoRuta() {
         if (!esRutaGuiada) return;
         if (esperandoLlegadaPlanta) {
-            Toast.makeText(this, "🛗 Confirma que has llegado a la 1ª Planta para continuar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.mapa_confirma_llegada_p1), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -235,7 +235,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         indiceRutaActual++;
 
         if (indiceRutaActual > recursosRuta.size()) {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            tvEstadoFoto.setText(getString(R.string.mapa_has_llegado_al_destino, destinoNombre));
         } else {
             ivFotoRuta.setImageResource(recursosRuta.get(indiceRutaActual - 1));
             configurarNodoRutaActual();
@@ -246,13 +246,13 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
     private void comprobarEventosAscensor() {
         if (esRutaAula && usaAscensor) {
             if (indiceRutaActual == 4) {
-                tvEstadoFoto.setText("🛗 Uso del ascensor...");
+                tvEstadoFoto.setText(getString(R.string.mapa_subiendo_ascensor));
                 mostrarDialogoBotonAscensor();
                 return;
             }
             if (indiceRutaActual == 5) {
                 esperandoLlegadaPlanta = true;
-                tvEstadoFoto.setText("🛗 Esperando confirmación de llegada...");
+                tvEstadoFoto.setText(getString(R.string.mapa_esperando_confirmacion_llegada));
                 mostrarDialogoLlegadaPlanta();
                 return;
             }
@@ -263,17 +263,17 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
         if (indiceRutaActual == fotoClave) {
             preguntaAscensorMostrada = true;
-            tvEstadoFoto.setText("🛗 Opción de Ascensor...");
+            tvEstadoFoto.setText(getString(R.string.mapa_deseas_ascensor_titulo));
             mostrarDialogoAscensor();
         }
     }
 
     private void mostrarDialogoBotonAscensor() {
         new AlertDialog.Builder(this)
-                .setTitle("🛗 Uso del Ascensor")
-                .setMessage("Pulsa el botón del ascensor para ir a la 1ª Planta.")
+                .setTitle(getString(R.string.mapa_uso_ascensor_titulo))
+                .setMessage(getString(R.string.mapa_uso_ascensor_msg))
                 .setCancelable(false)
-                .setPositiveButton("OK", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.aceptar), (dialog, which) -> {
                     avanzarSiguienteFotoRuta();
                 })
                 .show();
@@ -281,10 +281,10 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
     private void mostrarDialogoLlegadaPlanta() {
         new AlertDialog.Builder(this)
-                .setTitle("🛗 En el Ascensor")
-                .setMessage("¿Has llegado ya a la 1ª Planta?")
+                .setTitle(getString(R.string.mapa_en_el_ascensor_titulo))
+                .setMessage(getString(R.string.mapa_en_el_ascensor_msg))
                 .setCancelable(false)
-                .setPositiveButton("¡Sí, he llegado!", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.mapa_si_he_llegado), (dialog, which) -> {
                     esperandoLlegadaPlanta = false;
                     avanzarSiguienteFotoRuta();
                 })
@@ -293,17 +293,17 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
     private void mostrarDialogoAscensor() {
         new AlertDialog.Builder(this)
-                .setTitle("🛗 ¿Deseas usar el ascensor?")
-                .setMessage("¿Quieres utilizar el ascensor para continuar la ruta?")
+                .setTitle(getString(R.string.mapa_deseas_ascensor_titulo))
+                .setMessage(getString(R.string.mapa_deseas_ascensor_msg))
                 .setCancelable(false)
-                .setPositiveButton("Sí", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.mapa_si), (dialog, which) -> {
                     usaAscensor = true;
-                    Toast.makeText(this, "🛗 Ruta por ascensor activada", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.mapa_ruta_ascensor_activada), Toast.LENGTH_SHORT).show();
                     cargarRutaAscensorImagenes();
                 })
-                .setNegativeButton("No", (dialog, which) -> {
+                .setNegativeButton(getString(R.string.mapa_no), (dialog, which) -> {
                     usaAscensor = false;
-                    Toast.makeText(this, "🚶 Continuando por escaleras", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.mapa_continuando_escaleras), Toast.LENGTH_SHORT).show();
                     configurarNodoRutaActual();
                 })
                 .show();
@@ -392,25 +392,25 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         if (indiceRutaActual < recursosRuta.size()) {
             avanzarSiguienteFotoRuta();
         } else {
-            tvEstadoFoto.setText("🎉 ¡Has llegado al " + destinoNombre + "!");
+            tvEstadoFoto.setText(getString(R.string.mapa_has_llegado_al_destino, destinoNombre));
         }
     }
 
     private void actualizarTextoRuta() {
         if (!esRutaGuiada) return;
         if (indiceRutaActual > recursosRuta.size()) {
-            tvEstadoFoto.setText("🎉 ¡Destino alcanzado: " + destinoNombre + "!");
+            tvEstadoFoto.setText(getString(R.string.mapa_destino_alcanzado, destinoNombre));
             return;
         }
         if (esperandoLlegadaPlanta) {
-            tvEstadoFoto.setText("🛗 Subiendo en el ascensor...");
+            tvEstadoFoto.setText(getString(R.string.mapa_subiendo_ascensor));
         } else if (esperandoGiro) {
-            tvEstadoFoto.setText("🔄 ¡Gira el móvil hacia la dirección indicada!");
+            tvEstadoFoto.setText(getString(R.string.mapa_gira_direccion_indicada));
         } else if (pasosRequeridosNodo == 0) {
-            tvEstadoFoto.setText("🔄 ¡Gira para continuar!");
+            tvEstadoFoto.setText(getString(R.string.mapa_gira_para_continuar));
         } else {
             int restantes = pasosRequeridosNodo - pasosDados;
-            tvEstadoFoto.setText(String.format(Locale.getDefault(), "🚶 Avanza %d pasos al frente", restantes));
+            tvEstadoFoto.setText(getString(R.string.mapa_avanza_pasos_al_frente, restantes));
         }
     }
 
@@ -470,9 +470,9 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
             if (indiceRutaActual == 1) {
                 float difSur = FotosRuta.diferencia(180f, grados);
                 if (difSur > 35f) {
-                    tvEstadoFoto.setText("⚠️ ¡Gira hacia el Sur para iniciar la ruta!");
+                    tvEstadoFoto.setText(getString(R.string.mapa_gira_sur_para_iniciar));
                 } else {
-                    tvEstadoFoto.setText("🧭 ¡Orientado al Sur! Avanzando...");
+                    tvEstadoFoto.setText(getString(R.string.mapa_orientado_al_sur));
                     avanzarSiguienteFotoRuta();
                 }
             } else if (esperandoGiro && !esperandoLlegadaPlanta) {
@@ -481,8 +481,8 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
                     avanzarSiguienteFotoRuta();
                 } else {
                     float diffRelativa = (rumboRequeridoNodo - grados + 540f) % 360f - 180f;
-                    String sentido = diffRelativa > 0 ? "hacia la DERECHA" : "hacia la IZQUIERDA";
-                    tvEstadoFoto.setText("🔄 Gira " + sentido + " para continuar.");
+                    String sentido = diffRelativa > 0 ? getString(R.string.mapa_hacia_derecha) : getString(R.string.mapa_hacia_izquierda);
+                    tvEstadoFoto.setText(getString(R.string.mapa_gira_sentido_para_continuar, sentido));
                 }
             }
             return;
@@ -493,7 +493,7 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
 
     private void mostrarRumbo(float rumbo) {
         int redondeado = Math.round(rumbo) % 360;
-        tvRumbo.setText(String.format(Locale.getDefault(), "Rumbo: %d° %s", redondeado, puntoCardinal(rumbo)));
+        tvRumbo.setText(getString(R.string.mapa_rumbo_formato, redondeado, puntoCardinal(rumbo)));
 
         FotosRuta.Foto foto = FotosRuta.elegir(fotos, rumbo);
         int novo = (foto == null) ? 0 : foto.idRecurso;
@@ -501,10 +501,10 @@ public class VisorRuta extends BaseActivity implements Brujula.Listener, SensorE
         recursoMostrado = novo;
 
         if (novo == 0) {
-            tvEstadoFoto.setText("Sin foto en esta dirección");
+            tvEstadoFoto.setText(getString(R.string.mapa_sin_foto_direccion));
             ivFotoRuta.animate().alpha(0f).setDuration(150).start();
         } else {
-            tvEstadoFoto.setText(String.format(Locale.getDefault(), "Mostrando foto de %d°", foto.grados));
+            tvEstadoFoto.setText(getString(R.string.mapa_mostrando_foto, foto.grados));
             ivFotoRuta.setImageResource(novo);
             ivFotoRuta.animate().alpha(1f).setDuration(150).start();
         }

@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.widget.Toast;
 
+import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.secciones.mapa.LocalizadorUsuario;
 
 import java.util.Calendar;
@@ -21,7 +22,7 @@ import java.util.Calendar;
  * Detecta cuando el móvil se coloca boca abajo sobre una superficie (Z <= -8.0 m/s²).
  * Si el usuario se encuentra en horario de clase, activa el MODO SILENCIO REAL del sistema
  * para todo el teléfono (llamadas, notificaciones, sonidos del sistema).
- * Al levantar el móvil boca arriba, restaura el sonido normal del sistema.
+ * Al levantar el móvil boca arriba, restaura el estado de sonido anterior del sistema.
  */
 public class DetectorBocaAbajo implements SensorEventListener {
 
@@ -44,6 +45,10 @@ public class DetectorBocaAbajo implements SensorEventListener {
     private boolean activadoModoSilencio = false;
     private long ultimoDisparo = 0;
 
+    // Estado previo del teléfono para restaurarlo al levantarlo
+    private int ringerModePrevio = AudioManager.RINGER_MODE_NORMAL;
+    private int interruptionFilterPrevio = NotificationManager.INTERRUPTION_FILTER_ALL;
+
     public DetectorBocaAbajo(Context context) {
         this.context = context.getApplicationContext();
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
@@ -57,7 +62,6 @@ public class DetectorBocaAbajo implements SensorEventListener {
     public void iniciar() {
         if (acelerometro == null || sensorManager == null) return;
         primeraLectura = true;
-        activadoModoSilencio = false;
         sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_UI);
     }
 
@@ -103,57 +107,79 @@ public class DetectorBocaAbajo implements SensorEventListener {
                         context, correo, Calendar.getInstance());
 
                 if (sesion != null) {
-                    activadoModoSilencio = true;
-                    ultimoDisparo = ahora;
-                    activarModoSilencioSistema(sesion);
+                    if (activarModoSilencioSistema(sesion)) {
+                        activadoModoSilencio = true;
+                        ultimoDisparo = ahora;
+                    } else {
+                        // Evitar abrir en bucle los ajustes si no tiene permiso
+                        ultimoDisparo = ahora;
+                        tiempoInicioBocaAbajo = 0;
+                    }
                 }
             }
         } else {
-            if (activadoModoSilencio) {
+            // Si estaba silenciado por este detector y el usuario levanta el móvil (Z > 0)
+            if (activadoModoSilencio && zFiltrado > 2.0f) {
                 activadoModoSilencio = false;
+                restaurarModoSonidoSistema();
             }
             tiempoInicioBocaAbajo = 0;
         }
     }
 
-    private void activarModoSilencioSistema(LocalizadorUsuario.SesionActual sesion) {
+    /**
+     * Silencia por completo llamadas, notificaciones y sistema.
+     * @return true si se pudo silenciar, false si falta permiso de No Molestar.
+     */
+    private boolean activarModoSilencioSistema(LocalizadorUsuario.SesionActual sesion) {
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (audioManager != null) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (notificationManager != null && notificationManager.isNotificationPolicyAccessGranted()) {
-                        notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
-                        audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                    } else {
-                        // Muta los canales del sistema directamente
-                        audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_RING, AudioManager.ADJUST_MUTE, 0);
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_MUTE, 0);
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+        if (audioManager == null) return false;
 
-                        // Abrir ajuste de No Molestar para conceder acceso permanente si no se ha otorgado
-                        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                        Toast.makeText(context, "Concede acceso a «No Molestar» para permitir silenciar llamadas del sistema automáticamente", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                }
-            } catch (Exception e) {
-                try {
-                    audioManager.setStreamVolume(AudioManager.STREAM_RING, 0, 0);
-                    audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, 0, 0);
-                    audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, 0, 0);
-                } catch (Exception ignored) {}
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (notificationManager == null || !notificationManager.isNotificationPolicyAccessGranted()) {
+                // Pedir permiso de Acceso a No Molestar SIN llamar antes a setRingerMode (que lanzaría SecurityException)
+                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                Toast.makeText(context, R.string.boca_abajo_permiso_dnd, Toast.LENGTH_LONG).show();
+                return false;
             }
+
+            // Guardar estado previo para poder restaurarlo después
+            ringerModePrevio = audioManager.getRingerMode();
+            interruptionFilterPrevio = notificationManager.getCurrentInterruptionFilter();
+
+            // Silencio total del sistema (corta llamadas, tono y vibración)
+            notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+            audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+        } else {
+            ringerModePrevio = audioManager.getRingerMode();
+            audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
         }
 
-        String aulaTexto = sesion.aula != null ? (" (" + sesion.aula + ")") : "";
-        String msg = "🔕 Móvil totalmente silenciado en el sistema durante " + sesion.nombreAsignatura + aulaTexto;
+        String asignaturaConAula = sesion.nombreAsignatura + (sesion.aula != null ? (" (" + sesion.aula + ")") : "");
+        String msg = context.getString(R.string.boca_abajo_silenciado_fmt, asignaturaConAula);
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        return true;
+    }
+
+    private void restaurarModoSonidoSistema() {
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (audioManager == null) return;
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && notificationManager != null
+                    && notificationManager.isNotificationPolicyAccessGranted()) {
+                notificationManager.setInterruptionFilter(interruptionFilterPrevio);
+            }
+            audioManager.setRingerMode(ringerModePrevio);
+            Toast.makeText(context, R.string.boca_abajo_restaurado, Toast.LENGTH_SHORT).show();
+        } catch (SecurityException ignored) {
+        }
     }
 
     @Override

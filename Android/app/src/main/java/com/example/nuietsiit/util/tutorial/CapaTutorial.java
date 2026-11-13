@@ -140,7 +140,7 @@ class CapaTutorial extends FrameLayout {
         arriba.addView(tvProgreso);
         arriba.addView(new View(actividad), new LinearLayout.LayoutParams(0, 1, 1f));
         btnSaltarTodo = texto(14, R.color.nui_apagado, false);
-        btnSaltarTodo.setText("Saltar tutorial");
+        btnSaltarTodo.setText(R.string.tut_saltar_todo);
         btnSaltarTodo.setPaintFlags(btnSaltarTodo.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         btnSaltarTodo.setMinHeight((int) (44 * dp));
         btnSaltarTodo.setGravity(Gravity.CENTER_VERTICAL);
@@ -204,9 +204,9 @@ class CapaTutorial extends FrameLayout {
 
         pintarPuntos(indice, total);
         tvProgreso.setText((indice + 1) + "/" + total);
-        tvProgreso.setContentDescription("Paso " + (indice + 1) + " de " + total);
+        tvProgreso.setContentDescription(getContext().getString(R.string.tut_progreso_desc_fmt, indice + 1, total));
         tvTexto.setText(nuevo.texto);
-        btnPaso.setText(nuevo.esInfo() ? "Entendido" : "Saltar paso");
+        btnPaso.setText(nuevo.esInfo() ? R.string.tut_entendido : R.string.tut_saltar_paso);
         // con TalkBack muchos gestos no se pueden hacer, y escanear necesita un código a mano:
         // saltar se ofrece desde el principio
         estiloBoton(btnPaso, nuevo.esInfo() || conTalkBack || nuevo.gesto == Gesto.ESCANEAR);
@@ -235,8 +235,8 @@ class CapaTutorial extends FrameLayout {
         removeCallbacks(resaltarSaltar);
         mano.parar();
         vibrar();
-        tvTexto.setText("¡Eso es!");
-        announceForAccessibility("¡Eso es!");
+        tvTexto.setText(R.string.tut_acierto);
+        announceForAccessibility(getContext().getString(R.string.tut_acierto));
 
         float cx = hayFoco ? foco.centerX() : getWidth() / 2f;
         float cy = hayFoco ? foco.centerY() : bocadillo.getY() - 60 * dp;
@@ -271,9 +271,9 @@ class CapaTutorial extends FrameLayout {
         for (int i = 0; i < puntos.getChildCount(); i++) puntos.getChildAt(i).setBackground(punto(true));
         tvProgreso.setText("");
         btnSaltarTodo.setVisibility(GONE);
-        tvTexto.setText("¡Listo! Toca ? para repetirlo");
-        announceForAccessibility("¡Listo! Toca el botón de ayuda para repetirlo");
-        btnPaso.setText("Cerrar");
+        tvTexto.setText(R.string.tut_despedida);
+        announceForAccessibility(getContext().getString(R.string.tut_despedida_desc));
+        btnPaso.setText(R.string.tut_cerrar);
         estiloBoton(btnPaso, true);
         post(this::colocarBocadillo);
         postDelayed(quitarSola, DURACION_DESPEDIDA);

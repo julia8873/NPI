@@ -18,7 +18,6 @@ import com.example.nuietsiit.data.modelo.MensajeChat;
 import com.example.nuietsiit.util.GeminiManager;
 import com.example.nuietsiit.util.GeminiTools;
 import com.example.nuietsiit.util.SesionUtil;
-
 import com.google.ai.client.generativeai.type.GenerateContentResponse;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -116,10 +115,7 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void agregarMensajeBienvenida() {
-        String saludo = "¡Hola! Soy tu Asistente Virtual de la ETSIIT impulsado por Gemini.\n\n" +
-                "¿En qué te puedo ayudar hoy? Puedes hacerme preguntas sobre asignaturas, profesores, " +
-                "menús del comedor, o pedirme información de la facultad.";
-        listaMensajes.add(new MensajeChat(saludo, false));
+        listaMensajes.add(new MensajeChat(getString(R.string.chat_bienvenida), false));
         chatAdapter.notifyItemInserted(listaMensajes.size() - 1);
         rvChatMensajes.scrollToPosition(listaMensajes.size() - 1);
     }
@@ -148,7 +144,7 @@ public class ChatActivity extends BaseActivity {
             public void onRespuesta(GenerateContentResponse respuesta) {
                 String respuestaTexto = respuesta.getText();
                 if (respuestaTexto == null || respuestaTexto.isEmpty()) {
-                    respuestaTexto = "No he recibido una respuesta de la API.";
+                    respuestaTexto = getString(R.string.chat_sin_respuesta);
                 }
 
                 mensajeCargando.setCargando(false);
@@ -162,9 +158,10 @@ public class ChatActivity extends BaseActivity {
             @Override
             public void onError(Throwable error) {
                 Log.e("ChatGemini", "Error de conexión con la API", error);
-                String detalleError = error != null && error.getMessage() != null ? error.getMessage() : "Error desconocido";
-                String errorTexto = "Error de conexión con Gemini:\n\n" + detalleError +
-                        "\n\nPor favor, comprueba tu conexión o tu API Key e inténtalo de nuevo.";
+                String detalleError = error != null && error.getMessage() != null
+                        ? error.getMessage()
+                        : getString(R.string.chat_error_desconocido);
+                String errorTexto = getString(R.string.chat_error_conexion_fmt, detalleError);
 
                 mensajeCargando.setCargando(false);
                 mensajeCargando.setTexto(errorTexto);

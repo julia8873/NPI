@@ -157,7 +157,9 @@ public class FicheroPaginado extends LinearLayout {
                 if (arrastrando && Math.abs(dx) > getWidth() / 6f) {
                     pasar(dx < 0 ? 1 : -1);
                     Tutorial.avisar(getContext(), dx < 0 ? Gesto.DESLIZAR_IZQ : Gesto.DESLIZAR_DER);
-                } else animate().translationX(0).setDuration(150).start();
+                } else {
+                    animate().translationX(0).setDuration(150).start();
+                }
                 arrastrando = false;
                 return true;
             case MotionEvent.ACTION_CANCEL:

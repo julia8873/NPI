@@ -10,6 +10,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 
+import com.example.nuietsiit.R;
+
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
@@ -97,7 +99,7 @@ public final class CapaLugares {
             etiqueta.setIcon(new BitmapDrawable(ctx.getResources(),
                     etiquetaBitmap(ctx, lugar.icono + " " + lugar.corto, lugar.destacado)));
             etiqueta.setTitle(lugar.nombre);
-            if (lugar.ejemplo) etiqueta.setSnippet("Ubicación de ejemplo");
+            if (lugar.ejemplo) etiqueta.setSnippet(ctx.getString(R.string.mapa_ubicacion_ejemplo));
             if (alTocarLugar != null) {
                 etiqueta.setOnMarkerClickListener((m, v) -> { alTocarLugar.accept(lugar.id); return true; });
             }
@@ -118,8 +120,8 @@ public final class CapaLugares {
                     m.setIcon(icono);
                     m.setTitle("🚌 " + linea.id + " · " + parada.nombre);
                     m.setOnMarkerClickListener((marcador, vista) -> {
-                        marcador.setSnippet("Hacia " + sentido.hacia + ": "
-                                + proximosBuses(horario, sentido, parada, LocalDateTime.now()));
+                        marcador.setSnippet(ctx.getString(R.string.mapa_hacia_parada, sentido.hacia,
+                                proximosBuses(ctx, horario, sentido, parada, LocalDateTime.now())));
                         marcador.showInfoWindow();
                         return true;
                     });
@@ -151,14 +153,14 @@ public final class CapaLugares {
     }
 
     /** "3 min, 11 min, 19 min" o "no hay más buses hoy". */
-    static String proximosBuses(HorarioBus horario, RedTransporte.Sentido sentido,
+    static String proximosBuses(Context ctx, HorarioBus horario, RedTransporte.Sentido sentido,
                                 RedTransporte.Parada parada, LocalDateTime ahora) {
         List<HorarioBus.Paso> pasos = horario.proximosPasos(sentido, parada, ahora, PROXIMOS_BUSES);
-        if (pasos.isEmpty()) return "no hay más buses hoy";
+        if (pasos.isEmpty()) return ctx.getString(R.string.mapa_no_hay_mas_buses_hoy);
         List<String> textos = new ArrayList<>();
         for (HorarioBus.Paso paso : pasos) {
             long min = Duration.between(ahora, paso.hora).toMinutes();
-            textos.add(min <= 0 ? "llegando" : min + " min");
+            textos.add(min <= 0 ? ctx.getString(R.string.mapa_bus_llegando) : ctx.getString(R.string.mapa_bus_minutos, (int) min));
         }
         return String.join(", ", textos);
     }

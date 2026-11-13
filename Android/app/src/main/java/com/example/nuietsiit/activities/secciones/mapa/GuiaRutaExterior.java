@@ -28,6 +28,8 @@ import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+
+import com.example.nuietsiit.R;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
@@ -236,9 +238,9 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         llPuntos.removeAllViews();
         tvPaso.setVisibility(View.GONE);
         tvAviso.setVisibility(View.GONE);
-        btnSimular.setText("▶ Simular");
+        btnSimular.setText(act.getString(R.string.mapa_guia_simular));
         btnSimular.setVisibility(View.VISIBLE);
-        btnTerminar.setText("Terminar");
+        btnTerminar.setText(act.getString(R.string.mapa_guia_terminar));
 
         panel.modoGuia(this::terminar);
         atras.setEnabled(true);
@@ -366,11 +368,11 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             horaSimulada = trayecto.inicio();
             escucharGps(false);
             if (!mapa.getOverlays().contains(marcaSimulada)) mapa.getOverlays().add(marcaSimulada);
-            btnSimular.setText("■ GPS");
+            btnSimular.setText(act.getString(R.string.mapa_guia_gps));
         } else {
             mapa.getOverlays().remove(marcaSimulada);
             escucharGps(true);
-            btnSimular.setText("▶ Simular");
+            btnSimular.setText(act.getString(R.string.mapa_guia_simular));
         }
         ultimoTick = SystemClock.elapsedRealtime();
         handler.removeCallbacks(tick);
@@ -400,8 +402,8 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         ultimoTick = ahoraMs;
 
         if (p == null) {
-            tvEtapa.setText("Buscando tu ubicación…");
-            instruccionRuta = "Sal a la calle o pulsa «Simular» para ver la ruta";
+            tvEtapa.setText(act.getString(R.string.mapa_guia_buscando_ubicacion));
+            instruccionRuta = act.getString(R.string.mapa_guia_sal_a_la_calle);
             tvInstruccion.setText(instruccionRuta);
             tvCuenta.setText("");
             tvLlegada.setText("");
@@ -420,29 +422,28 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             llegado = true;
             pausar();
             btnSimular.setVisibility(View.GONE);
-            btnTerminar.setText("Cerrar");
+            btnTerminar.setText(act.getString(R.string.cerrar));
             if (alLlegar != null) alLlegar.accept(seguimiento.plan().destino.id, ahora);
         }
     }
 
     private void pintar(SeguimientoRuta.Estado e, LocalDateTime ahora) {
-        String etapa = e.etapa.texto;
+        String etapa = e.etapa.texto(act);
         if (e.etapa == SeguimientoRuta.Etapa.EN_BUS && e.paradasRestantes > 0) {
             etapa += " · " + e.paradasRestantes + (e.paradasRestantes == 1 ? " parada" : " paradas");
         }
-        tvEtapa.setText(simulando ? etapa + " · simulación " + PlanRuta.hora(ahora) : etapa);
+        tvEtapa.setText(simulando ? etapa + act.getString(R.string.mapa_guia_simulacion) + PlanRuta.hora(ahora) : etapa);
         instruccionRuta = e.instruccion;
         if (puntosTramo.isEmpty()) tvInstruccion.setText(instruccionRuta);
         tvPaso.setText(instruccionRuta);
         tvPaso.setVisibility(puntosTramo.isEmpty() ? View.GONE : View.VISIBLE);
 
         if (e.etapa == SeguimientoRuta.Etapa.LLEGADO) {
-            tvCuenta.setText("🏁 Has llegado");
+            tvCuenta.setText(act.getString(R.string.mapa_guia_has_llegado));
             tvLlegada.setText(seguimiento.plan().destino.nombre);
         } else {
             tvCuenta.setText(e.cuentaAtras);
-            tvLlegada.setText("Llegas a las " + PlanRuta.horaArriba(e.llegada) + " · quedan "
-                    + e.minutosRestantes(ahora) + " min");
+            tvLlegada.setText(act.getString(R.string.mapa_guia_llegas_a_las, PlanRuta.horaArriba(e.llegada), e.minutosRestantes(ahora)));
         }
 
         tvMetros.setText(Double.isNaN(e.rumbo) ? "" : e.metrosAlObjetivo < 1000
@@ -610,7 +611,7 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             tvPuntualidad.setVisibility(View.GONE);
             return;
         }
-        if (puntualidad != null && puntualidad.nivel != nueva.nivel) voz.avisar(nueva.texto());
+        if (puntualidad != null && puntualidad.nivel != nueva.nivel) voz.avisar(nueva.texto(act));
         puntualidad = nueva;
 
         boolean antesDelBus = e.etapa == SeguimientoRuta.Etapa.POR_SALIR
@@ -622,17 +623,17 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             mejorPlan = buscarMejorPlan(p, ahora);
         }
 
-        String texto = nueva.texto();
+        String texto = nueva.texto(act);
         int color;
         switch (nueva.nivel) {
             case VERDE: color = Color.rgb(46, 125, 50); texto = "✅ " + texto; break;
             case AMBAR: color = Color.rgb(239, 108, 0); texto = "⏱ " + texto; break;
             default:
                 color = Color.rgb(198, 40, 40);
-                texto = "⚠ " + texto + (mejorPlan == null ? " · ve más rápido"
+                texto = "⚠ " + texto + (mejorPlan == null ? (" · " + act.getString(R.string.mapa_guia_ve_mas_rapido))
                         : mejorPlan.tramoBus() != null
-                        ? " · 👉 coge el bus de las " + PlanRuta.hora(mejorPlan.tramoBus().inicio)
-                        : " · 👉 ve andando");
+                        ? act.getString(R.string.mapa_guia_coge_bus_de, PlanRuta.hora(mejorPlan.tramoBus().inicio))
+                        : act.getString(R.string.mapa_guia_ve_andando));
         }
         tvPuntualidad.setText(texto);
         GradientDrawable fondo = new GradientDrawable();
@@ -664,7 +665,7 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
 
     private void pintarVoz() {
         btnVoz.setText(voz.activa() ? "🔊" : "🔇");
-        btnVoz.setContentDescription(voz.activa() ? "Silenciar la voz" : "Activar la voz");
+        btnVoz.setContentDescription(voz.activa() ? act.getString(R.string.mapa_guia_silenciar_voz) : act.getString(R.string.mapa_guia_activar_voz));
     }
 
     private void confirmarTerminar() {
@@ -673,10 +674,10 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             return;
         }
         new AlertDialog.Builder(act)
-                .setTitle("¿Terminar la guía?")
-                .setMessage("Dejaré de avisarte del bus y de la llegada.")
-                .setPositiveButton("Terminar", (d, w) -> terminar())
-                .setNegativeButton("Seguir", null)
+                .setTitle(act.getString(R.string.mapa_guia_confirmar_titulo))
+                .setMessage(act.getString(R.string.mapa_guia_confirmar_msg))
+                .setPositiveButton(act.getString(R.string.mapa_guia_terminar), (d, w) -> terminar())
+                .setNegativeButton(act.getString(R.string.mapa_guia_seguir), null)
                 .show();
     }
 

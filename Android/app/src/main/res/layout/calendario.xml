@@ -29,7 +29,7 @@
                 android:layout_height="44dp"
                 android:layout_marginEnd="12dp"
                 android:background="@drawable/bg_circulo_blanco_volver"
-                android:contentDescription="Volver al menú principal"
+                android:contentDescription="@string/volver_menu_principal"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:padding="12dp"
                 android:scaleType="fitCenter"
@@ -43,7 +43,7 @@
                 android:layout_weight="1"
                 android:letterSpacing="-0.02"
                 android:maxLines="1"
-                android:text="Calendario"
+                android:text="@string/seccion_calendario"
                 android:textColor="@color/nui_tinta"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -55,7 +55,7 @@
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/bg_nui_chat"
                 android:clickable="true"
-                android:contentDescription="Abrir asistente"
+                android:contentDescription="@string/abrir_asistente"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:gravity="center_vertical"
@@ -74,7 +74,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
-                    android:text="Chat"
+                    android:text="@string/chat"
                     android:textColor="@android:color/white"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -86,7 +86,7 @@
                 android:layout_height="40dp"
                 android:background="@drawable/bg_nui_circulo_suave"
                 android:clickable="true"
-                android:contentDescription="Perfil de usuario"
+                android:contentDescription="@string/perfil_usuario"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
@@ -108,63 +108,103 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="8dp"
                     app:cardBackgroundColor="#FFFFFF"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="2dp"
-                    app:strokeColor="#E2E8F0"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="3dp"
+                    app:strokeColor="#F1F5F9"
                     app:strokeWidth="1dp">
 
                     <com.example.nuietsiit.activities.secciones.calendario.CalendarGridView
                         android:id="@+id/calendarView"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="8dp" />
 
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Cabecera de fecha seleccionada y botón añadir -->
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:paddingHorizontal="20dp"
-                    android:paddingVertical="8dp">
+                    android:paddingTop="12dp"
+                    android:paddingBottom="8dp">
 
                     <TextView
                         android:id="@+id/tvFechaSeleccionadaHeader"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_toStartOf="@id/btnAnadirEventoRapido"
-                        android:text="Eventos para hoy"
+                        android:layout_weight="1"
+                        android:letterSpacing="-0.01"
+                        android:text="@string/eventos_para_hoy"
                         android:textColor="#0F172A"
-                        android:textSize="16sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnAnadirEventoRapido"
                         style="@style/Widget.Material3.Button.TonalButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:text="+ Añadir"
+                        android:layout_height="40dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingHorizontal="14dp"
+                        android:text="@string/anadir_evento"
                         android:textColor="#FF8C42"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
                         app:backgroundTint="#FFF3EB"
-                        app:cornerRadius="12dp" />
+                        app:cornerRadius="20dp"
+                        app:icon="@android:drawable/ic_input_add"
+                        app:iconSize="16dp"
+                        app:iconTint="#FF8C42" />
 
-                </RelativeLayout>
+                </LinearLayout>
 
-                <TextView
+                <!-- Estado vacío mejorado -->
+                <com.google.android.material.card.MaterialCardView
                     android:id="@+id/tvSinEventos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="30dp"
-                    android:text="No hay actividades ni entregas anotadas para esta fecha."
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E2E8F0"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="28dp">
+
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginBottom="8dp"
+                            android:alpha="0.45"
+                            android:importantForAccessibility="no"
+                            android:src="@android:drawable/ic_menu_my_calendar"
+                            app:tint="#94A3B8" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/no_hay_actividades_fecha"
+                            android:textColor="#64748B"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Lista de Eventos -->
                 <androidx.recyclerview.widget.RecyclerView

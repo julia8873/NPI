@@ -20,7 +20,7 @@
         android:importantForAccessibility="no"
         android:scaleType="fitCenter" />
 
-    <!-- si no se lee el QR, el código se puede dictar -->
+    <!-- Si no se lee el QR, el código se puede dictar -->
     <TextView
         android:id="@+id/tvCapaCodigo"
         android:layout_width="wrap_content"

@@ -17,19 +17,15 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.OneShotPreDrawListener;
 
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.secciones.secretaria.PantallaSecretaria;
 import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
 import com.example.nuietsiit.activities.secciones.secretaria.DetalleTramite;
 import com.example.nuietsiit.activities.secciones.secretaria.FicheroPaginado;
-import com.example.nuietsiit.ui.InclinarParaPasar;
-import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.activities.secciones.secretaria.Justificante;
 import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
+import com.example.nuietsiit.activities.secciones.secretaria.PantallaSecretaria;
 import com.example.nuietsiit.activities.secciones.secretaria.QueNecesitas;
 import com.example.nuietsiit.activities.secciones.secretaria.TramiteAdapter;
 import com.example.nuietsiit.data.DBHelper;
@@ -37,6 +33,9 @@ import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.BuscadorTolerante;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
@@ -53,7 +52,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 public class Secretaria extends PantallaSecretaria {
 
@@ -99,7 +97,7 @@ public class Secretaria extends PantallaSecretaria {
             setSupportActionBar(barra);
             CabeceraNui.preparar(barra);
             if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Secretaría");
+                getSupportActionBar().setTitle(R.string.sec_titulo);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
         }
@@ -130,9 +128,11 @@ public class Secretaria extends PantallaSecretaria {
         TextView tvPagina = findViewById(R.id.tvPagina);
         fichero.setAdaptador(adaptador, (pagina, paginas) -> {
             int n = adaptador.getItemCount();
-            String cuantos = n == 1 ? "1 trámite" : n + " trámites";
+            String cuantos = getResources().getQuantityString(R.plurals.sec_cuantos_tramites, n, n);
             boolean varias = paginas > 1;
-            tvPagina.setText(varias ? cuantos + " · " + (pagina + 1) + " de " + paginas + " · desliza o inclina" : cuantos);
+            tvPagina.setText(varias
+                    ? getString(R.string.sec_pagina_varias_fmt, cuantos, pagina + 1, paginas)
+                    : cuantos);
             View atras = findViewById(R.id.btnFichasAtras), adelante = findViewById(R.id.btnFichasAdelante);
             atras.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
             adelante.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
@@ -178,21 +178,20 @@ public class Secretaria extends PantallaSecretaria {
                     etBuscar.setText("");
                     mostrarCatalogo(false);
                 })
-                .info(R.id.contenedorLoTuyo, "Aquí tienes lo tuyo: tu próxima cita, lo que has solicitado y los plazos abiertos. Tócalo para abrirlo")
+                .info(R.id.contenedorLoTuyo, getString(R.string.sec_tut_lo_tuyo))
                 .soloSi(() -> contenedorLoTuyo.getChildCount() > 0)
-                .info(R.id.btnQueNecesitas, "¿No sabes qué trámite es el tuyo? Aquí te lo preguntamos paso a paso")
-                .info(R.id.btnPedirCita, "Pide cita para ir a la ventanilla de Secretaría")
-                .info(R.id.btnMisGestiones, "Tus citas y solicitudes, con su justificante y su QR")
-                .tocar(R.id.tvVerTodos, "Toca aquí para abrir el catálogo con todos los trámites")
-                .tocar(R.id.pestanasCategorias, "Toca una categoría para ver solo sus trámites")
-                .gesto(R.id.fichero, Gesto.DESLIZAR_IZQ, "Hay más fichas: desliza a la izquierda para pasarlas")
+                .info(R.id.btnQueNecesitas, getString(R.string.sec_tut_que_necesitas))
+                .info(R.id.btnPedirCita, getString(R.string.sec_tut_pedir_cita))
+                .info(R.id.btnMisGestiones, getString(R.string.sec_tut_mis_gestiones))
+                .tocar(R.id.tvVerTodos, getString(R.string.sec_tut_ver_todos))
+                .tocar(R.id.pestanasCategorias, getString(R.string.sec_tut_pestanas))
+                .gesto(R.id.fichero, Gesto.DESLIZAR_IZQ, getString(R.string.sec_tut_deslizar))
                 .soloSi(() -> fichero.getPaginas() > 1)
-                .sensor(Gesto.INCLINAR, "También puedes inclinar el móvil a un lado o al otro para pasar las fichas")
+                .sensor(Gesto.INCLINAR, getString(R.string.sec_tut_inclinar))
                 .soloSi(() -> inclinar.escuchando())
-                .gesto(R.id.etBuscar, Gesto.ESCRIBIR,
-                        "Escribe lo que buscas, aunque sea con faltas: te entendemos igual")
-                .tocar(R.id.chipSugerencia, "¿Era esto lo que querías decir? Tócalo para buscarlo").soloSiSeVe()
-                .tocar(R.id.itemTramite, "Toca un trámite para ver qué necesitas y sus pasos");
+                .gesto(R.id.etBuscar, Gesto.ESCRIBIR, getString(R.string.sec_tut_buscar))
+                .tocar(R.id.chipSugerencia, getString(R.string.sec_tut_sugerencia)).soloSiSeVe()
+                .tocar(R.id.itemTramite, getString(R.string.sec_tut_item_tramite));
     }
 
     @Override
@@ -220,7 +219,7 @@ public class Secretaria extends PantallaSecretaria {
         grupoCatalogo.setVisibility(visible ? View.VISIBLE : View.GONE);
         contenedorLoTuyo.setVisibility(visible ? View.GONE : View.VISIBLE);
         grupoMostrador.setVisibility(visible ? View.GONE : View.VISIBLE);
-        tvVerTodos.setText(visible ? "Cerrar el catálogo ▾" : "Ver todos los trámites ▴");
+        tvVerTodos.setText(visible ? R.string.sec_catalogo_cerrar : R.string.sec_catalogo_abrir);
         if (inclinar != null) inclinar.actualizar(); // solo se escucha con el catálogo abierto
         if (cerrando) mostrarLoTuyo(); // con el catálogo abierto no se pudo medir qué tarjetas caben
     }
@@ -252,10 +251,10 @@ public class Secretaria extends PantallaSecretaria {
             LocalDateTime cuando = cita.fechaHora();
             boolean hoy = FechasUtil.diasHasta(cuando.toLocalDate()) == 0;
             View tarjeta = anadirTarjeta(R.drawable.nui_ic_cita, R.color.nui_cobalto_tinte, R.color.nui_cobalto,
-                    "Tu próxima cita",
-                    FechasUtil.cuando(cuando) + " a las " + FechasUtil.hora(cuando),
+                    getString(R.string.sec_tarjeta_cita_etiqueta),
+                    getString(R.string.sec_tarjeta_cita_titulo_fmt, FechasUtil.cuando(this, cuando), FechasUtil.hora(cuando)),
                     cita.motivo(),
-                    "En Secretaría, gira el móvil para enseñar el QR",
+                    getString(R.string.sec_tarjeta_cita_accion),
                     v -> startActivity(new Intent(this, Justificante.class)
                             .putExtra("idCita", cita.id).putExtra("CORREO", correoUsuario)));
             if (hoy) resaltar(tarjeta);
@@ -275,8 +274,10 @@ public class Secretaria extends PantallaSecretaria {
             View tarjeta = anadirTarjeta(R.drawable.nui_ic_sobre,
                     resuelta ? R.color.nui_arrayan_tinte : R.color.nui_granada_tinte,
                     resuelta ? R.color.nui_arrayan : R.color.nui_granada,
-                    "Solicitud", s.nombreTramite,
-                    "Enviada " + FechasUtil.hace(envio), null,
+                    getString(R.string.sec_tarjeta_solicitud_etiqueta),
+                    s.nombreTramite,
+                    getString(R.string.sec_tarjeta_solicitud_detalle_fmt, FechasUtil.hace(this, envio)),
+                    null,
                     v -> startActivity(new Intent(this, Justificante.class)
                             .putExtra("idSolicitud", s.id).putExtra("CORREO", correoUsuario)));
             TextView sello = tarjeta.findViewById(R.id.tvSello);
@@ -287,19 +288,25 @@ public class Secretaria extends PantallaSecretaria {
 
         for (Tramite t : plazosAbiertos(tramitesEnCurso)) {
             long dias = FechasUtil.diasHasta(LocalDate.parse(t.plazoFin));
-            String queda = dias == 0 ? "Último día" : dias == 1 ? "Queda 1 día" : "Quedan " + dias + " días";
+            String queda = dias == 0
+                    ? getString(R.string.sec_plazo_ultimo_dia)
+                    : getResources().getQuantityString(R.plurals.sec_plazo_dias_restantes, (int) dias, (int) dias);
             View tarjeta = anadirTarjeta(R.drawable.nui_ic_reloj_arena, R.color.nui_resaltado_tinte, R.color.nui_acento_profundo,
-                    "Plazo abierto", t.nombre,
-                    queda + " · hasta el " + FechasUtil.diaCorto(LocalDate.parse(t.plazoFin)), null,
+                    getString(R.string.sec_tarjeta_plazo_etiqueta),
+                    t.nombre,
+                    getString(R.string.sec_tarjeta_plazo_detalle_fmt, queda, FechasUtil.diaCorto(LocalDate.parse(t.plazoFin))),
+                    null,
                     v -> abrirDetalle(t));
             if (dias <= 3) resaltar(tarjeta);
         }
 
         if (contenedorLoTuyo.getChildCount() == 0) {
             View tarjeta = anadirTarjeta(R.drawable.nui_ic_hoja, R.color.nui_arrayan_tinte, R.color.nui_arrayan,
-                    "Todo en orden",
-                    "No tienes nada pendiente", "Ni citas, ni solicitudes, ni plazos que se acaben",
-                    "Si necesitas algo, pulsa «¿Qué necesitas?»", null);
+                    getString(R.string.sec_tarjeta_todo_orden_etiqueta),
+                    getString(R.string.sec_tarjeta_todo_orden_titulo),
+                    getString(R.string.sec_tarjeta_todo_orden_detalle),
+                    getString(R.string.sec_tarjeta_todo_orden_accion),
+                    null);
             tarjeta.setClickable(false);
             tarjeta.findViewById(R.id.tvChevron).setVisibility(View.GONE);
         }
@@ -385,7 +392,7 @@ public class Secretaria extends PantallaSecretaria {
     // dos filas del mismo ancho: los nombres cortos arriba y los largos abajo, para que todos se lean enteros
     private void crearPestanas() {
         pestanasCategorias.nuevaFila();
-        pestanasCategorias.anadir(null, "Todas", null, R.drawable.nui_ic_granada, R.color.nui_granada);
+        pestanasCategorias.anadir(null, getString(R.string.sec_pestana_todas), null, R.drawable.nui_ic_granada, R.color.nui_granada);
         anadirPestana("matricula", R.drawable.nui_ic_matricula);
         anadirPestana("titulos", R.drawable.nui_ic_titulo);
         anadirPestana("otro", R.drawable.nui_ic_consulta);
@@ -403,7 +410,7 @@ public class Secretaria extends PantallaSecretaria {
     private void anadirPestana(String clave, int icono) {
         String nombre = clave;
         for (String[] c : Tramite.CATEGORIAS) if (c[0].equals(clave)) nombre = c[1];
-        if (clave.equals("reconocimiento_creditos")) nombre = "Créditos"; // «Reconocimiento de créditos» no cabe
+        if (clave.equals("reconocimiento_creditos")) nombre = getString(R.string.sec_pestana_creditos); // «Reconocimiento de créditos» no cabe
         pestanasCategorias.anadir(clave, nombre, null, icono, Tramite.colorCategoria(clave));
     }
 
@@ -420,11 +427,11 @@ public class Secretaria extends PantallaSecretaria {
 
         tvMostrandoPara.setVisibility(r.mostrandoPara != null ? View.VISIBLE : View.GONE);
         if (r.mostrandoPara != null) {
-            tvMostrandoPara.setText("Mostrando resultados para «" + r.mostrandoPara + "»");
+            tvMostrandoPara.setText(getString(R.string.sec_mostrando_para_fmt, r.mostrandoPara));
         }
         chipSugerencia.setVisibility(r.sugerencia != null ? View.VISIBLE : View.GONE);
         if (r.sugerencia != null) {
-            chipSugerencia.setText("¿Quisiste decir «" + r.sugerencia + "»?");
+            chipSugerencia.setText(getString(R.string.sec_sugerencia_fmt, r.sugerencia));
             chipSugerencia.setTag(r.sugerencia);
         }
         tvVacio.setVisibility(r.elementos.isEmpty() ? View.VISIBLE : View.GONE);
@@ -432,7 +439,9 @@ public class Secretaria extends PantallaSecretaria {
 
     private void actualizarContadorGestiones() {
         int n = secretariaDB.contarCitasActivas(correoUsuario);
-        tvMisGestiones.setText(n > 0 ? "Mis gestiones (" + n + ")" : "Mis gestiones");
+        tvMisGestiones.setText(n > 0
+                ? getString(R.string.sec_mis_gestiones_contador_fmt, n)
+                : getString(R.string.sec_mis_gestiones));
     }
 
     private void abrirDetalle(Tramite tramite) {
