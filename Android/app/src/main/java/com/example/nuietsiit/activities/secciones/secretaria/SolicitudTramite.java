@@ -736,7 +736,6 @@ public class SolicitudTramite extends PantallaSecretaria {
             nombre.setPadding(dp(3), dp(2), dp(3), dp(2));
             hoja.addView(nombre, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP));
-            hoja.setRotation(i % 2 == 0 ? -3f : 3f);
             hoja.setContentDescription(getString(R.string.sol_desc_hoja_fmt, d.nombre));
             hoja.setOnClickListener(v -> opcionesHoja(d));
             ViewCompat.addAccessibilityAction(hoja, getString(R.string.sol_accion_sacar_carpeta), (v, args) -> {

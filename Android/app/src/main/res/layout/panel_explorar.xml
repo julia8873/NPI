@@ -3,26 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala en pequeño: yesería con el título y arquería debajo -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:accessibilityHeading="true"
-        android:background="@color/nui_yeseria"
+        android:background="#F8FAFC"
         android:paddingHorizontal="@dimen/nui_espacio_l"
         android:paddingTop="@dimen/nui_espacio_xl"
         android:paddingBottom="@dimen/nui_espacio_s"
         android:text="@string/titulo_explorar_biblioteca"
-        android:textAppearance="@style/TextAppearance.Nui.Titular" />
+        android:textColor="@color/nui_tinta"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
 
     <!-- Sin scroll: si no cabe todo, hojas que se pasan deslizando o inclinando -->
     <com.example.nuietsiit.ui.HojasPaginadas
@@ -84,18 +80,13 @@
         </LinearLayout>
     </com.example.nuietsiit.ui.HojasPaginadas>
 
-    <!-- Pie: filete de oro sobre yesería -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/biblio_filete"
-        android:background="@color/nui_oro" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
         android:orientation="horizontal"
-        android:background="@color/nui_yeseria"
+        android:background="#F8FAFC"
         android:padding="@dimen/nui_espacio_m">
 
         <com.google.android.material.button.MaterialButton

@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- FLOTANTE / ELEGIDO: botones flotantes (Chat, Escanear estantería) y la ficha elegida del hub.
-     Sombra dura de TINTA desplazada: lo único con negro del sistema; marca "esto está por encima".
-     Relleno acento. Para el Chat: nui_flotante_cobalto. (No usar backgroundTint: teñiría también la sombra.) -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:left="@dimen/nui_sombra_flotante" android:top="@dimen/nui_sombra_flotante">
-        <shape>
-            <solid android:color="@color/nui_tinta" />
-            <corners android:radius="@dimen/nui_radio_papel" />
-        </shape>
-    </item>
-    <item android:right="@dimen/nui_sombra_flotante" android:bottom="@dimen/nui_sombra_flotante">
-        <shape>
-            <solid android:color="@color/nui_resaltado" />
-            <corners android:radius="@dimen/nui_radio_papel" />
-        </shape>
-    </item>
-</layer-list>
+<!-- FLOTANTE / ELEGIDO: botones flotantes (Escanear estantería) y la ficha elegida. Naranja, pastilla (28dp). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/nui_resaltado" />
+    <corners android:radius="28dp" />
+</shape>

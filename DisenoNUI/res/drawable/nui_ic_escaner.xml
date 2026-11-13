@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Icono: apuntar con la cámara a los libros. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:strokeColor="@color/nui_tinta" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M3,7V4h3M18,4h3v3M21,17v3h-3M6,20H3v-3M8,8v8M12,8v8M16,8v8" />
-</vector>

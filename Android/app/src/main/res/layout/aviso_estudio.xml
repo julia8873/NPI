@@ -11,7 +11,7 @@
     android:layout_marginBottom="@dimen/biblio_aviso_abajo"
     android:accessibilityLiveRegion="polite"
     android:clickable="true"
-    android:elevation="@dimen/biblio_elevacion_ojear"
+    android:elevation="2dp"
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"

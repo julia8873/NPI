@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CAMPO de formulario rellenable (EditText simple). Con foco: borde de tinta. -->
+<!-- CAMPO de formulario (EditText simple). Con foco: borde naranja. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape>
             <solid android:color="@color/nui_superficie" />
-            <stroke android:width="2dp" android:color="@color/nui_tinta" />
-            <corners android:radius="@dimen/nui_radio_papel" />
+            <stroke android:width="2dp" android:color="@color/nui_resaltado" />
+            <corners android:radius="@dimen/nui_radio_boton" />
         </shape>
     </item>
     <item>
         <shape>
-            <solid android:color="@color/nui_suave" />
-            <stroke android:width="@dimen/nui_borde" android:color="@color/nui_papel_sombra" />
-            <corners android:radius="@dimen/nui_radio_papel" />
+            <solid android:color="@color/nui_superficie" />
+            <stroke android:width="@dimen/nui_borde" android:color="#E2E8F0" />
+            <corners android:radius="@dimen/nui_radio_boton" />
         </shape>
     </item>
 </selector>

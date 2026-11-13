@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Medidas propias de la Biblioteca (design system NUI: nada de dp sueltos en los layouts) -->
+    <!-- Medidas propias de la Biblioteca -->
     <dimen name="biblio_libro_grande_ancho">160dp</dimen>   <!-- libro ojeado y libro del detalle (3:4) -->
     <dimen name="biblio_libro_grande_alto">213dp</dimen>
     <dimen name="biblio_tarjeta_ojear">280dp</dimen>

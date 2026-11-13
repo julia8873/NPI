@@ -168,15 +168,16 @@ public class PasosTramite extends PantallaSecretaria {
     }
 
     private void crearPuntos() {
-        // rombos de azulejo: teselas cuadradas giradas 45°
+        // puntos de página
         int tam = getResources().getDimensionPixelSize(R.dimen.nui_espacio_s);
         for (int i = 0; i < numPasos; i++) {
             View punto = new View(this);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tam, tam);
             lp.setMargins(tam / 2, tam / 2, tam / 2, tam / 2);
             punto.setLayoutParams(lp);
-            punto.setRotation(45f);
-            punto.setBackground(new GradientDrawable());
+            GradientDrawable circulo = new GradientDrawable();
+            circulo.setShape(GradientDrawable.OVAL);
+            punto.setBackground(circulo);
             llPuntos.addView(punto);
         }
     }

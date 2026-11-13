@@ -11,7 +11,7 @@
     android:foreground="?attr/selectableItemBackground"
     android:orientation="vertical">
 
-    <!-- Cabecera de la ficha: categoría (sobre la línea granada) -->
+    <!-- Cabecera de la ficha: categoría -->
     <TextView
         android:id="@+id/tvCategoria"
         android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
         android:layout_marginTop="@dimen/nui_espacio_l"
         android:orientation="horizontal">
 
-        <!-- Icono de la respuesta elegida, sobre su tesela -->
+        <!-- Icono de la respuesta elegida, sobre un círculo de su color -->
         <ImageView
             android:id="@+id/ivIcono"
             android:layout_width="56dp"

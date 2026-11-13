@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- La pantalla de debajo no se mueve mientras el papel entra o sale (dura lo mismo para no parpadear). -->
-<alpha xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="260" android:fromAlpha="1" android:toAlpha="1" />

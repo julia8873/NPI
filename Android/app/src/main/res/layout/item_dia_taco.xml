@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Un día en Pedir cita: hoja de taco de calendario (banda granada, número grande, mes).
+<!-- Un día en Pedir cita: tarjeta de calendario (día de la semana en naranja, número grande, mes).
      Elegido = setSelected(true): sombra naranja del papel. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
@@ -10,18 +10,16 @@
     android:focusable="true"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingEnd="@dimen/nui_sombra_papel"
     android:paddingBottom="@dimen/nui_espacio_xs">
 
     <TextView
         android:id="@+id/tvSemana"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/nui_granada"
         android:gravity="center"
-        android:paddingVertical="2dp"
+        android:paddingTop="@dimen/nui_espacio_xs"
         android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
-        android:textColor="@color/nui_superficie" />
+        android:textColor="@color/nui_resaltado" />
 
     <TextView
         android:id="@+id/tvNumero"

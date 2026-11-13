@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Dispensador de número de turno: "Pedir cita". El número va encima en un TextView (Codigo, granada). -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="44dp" android:height="44dp" android:viewportWidth="44" android:viewportHeight="44">
-    <path android:fillColor="@color/nui_superficie" android:strokeColor="@color/nui_tinta" android:strokeWidth="1" android:pathData="M6.5,8v34h31v-34" />
-    <path android:fillColor="@color/nui_tinta" android:pathData="M4,2h36a2,2 0,0 1,2 2v6h-40v-6a2,2 0,0 1,2 -2z" />
-</vector>

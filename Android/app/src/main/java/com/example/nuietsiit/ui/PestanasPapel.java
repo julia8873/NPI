@@ -84,8 +84,7 @@ public class PestanasPapel extends LinearLayout {
         p.setOrientation(VERTICAL);
         p.setGravity(Gravity.CENTER);
         p.setBackgroundResource(R.drawable.nui_papel_estado);
-        // +3dp a la derecha y abajo: la sombra dura del papel
-        p.setPadding(Math.round(6 * d), Math.round(6 * d), Math.round(9 * d), Math.round(9 * d));
+        p.setPadding(Math.round(6 * d), Math.round(6 * d), Math.round(6 * d), Math.round(6 * d));
         p.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.nui_toque_min) + Math.round(6 * d));
         p.setClickable(true);
         p.setFocusable(true);

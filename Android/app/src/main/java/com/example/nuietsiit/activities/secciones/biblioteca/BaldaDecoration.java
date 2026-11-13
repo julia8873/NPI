@@ -2,6 +2,7 @@ package com.example.nuietsiit.activities.secciones.biblioteca;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
@@ -24,14 +25,14 @@ public class BaldaDecoration extends RecyclerView.ItemDecoration {
 
     public BaldaDecoration(Context contexto) {
         float d = contexto.getResources().getDisplayMetrics().density;
-        grosor = (int) (12 * d);
-        sombra = (int) (6 * d);
+        grosor = (int) (6 * d);
+        sombra = 0; // estilo general: sin sombras duras
         hueco = (int) (16 * d);
         altoFila = (int) (220 * d);
 
-        madera.setColor(contexto.getColor(R.color.nui_madera));
-        cantoOscuro.setColor(contexto.getColor(R.color.nui_madera_oscura));
-        pinturaSombra.setColor(contexto.getColor(R.color.nui_sombra_libro)); // sombra dura, sin difuminar
+        madera.setColor(Color.parseColor("#FFE3D1"));      // balda: tinte naranja suave
+        cantoOscuro.setColor(Color.parseColor("#FFCBA4")); // canto un poco más oscuro
+        pinturaSombra.setColor(Color.TRANSPARENT);
     }
 
     /** Lo que añade cada fila al alto del libro: hueco encima, balda y su sombra. */
