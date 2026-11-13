@@ -1,6 +1,6 @@
 {
  "version": 1,
- "fuente": "osm/puntos_foto.py (regenerar tras corregir)",
+ "fuente": "osm/puntos_foto.py (regenerar tras corregir); puntos sin foto quitados a mano (Miguel): residencia_ronda210_02, bellasartes_etsiit_05",
  "tramos": [
   {
    "id": "residencia_ronda210",
@@ -22,16 +22,7 @@
      "rumbo": 282,
      "giro": 0,
      "metros": 0,
-     "instruccion": "Empieza aquí: camina hacia donde mira la foto"
-    },
-    {
-     "id": "residencia_ronda210_02",
-     "lat": 37.186243,
-     "lon": -3.614426,
-     "rumbo": 224,
-     "giro": -59,
-     "metros": 25,
-     "instruccion": "Gira un poco a la izquierda"
+     "instruccion": "Empieza aquí: cruza la plaza hacia donde mira la foto"
     },
     {
      "id": "residencia_ronda210_03",
@@ -118,16 +109,7 @@
      "rumbo": 56,
      "giro": 0,
      "metros": 140,
-     "instruccion": "Sigue recto unos 50 m"
-    },
-    {
-     "id": "bellasartes_etsiit_05",
-     "lat": 37.195728,
-     "lon": -3.625774,
-     "rumbo": 56,
-     "giro": 0,
-     "metros": 190,
-     "instruccion": "Sigue recto unos 50 m"
+     "instruccion": "Sigue recto unos 100 m"
     },
     {
      "id": "bellasartes_etsiit_06",
