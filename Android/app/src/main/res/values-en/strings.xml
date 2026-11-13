@@ -1470,4 +1470,5 @@
     <string name="mapa_horario_simulado">Schedule: %1$s</string>
     <string name="mapa_estas_en_info">📍 You are at: %1$s (%2$s)\n🎯 Destination: %3$s</string>
     <string name="mapa_has_llegado_sigue_hasta">You have arrived. Continue to %1$s</string>
+    <string name="btn_ver_en_mapa">📍 View on map</string>
 </resources>

@@ -2,9 +2,11 @@
 <!-- Actividades sin scroll: una tarjeta grande cada vez (mazo), con botones ✕ / ✓ debajo -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootAsignaturas"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F8FAFC"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
@@ -14,7 +16,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingTop="25dp"
+        android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
         <ImageButton

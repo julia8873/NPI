@@ -246,6 +246,22 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerEnMapa"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="@color/nui_suave"
+            app:cornerRadius="12dp"
+            app:strokeColor="#FFE3D1"
+            app:strokeWidth="1dp"
+            android:text="@string/btn_ver_en_mapa"
+            android:textColor="@color/nui_tinta"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
         <!-- 4. CARTEL DEL MENÚ CON LA FOTO DE FONDO CONSERVADA -->
         <RelativeLayout
             android:layout_width="match_parent"

@@ -25,6 +25,10 @@ import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignatura
 import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +80,7 @@ public class Asignaturas extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.asignaturas);
+        aplicarMargenesSistema();
 
         BD = DBHelper.getInstance(this);
 
@@ -235,5 +240,16 @@ public class Asignaturas extends BaseActivity {
             }
         }
         return tv;
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

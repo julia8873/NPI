@@ -36,6 +36,7 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.Comedores.Comedor;
 import com.example.nuietsiit.data.Comedores.ComedoresDB;
 import com.example.nuietsiit.data.Comedores.MenuInfo;
@@ -180,6 +181,15 @@ public class Comedores extends BaseActivity {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
             mostrarBottomSheetTipoMenu();
         });
+
+        View btnVerEnMapa = findViewById(R.id.btnVerEnMapa);
+        if (btnVerEnMapa != null) {
+            btnVerEnMapa.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                Intent intent = new Intent(Comedores.this, Mapa.class);
+                startActivity(intent);
+            });
+        }
 
         View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
         if (cardMascotaAyudante != null) {

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootAsignaturas"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:fitsSystemWindows="true"
+    android:background="#F8FAFC"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <!-- CABECERA UNIFICADA ORIGINAL: Botón volver · Título · Chat · Perfil -->
@@ -15,7 +16,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="6dp"
         android:paddingBottom="6dp">
 
         <ImageButton

@@ -17,7 +17,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
 import androidx.core.os.LocaleListCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.auth.Login;
@@ -218,6 +221,7 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
+        aplicarMargenesSistema();
         configurarCabeceraUnificada(null);
 
         if (!(this instanceof MenuPrincipal) && !(this instanceof Login) && !(this instanceof SignUp)) {
@@ -359,5 +363,17 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
             mDetectorBocaAbajo.parar();
         }
         super.onPause();
+    }
+
+    private void aplicarMargenesSistema() {
+        if (this instanceof MenuPrincipal) return;
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

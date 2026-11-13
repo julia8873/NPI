@@ -17,6 +17,9 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -50,6 +53,7 @@ public class BuscadorProfesores extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.buscador_profesores);
+        aplicarMargenesSistema();
 
         BD = DBHelper.getInstance(this);
         usuariosDB = new UsuariosDB(BD);
@@ -324,5 +328,16 @@ public class BuscadorProfesores extends BaseActivity {
         tvVacio.setTextColor(Color.GRAY);
         tvVacio.setPadding(20, 40, 20, 20);
         contenedorResultados.addView(tvVacio);
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }
