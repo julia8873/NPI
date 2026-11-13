@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -50,11 +49,14 @@ import com.example.nuietsiit.util.DetectorInclinacionMenu;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.Notificador;
 import com.example.nuietsiit.util.RecienteUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -190,18 +192,6 @@ public class MenuPrincipal extends BaseActivity {
         configurarInclinacion();
 
         Notificador.revisarAvisos(this, correoUsuario);
-
-        // Configuración del botón flotante (FAB) para el Asistente AI Gemini
-        View fabAsistenteChat = findViewById(R.id.fabAsistenteChat);
-        if (fabAsistenteChat != null) {
-            fabAsistenteChat.setOnClickListener(v -> {
-                Intent chatIntent = new Intent(MenuPrincipal.this, ChatActivity.class);
-                if (correoUsuario != null) {
-                    chatIntent.putExtra("CORREO", correoUsuario);
-                }
-                startActivity(chatIntent);
-            });
-        }
     }
 
     @Override
@@ -250,12 +240,11 @@ public class MenuPrincipal extends BaseActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new AlertDialog.Builder(MenuPrincipal.this)
-                        .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle(R.string.asistente_virtual_titulo)
-                        .setMessage(R.string.asistente_virtual_msg)
-                        .setPositiveButton(R.string.btn_entendido, null)
-                        .show();
+                Intent chatIntent = new Intent(MenuPrincipal.this, ChatActivity.class);
+                if (correoUsuario != null) {
+                    chatIntent.putExtra("CORREO", correoUsuario);
+                }
+                startActivity(chatIntent);
             });
         }
     }
@@ -291,6 +280,7 @@ public class MenuPrincipal extends BaseActivity {
                 hub.setSeleccion(fila * 3 + columna, true);
                 nivel.setZona(fila, columna);
                 vibrarSeleccion();
+                avisarTutorial(Gesto.INCLINAR);
             }
 
             @Override
@@ -446,8 +436,8 @@ public class MenuPrincipal extends BaseActivity {
     private void actualizarAccesoDirecto() {
         if (cardAccesoDirecto == null) return;
 
-        java.util.Calendar ahora = java.util.Calendar.getInstance();
-        int minuto = ahora.get(java.util.Calendar.MINUTE);
+        Calendar ahora = Calendar.getInstance();
+        int minuto = ahora.get(Calendar.MINUTE);
         boolean esModoComedor;
         if (simulacionManualForzada) {
             esModoComedor = simulacionManualEsComedor;
@@ -464,7 +454,7 @@ public class MenuPrincipal extends BaseActivity {
     }
 
     private void configurarAccesoDirectoComedor() {
-        tvTituloCabeceraAccesoDirecto.setText(R.string.acceso_rapido_contextual);
+        //tvTituloCabeceraAccesoDirecto.setText(R.string.acceso_rapido_contextual);
         if (btnCambiarModoAcceso != null) {
             btnCambiarModoAcceso.setText(R.string.btn_cambiar_ultimo_visto);
             btnCambiarModoAcceso.setTextColor(Color.parseColor("#FF7A2F"));
@@ -509,7 +499,7 @@ public class MenuPrincipal extends BaseActivity {
         RecienteUtil.DatosRecientes recientes = RecienteUtil.obtener(this);
         HubSeccionesView.Seccion seccion = HubSeccionesView.SECCIONES[recientes.seccionIndex];
 
-        tvTituloCabeceraAccesoDirecto.setText(R.string.pagina_reciente);
+        //tvTituloCabeceraAccesoDirecto.setText(R.string.pagina_reciente);
         if (btnCambiarModoAcceso != null) {
             btnCambiarModoAcceso.setText(R.string.btn_cambiar_sugerido);
             btnCambiarModoAcceso.setTextColor(seccion.color);
@@ -624,8 +614,27 @@ public class MenuPrincipal extends BaseActivity {
                 super.onPageSelected(position);
                 sliderHandler.removeCallbacks(sliderRunnable);
                 sliderHandler.postDelayed(sliderRunnable, 3500);
+                avisarTutorial(Gesto.DESLIZAR_IZQ);
             }
         });
+    }
+
+    // -------------------------------------------------
+    //              TUTORIAL
+    // -------------------------------------------------
+
+    /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "menu_principal", 2)
+                .gesto(R.id.vpNoticias, Gesto.DESLIZAR_IZQ, getString(R.string.tut_menu_noticias))
+                .info(R.id.hubSecciones, getString(R.string.tut_menu_hub))
+                .info(R.id.nivelInclinacion, getString(R.string.tut_menu_inclinacion))
+                .sensor(Gesto.AGITAR, getString(R.string.tut_menu_agitar))
+                .info(R.id.ivIcono, getString(R.string.tut_menu_ajustes))
+                .info(R.id.cardAccesoDirecto, getString(R.string.tut_menu_acceso_directo))
+                .info(R.id.cardEventoHoy, getString(R.string.tut_menu_evento_hoy))
+                .info(R.id.cardMascotaAyudante, getString(R.string.tut_menu_asistente));
     }
 
     private final Runnable sliderRunnable = new Runnable() {

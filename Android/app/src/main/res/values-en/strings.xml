@@ -22,7 +22,7 @@
     <string name="calendario_etsiit">ETSIIT Calendar</string>
     <string name="titulo_calendario_etsiit">ETSIIT Calendar</string>
     <string name="subtitulo_calendario_etsiit">Activities, appointments, exams and deadlines</string>
-    <string name="cabecera_acceso_rapido">QUICK ACCESS</string>
+    <string name="cabecera_acceso_rapido"> </string>
     <string name="btn_cambiar_ultimo_visto">🔄 Switch to last viewed</string>
     <string name="tag_hora_de_comer">🍽️ LUNCHTIME</string>
     <string name="subinfo_horario_etsiit">ETSIIT Schedule</string>
@@ -1530,6 +1530,7 @@
     <string name="nui_act_desc_anterior">Back to the previous one</string>
     <string name="nui_act_btn_paso">Skip</string>
     <string name="nui_act_btn_apunto">I\'m in</string>
+    <string name="nui_act_desc_voz">Give a voice command</string>
     <string name="nui_act_desc_escanear">Scan a poster\'s QR code</string>
     <string name="nui_act_escanear">Scan</string>
     <string name="nui_act_desc_grupos">Chat communities</string>
@@ -1606,6 +1607,37 @@
     <string name="nui_act_estado_no">Not signed up</string>
     <string name="nui_act_btn_ya_apuntado">Already in</string>
     <string name="nui_cred_explicacion">Only AbiertaUGR courses give credits. Up to 6 ECTS from activities can be recognised in your degree.</string>
+
+    <!-- Tutorial Main Menu -->
+    <string name="tut_menu_noticias">News carousel: swipe left to view highlights from ETSIIT or tap to open the News section</string>
+    <string name="tut_menu_hub">Access the 9 main sections of the school: Map, Activities, Registrar\'s Office, Cafeteria, and more</string>
+    <string name="tut_menu_inclinacion">Tilt your phone to select sections. Tap the top diagram to enable or disable the gyroscope</string>
+    <string name="tut_menu_agitar">Test it: shake your phone firmly to instantly enter the selected section</string>
+    <string name="tut_menu_ajustes">Settings and profile: tap your user icon in the top right to view your account, language, and options</string>
+    <string name="tut_menu_acceso_directo">Contextual quick access: suggests a route to the cafeteria at meal times or your last visited page. Tap to toggle mode</string>
+    <string name="tut_menu_evento_hoy">Check your upcoming events and classes for today at a glance. Tap to open the full calendar</string>
+    <string name="tut_menu_asistente">Virtual assistant: ask any question about the school or the app at any time</string>
+
+    <!-- Tutorial Cafeteria -->
+    <string name="tut_com_cercano">Nearest cafeteria: automatically detects the closest dining hall to your location. Tap to view the full list</string>
+    <string name="tut_com_menu_deslizar">Daily menu: view the courses. Swipe the card left or right (or use the arrows) to change the day</string>
+    <string name="tut_com_tipo_menu">Menu type: tap this button to toggle between regular and vegetarian menu (you can also tilt your phone backward)</string>
+    <string name="tut_com_horario">Hours: check the cafeteria opening times</string>
+    <string name="tut_com_precios">Prices: check the official cafeteria rates for students and staff</string>
+    <string name="tut_com_mapa">View on map: opens guided routing to get to the cafeteria</string>
+
+    <!-- Tutorial Calendar -->
+    <string name="tut_cal_grid">Calendar view: tap any day to view your classes, activities, and appointments. Days marked with an orange dot have events</string>
+    <string name="tut_cal_eventos">Events list: check your personal events, classes, and appointments for the selected date</string>
+    <string name="tut_cal_anadir">Add event: tap the + button to schedule a new personal event or reminder on your calendar</string>
+
+    <!-- Tutorial Map -->
+    <string name="tut_mapa_modo">Map mode: switch at any time between the general city GPS map and detailed ETSIIT floor plans</string>
+    <string name="tut_mapa_donde_vas">GPS search: tap here to search for any location in the city or university</string>
+    <string name="tut_mapa_como_llegar">GPS route planner: calculate your journey and navigate to your destination</string>
+    <string name="tut_mapa_buscador_planos">ETSIIT space search: type the name of an office, classroom, or department to find it on the floor plan</string>
+    <string name="tut_mapa_plantas">Floor selector: switch between basement, ground floor, and floors 1 to 5</string>
+    <string name="tut_mapa_plano">Interactive floor plan: explore the interior of the school floor by floor</string>
 
     <!-- Tutoriales de Asignaturas y Profesorado -->
     <string name="asig_tut_login">To view your personalized class schedule, sign in with your credentials</string>

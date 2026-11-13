@@ -28,11 +28,13 @@ import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.Actividades;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.data.ActividadesDB;
 import com.example.nuietsiit.data.CalendarioDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.EventoCalendario;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
@@ -91,12 +93,9 @@ public class Calendario extends BaseActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new AlertDialog.Builder(this)
-                        .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle(R.string.cal_asistente_titulo)
-                        .setMessage(R.string.cal_asistente_mensaje)
-                        .setPositiveButton(R.string.cal_asistente_btn, null)
-                        .show();
+                Intent chatIntent = new Intent(this, ChatActivity.class);
+                if (correoUsuario != null) chatIntent.putExtra("CORREO", correoUsuario);
+                startActivity(chatIntent);
             });
         }
 
@@ -364,5 +363,18 @@ public class Calendario extends BaseActivity {
                 return insets;
             });
         }
+    }
+
+    // -------------------------------------------------
+    //              TUTORIAL
+    // -------------------------------------------------
+
+    /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "calendario", 1)
+                .info(R.id.calendarView, getString(R.string.tut_cal_grid))
+                .info(R.id.tvFechaSeleccionadaHeader, getString(R.string.tut_cal_eventos))
+                .tocar(R.id.btnAnadirEventoRapido, getString(R.string.tut_cal_anadir));
     }
 }
