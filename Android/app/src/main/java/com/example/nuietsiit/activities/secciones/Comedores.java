@@ -26,7 +26,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -36,6 +35,7 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.Comedores.Comedor;
 import com.example.nuietsiit.data.Comedores.ComedoresDB;
@@ -43,6 +43,8 @@ import com.example.nuietsiit.data.Comedores.MenuInfo;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.DetectorInclinacionFrontal;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.text.SimpleDateFormat;
@@ -195,12 +197,10 @@ public class Comedores extends BaseActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new AlertDialog.Builder(this)
-                        .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle(R.string.com_asistente_titulo)
-                        .setMessage(R.string.com_asistente_mensaje)
-                        .setPositiveButton(R.string.com_asistente_btn, null)
-                        .show();
+                Intent intent = new Intent(this, ChatActivity.class);
+                String correo = obtenerCorreoUsuarioActual();
+                if (correo != null) intent.putExtra("CORREO", correo);
+                startActivity(intent);
             });
         }
 
@@ -370,6 +370,7 @@ public class Comedores extends BaseActivity {
         guardarPreferenciaVegetariano(esModoVegetariano);
         actualizarBotonTipoMenu();
         actualizarVistasDialogoTipoMenu();
+        avisarTutorial(Gesto.INCLINAR);
 
         if (comedorSeleccionado != null) {
             mostrarComedorPrincipal(comedorSeleccionado);
@@ -950,6 +951,7 @@ public class Comedores extends BaseActivity {
             }
             actualizarVisibilidadBotonesNavegacion();
             actualizarIndicadoresDias();
+            avisarTutorial(Gesto.DESLIZAR_IZQ);
         }
     }
 
@@ -964,6 +966,7 @@ public class Comedores extends BaseActivity {
             }
             actualizarVisibilidadBotonesNavegacion();
             actualizarIndicadoresDias();
+            avisarTutorial(Gesto.DESLIZAR_IZQ);
         }
     }
 
@@ -1000,5 +1003,21 @@ public class Comedores extends BaseActivity {
             });
             ViewCompat.requestApplyInsets(scroll);
         }
+    }
+
+    // -------------------------------------------------
+    //              TUTORIAL
+    // -------------------------------------------------
+
+    /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "comedores", 2)
+                .info(R.id.cardComedorCercano, getString(R.string.tut_com_cercano))
+                .gesto(R.id.cardMenu, Gesto.DESLIZAR_IZQ, getString(R.string.tut_com_menu_deslizar))
+                .info(R.id.btnTipoMenu, getString(R.string.tut_com_tipo_menu))
+                .info(R.id.btnHorario, getString(R.string.tut_com_horario))
+                .info(R.id.btnPrecios, getString(R.string.tut_com_precios))
+                .info(R.id.btnVerEnMapa, getString(R.string.tut_com_mapa));
     }
 }

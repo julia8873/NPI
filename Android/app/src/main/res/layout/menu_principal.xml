@@ -48,7 +48,7 @@
                 android:focusable="true" />
 
             <LinearLayout
-                android:id="@+id/fabAsistenteChat"
+                android:id="@+id/cardMascotaAyudante"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginEnd="10dp"
@@ -288,7 +288,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:letterSpacing="0.06"
-                    android:text="@string/cabecera_acceso_rapido"
+                    android:text=""
                     android:textColor="@color/nui_apagado"
                     android:textSize="10.5sp"
                     android:textStyle="bold" />

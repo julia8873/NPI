@@ -1617,4 +1617,35 @@
     <string name="nui_act_estado_no">No apuntado</string>
     <string name="nui_act_btn_ya_apuntado">Ya apuntado</string>
     <string name="nui_cred_explicacion">Solo dan créditos los cursos AbiertaUGR. En el grado se pueden reconocer hasta 6 ECTS por actividades.</string>
+
+    <!-- Tutorial Menú Principal -->
+    <string name="tut_menu_noticias">Carrusel de novedades: desliza a la izquierda para ver los destacados de la ETSIIT o toca para abrir Noticias</string>
+    <string name="tut_menu_hub">Navega por las 9 secciones principales de la escuela: Mapa, Actividades, Secretaría, Comedores y más</string>
+    <string name="tut_menu_inclinacion">Inclina el móvil para seleccionar secciones. Toca el diagrama superior para activar o desactivar el giroscopio</string>
+    <string name="tut_menu_agitar">Prueba: agita el móvil enérgicamente para entrar al instante en la sección seleccionada</string>
+    <string name="tut_menu_ajustes">Ajustes y perfil: toca tu icono de usuario arriba a la derecha para ver tu cuenta, idioma y opciones</string>
+    <string name="tut_menu_acceso_directo">Acceso rápido contextual: te sugiere la ruta al comedor en hora de comer o tu última página vista. Toca para cambiar de modo</string>
+    <string name="tut_menu_evento_hoy">Comprueba tus próximos eventos y clases de hoy de un vistazo. Toca para abrir el calendario</string>
+    <string name="tut_menu_asistente">Asistente virtual: consulta cualquier duda sobre la escuela o la aplicación en cualquier momento</string>
+
+    <!-- Tutorial Comedores -->
+    <string name="tut_com_cercano">Comedor más cercano: detecta automáticamente el comedor más próximo a tu ubicación. Tócalo para ver la lista completa</string>
+    <string name="tut_com_menu_deslizar">Menú del día: consulta los platos. Desliza la tarjeta a la izquierda o derecha (o usa las flechas) para cambiar de día</string>
+    <string name="tut_com_tipo_menu">Tipo de menú: toca este botón para alternar entre el menú normal y el vegetariano (también puedes inclinar el móvil hacia atrás)</string>
+    <string name="tut_com_horario">Horarios: consulta la información de apertura del comedor</string>
+    <string name="tut_com_precios">Precios: consulta las tarifas oficiales del comedor para estudiantes y personal</string>
+    <string name="tut_com_mapa">Ver en el mapa: abre la ruta guiada para llegar hasta el comedor</string>
+
+    <!-- Tutorial Calendario -->
+    <string name="tut_cal_grid">Vista de calendario: toca cualquier día para ver tus clases, actividades y citas. Los días con punto naranja tienen eventos</string>
+    <string name="tut_cal_eventos">Lista de eventos: comprueba tus eventos personales, clases y citas del día seleccionado</string>
+    <string name="tut_cal_anadir">Añadir evento: toca el botón + para programar un nuevo aviso o recordatorio personal en tu calendario</string>
+
+    <!-- Tutorial Mapa -->
+    <string name="tut_mapa_modo">Modo de mapa: cambia en cualquier momento entre el mapa GPS general y los planos detallados por plantas de la ETSIIT</string>
+    <string name="tut_mapa_donde_vas">Buscador GPS: toca aquí para buscar cualquier lugar de la ciudad o de la universidad</string>
+    <string name="tut_mapa_como_llegar">Planificador de rutas GPS: calcula el trayecto y navega hasta tu destino</string>
+    <string name="tut_mapa_buscador_planos">Buscador de espacios ETSIIT: escribe el nombre de un despacho, aula o departamento para localizarlo en el plano</string>
+    <string name="tut_mapa_plantas">Selector de plantas: cambia entre el sótano, planta baja y plantas de la 1ª a la 5ª</string>
+    <string name="tut_mapa_plano">Plano interactivo: explora el interior de la escuela planta por planta</string>
 </resources>
