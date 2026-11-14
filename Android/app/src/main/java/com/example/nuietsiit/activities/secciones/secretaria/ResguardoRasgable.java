@@ -21,7 +21,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.example.nuietsiit.R;
 
@@ -81,8 +80,7 @@ public class ResguardoRasgable extends View {
         desgarro.setStrokeWidth(1.5f * dp);
         texto.setColor(context.getColor(R.color.nui_apagado));
         texto.setTextSize(getResources().getDimension(R.dimen.nui_texto_etiqueta));
-        Typeface fuente = ResourcesCompat.getFont(context, R.font.nui_texto);
-        texto.setTypeface(Typeface.create(fuente, Typeface.BOLD));
+        texto.setTypeface(Typeface.DEFAULT_BOLD);
         texto.setTextAlign(Paint.Align.CENTER);
         tijeras.setColor(context.getColor(R.color.nui_granada));
         tijeras.setStyle(Paint.Style.STROKE);

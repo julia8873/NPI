@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Carpeta con un papel asomando: "Mis gestiones". -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="44dp" android:viewportWidth="48" android:viewportHeight="44">
-    <path android:fillColor="@color/nui_oro" android:pathData="M2,8h16l4,4h24v30h-44z" />
-    <path android:fillColor="@color/nui_superficie" android:strokeColor="@color/nui_papel_sombra" android:strokeWidth="1" android:pathData="M7,6h34v26h-34z" />
-    <path android:fillColor="@color/nui_oro_claro" android:pathData="M2,16h44v26h-44z" />
-    <path android:fillColor="@color/nui_papel" android:strokeColor="@color/nui_madera" android:strokeWidth="0.8" android:pathData="M16,24h16v7h-16z" />
-</vector>

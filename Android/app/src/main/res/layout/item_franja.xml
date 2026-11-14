@@ -10,7 +10,6 @@
         style="@style/Widget.Nui.Boton.Secundario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/nui_codigo"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:paddingHorizontal="0dp"

@@ -3,57 +3,125 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie">
+    android:background="#F8FAFC">
 
     <LinearLayout
+        android:id="@+id/rootAsignaturas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#F8FAFC"
         android:orientation="vertical">
 
-        <!-- Cabecera de sala: yesería con toolbar y buscador -->
+        <!-- CABECERA UNIFICADA (igual que profesorado.xml): volver · título · chat · perfil -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/nui_yeseria"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/nui_espacio_xs">
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/nui_yeseria"
-                app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:contentDescription="Volver al menú principal"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/nui_tinta" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvTituloSeccion"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/nui_espacio_l"
-                android:hint="@string/hint_buscador_libros"
-                app:boxBackgroundColor="@color/nui_superficie"
-                app:boxStrokeColor="@color/nui_oro"
-                app:boxStrokeWidth="@dimen/nui_borde"
-                app:hintEnabled="false"
-                app:startIconDrawable="@android:drawable/ic_menu_search"
-                app:startIconTint="@color/nui_apagado">
+                android:layout_weight="1"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:text="@string/titulo_biblioteca"
+                android:textColor="@color/nui_tinta"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etBuscar"
-                    android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/cardMascotaAyudante"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bg_nui_chat"
+                android:clickable="true"
+                android:contentDescription="Abrir asistente"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_bot"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_buscador_libros"
-                    android:imeOptions="actionSearch"
-                    android:inputType="text"
-                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
-                    android:textColorHint="@color/nui_apagado" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="6dp"
+                    android:text="Chat"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivIcono"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_nui_circulo_suave"
+                android:clickable="true"
+                android:contentDescription="Perfil"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_nui_usuario"
+                app:tint="@color/nui_tinta" />
         </LinearLayout>
 
-        <com.example.nuietsiit.ui.TramaAzulejo
+        <!-- Buscador: campo blanco redondeado -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_arqueria"
-            android:importantForAccessibility="no"
-            app:tesela="@drawable/nui_arqueria" />
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="#FF8C42"
+            app:hintEnabled="false"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="@color/nui_apagado">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBuscar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_buscador_libros"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+                android:textColorHint="@color/nui_apagado" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Vistas de la estantería: pestañas de papel, todas a la vista (Biblioteca.crearPestanasVista) -->
         <com.example.nuietsiit.ui.PestanasPapel
@@ -102,13 +170,14 @@
                 android:text="@string/solo_disponibles" />
         </LinearLayout>
 
-        <!-- Estantería: marco de madera; las baldas las pinta BaldaDecoration -->
+        <!-- Estantería: tarjeta blanca; las baldas las pinta BaldaDecoration -->
         <FrameLayout
             android:id="@+id/marcoBalda"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginHorizontal="@dimen/nui_espacio_m"
+            android:layout_marginHorizontal="16dp"
             android:layout_marginTop="@dimen/nui_espacio_xs"
+            android:layout_marginBottom="16dp"
             android:layout_weight="1">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -139,6 +208,7 @@
                 android:background="@drawable/nui_flotante_cobalto"
                 android:clickable="true"
                 android:contentDescription="@string/modo_estudio_desc"
+                android:elevation="2dp"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
@@ -152,7 +222,7 @@
                     android:layout_height="@dimen/nui_icono"
                     android:importantForAccessibility="no"
                     android:src="@drawable/nui_ic_reloj_arena"
-                    app:tint="@color/nui_sobre_resaltado" />
+                    app:tint="#FF8C42" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -161,10 +231,10 @@
                     android:importantForAccessibility="no"
                     android:text="@string/estudiar"
                     android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
-                    android:textColor="@color/nui_sobre_resaltado" />
+                    android:textColor="@color/nui_tinta" />
             </LinearLayout>
 
-            <!-- Flotante: sombra dura de tinta -->
+            <!-- Flotante principal: naranja -->
             <LinearLayout
                 android:id="@+id/btnApuntar"
                 android:layout_width="wrap_content"
@@ -173,6 +243,7 @@
                 android:layout_margin="@dimen/nui_espacio_m"
                 android:background="@drawable/nui_flotante"
                 android:clickable="true"
+                android:elevation="2dp"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:gravity="center_vertical"
@@ -197,17 +268,6 @@
                     android:textColor="@color/nui_sobre_resaltado" />
             </LinearLayout>
         </FrameLayout>
-
-        <!-- Zócalo: filete de oro + alicatado -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/biblio_filete"
-            android:background="@color/nui_oro" />
-
-        <com.example.nuietsiit.ui.TramaAzulejo
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_zocalo"
-            android:importantForAccessibility="no" />
     </LinearLayout>
 
     <!-- Ojear: el libro sacado de la balda mientras se mantiene el dedo -->
@@ -237,7 +297,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:rotation="-3">
+                android:elevation="2dp">
 
                 <ImageView
                     android:id="@+id/ivPortadaOjear"
@@ -288,7 +348,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/nui_espacio_xl"
-                android:background="@drawable/nui_tesela"
+                android:background="@drawable/nui_flotante_cobalto"
                 android:paddingHorizontal="@dimen/nui_espacio_m"
                 android:paddingVertical="@dimen/nui_espacio_xs"
                 android:text="@string/suelta_para_devolverlo"

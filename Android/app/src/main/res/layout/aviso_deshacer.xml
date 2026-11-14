@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Aviso de Deshacer (AvisoDeshacer): nota de papel flotante con la mecha del tiempo que queda -->
+<!-- Aviso de Deshacer (AvisoDeshacer): tarjeta flotante con la mecha del tiempo que queda -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Nui.Aviso"
     android:layout_width="match_parent"
@@ -17,11 +17,11 @@
             android:layout_width="@dimen/nui_toque_min"
             android:layout_height="@dimen/nui_toque_min"
             android:background="@drawable/nui_tesela"
-            android:backgroundTint="@color/nui_granada_tinte"
+            android:backgroundTint="@color/nui_tinte"
             android:importantForAccessibility="no"
             android:padding="@dimen/nui_espacio_m"
             android:src="@drawable/nui_ic_cita"
-            android:tint="@color/nui_granada" />
+            android:tint="@color/nui_resaltado" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
-                android:textColor="@color/nui_granada" />
+                android:textColor="@color/nui_resaltado" />
 
             <TextView
                 android:id="@+id/tvAvisoTexto"

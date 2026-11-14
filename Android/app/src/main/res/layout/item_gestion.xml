@@ -31,7 +31,7 @@
                 android:layout_height="24dp"
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.Nui.Codigo"
-                android:textColor="@color/nui_granada" />
+                android:textColor="@color/nui_resaltado" />
 
             <TextView
                 android:id="@+id/tvTitulo"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Parte de atrás de la carpeta (y su pestaña): cartón oro, como nui_carpeta -->
+<!-- Parte de atrás de la carpeta (y su pestaña) -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="@color/nui_oro" />

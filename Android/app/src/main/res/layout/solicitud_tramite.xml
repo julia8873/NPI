@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:clipChildren="false"
     android:orientation="vertical">
 
@@ -12,14 +12,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria" />
-
-    <!-- Arquería bajo la cabecera de yesería. Sin zócalo: aquí la carpeta necesita todo el alto -->
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
+        android:background="#F8FAFC"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
     <!-- Progreso: "Paso 1 de 4 · Documentos" -->
     <TextView
@@ -39,7 +33,7 @@
         android:max="4"
         app:indicatorColor="@color/nui_resaltado"
         app:trackColor="@color/nui_papel_sombra"
-        app:trackCornerRadius="0dp"
+        app:trackCornerRadius="@dimen/nui_espacio_xs"
         app:trackThickness="@dimen/nui_espacio_s" />
 
     <!-- Qué hacer ahora, en una frase -->
@@ -167,8 +161,7 @@
                         android:background="@drawable/fondo_papel"
                         android:orientation="vertical"
                         android:paddingHorizontal="@dimen/nui_espacio_m"
-                        android:paddingVertical="@dimen/nui_espacio_s"
-                        android:rotation="-1">
+                        android:paddingVertical="@dimen/nui_espacio_s">
 
                         <TextView
                             android:id="@+id/tvTituloCarpeta"
@@ -300,10 +293,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:max="1000"
-                        app:indicatorColor="@color/nui_granada"
+                        app:indicatorColor="@color/nui_resaltado"
                         app:indicatorInset="0dp"
                         app:indicatorSize="84dp"
-                        app:trackColor="@color/nui_granada_tinte"
+                        app:trackColor="@color/nui_resaltado_tinte"
                         app:trackThickness="6dp" />
 
                     <LinearLayout
@@ -317,15 +310,15 @@
                         <ImageView
                             android:layout_width="28dp"
                             android:layout_height="28dp"
-                            android:src="@drawable/nui_ic_granada"
-                            app:tint="@color/nui_granada" />
+                            android:src="@drawable/ic_check"
+                            app:tint="@color/nui_resaltado" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/sello_manten"
                             android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
-                            android:textColor="@color/nui_granada" />
+                            android:textColor="@color/nui_resaltado" />
                     </LinearLayout>
                 </FrameLayout>
 
@@ -337,7 +330,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom|end"
                     android:layout_margin="18dp"
-                    android:rotation="-12"
                     android:visibility="gone" />
             </FrameLayout>
 

@@ -76,7 +76,7 @@ public class FranjaAdapter extends RecyclerView.Adapter<FranjaAdapter.Holder> {
                 : estado == TUYA ? R.color.nui_sobre_resaltado : R.color.nui_tinta));
         b.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(
                 estado == TUYA ? R.color.nui_resaltado : tachada ? R.color.nui_transparente : R.color.nui_papel)));
-        b.setStrokeColor(ColorStateList.valueOf(ctx.getColor(tachada ? R.color.nui_linea : R.color.nui_tinta)));
+        b.setStrokeColor(ColorStateList.valueOf(ctx.getColor(tachada ? R.color.nui_linea : R.color.nui_papel_sombra)));
         int descResId = estado == OCUPADA
                 ? R.string.franja_desc_ocupada_fmt
                 : estado == TUYA ? R.string.franja_desc_tuya_fmt : R.string.franja_desc_libre_fmt;

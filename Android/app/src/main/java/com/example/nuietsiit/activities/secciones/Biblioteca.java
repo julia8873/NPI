@@ -38,7 +38,6 @@ import com.example.nuietsiit.data.BibliotecaDB;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.AsignaturaCatalogo;
 import com.example.nuietsiit.data.modelo.Libro;
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.BuscadorTolerante;
@@ -46,7 +45,6 @@ import com.example.nuietsiit.util.ProximaClase;
 import com.example.nuietsiit.util.SesionUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 
 import java.time.LocalDateTime;
@@ -116,7 +114,7 @@ public class Biblioteca extends PantallaBiblioteca {
     private float yInicioDedo;
     private boolean dedoEnBaldas;
     private boolean sobreUmbralSacar;
-    private static final float GIRO_OJEAR = -3f;       // el libro sacado flota un poco torcido
+    private static final float GIRO_OJEAR = 0f;        // el libro sacado flota recto (estilo general)
     private ImageView portadaRetorno;                   // a dónde vuelve la portada al cerrar el detalle
     private boolean abriendoDetalle;
 
@@ -129,14 +127,7 @@ public class Biblioteca extends PantallaBiblioteca {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.biblioteca);
 
-        // Botón atrás en la barra superior
-        MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        CabeceraNui.preparar(barra);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(R.string.titulo_biblioteca);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        // cabecera unificada (btnVolver, título, chat, perfil): la conecta BaseActivity
 
         // al volver del detalle, la portada regresa a su libro de la balda (el panel de ojear ya no está)
         setExitSharedElementCallback(new SharedElementCallback() {

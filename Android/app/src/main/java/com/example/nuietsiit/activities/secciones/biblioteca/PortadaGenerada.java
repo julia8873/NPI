@@ -13,7 +13,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Libro;
@@ -24,10 +23,10 @@ import com.example.nuietsiit.data.modelo.Libro;
  */
 public class PortadaGenerada extends Drawable {
 
-    // colores fuertes de la paleta (todos con texto blanco legible encima)
+    // colores del estilo general de la app (todos con texto blanco legible encima)
     private static final int[] COLORES = {
-            R.color.nui_cobalto, R.color.nui_granada, R.color.nui_arrayan, R.color.nui_madera,
-            R.color.nui_acento_profundo, R.color.nui_madera_oscura, R.color.nui_resaltado, R.color.nui_tinta};
+            0xFFFF8C42, 0xFF1976D2, 0xFF2E7D32, 0xFF7B1FA2,
+            0xFFD32F2F, 0xFF00897B, 0xFF455A64, 0xFFE06A1F};
 
     private final String titulo, autor;
     private final int color;
@@ -40,14 +39,11 @@ public class PortadaGenerada extends Drawable {
     public PortadaGenerada(Context ctx, Libro libro) {
         titulo = libro.titulo;
         autor = libro.autores.split(";")[0]; // solo el primero
-        color = ctx.getColor(COLORES[Math.floorMod(libro.isbn.hashCode(), COLORES.length)]);
+        color = (COLORES[Math.floorMod(libro.isbn.hashCode(), COLORES.length)]);
         int texto = ctx.getColor(R.color.nui_sobre_resaltado);
         pinturaTitulo.setColor(texto);
-        Typeface titular = ResourcesCompat.getFont(ctx, R.font.nui_titular);
-        pinturaTitulo.setTypeface(titular != null ? titular : Typeface.DEFAULT_BOLD);
+        pinturaTitulo.setTypeface(Typeface.DEFAULT_BOLD);
         pinturaAutor.setColor(texto);
-        Typeface cuerpo = ResourcesCompat.getFont(ctx, R.font.nui_texto);
-        if (cuerpo != null) pinturaAutor.setTypeface(cuerpo);
     }
 
     @Override
