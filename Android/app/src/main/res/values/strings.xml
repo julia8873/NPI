@@ -1617,4 +1617,21 @@
     <string name="nui_act_estado_no">No apuntado</string>
     <string name="nui_act_btn_ya_apuntado">Ya apuntado</string>
     <string name="nui_cred_explicacion">Solo dan créditos los cursos AbiertaUGR. En el grado se pueden reconocer hasta 6 ECTS por actividades.</string>
+
+    <!-- Tutoriales de Asignaturas y Profesorado -->
+    <string name="asig_tut_login">Para consultar tu horario personalizado de clases, inicia sesión con tus credenciales</string>
+    <string name="asig_tut_horario">Aquí ves tu horario semanal. Toca sobre cualquiera de tus asignaturas para consultar su ficha</string>
+    <string name="asig_tut_explorar">Toca aquí para explorar el catálogo completo de asignaturas por grado y curso</string>
+    <string name="asig_tut_grados">Selecciona tu grado o titulación para ver sus asignaturas</string>
+    <string name="asig_tut_ruleta_dedo">Puedes girar la ruleta deslizando el dedo sobre ella para elegir curso</string>
+    <string name="asig_tut_ruleta_volante">¡O también puedes girar el teléfono como un volante para moverla!</string>
+    <string name="asig_tut_buscar">O escribe el nombre de cualquier asignatura para buscarla directamente</string>
+
+    <string name="prof_tut_login">Inicia sesión para consultar tus tutorías reservadas con el profesorado</string>
+    <string name="prof_tut_tutorias">Aquí verás las tutorías que tienes agendadas con tus profesores</string>
+    <string name="prof_tut_buscar">Toca aquí para buscar profesores por grado o por su nombre</string>
+    <string name="prof_tut_grados">Elige una titulación o grado para ver su equipo docente</string>
+    <string name="prof_tut_ruleta_dedo">Puedes girar la ruleta deslizando el dedo sobre ella para elegir curso</string>
+    <string name="prof_tut_ruleta_volante">¡O también puedes girar el teléfono como un volante para moverla!</string>
+    <string name="prof_tut_buscar_nombre">O escribe el nombre del profesor/a para filtrar en tiempo real</string>
 </resources>

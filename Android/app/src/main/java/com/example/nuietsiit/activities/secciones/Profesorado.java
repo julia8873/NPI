@@ -24,6 +24,8 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.profesorado.BuscadorProfesores;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.TutoriasDB;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 import java.util.Locale;
 
@@ -63,6 +65,16 @@ public class Profesorado extends BaseActivity {
     }
 
     @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "profesorado", 1)
+                .tocar(R.id.btnLogin, getString(R.string.prof_tut_login))
+                .soloSi(() -> correoUsuario == null || correoUsuario.isEmpty())
+                .info(R.id.cardTutorias, getString(R.string.prof_tut_tutorias))
+                .soloSi(() -> correoUsuario != null && !correoUsuario.isEmpty())
+                .tocar(R.id.btnBuscarProfesorado, getString(R.string.prof_tut_buscar));
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
@@ -81,9 +93,13 @@ public class Profesorado extends BaseActivity {
             }
         });
 
-        btnLogin.setOnClickListener(v -> startActivity(new Intent(Profesorado.this, Login.class)));
+        btnLogin.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
+            startActivity(new Intent(Profesorado.this, Login.class));
+        });
 
         btnBuscarProfesorado.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
             Intent intent = new Intent(Profesorado.this, BuscadorProfesores.class);
             startActivity(intent);
         });

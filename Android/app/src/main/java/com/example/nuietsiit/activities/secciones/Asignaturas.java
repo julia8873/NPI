@@ -24,6 +24,8 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
 import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -98,6 +100,16 @@ public class Asignaturas extends BaseActivity {
         configurarBotones();
     }
 
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "asignaturas", 1)
+                .tocar(R.id.btnLogin, getString(R.string.asig_tut_login))
+                .soloSi(() -> correoUsuario == null || correoUsuario.isEmpty())
+                .info(R.id.cardHorario, getString(R.string.asig_tut_horario))
+                .soloSi(() -> correoUsuario != null && !correoUsuario.isEmpty())
+                .tocar(R.id.btnVerMasAsignaturas, getString(R.string.asig_tut_explorar));
+    }
+
     private void configurarBotones() {
         ivIcono.setOnClickListener(v -> {
             if (correoUsuario == null || correoUsuario.isEmpty()) {
@@ -109,9 +121,13 @@ public class Asignaturas extends BaseActivity {
             }
         });
 
-        btnLogin.setOnClickListener(v -> startActivity(new Intent(Asignaturas.this, Login.class)));
+        btnLogin.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
+            startActivity(new Intent(Asignaturas.this, Login.class));
+        });
 
         btnVerMasAsignaturas.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
             Intent intent = new Intent(Asignaturas.this, BuscadorAsignaturas.class);
             startActivity(intent);
         });

@@ -1618,4 +1618,21 @@
     <string name="nui_act_estado_no">Not signed up</string>
     <string name="nui_act_btn_ya_apuntado">Already in</string>
     <string name="nui_cred_explicacion">Only AbiertaUGR courses give credits. Up to 6 ECTS from activities can be recognised in your degree.</string>
+
+    <!-- Tutoriales de Asignaturas y Profesorado -->
+    <string name="asig_tut_login">To view your personalized class schedule, sign in with your credentials</string>
+    <string name="asig_tut_horario">Here is your weekly schedule. Tap any subject to view its details</string>
+    <string name="asig_tut_explorar">Tap here to explore the full catalog of subjects by degree and year</string>
+    <string name="asig_tut_grados">Select your degree to view its subjects</string>
+    <string name="asig_tut_ruleta_dedo">You can rotate the wheel by sliding your finger over it to select a year</string>
+    <string name="asig_tut_ruleta_volante">Or you can also turn your phone like a steering wheel to move it!</string>
+    <string name="asig_tut_buscar">Or type the name of any subject to search directly</string>
+
+    <string name="prof_tut_login">Sign in to view your reserved office hours with professors</string>
+    <string name="prof_tut_tutorias">Here you will see your scheduled office hours with your professors</string>
+    <string name="prof_tut_buscar">Tap here to search for faculty members by degree or name</string>
+    <string name="prof_tut_grados">Choose a degree to view its faculty members</string>
+    <string name="prof_tut_ruleta_dedo">You can rotate the wheel by sliding your finger over it to select a year</string>
+    <string name="prof_tut_ruleta_volante">Or you can also turn your phone like a steering wheel to move it!</string>
+    <string name="prof_tut_buscar_nombre">Or type a professor\'s name to filter in real time</string>
 </resources>

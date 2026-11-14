@@ -28,6 +28,8 @@ import com.example.nuietsiit.activities.secciones.asignaturas.DetectorGiroRuleta
 import com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
@@ -45,6 +47,7 @@ public class BuscadorProfesores extends BaseActivity {
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
     private DetectorGiroRuleta detectorGiro;
+    private float anguloGiroAcumuladoTutorial = 0f;
 
     private DBHelper BD;
     private UsuariosDB usuariosDB;
@@ -78,6 +81,11 @@ public class BuscadorProfesores extends BaseActivity {
         detectorGiro = new DetectorGiroRuleta(this, delta -> {
             if (layoutRuletaCursos.getVisibility() == View.VISIBLE) {
                 ruletaCursosView.rotarPorSensor(delta);
+                anguloGiroAcumuladoTutorial += Math.abs(delta);
+                if (anguloGiroAcumuladoTutorial >= 15.0f) {
+                    avisarTutorial(Gesto.GIRAR);
+                    anguloGiroAcumuladoTutorial = 0f;
+                }
             }
         });
 
@@ -88,6 +96,7 @@ public class BuscadorProfesores extends BaseActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() > 0) {
+                    avisarTutorial(Gesto.ESCRIBIR);
                     mostrarResultadosPorTexto(s.toString().trim());
                 } else {
                     restaurarVistaInicial();
@@ -108,6 +117,15 @@ public class BuscadorProfesores extends BaseActivity {
         });
 
         cargarGrados();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "buscador_profesores", 2)
+                .tocar(R.id.scrollGrados, getString(R.string.prof_tut_grados))
+                .gesto(R.id.ruletaCursosView, Gesto.TOCAR, getString(R.string.prof_tut_ruleta_dedo))
+                .sensor(Gesto.GIRAR, getString(R.string.prof_tut_ruleta_volante))
+                .gesto(R.id.etBuscadorRapido, Gesto.ESCRIBIR, getString(R.string.prof_tut_buscar_nombre));
     }
 
     @Override
@@ -229,6 +247,7 @@ public class BuscadorProfesores extends BaseActivity {
     }
 
     private void prepararRuletaParaGrado(int idGrado, String nombreGrado) {
+        avisarTutorial(Gesto.TOCAR);
         idGradoActual = idGrado;
         nombreGradoActual = nombreGrado;
 
