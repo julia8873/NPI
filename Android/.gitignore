@@ -15,3 +15,6 @@
 # Archivos de claves (por seguridad nunca se suben)
 *.jks
 *.keystore
+
+# Registros de cierres inesperados de Java (Android Studio / Gradle)
+hs_err_pid*.log

@@ -11,8 +11,6 @@
     <!-- Notificaciones de avisos urgentes y actividades -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Noticias: leer los avisos por el auricular al acercar el móvil a la oreja y apagar la pantalla (Miguel) -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
@@ -44,7 +42,10 @@
             android:name=".activities.auth.SignUp"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".activities.main.AjustesCuenta" />
-        <activity android:name=".activities.secciones.Noticias" />
+        <!-- En tablets Android 16 no respeta el vertical: al girar no se recrea (no se pierden la ficha ni el QR) -->
+        <activity
+            android:name=".activities.secciones.Noticias"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
         <!-- Al girar el móvil no se recrea: se mantienen la guía, el panel de ruta y el viaje -->
         <activity
             android:name=".activities.secciones.mapa.Mapa"
@@ -55,6 +56,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.secciones.Actividades"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />

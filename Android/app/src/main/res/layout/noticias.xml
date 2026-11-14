@@ -110,20 +110,6 @@
                 android:accessibilityLiveRegion="polite"
                 android:textAppearance="@style/TextAppearance.Seccion.Subtitulo" />
 
-            <!-- Leer los avisos en voz alta (también acercándote el móvil a la oreja: LectorAvisos) -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEscuchar"
-                style="@style/Widget.Seccion.Boton.Texto"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:contentDescription="@string/nui_not_desc_escuchar"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
-                android:padding="0dp"
-                app:icon="@drawable/nui_ic_altavoz"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/tvMarcarTodo"
                 style="@style/Widget.Seccion.Boton.Texto"

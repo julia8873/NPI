@@ -11,11 +11,12 @@ public enum Gesto {
     INCLINAR, AGITAR, GIRAR, BOCA_ABAJO, ESCANEAR,
     MESA,     // dejar el móvil boca arriba y quieto sobre la mesa
     LEVANTAR, // cogerlo de la mesa
-    OREJA;    // acercarse el móvil a la oreja (sensor de proximidad; Noticias lo usa para leer por el auricular)
+    MANO,     // pasar la mano por delante del móvil (sensor de proximidad; Noticias lo usa para pasar de aviso)
+    HACIA_TI; // inclinar la parte de arriba del móvil hacia uno (Actividades: guardar para luego)
 
     /** Se hace moviendo el móvil, no tocando la pantalla: la pista es un móvil dibujado. */
     public boolean esSensor() {
         return this == INCLINAR || this == AGITAR || this == GIRAR || this == BOCA_ABAJO || this == ESCANEAR
-                || this == MESA || this == LEVANTAR || this == OREJA;
+                || this == MESA || this == LEVANTAR || this == MANO || this == HACIA_TI;
     }
 }

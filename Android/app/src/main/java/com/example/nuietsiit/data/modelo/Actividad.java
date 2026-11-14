@@ -185,7 +185,7 @@ public class Actividad {
             case "charla": return R.drawable.nui_ic_consulta;
             case "bibliomaker": return R.drawable.nui_ic_hoja;
             case "abiertaugr": return R.drawable.nui_ic_creditos;
-            case "dia_etsiit": return R.drawable.nui_ic_granada;
+            case "dia_etsiit": return R.drawable.nui_ic_dia_etsiit;
             default: return R.drawable.ic_nui_actividades;
         }
     }
