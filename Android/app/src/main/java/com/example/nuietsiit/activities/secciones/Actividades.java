@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -15,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -47,7 +45,6 @@ import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Pantalla de Actividades SIN SCROLL: un "mazo" con una ficha grande cada vez.
@@ -62,8 +59,6 @@ import java.util.Locale;
  * - CÁMARA: "Escanear" lee el QR de un cartel de actividad (zxing, como el escáner de Biblioteca)
  *   y abre esa actividad para apuntarse. El QR lleva "NUIETSIIT:ACTIVIDAD:" + el título sin tildes en
  *   minúsculas y con guiones (p. ej. "...:arduino-desde-cero"), o el id.
- * - VOZ: el micrófono escucha una orden ("paso", "me apunto", "anterior", "llévame", "¿cuándo es?",
- *   "léemela", "charlas"...) con el reconocedor de voz de Google (no pide permisos) y contesta hablando.
  * - Tutorial interactivo la primera vez (crearTutorial), como los de Izaro.
  */
 public class Actividades extends BaseActivity {
@@ -90,16 +85,6 @@ public class Actividades extends BaseActivity {
     private InclinarParaPasar inclinar;
     /** La carta está saliendo volando: hasta que acabe no se acepta otra decisión (doble toque, botón + inclinar…). */
     private boolean decidiendo;
-
-    // Órdenes por voz: reconocedor de Google (pantalla del sistema) y respuesta hablada
-    private final ActivityResultLauncher<Intent> reconocedor = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), resultado -> {
-                if (resultado.getResultCode() != RESULT_OK || resultado.getData() == null) return;
-                List<String> frases = resultado.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                if (frases != null && !frases.isEmpty()) alOir(frases);
-            });
-    private TextToSpeech voz;
-    private boolean vozLista;
 
     // Escáner de QR (pantalla de zxing; pide ella el permiso de cámara)
     private final ActivityResultLauncher<ScanOptions> escaner = registerForActivityResult(new ScanContract(),
@@ -130,12 +115,6 @@ public class Actividades extends BaseActivity {
         // Botón de comunidades de chat (grupos de WhatsApp/Telegram/Discord simulados)
         findViewById(R.id.btnComunidades).setOnClickListener(
                 v -> HojaComunidades.mostrar(this, correoUsuario));
-        findViewById(R.id.btnVoz).setOnClickListener(v -> escucharOrden());
-        voz = new TextToSpeech(this, estado -> {
-            if (estado != TextToSpeech.SUCCESS || voz == null) return;
-            int r = voz.setLanguage(idioma());
-            vozLista = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
-        });
         findViewById(R.id.btnEscanear).setOnClickListener(v -> escaner.launch(new ScanOptions()
                 .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
                 .setPrompt(getString(R.string.nui_act_escaner_prompt))
@@ -413,144 +392,6 @@ public class Actividades extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        if (voz != null) voz.shutdown();
-        voz = null;
-        super.onDestroy();
-    }
-
-    // -------------------------------------------------
-    //              ÓRDENES POR VOZ
-    // -------------------------------------------------
-
-    private void escucharOrden() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                .putExtra(RecognizerIntent.EXTRA_LANGUAGE, idioma().toLanguageTag())
-                .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                .putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.nui_act_voz_prompt));
-        try {
-            reconocedor.launch(intent);
-        } catch (ActivityNotFoundException e) {
-            avisar(getString(R.string.nui_act_voz_sin_reconocedor));
-        }
-    }
-
-    /** Prueba las frases que ha entendido el reconocedor, de la más probable a la menos. */
-    private void alOir(List<String> frases) {
-        for (String frase : frases) {
-            if (interpretar(normalizar(frase))) return;
-        }
-        String oido = frases.get(0);
-        avisar(getString(R.string.nui_act_voz_no_entendido_fmt, oido));
-        decir(getString(R.string.nui_act_voz_no_entendido));
-    }
-
-    /** Ejecuta la orden si la reconoce. La frase llega sin tildes y en minúsculas. */
-    private boolean interpretar(String f) {
-        Actividad a = posicion < mazo.size() ? mazo.get(posicion) : null;
-
-        // Antes los filtros y lo que no depende de la ficha
-        if (contiene(" " + f, "escanea", "cartel", "codigo qr", " qr", "scan", "poster")) {
-            findViewById(R.id.btnEscanear).performClick();
-            return true;
-        }
-        if (contiene(f, "grupo", "comunidad", "chat", "group", "communit")) {
-            HojaComunidades.mostrar(this, correoUsuario);
-            return true;
-        }
-        if (contiene(f, "mis actividades", "apuntado", "las mias", "my activities", "signed up")) return elegirFiltro(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
-        if (contiene(f, "charla", "talk")) return elegirFiltro("charla", Actividad.nombreFiltro(this, "charla"));
-        if (contiene(f, "bibliomaker", "biblio maker", "taller", "workshop")) return elegirFiltro("bibliomaker", Actividad.nombreFiltro(this, "bibliomaker"));
-        if (contiene(f, "cuantos creditos", "mis creditos", "how many credits", "my credits")) {
-            if (correoUsuario == null) {
-                pedirSesion(getString(R.string.nui_act_accion_apuntarte));
-                return true;
-            }
-            elegirFiltro(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
-            decir(((TextView) findViewById(R.id.tvCreditosDetalle)).getText().toString());
-            return true;
-        }
-        if (contiene(f, "abierta", "curso", "credito", "course", "credit")) return elegirFiltro("abiertaugr", Actividad.nombreFiltro(this, "abiertaugr"));
-        if (contiene(f, "dia de la", "fiesta", "etsiit day", "party")) return elegirFiltro("dia_etsiit", Actividad.nombreFiltro(this, "dia_etsiit"));
-        if (contiene(f, "otras", "other")) return elegirFiltro("otro", Actividad.nombreFiltro(this, "otro"));
-        if (contiene(f, "todas", "all ", "everything") || f.equals("all")) return elegirFiltro(FILTRO_TODAS, getString(R.string.chip_todas));
-        if (contiene(f, "anterior", "atras", "vuelve", "volver", "previous", "back")) {
-            if (posicion == 0) decir(getString(R.string.nui_act_voz_primera));
-            anterior();
-            return true;
-        }
-
-        if (a == null) {
-            if (contiene(f, "paso", "siguiente", "apunta", "llevame", "cuando", "lee", "skip", "next", "join", "sign", "take me", "when", "read")) {
-                decir(getString(R.string.nui_act_voz_ninguna_delante));
-                return true;
-            }
-            return false;
-        }
-        // "no me apunto" va antes que "me apunto"
-        if (contiene(f, "no me apunto", "paso", "pasa", "siguiente", "no me interesa", "descarta", "skip", "next", "pass", "not interested")) {
-            decidir(-1);
-            return true;
-        }
-        if (contiene(f, "desapunta", "borrame", "ya no puedo", "unregister", "leave", "can't go", "cant go")) {
-            if (a.inscrito) desapuntar(a);
-            else decir(getString(R.string.nui_act_voz_no_estabas));
-            return true;
-        }
-        if (contiene(f, "apunta", "apunto", "me interesa", "inscribe", "sign me up", "sign up", "join", "i'm in", "im in") || f.equals("si") || f.equals("yes")) {
-            decidir(+1);
-            return true;
-        }
-        if (contiene(f, "llevame", "como llego", "donde es", "ruta", "mapa", "take me", "how do i get", "where is", "route", "map")) {
-            decir(a.sitioEnMapa() != null ? getString(R.string.nui_act_voz_te_llevo_fmt, a.sitioEnMapa()) : getString(R.string.nui_act_voz_abro_mapa));
-            llevarme(a);
-            return true;
-        }
-        if (contiene(f, "cuando", "hora", "que dia", "donde", "when", "time", "what day", "where")) {
-            String texto = getString(R.string.nui_act_voz_cuando_fmt, a.titulo, textoFechas(a).replace("\n", ", "), lugar(a));
-            decir(texto);
-            avisar(texto);
-            return true;
-        }
-        if (contiene(f, "lee", "de que va", "cuentame", "que es", "read", "about", "tell me")) {
-            decir(a.titulo + ". " + a.descripcion);
-            return true;
-        }
-        if (contiene(f, "calendario", "agenda", "calendar")) {
-            anadirACalendario(a);
-            return true;
-        }
-        if (contiene(f, "detalle", "informacion", "mas info", "abre", "detail", "info", "open")) {
-            mostrarDetalle(a);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean elegirFiltro(String clave, String nombre) {
-        marcarFiltro(clave);
-        filtroSeleccionado = FILTRO_TODAS.equals(clave) ? null : clave;
-        aplicarFiltro();
-        decir(mazo.isEmpty() ? getString(R.string.nui_act_voz_filtro_ninguna_fmt, nombre) : getString(R.string.nui_act_voz_filtro_fmt, nombre, mazo.size()));
-        return true;
-    }
-
-    private void decir(String texto) {
-        if (vozLista && voz != null) voz.speak(texto, TextToSpeech.QUEUE_FLUSH, null, "orden");
-    }
-
-    /** Idioma de la app (español o inglés, según Ajustes): para la voz y el reconocedor. */
-    private Locale idioma() {
-        return getResources().getConfiguration().getLocales().get(0);
-    }
-
-    private static boolean contiene(String frase, String... palabras) {
-        for (String p : palabras) if (frase.contains(p)) return true;
-        return false;
-    }
-
     // -------------------------------------------------
     //              CRÉDITOS ABIERTAUGR («Mis actividades»)
     // -------------------------------------------------
@@ -580,11 +421,6 @@ public class Actividades extends BaseActivity {
         return c == Math.floor(c) ? String.valueOf((int) c) : String.valueOf(c);
     }
 
-    private static String normalizar(String texto) {
-        return java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT).trim();
-    }
-
     // -------------------------------------------------
     //              QR DE LOS CARTELES
     // -------------------------------------------------
@@ -599,7 +435,8 @@ public class Actividades extends BaseActivity {
         clave = clave.substring(PREFIJO_QR.length()).trim();
         Actividad encontrada = null;
         for (Actividad a : todas) {
-            if (claveQR(a.titulo).equals(claveQR(clave)) || String.valueOf(a.id).equals(clave)) encontrada = a;
+            String original = a.tituloEs != null ? a.tituloEs : a.titulo; // los carteles van en español
+            if (claveQR(original).equals(claveQR(clave)) || String.valueOf(a.id).equals(clave)) encontrada = a;
         }
         if (encontrada == null) {
             avisar(getString(R.string.nui_act_qr_no_esta));
@@ -657,7 +494,11 @@ public class Actividades extends BaseActivity {
         RecordatorioActividad.programar(this, a); // aviso con "Llévame" media hora antes
         mostrarCarta();
         // Aviso con "Deshacer". Lo de añadir al calendario está en el detalle.
-        Snackbar.make(raiz, getString(R.string.nui_act_aviso_apuntado_fmt, a.titulo), MS_DESHACER)
+        // Si las notificaciones están desactivadas, el recordatorio no llegará: se dice en el mismo aviso
+        String textoApuntado = getString(R.string.nui_act_aviso_apuntado_fmt, a.titulo);
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled())
+            textoApuntado += ". " + getString(R.string.nui_act_sin_notificaciones);
+        Snackbar.make(raiz, textoApuntado, MS_DESHACER)
                 .setAnchorView(botonera)
                 .setActionTextColor(getColor(R.color.nui_acento))
                 .setAction(R.string.deshacer, x -> {
@@ -825,7 +666,7 @@ public class Actividades extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "actividades", 5)
+        return new Tutorial(this, "actividades", 6)
                 .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_pestanas))
                 .gesto(R.id.carta, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_act_deslizar))
                 .soloSi(() -> posicion < mazo.size() - 1)
@@ -834,7 +675,6 @@ public class Actividades extends BaseActivity {
                 .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_creditos))
                 .soloSi(() -> correoUsuario != null)
                 .info(R.id.btnAnterior, getString(R.string.nui_tut_act_anterior))
-                .info(R.id.btnVoz, getString(R.string.nui_tut_act_voz))
                 .info(R.id.btnEscanear, getString(R.string.nui_tut_act_escanear))
                 .info(R.id.btnComunidades, getString(R.string.nui_tut_act_grupos))
                 // el último: al tocar se abre el detalle encima
@@ -842,12 +682,17 @@ public class Actividades extends BaseActivity {
                 .soloSi(() -> posicion < mazo.size());
     }
 
-    /** La app va de borde a borde: la cabecera baja lo que ocupa la barra de estado (como en Asignaturas). */
+    /**
+     * La app va de borde a borde: la cabecera baja lo que ocupa la barra de estado (como en Asignaturas)
+     * y la botonera sube lo que ocupa la barra de navegación (en tablets, la barra de apps), para que
+     * Escanear y Grupos no queden tapados.
+     */
     static void margenBarraEstado(View raiz) {
         if (raiz == null) return;
+        final int abajoOriginal = raiz.getPaddingBottom();
         ViewCompat.setOnApplyWindowInsetsListener(raiz, (v, insets) -> {
-            Insets arriba = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            v.setPadding(v.getPaddingLeft(), arriba.top, v.getPaddingRight(), v.getPaddingBottom());
+            Insets barras = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(v.getPaddingLeft(), barras.top, v.getPaddingRight(), abajoOriginal + barras.bottom);
             return insets;
         });
     }

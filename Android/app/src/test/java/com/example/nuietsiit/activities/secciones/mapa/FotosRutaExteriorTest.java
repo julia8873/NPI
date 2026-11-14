@@ -44,7 +44,8 @@ public class FotosRutaExteriorTest {
             for (int i = 1; i < t.puntos.size(); i++) {
                 FotosRutaExterior.PuntoFoto a = t.puntos.get(i - 1), b = t.puntos.get(i);
                 assertTrue(b.id, b.metros > a.metros);
-                assertTrue(b.id, b.metros - a.metros <= 61);
+                // ~60 m como mucho, salvo donde se quitó un punto sin foto (bellasartes_etsiit_05: 100 m)
+                assertTrue(b.id, b.metros - a.metros <= 101);
                 assertFalse(b.id, b.instruccion.isEmpty());
             }
         }
@@ -64,8 +65,10 @@ public class FotosRutaExteriorTest {
     @Test
     public void siguienteAvanzaAlAlcanzarOPasarCadaPunto() {
         List<FotosRutaExterior.PuntoFoto> lista = tramo("bellasartes_etsiit");
-        // en la salida: el 1.º ya está alcanzado, toca el 2.º
-        assertEquals(1, FotosRutaExterior.siguiente(lista, lista.get(0).punto));
+        // en la salida: la foto de la salida ("empieza aquí")
+        assertEquals(0, FotosRutaExterior.siguiente(lista, lista.get(0).punto));
+        // en un giro: sigue la foto de ese giro hasta haberlo hecho
+        assertEquals(1, FotosRutaExterior.siguiente(lista, lista.get(1).punto));
         // a mitad entre el 4.º y el 5.º: toca el 5.º
         Punto a = lista.get(3).punto, b = lista.get(4).punto;
         Punto medio = new Punto((a.lat + b.lat) / 2, (a.lon + b.lon) / 2);
