@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- MARCA "BÁSICA": bibliografía básica de la asignatura. Arrayán. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/nui_arrayan_tinte" />
-    <stroke android:width="@dimen/nui_borde" android:color="@color/nui_arrayan" />
-    <corners android:radius="@dimen/nui_radio_ficha" />
-</shape>

@@ -3,7 +3,6 @@ package com.example.nuietsiit.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.text.Layout;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
@@ -28,7 +27,7 @@ import java.util.List;
  * Sustituto de ScrollView sin scroll: si el contenido no cabe, se reparte en hojas que se pasan enteras,
  * deslizando de lado o inclinando el móvil (como los pasos de un trámite). Las hojas se cortan entre
  * secciones (hijos del contenido, o sus hijos si una sección sola no cabe) y, si no hay otra, entre líneas
- * de texto. Abajo, rombos de azulejo dicen en qué hoja estás; tocar a izquierda o derecha también pasa.
+ * de texto. Abajo, unos puntos dicen en qué hoja estás; tocar a izquierda o derecha también pasa.
  * Como un ScrollView: un solo hijo, y las Activities lo usan igual (findViewById de lo de dentro).
  */
 public class HojasPaginadas extends FrameLayout {
@@ -45,7 +44,6 @@ public class HojasPaginadas extends FrameLayout {
     private final int altoIndicador, tamRombo, umbralToque;
     private final Paint pintura = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint pinturaFlecha = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Path rombo = new Path();
     private final InclinarParaPasar inclinar;
 
     private float xInicio, yInicio;
@@ -277,7 +275,7 @@ public class HojasPaginadas extends FrameLayout {
         pintarIndicador(canvas);
     }
 
-    // rombos de azulejo como en los pasos: hecho = oro, actual = almagra y más grande, por venir = sombra
+    // puntos de página: hecho = naranja suave, actual = naranja y más grande, por venir = gris
     private void pintarIndicador(Canvas canvas) {
         int n = cortes.size();
         float cy = getScrollY() + getHeight() - getPaddingBottom() - altoIndicador / 2f;
@@ -285,21 +283,15 @@ public class HojasPaginadas extends FrameLayout {
         float x0 = getWidth() / 2f - paso * (n - 1) / 2f;
         for (int i = 0; i < n; i++) {
             pintura.setColor(getContext().getColor(i == hoja ? R.color.nui_resaltado
-                    : i < hoja ? R.color.nui_oro : R.color.nui_papel_sombra));
+                    : i < hoja ? R.color.nui_papel_sombra : R.color.nui_oro));
             float r = tamRombo * (i == hoja ? 0.85f : 0.6f);
             float cx = x0 + paso * i;
-            rombo.reset();
-            rombo.moveTo(cx, cy - r);
-            rombo.lineTo(cx + r, cy);
-            rombo.lineTo(cx, cy + r);
-            rombo.lineTo(cx - r, cy);
-            rombo.close();
-            canvas.drawPath(rombo, pintura);
+            canvas.drawCircle(cx, cy, r * 0.8f, pintura);
         }
         // flechas a los lados: se puede tocar para pasar
         float base = cy - (pinturaFlecha.descent() + pinturaFlecha.ascent()) / 2f;
         float margen = getPaddingLeft() + altoIndicador;
-        pinturaFlecha.setColor(getContext().getColor(R.color.nui_acento_profundo));
+        pinturaFlecha.setColor(getContext().getColor(R.color.nui_resaltado));
         pinturaFlecha.setAlpha(hoja > 0 ? 255 : 60);
         canvas.drawText("‹", margen, base, pinturaFlecha);
         pinturaFlecha.setAlpha(hoja < n - 1 ? 255 : 60);
@@ -308,7 +300,7 @@ public class HojasPaginadas extends FrameLayout {
 
     // ------------------------------ tocar ------------------------------
 
-    // lo tapado (el resto del contenido y el pie con los rombos) no recibe toques
+    // lo tapado (el resto del contenido y el pie con los puntos) no recibe toques
     private boolean enZonaTapada(float y) {
         return cortes.size() > 1 && y > getPaddingTop() + altoVisible();
     }

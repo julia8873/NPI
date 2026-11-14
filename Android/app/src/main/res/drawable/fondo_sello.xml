@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- El sello que se aprieta: objeto por encima de la carpeta, con sombra dura de tinta (como nui_flotante) -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:left="@dimen/nui_sombra_flotante" android:top="@dimen/nui_sombra_flotante">
-        <shape android:shape="oval">
-            <solid android:color="@color/nui_tinta" />
-        </shape>
-    </item>
-    <item android:right="@dimen/nui_sombra_flotante" android:bottom="@dimen/nui_sombra_flotante">
-        <shape android:shape="oval">
-            <solid android:color="@color/nui_papel" />
-            <stroke android:width="@dimen/nui_borde" android:color="@color/nui_tinta" />
-        </shape>
-    </item>
-</layer-list>
+<!-- El sello que se aprieta: círculo blanco con borde naranja por encima de la carpeta -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/nui_papel" />
+    <stroke android:width="2dp" android:color="@color/nui_resaltado" />
+</shape>

@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- FLOTANTE en cobalto (botón de Chat). Igual que nui_flotante.xml. -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:left="@dimen/nui_sombra_flotante" android:top="@dimen/nui_sombra_flotante">
-        <shape>
-            <solid android:color="@color/nui_tinta" />
-            <corners android:radius="@dimen/nui_radio_papel" />
-        </shape>
-    </item>
-    <item android:right="@dimen/nui_sombra_flotante" android:bottom="@dimen/nui_sombra_flotante">
-        <shape>
-            <solid android:color="@color/nui_cobalto" />
-            <corners android:radius="@dimen/nui_radio_papel" />
-        </shape>
-    </item>
-</layer-list>
+<!-- FLOTANTE secundario (Estudiar, aviso de ojear): pastilla blanca con borde suave. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFFFFF" />
+    <stroke android:width="1dp" android:color="#FFE3D1" />
+    <corners android:radius="28dp" />
+</shape>

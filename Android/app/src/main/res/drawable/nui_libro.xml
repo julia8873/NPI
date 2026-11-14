@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- LIBRO DE FRENTE: filete de oro alrededor de la portada y sombra dura sobre la balda.
+<!-- LIBRO DE FRENTE: marco fino gris claro alrededor de la portada, sin sombra.
      ImageView con padding inicio/arriba = nui_borde_sello y fin/abajo = nui_libro_canto. -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:left="@dimen/nui_sombra_papel" android:top="@dimen/nui_sombra_papel">
-        <shape><solid android:color="@color/nui_sombra_libro" /></shape>
-    </item>
-    <item android:right="@dimen/nui_sombra_papel" android:bottom="@dimen/nui_sombra_papel">
-        <shape><solid android:color="@color/nui_oro" /></shape>
-    </item>
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFFFFF" />
+    <stroke android:width="1dp" android:color="#E2E8F0" />
+    <corners android:radius="4dp" />
+</shape>

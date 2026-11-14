@@ -4,21 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
+        android:background="#F8FAFC"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
     <com.example.nuietsiit.ui.HojasPaginadas
         android:id="@+id/hojas"
@@ -166,20 +160,20 @@
         </LinearLayout>
     </com.example.nuietsiit.ui.HojasPaginadas>
 
-    <!-- Siguiente paso: un solo botón grande, siempre a la vista, sobre el mostrador -->
+    <!-- Siguiente paso: un solo botón grande, siempre a la vista, abajo -->
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/nui_borde"
-        android:background="@color/nui_papel_sombra" />
+        android:background="#E2E8F0" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/nui_suave"
+        android:background="#FFFFFF"
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/nui_espacio_l"
         android:paddingTop="@dimen/nui_espacio_m"
-        android:paddingBottom="@dimen/nui_espacio_xs">
+        android:paddingBottom="@dimen/nui_espacio_s">
 
         <TextView
             android:id="@+id/tvMotivoSolicitar"
@@ -203,14 +197,4 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- Zócalo: filete de oro + alicatado -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/nui_oro" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_zocalo"
-        android:importantForAccessibility="no" />
 </LinearLayout>

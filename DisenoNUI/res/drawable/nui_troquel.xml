@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- TROQUEL: línea discontinua de billete o resguardo ("por aquí se corta"). Úsalo con style="@style/Widget.Nui.Troquel" (la línea va centrada en la vista). -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="line">
-    <stroke android:width="@dimen/nui_borde_sello" android:color="@color/nui_apagado"
-        android:dashWidth="6dp" android:dashGap="5dp" />
-</shape>

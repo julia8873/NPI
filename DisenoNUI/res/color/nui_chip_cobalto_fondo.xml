@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Chip de acción especial (Explorar): contorno cobalto; activo = cobalto lleno. -->
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/nui_cobalto" android:state_checked="true" />
-    <item android:color="@color/nui_cobalto_tinte" />
-</selector>

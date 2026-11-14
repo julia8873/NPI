@@ -7,18 +7,18 @@
     android:viewportHeight="56">
     <path
         android:fillColor="@color/nui_superficie"
-        android:strokeColor="@color/nui_tinta"
+        android:strokeColor="@color/nui_apagado"
         android:strokeWidth="2"
         android:pathData="M5,1 H27 A4,4 0 0 1 31,5 V51 A4,4 0 0 1 27,55 H5 A4,4 0 0 1 1,51 V5 A4,4 0 0 1 5,1 Z" />
     <path
         android:fillColor="@color/nui_tinte"
         android:pathData="M5,8 H27 V46 H5 Z" />
     <path
-        android:strokeColor="@color/nui_tinta"
+        android:strokeColor="@color/nui_apagado"
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:pathData="M13,4.5 H19" />
     <path
-        android:fillColor="@color/nui_acento"
+        android:fillColor="@color/nui_resaltado"
         android:pathData="M14,50.5 A2,2 0 1 1 18,50.5 A2,2 0 1 1 14,50.5 Z" />
 </vector>

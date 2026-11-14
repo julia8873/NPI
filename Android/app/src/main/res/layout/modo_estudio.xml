@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:keepScreenOn="true">
 
     <LinearLayout
@@ -16,14 +16,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/nui_yeseria"
+            android:background="#F8FAFC"
             app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
-        <com.example.nuietsiit.ui.TramaAzulejo
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_arqueria"
-            android:importantForAccessibility="no"
-            app:tesela="@drawable/nui_arqueria" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,15 +120,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/biblio_filete"
-            android:background="@color/nui_oro" />
 
-        <com.example.nuietsiit.ui.TramaAzulejo
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_zocalo"
-            android:importantForAccessibility="no" />
     </LinearLayout>
 
     <!-- Estudiando: pantalla negra y atenuada con el tiempo; tocar o levantar el móvil = pausa -->

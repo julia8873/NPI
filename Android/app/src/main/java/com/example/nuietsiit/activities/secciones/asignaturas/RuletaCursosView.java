@@ -12,6 +12,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.example.nuietsiit.R;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
 public class RuletaCursosView extends View {
 
@@ -141,6 +143,15 @@ public class RuletaCursosView extends View {
     }
 
     /**
+     * Permite rotar la ruleta mediante un sensor (ej: inclinación/giro del teléfono).
+     * @param deltaAngulo Variación angular en grados.
+     */
+    public void rotarPorSensor(float deltaAngulo) {
+        this.anguloActual = (this.anguloActual + deltaAngulo) % 360f;
+        invalidate();
+    }
+
+    /**
      * Gestión del toque táctil: Giro con el dedo y clic en el botón "IR" central
      */
     @Override
@@ -165,6 +176,10 @@ public class RuletaCursosView extends View {
                 double anguloPrevio = Math.atan2(ultimoY - centroY, ultimoX - centroX);
                 double anguloNuevo = Math.atan2(y - centroY, x - centroX);
                 float deltaAngulo = (float) Math.toDegrees(anguloNuevo - anguloPrevio);
+
+                if (Math.abs(deltaAngulo) > 1.5f) {
+                    Tutorial.avisar(getContext(), Gesto.TOCAR);
+                }
 
                 anguloActual = (anguloActual + deltaAngulo) % 360f;
                 ultimoX = x;

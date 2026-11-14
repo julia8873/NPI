@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ficha de trámite en el cajón del fichero: cabecera (categoría) sobre la línea granada -->
+<!-- Ficha de trámite del fichero: tarjeta blanca con la categoría arriba -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/itemTramite"
     style="@style/Widget.Nui.Ficha"
@@ -33,6 +33,6 @@
         android:layout_marginTop="@dimen/nui_espacio_xs"
         android:text="@string/plazo_abierto"
         android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
-        android:textColor="@color/nui_granada"
+        android:textColor="#FF8C42"
         android:textSize="@dimen/nui_texto_s" />
 </LinearLayout>

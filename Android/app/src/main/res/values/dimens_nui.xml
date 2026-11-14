@@ -9,13 +9,14 @@
     <dimen name="nui_espacio_xl">24dp</dimen>  <!-- separación entre bloques -->
     <dimen name="nui_espacio_xxl">32dp</dimen>
 
-    <!-- Radios: objetos de papel = esquinas casi rectas. Nada de "todo redondeado" -->
-    <dimen name="nui_radio_ficha">2dp</dimen>   <!-- fichas, documentos -->
-    <dimen name="nui_radio_papel">6dp</dimen>   <!-- tarjetas, botones, campos -->
+    <!-- Radios: los del resto de la app (tarjetas 16dp, botones 12dp) -->
+    <dimen name="nui_radio_ficha">16dp</dimen>  <!-- fichas, documentos -->
+    <dimen name="nui_radio_papel">16dp</dimen>  <!-- tarjetas -->
+    <dimen name="nui_radio_boton">12dp</dimen>  <!-- botones, campos -->
     <dimen name="nui_radio_burbuja">18dp</dimen> <!-- solo burbujas de chat y bottom sheets -->
 
-    <!-- Sombra dura del papel apoyado (desplazamiento, sin difuminado) -->
-    <dimen name="nui_sombra_papel">3dp</dimen>
+    <!-- Sin sombras duras (se dejan a 0 para no tocar los drawables que las usan) -->
+    <dimen name="nui_sombra_papel">0dp</dimen>
     <dimen name="nui_borde">1dp</dimen>
     <dimen name="nui_borde_sello">2dp</dimen>
 
@@ -25,9 +26,9 @@
     <dimen name="nui_cenefa">16dp</dimen>       <!-- alto de la cenefa de azulejo -->
     <dimen name="nui_arqueria">22dp</dimen>     <!-- arquería bajo la cabecera -->
     <dimen name="nui_zocalo">28dp</dimen>       <!-- zócalo de alicatado al pie de la pantalla -->
-    <dimen name="nui_libro_canto">5dp</dimen>   <!-- padding fin/abajo de un libro: filete 2dp + sombra 3dp -->
+    <dimen name="nui_libro_canto">2dp</dimen>   <!-- padding fin/abajo de un libro: igual que el marco (sin sombra) -->
     <dimen name="nui_icono_objeto">44dp</dimen> <!-- ilustraciones de objetos (rosa, carpeta, turno) -->
-    <dimen name="nui_sombra_flotante">3dp</dimen> <!-- sombra dura de tinta en flotantes y elegidos -->
+    <dimen name="nui_sombra_flotante">0dp</dimen>
     <dimen name="nui_mecha">3dp</dimen> <!-- barra de tiempo que se consume en un aviso (Deshacer) -->
 
     <!-- Escala tipográfica -->

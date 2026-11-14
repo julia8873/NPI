@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    TOKENS DE COLOR NUEVOS del design system NUI (ver DESIGN.md).
-    Complementan a colores_nui.xml, que ya existe en la app y NO se modifica
-    (nui_superficie, nui_tinta, nui_apagado, nui_linea, nui_acento, nui_suave, nui_tinte).
-    La app no tiene modo oscuro: values-night/ hereda estos valores, no hace falta copiarlos.
+    Colores de Biblioteca y Secretaría, redirigidos a la paleta general del grupo
+    (colores_nui.xml + naranja #FF8C42). Los nombres se mantienen para no tocar layouts ni Java.
+    La app no tiene modo oscuro: values-night/ hereda estos valores.
 -->
 <resources>
-    <!-- Papel -->
-    <color name="nui_papel">#FBF8F2</color>           <!-- tarjetas "papel", fichas, documentos -->
-    <color name="nui_papel_sombra">#E4DCCB</color>    <!-- sombra dura del papel apoyado -->
+    <!-- Tarjetas: blancas con borde melocotón -->
+    <color name="nui_papel">#FFFFFF</color>
+    <color name="nui_papel_sombra">#FFE3D1</color>
 
-    <!-- Acento profundo: texto/iconos naranjas sobre fondo claro, estado pulsado -->
-    <color name="nui_acento_profundo">#8E3520</color>
+    <!-- Naranja oscuro: texto/iconos naranjas sobre fondo claro, estado pulsado -->
+    <color name="nui_acento_profundo">#E06A1F</color>
 
-    <!-- Granada / alicatado: solo identidad (sellos, cenefas, detalles), no bloques grandes -->
-    <color name="nui_granada">#A3233A</color>         <!-- tinta de sello, línea de ficha, error -->
-    <color name="nui_granada_tinte">#F8E4E6</color>
-    <color name="nui_cobalto">#1F4E79</color>         <!-- azulejo, enlaces, información -->
-    <color name="nui_cobalto_tinte">#E3ECF4</color>
-    <color name="nui_arrayan">#3C6E47</color>         <!-- éxito / completado (verde arrayán) -->
-    <color name="nui_arrayan_tinte">#E4EFE5</color>
+    <!-- Estados -->
+    <color name="nui_granada">#D32F2F</color>         <!-- error / borrar -->
+    <color name="nui_granada_tinte">#FDECEC</color>
+    <color name="nui_cobalto">@color/nui_tinta</color> <!-- información / enlaces -->
+    <color name="nui_cobalto_tinte">#E2E8F0</color>
+    <color name="nui_arrayan">#2E7D32</color>         <!-- éxito / completado -->
+    <color name="nui_arrayan_tinte">#E8F5E9</color>
 
-    <!-- La sala nazarí: cabecera de yesería, filetes de oro y madera de estanterías/cajones -->
-    <color name="nui_yeseria">#F3EADB</color>         <!-- fondo de cabecera + arquería -->
-    <color name="nui_yeseria_texto">#7A5A3A</color>   <!-- etiquetas sobre yesería -->
-    <color name="nui_oro">#C9A66B</color>             <!-- filetes, bordes finos de libros y zócalo. Nunca texto -->
-    <color name="nui_madera">#8B5E3C</color>          <!-- baldas, cajón del fichero -->
-    <color name="nui_oro_claro">#D9BC86</color>       <!-- frente de carpeta / cartón -->
-    <color name="nui_sombra_libro">#4D14110F</color>  <!-- sombra dura de un libro sobre la balda (tinta 30%) -->
-    <color name="nui_madera_oscura">#6B4429</color>   <!-- canto inferior de la balda -->
+    <!-- Antiguos colores de "sala": ahora grises y naranja suave -->
+    <color name="nui_yeseria">@color/nui_suave</color>
+    <color name="nui_yeseria_texto">@color/nui_apagado</color>
+    <color name="nui_oro">#E2E8F0</color>
+    <color name="nui_madera">#FFB37A</color>
+    <color name="nui_oro_claro">#FFE3D1</color>
+    <color name="nui_sombra_libro">#00000000</color>
+    <color name="nui_madera_oscura">#A0501A</color>  <!-- texto sobre la carpeta (melocotón): naranja oscuro legible -->
 
     <!-- Semánticos (alias: usar estos en lógica de estado) -->
     <color name="nui_ok">@color/nui_arrayan</color>
-    <color name="nui_info">@color/nui_cobalto</color>
+    <color name="nui_info">#1976D2</color>
     <color name="nui_aviso">@color/nui_acento_profundo</color>
     <color name="nui_error">@color/nui_granada</color>
 
@@ -40,27 +39,25 @@
     <color name="nui_velo">#99000000</color>
     <color name="nui_transparente">#00000000</color>
 
-    <!-- Resaltado al tocar (ripple) y selección de texto: naranja translúcido, no el gris/lila de Material -->
-    <color name="nui_resalte">#29C0502E</color>          <!-- almagra 16 % -->
-    <color name="nui_resalte_texto">#52C0502E</color>    <!-- almagra 32 %: texto seleccionado -->
+    <!-- Resaltado al tocar (ripple) y selección de texto: naranja translúcido -->
+    <color name="nui_resalte">#29FF8C42</color>
+    <color name="nui_resalte_texto">#52FF8C42</color>
 
-    <!-- Colores por tema (Secretaría y cualquier sección que agrupe por tema). Un solo color fuerte por tarjeta. -->
-    <color name="nui_tema_matricula">@color/nui_acento_profundo</color>
+    <!-- Colores por tema (Secretaría). Un solo color fuerte por tarjeta. -->
+    <color name="nui_tema_matricula">@color/nui_resaltado</color>
     <color name="nui_tema_matricula_tinte">@color/nui_resaltado_tinte</color>
-    <color name="nui_tema_examenes">@color/nui_granada</color>          <!-- también convocatorias -->
+    <color name="nui_tema_examenes">@color/nui_granada</color>
     <color name="nui_tema_examenes_tinte">@color/nui_granada_tinte</color>
-    <color name="nui_tema_creditos">@color/nui_cobalto</color>
-    <color name="nui_tema_creditos_tinte">@color/nui_cobalto_tinte</color>
+    <color name="nui_tema_creditos">#1976D2</color>
+    <color name="nui_tema_creditos_tinte">#E3F2FD</color>
     <color name="nui_tema_titulos">@color/nui_arrayan</color>
     <color name="nui_tema_titulos_tinte">@color/nui_arrayan_tinte</color>
-    <color name="nui_tema_certificados">@color/nui_madera</color>       <!-- también "otra cosa" -->
-    <color name="nui_tema_certificados_tinte">@color/nui_yeseria</color>
+    <color name="nui_tema_certificados">#7B1FA2</color>
+    <color name="nui_tema_certificados_tinte">#F3E5F5</color>
     <color name="nui_tema_otros">@color/nui_apagado</color>
 
-    <!-- RESALTADO: almagra, el rojo-teja de los muros de la Alhambra ("la roja"). Sustituye al naranja
-         neón (nui_acento) en todo el design system: botón principal, selección, sombras de elegido, chips.
-         Texto encima: nui_superficie (blanco, contraste AA). Para probar otro color, cambia solo estos tres. -->
-    <color name="nui_resaltado">#C0502E</color>
-    <color name="nui_resaltado_tinte">#F6E4DC</color>     <!-- fondo de lo seleccionado -->
+    <!-- Resaltado principal: naranja del grupo. Texto encima: blanco. -->
+    <color name="nui_resaltado">#FF8C42</color>
+    <color name="nui_resaltado_tinte">@color/nui_tinte</color>
     <color name="nui_sobre_resaltado">@color/nui_superficie</color>
 </resources>

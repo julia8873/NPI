@@ -5,21 +5,15 @@
     android:id="@+id/contenido"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
+        android:background="#F8FAFC"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
     <!-- clipChildren="false": el QR ampliado con pinch puede salirse de su sitio (lo recorta la pantalla) -->
     <com.example.nuietsiit.ui.HojasPaginadas
@@ -60,7 +54,7 @@
                     android:layout_marginTop="@dimen/nui_espacio_s"
                     android:accessibilityHeading="true"
                     android:textAppearance="@style/TextAppearance.Nui.Codigo"
-                    android:textColor="@color/nui_granada"
+                    android:textColor="@color/nui_resaltado"
                     android:textSize="@dimen/nui_texto_l" />
 
                 <TextView
@@ -156,15 +150,4 @@
                 app:icon="@drawable/nui_ic_cita" />
         </LinearLayout>
     </com.example.nuietsiit.ui.HojasPaginadas>
-
-    <!-- Zócalo: filete de oro + alicatado -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/nui_oro" />
-
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_zocalo"
-        android:importantForAccessibility="no" />
 </LinearLayout>

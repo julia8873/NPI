@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- MARCA sobre un objeto (PRESTADO en un libro): cartela blanca con borde granada. Girarla un poco. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/nui_superficie" />
-    <stroke android:width="@dimen/nui_borde" android:color="@color/nui_granada" />
-    <corners android:radius="@dimen/nui_radio_ficha" />
-</shape>

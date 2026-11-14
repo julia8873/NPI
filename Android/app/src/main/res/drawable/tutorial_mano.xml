@@ -7,20 +7,20 @@
     android:viewportHeight="56">
     <path
         android:fillColor="@color/nui_superficie"
-        android:strokeColor="@color/nui_tinta"
-        android:strokeWidth="2.5"
+        android:strokeColor="@color/nui_apagado"
+        android:strokeWidth="2"
         android:strokeLineJoin="round"
         android:pathData="M10,30 Q10,24 16,24 L36,24 Q42,24 42,30 L42,40 Q42,54 28,54 L24,54 Q10,54 10,40 Z" />
     <path
         android:fillColor="@color/nui_superficie"
         android:pathData="M17,7 A5,5 0 0 1 27,7 L27,31 L17,31 Z" />
     <path
-        android:strokeColor="@color/nui_tinta"
-        android:strokeWidth="2.5"
+        android:strokeColor="@color/nui_apagado"
+        android:strokeWidth="2"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:pathData="M17,30 L17,7 A5,5 0 0 1 27,7 L27,30 M34,25 L34,31 M10,36 Q5,33 7,28" />
     <path
-        android:fillColor="@color/nui_acento"
+        android:fillColor="@color/nui_resaltado"
         android:pathData="M19,8 A3,3 0 0 1 25,8 L25,10 L19,10 Z" />
 </vector>

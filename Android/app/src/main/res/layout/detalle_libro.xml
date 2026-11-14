@@ -1,25 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Detalle de un libro: el libro de frente sobre su balda y debajo su ficha de catálogo (design system NUI) -->
+<!-- Detalle de un libro: el libro de frente sobre su balda y debajo su ficha de catálogo (estilo general de la app) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/nui_superficie"
+    android:background="#F8FAFC"
     android:orientation="vertical">
 
-    <!-- Cabecera de sala: yesería + arquería -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/nui_yeseria"
+        android:background="#F8FAFC"
         app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_arqueria"
-        android:importantForAccessibility="no"
-        app:tesela="@drawable/nui_arqueria" />
 
     <com.example.nuietsiit.ui.HojasPaginadas
         android:layout_width="match_parent"
@@ -60,7 +54,6 @@
                     android:background="@drawable/nui_marca"
                     android:paddingHorizontal="@dimen/nui_espacio_s"
                     android:paddingVertical="@dimen/biblio_marca_vertical"
-                    android:rotation="-8"
                     android:text="@string/prestado_label"
                     android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
                     android:textColor="@color/nui_granada"
@@ -69,16 +62,9 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/nui_espacio_s"
+                android:layout_height="6dp"
                 android:layout_marginHorizontal="@dimen/nui_espacio_xl"
-                android:background="@color/nui_madera"
-                android:importantForAccessibility="no" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/nui_espacio_xs"
-                android:layout_marginHorizontal="@dimen/nui_espacio_xl"
-                android:background="@color/nui_madera_oscura"
+                android:background="#FFE3D1"
                 android:importantForAccessibility="no" />
 
             <!-- Ficha de catálogo: signatura en la cabecera -->
@@ -144,7 +130,7 @@
                 android:text="@string/btn_como_llegar_biblio"
                 app:icon="@drawable/ic_nui_mapa" />
 
-            <!-- Datos de edición: papel aparte, en letra de oficina -->
+            <!-- Datos de edición: tarjeta aparte -->
             <TextView
                 style="@style/TituloExplorar"
                 android:layout_marginTop="@dimen/nui_espacio_xl"
@@ -225,14 +211,5 @@
         </LinearLayout>
     </com.example.nuietsiit.ui.HojasPaginadas>
 
-    <!-- Zócalo: filete de oro + alicatado -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/biblio_filete"
-        android:background="@color/nui_oro" />
 
-    <com.example.nuietsiit.ui.TramaAzulejo
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nui_zocalo"
-        android:importantForAccessibility="no" />
 </LinearLayout>

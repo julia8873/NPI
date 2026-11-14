@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Escanear estantería: la cámara es la ventana de la sala; arriba yesería y arquería,
-     abajo la leyenda en papel sobre el zócalo (design system NUI) -->
+<!-- Escanear estantería: la cámara a pantalla completa; arriba la barra y abajo la leyenda -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -21,7 +20,6 @@
         android:layout_height="match_parent"
         android:accessibilityLiveRegion="polite" />
 
-    <!-- Cabecera de sala: el relleno superior (barra de estado) lo pone el código -->
     <LinearLayout
         android:id="@+id/cabecera"
         android:layout_width="match_parent"
@@ -32,14 +30,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/nui_yeseria"
+            android:background="#F8FAFC"
             app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
-        <com.example.nuietsiit.ui.TramaAzulejo
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_arqueria"
-            android:importantForAccessibility="no"
-            app:tesela="@drawable/nui_arqueria" />
     </LinearLayout>
 
     <LinearLayout
@@ -112,16 +105,13 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Zócalo: filete de oro + alicatado (el código le suma la barra de navegación) -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/biblio_filete"
-            android:background="@color/nui_oro" />
 
-        <com.example.nuietsiit.ui.TramaAzulejo
+        <!-- Franja inferior (el código le suma la barra de navegación) -->
+        <View
             android:id="@+id/zocalo"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/nui_zocalo"
+            android:layout_height="8dp"
+            android:background="#F8FAFC"
             android:importantForAccessibility="no" />
     </LinearLayout>
 

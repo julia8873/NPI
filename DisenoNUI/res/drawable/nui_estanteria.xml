@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- ESTANTERÍA: fondo de mueble claro con marco de madera. Las baldas las pinta BaldaDecoration. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/nui_yeseria" />
-    <stroke android:width="@dimen/nui_borde_sello" android:color="@color/nui_madera" />
-    <corners android:topLeftRadius="@dimen/nui_radio_papel" android:topRightRadius="@dimen/nui_radio_papel" />
-</shape>

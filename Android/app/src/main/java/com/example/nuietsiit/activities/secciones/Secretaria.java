@@ -33,7 +33,6 @@ import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
-import com.example.nuietsiit.ui.CabeceraNui;
 import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.BuscadorTolerante;
@@ -41,7 +40,6 @@ import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 
 import java.time.Duration;
@@ -91,16 +89,7 @@ public class Secretaria extends PantallaSecretaria {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secretaria);
 
-        // Botón atrás en la barra superior
-        MaterialToolbar barra = findViewById(R.id.toolbar);
-        if (barra != null) {
-            setSupportActionBar(barra);
-            CabeceraNui.preparar(barra);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(R.string.sec_titulo);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            }
-        }
+        // cabecera unificada (btnVolver, título, chat, perfil): la conecta BaseActivity
 
         correoUsuario = SesionUtil.correo(getIntent());
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
@@ -360,8 +349,6 @@ public class Secretaria extends PantallaSecretaria {
         ivIcono.setBackgroundTintList(ColorStateList.valueOf(getColor(tinte)));
         ivIcono.setVisibility(View.VISIBLE);
         tarjeta.findViewById(R.id.tvIcono).setVisibility(View.GONE);
-        // papeles sobre la mesa: cada uno un poco girado, alternando
-        tarjeta.setRotation(contenedorLoTuyo.getChildCount() % 2 == 0 ? -0.6f : 0.5f);
         ((TextView) tarjeta.findViewById(R.id.tvEtiqueta)).setText(etiqueta);
         ((TextView) tarjeta.findViewById(R.id.tvTitulo)).setText(titulo);
         ((TextView) tarjeta.findViewById(R.id.tvDetalle)).setText(detalle);
@@ -392,7 +379,7 @@ public class Secretaria extends PantallaSecretaria {
     // dos filas del mismo ancho: los nombres cortos arriba y los largos abajo, para que todos se lean enteros
     private void crearPestanas() {
         pestanasCategorias.nuevaFila();
-        pestanasCategorias.anadir(null, getString(R.string.sec_pestana_todas), null, R.drawable.nui_ic_granada, R.color.nui_granada);
+        pestanasCategorias.anadir(null, getString(R.string.sec_pestana_todas), null, R.drawable.nui_ic_todas, R.color.nui_resaltado);
         anadirPestana("matricula", R.drawable.nui_ic_matricula);
         anadirPestana("titulos", R.drawable.nui_ic_titulo);
         anadirPestana("otro", R.drawable.nui_ic_consulta);

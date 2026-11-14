@@ -4,7 +4,7 @@
     android:shape="oval">
     <stroke
         android:width="3dp"
-        android:color="@color/nui_acento" />
+        android:color="@color/nui_resaltado" />
     <size
         android:width="48dp"
         android:height="48dp" />

@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.secciones.asignaturas;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -22,6 +23,8 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.AcademicoDB;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
@@ -38,6 +41,8 @@ public class BuscadorAsignaturas extends BaseActivity {
     private View btnVolver;
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
+    private DetectorGiroRuleta detectorGiro;
+    private float anguloGiroAcumuladoTutorial = 0f;
 
     private DBHelper BD;
     private AcademicoDB academicoDB;
@@ -48,6 +53,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.buscador_asignaturas);
 
         BD = DBHelper.getInstance(this);
@@ -66,6 +72,17 @@ public class BuscadorAsignaturas extends BaseActivity {
 
         ruletaCursosView.setOnCursoSelectedListener(this::mostrarResultadosPorRuleta);
 
+        detectorGiro = new DetectorGiroRuleta(this, delta -> {
+            if (layoutRuletaCursos.getVisibility() == View.VISIBLE) {
+                ruletaCursosView.rotarPorSensor(delta);
+                anguloGiroAcumuladoTutorial += Math.abs(delta);
+                if (anguloGiroAcumuladoTutorial >= 15.0f) {
+                    avisarTutorial(Gesto.GIRAR);
+                    anguloGiroAcumuladoTutorial = 0f;
+                }
+            }
+        });
+
         etBuscadorRapido.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -73,6 +90,7 @@ public class BuscadorAsignaturas extends BaseActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() > 0) {
+                    avisarTutorial(Gesto.ESCRIBIR);
                     mostrarResultadosPorTexto(s.toString().trim());
                 } else {
                     restaurarVistaInicial();
@@ -93,6 +111,31 @@ public class BuscadorAsignaturas extends BaseActivity {
         });
 
         cargarGrados();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "buscador_asignaturas", 2)
+                .tocar(R.id.scrollGrados, getString(R.string.asig_tut_grados))
+                .gesto(R.id.ruletaCursosView, Gesto.TOCAR, getString(R.string.asig_tut_ruleta_dedo))
+                .sensor(Gesto.GIRAR, getString(R.string.asig_tut_ruleta_volante))
+                .gesto(R.id.etBuscadorRapido, Gesto.ESCRIBIR, getString(R.string.asig_tut_buscar));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (detectorGiro != null) {
+            detectorGiro.iniciar();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (detectorGiro != null) {
+            detectorGiro.parar();
+        }
     }
 
     private void manejarRetroceso() {
@@ -196,6 +239,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     }
 
     private void prepararRuletaParaGrado(int idGrado, String nombreGrado) {
+        avisarTutorial(Gesto.TOCAR);
         idGradoActual = idGrado;
         nombreGradoActual = nombreGrado;
 

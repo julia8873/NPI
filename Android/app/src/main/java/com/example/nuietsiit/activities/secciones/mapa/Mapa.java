@@ -52,8 +52,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
 import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.card.MaterialCardView;
@@ -84,11 +86,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 public class Mapa extends BaseActivity {
 
@@ -189,7 +195,7 @@ public class Mapa extends BaseActivity {
     private boolean sinPedirUbicacion = false; // "En otro sitio": ya eligió a mano, el panel no pide la ubicación
     private Runnable llegadaPendiente;         // "Has llegado" → seguir dentro (se cancela si cierra la guía)
     // hora de la app: la simulada si se ha cambiado, si no la real
-    private final java.util.function.Supplier<Calendar> reloj =
+    private final Supplier<Calendar> reloj =
             () -> ahoraSimulado != null ? (Calendar) ahoraSimulado.clone() : Calendar.getInstance();
     private boolean viajePendientePermiso = false;
     private static final int ESPERA_GPS_VIAJE_MS = 5000;
@@ -280,12 +286,10 @@ public class Mapa extends BaseActivity {
         if (cardMascotaAyudante != null) {
             cardMascotaAyudante.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                new AlertDialog.Builder(this)
-                        .setIcon(R.drawable.ic_mascota_ayudante)
-                        .setTitle(getString(R.string.mapa_asistente_virtual))
-                        .setMessage(getString(R.string.mapa_asistente_msg))
-                        .setPositiveButton(getString(R.string.mapa_entendido_exclamacion), null)
-                        .show();
+                Intent chatIntent = new Intent(this, ChatActivity.class);
+                String correo = getSharedPreferences("SesionUsuario", MODE_PRIVATE).getString("CORREO", null);
+                if (correo != null) chatIntent.putExtra("CORREO", correo);
+                startActivity(chatIntent);
             });
         }
 
@@ -375,7 +379,7 @@ public class Mapa extends BaseActivity {
     }
 
     // Llegada con la guía exterior: si el viaje ya decía a qué sitio de dentro vas, se sigue solo hasta allí
-    private void alLlegarConGuia(String idLugar, java.time.LocalDateTime hora) {
+    private void alLlegarConGuia(String idLugar, LocalDateTime hora) {
         DestinoViaje destino = viajeHacia(idLugar);
         viaje = null;
         Marcador m = destino != null && destino.interior != null ? marcadorQueContiene(destino.interior) : null;
@@ -394,8 +398,8 @@ public class Mapa extends BaseActivity {
     }
 
     // En la ETSIIT o el Auxiliar sin destino de dentro: "¿a dónde vas?" y enlace con la ruta interior
-    private void alLlegarAEdificio(String idLugar, java.time.LocalDateTime hora, boolean llegando) {
-        Calendar ahora = java.util.GregorianCalendar.from(hora.atZone(java.time.ZoneId.systemDefault()));
+    private void alLlegarAEdificio(String idLugar, LocalDateTime hora, boolean llegando) {
+        Calendar ahora = GregorianCalendar.from(hora.atZone(ZoneId.systemDefault()));
         LlegadaEdificio.mostrar(this, idLugar, ProximaClase.de(this, SesionUtil.correo(getIntent()), ahora),
                 ahora, titulosMarcadores(), llegando, new LlegadaEdificio.Acciones() {
                     @Override public void rutaInterior(String buscado) { rutaInteriorDesdeEntrada(buscado); }
@@ -414,7 +418,7 @@ public class Mapa extends BaseActivity {
     // Tocar un edificio del mapa exterior: "¿Te llevo?" (TarjetaLugar)
     private void alTocarLugar(String idLugar) {
         if (guiaRutaExterior != null && guiaRutaExterior.activa()) return; // no cambiar de destino en plena guía
-        java.time.LocalDateTime hora = horaActual();
+        LocalDateTime hora = horaActual();
         GeoPoint gps = myLocationOverlay != null ? myLocationOverlay.getMyLocation() : null;
         TarjetaLugar.mostrar(this, findViewById(R.id.flContenedorMapa), redTransporte, idLugar,
                 gps != null ? new Punto(gps.getLatitude(), gps.getLongitude()) : null, hora,
@@ -576,8 +580,8 @@ public class Mapa extends BaseActivity {
         return titulos;
     }
 
-    private java.time.LocalDateTime horaActual() {
-        return java.time.LocalDateTime.ofInstant(reloj.get().toInstant(), java.time.ZoneId.systemDefault());
+    private LocalDateTime horaActual() {
+        return LocalDateTime.ofInstant(reloj.get().toInstant(), ZoneId.systemDefault());
     }
 
     private void rutaInteriorDesdeEntrada(String buscado) {
@@ -1933,5 +1937,21 @@ public class Mapa extends BaseActivity {
                 .replaceAll("\\p{M}", "")
                 .toLowerCase(Locale.ROOT)
                 .trim();
+    }
+
+    // -------------------------------------------------
+    //              TUTORIAL
+    // -------------------------------------------------
+
+    /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "mapa", 2)
+                .info(R.id.toggleGroupModo, getString(R.string.tut_mapa_modo))
+                .tocar(R.id.fabADondeVas, getString(R.string.tut_mapa_donde_vas)).soloSiSeVe()
+                .info(R.id.fabComoLlegar, getString(R.string.tut_mapa_como_llegar)).soloSiSeVe()
+                .info(R.id.cardBuscadorMapa, getString(R.string.tut_mapa_buscador_planos)).soloSiSeVe()
+                .info(R.id.scrollPlantas, getString(R.string.tut_mapa_plantas)).soloSiSeVe()
+                .info(R.id.ivPlanoEdificio, getString(R.string.tut_mapa_plano)).soloSiSeVe();
     }
 }

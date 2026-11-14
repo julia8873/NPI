@@ -8,10 +8,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.Gravity;
@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -48,7 +47,7 @@ class CapaTutorial extends FrameLayout {
     private static final long ESPERA_RESALTAR_SALTAR = 10000;
     private static final long DURACION_ACIERTO = 1100;
     private static final long DURACION_DESPEDIDA = 3500;
-    private static final int COLOR_VELO = 0xB814110F; // tinta al 72 %
+    private static final int COLOR_VELO = 0xB3333333; // #333333 al 70 %
 
     private final Activity actividad;
     private final Tutorial tutorial;
@@ -111,10 +110,10 @@ class CapaTutorial extends FrameLayout {
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
 
-        int acento = color(R.color.nui_acento);
+        int acento = color(R.color.nui_resaltado);
         pinturaVelo.setColor(COLOR_VELO);
         pinturaBorde.setStyle(Paint.Style.STROKE);
-        pinturaBorde.setStrokeWidth(3 * dp);
+        pinturaBorde.setStrokeWidth(2.5f * dp);
         pinturaBorde.setColor(acento);
         pinturaPulso.setStyle(Paint.Style.STROKE);
         pinturaPulso.setStrokeWidth(2 * dp);
@@ -125,9 +124,9 @@ class CapaTutorial extends FrameLayout {
         // ---------- bocadillo ----------
         bocadillo = new LinearLayout(actividad);
         bocadillo.setOrientation(LinearLayout.VERTICAL);
-        int sombra = (int) (5 * dp);
-        bocadillo.setPadding((int) (18 * dp), (int) (12 * dp), (int) (18 * dp) + sombra, (int) (16 * dp) + sombra);
-        bocadillo.setBackground(fondoBocadillo(sombra));
+        bocadillo.setPadding((int) (18 * dp), (int) (12 * dp), (int) (18 * dp), (int) (16 * dp));
+        bocadillo.setBackground(fondoBocadillo());
+        bocadillo.setElevation(4 * dp);
         bocadillo.setClickable(true);
 
         LinearLayout arriba = new LinearLayout(actividad);
@@ -179,13 +178,13 @@ class CapaTutorial extends FrameLayout {
         marcaAcierto.setText("✓");
         marcaAcierto.setTextSize(34);
         marcaAcierto.setTypeface(Typeface.DEFAULT_BOLD);
-        marcaAcierto.setTextColor(color(R.color.nui_tinta));
+        marcaAcierto.setTextColor(Color.WHITE);
         marcaAcierto.setGravity(Gravity.CENTER);
         GradientDrawable circulo = new GradientDrawable();
         circulo.setShape(GradientDrawable.OVAL);
-        circulo.setColor(acento);
-        circulo.setStroke((int) (3 * dp), color(R.color.nui_tinta));
+        circulo.setColor(color(R.color.nui_arrayan));
         marcaAcierto.setBackground(circulo);
+        marcaAcierto.setElevation(6 * dp);
         marcaAcierto.setAlpha(0f);
         marcaAcierto.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(marcaAcierto, new LayoutParams((int) (72 * dp), (int) (72 * dp)));
@@ -498,42 +497,33 @@ class CapaTutorial extends FrameLayout {
     private Drawable punto(boolean hecho) {
         GradientDrawable d = new GradientDrawable();
         d.setShape(GradientDrawable.OVAL);
-        d.setColor(hecho ? color(R.color.nui_acento) : color(R.color.nui_linea));
-        d.setStroke((int) (1.5f * dp), color(R.color.nui_tinta));
+        d.setColor(hecho ? color(R.color.nui_resaltado) : 0xFFE2E8F0);
         return d;
     }
 
-    /** Neobrutalista: borde grueso de tinta y sombra dura desplazada. */
-    private Drawable fondoBocadillo(int sombra) {
-        float r = 14 * dp;
-        GradientDrawable fondoSombra = new GradientDrawable();
-        fondoSombra.setCornerRadius(r);
-        fondoSombra.setColor(color(R.color.nui_tinta));
+    /** Tarjeta blanca como las del resto de la app: radio 16dp y borde fino melocotón. */
+    private Drawable fondoBocadillo() {
         GradientDrawable papel = new GradientDrawable();
-        papel.setCornerRadius(r);
+        papel.setCornerRadius(16 * dp);
         papel.setColor(color(R.color.nui_superficie));
-        papel.setStroke((int) (3 * dp), color(R.color.nui_tinta));
-        LayerDrawable capas = new LayerDrawable(new Drawable[]{fondoSombra, papel});
-        capas.setLayerInset(0, sombra, sombra, 0, 0);
-        capas.setLayerInset(1, 0, 0, sombra, sombra);
-        return capas;
+        papel.setStroke((int) (1 * dp), 0xFFFFE3D1);
+        return papel;
     }
 
     private void estiloBoton(TextView b, boolean resaltado) {
         GradientDrawable d = new GradientDrawable();
-        d.setCornerRadius(10 * dp);
-        d.setColor(resaltado ? color(R.color.nui_acento) : color(R.color.nui_superficie));
-        d.setStroke((int) ((resaltado ? 2.5f : 1.5f) * dp), color(resaltado ? R.color.nui_tinta : R.color.nui_apagado));
+        d.setCornerRadius(12 * dp);
+        d.setColor(resaltado ? color(R.color.nui_resaltado) : color(R.color.nui_superficie));
+        if (!resaltado) d.setStroke((int) (1 * dp), 0xFFFFE3D1);
         b.setBackground(d);
-        b.setTextColor(color(resaltado ? R.color.nui_tinta : R.color.nui_apagado));
+        b.setTextColor(resaltado ? Color.WHITE : color(R.color.nui_resaltado));
     }
 
     private TextView texto(int sp, int colorRes, boolean negrita) {
         TextView t = new TextView(getContext());
         t.setTextSize(sp);
         t.setTextColor(color(colorRes));
-        Typeface fuente = ResourcesCompat.getFont(getContext(), R.font.nui_texto);
-        t.setTypeface(Typeface.create(fuente, negrita ? Typeface.BOLD : Typeface.NORMAL));
+        t.setTypeface(negrita ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         return t;
     }
 
