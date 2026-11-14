@@ -141,6 +141,15 @@ public class RuletaCursosView extends View {
     }
 
     /**
+     * Permite rotar la ruleta mediante un sensor (ej: inclinación/giro del teléfono).
+     * @param deltaAngulo Variación angular en grados.
+     */
+    public void rotarPorSensor(float deltaAngulo) {
+        this.anguloActual = (this.anguloActual + deltaAngulo) % 360f;
+        invalidate();
+    }
+
+    /**
      * Gestión del toque táctil: Giro con el dedo y clic en el botón "IR" central
      */
     @Override

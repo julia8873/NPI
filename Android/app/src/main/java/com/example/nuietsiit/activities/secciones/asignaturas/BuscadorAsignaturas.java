@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.secciones.asignaturas;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -38,6 +39,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     private View btnVolver;
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
+    private DetectorGiroRuleta detectorGiro;
 
     private DBHelper BD;
     private AcademicoDB academicoDB;
@@ -48,6 +50,7 @@ public class BuscadorAsignaturas extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.buscador_asignaturas);
 
         BD = DBHelper.getInstance(this);
@@ -65,6 +68,12 @@ public class BuscadorAsignaturas extends BaseActivity {
         ruletaCursosView = findViewById(R.id.ruletaCursosView);
 
         ruletaCursosView.setOnCursoSelectedListener(this::mostrarResultadosPorRuleta);
+
+        detectorGiro = new DetectorGiroRuleta(this, delta -> {
+            if (layoutRuletaCursos.getVisibility() == View.VISIBLE) {
+                ruletaCursosView.rotarPorSensor(delta);
+            }
+        });
 
         etBuscadorRapido.addTextChangedListener(new TextWatcher() {
             @Override
@@ -93,6 +102,22 @@ public class BuscadorAsignaturas extends BaseActivity {
         });
 
         cargarGrados();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (detectorGiro != null) {
+            detectorGiro.iniciar();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (detectorGiro != null) {
+            detectorGiro.parar();
+        }
     }
 
     private void manejarRetroceso() {

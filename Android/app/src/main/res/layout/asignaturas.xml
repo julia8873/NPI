@@ -97,7 +97,7 @@
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingTop="8dp"
-        android:paddingBottom="14dp">
+        android:paddingBottom="20dp">
 
         <!-- Recuadro expansible para el horario/estado del usuario -->
         <com.google.android.material.card.MaterialCardView

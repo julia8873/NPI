@@ -371,7 +371,13 @@ public class BaseActivity extends AppCompatActivity implements Tutorial.ConTutor
         if (root != null) {
             ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
                 Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                Insets navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+                v.setPadding(
+                        v.getPaddingLeft(),
+                        statusBarInsets.top,
+                        v.getPaddingRight(),
+                        Math.max(v.getPaddingBottom(), navBarInsets.bottom)
+                );
                 return insets;
             });
         }
