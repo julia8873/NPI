@@ -261,6 +261,9 @@ public final class TablasActividades {
                     "Abre una sala de estudio con 60 puestos y enchufes en la planta baja del Edificio Auxiliar.",
                     "general", "baja", ahora.minusDays(5), null, null);
         }
+
+        // Traducción al inglés de los datos (títulos, descripciones y avisos): TRADUCCION
+        TraduccionesActividades.guardar(db);
     }
 
     private static boolean existe(SQLiteDatabase db, String tabla, String titulo) {

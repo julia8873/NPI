@@ -63,6 +63,8 @@ import java.util.function.Supplier;
 public final class GuiaRutaExterior implements Brujula.Listener, LocationListener {
 
     private static final int VELOCIDAD_SIMULACION = 10;
+    /** En los tramos a pie con fotos la simulación va a ×3 para que dé tiempo a ver cada foto (Miguel). */
+    private static final int VELOCIDAD_SIMULACION_FOTOS = 3;
     private static final long TICK_MS = 1000, TICK_SIMULACION_MS = 500;
     /** Si el GPS lleva este tiempo sin dar posición, se da al usuario por parado. */
     private static final long GPS_PARADO_MS = 10_000;
@@ -388,7 +390,8 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         Punto p;
         double v;
         if (simulando) {
-            horaSimulada = horaSimulada.plus(Duration.ofMillis((ahoraMs - ultimoTick) * VELOCIDAD_SIMULACION));
+            int velocidadSim = puntosTramo.isEmpty() ? VELOCIDAD_SIMULACION : VELOCIDAD_SIMULACION_FOTOS;
+            horaSimulada = horaSimulada.plus(Duration.ofMillis((ahoraMs - ultimoTick) * velocidadSim));
             TrayectoSimulado.Muestra m = trayecto.en(horaSimulada);
             ahora = horaSimulada;
             p = m.posicion;

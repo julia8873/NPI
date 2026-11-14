@@ -134,6 +134,8 @@ public class ActividadesDB {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow("idActividad"));
                 String titulo = cursor.getString(cursor.getColumnIndexOrThrow("titulo"));
                 String desc = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
+                titulo = TraduccionesActividades.traducir(db, "ACTIVIDAD", id, "titulo", titulo);
+                desc = TraduccionesActividades.traducir(db, "ACTIVIDAD", id, "descripcion", desc);
                 String fechaInicio = cursor.getString(cursor.getColumnIndexOrThrow("fechaInicio"));
 
                 String hora = "";
@@ -322,7 +324,8 @@ public class ActividadesDB {
                 com.nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombreComunidad"));
                 com.plataforma = cursor.getString(cursor.getColumnIndexOrThrow("plataforma"));
                 com.enlace = cursor.getString(cursor.getColumnIndexOrThrow("enlaceAcceso"));
-                com.descripcion = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
+                com.descripcion = TraduccionesActividades.traducir(dbHelper.getReadableDatabase(), "COMUNIDAD_CHAT",
+                        com.id, "descripcion", cursor.getString(cursor.getColumnIndexOrThrow("descripcion")));
                 int iGrado = cursor.getColumnIndexOrThrow("idGrado");
                 com.idGrado = cursor.isNull(iGrado) ? null : cursor.getInt(iGrado);
                 lista.add(com);
@@ -361,6 +364,12 @@ public class ActividadesDB {
         }
         a.inscritos = c.getInt(c.getColumnIndexOrThrow("inscritos"));
         a.inscrito = c.getInt(c.getColumnIndexOrThrow("inscrito")) == 1;
+
+        // En inglés, título y descripción traducidos (TRADUCCION); el título original se guarda para los QR
+        a.tituloEs = a.titulo;
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        a.titulo = TraduccionesActividades.traducir(db, "ACTIVIDAD", a.id, "titulo", a.titulo);
+        a.descripcion = TraduccionesActividades.traducir(db, "ACTIVIDAD", a.id, "descripcion", a.descripcion);
         return a;
     }
 }
