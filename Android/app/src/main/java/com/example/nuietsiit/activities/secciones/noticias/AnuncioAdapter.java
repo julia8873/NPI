@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Anuncio;
 import com.example.nuietsiit.util.FechasUtil;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
@@ -32,10 +33,12 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     }
 
     private List<Anuncio> anuncios = new ArrayList<>();
-    private final OnAnuncioClick listener;
+    private final OnAnuncioClick listener, alGuardar;
 
-    public AnuncioAdapter(OnAnuncioClick listener) {
+    /** alGuardar: el marcapáginas de la ficha (guardar o quitar de guardados). */
+    public AnuncioAdapter(OnAnuncioClick listener, OnAnuncioClick alGuardar) {
         this.listener = listener;
+        this.alGuardar = alGuardar;
     }
 
     public void setAnuncios(List<Anuncio> nuevos) {
@@ -78,7 +81,13 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         tarjeta.setStrokeWidth(Math.round((a.esUrgente() ? 2 : 1) * ctx.getResources().getDisplayMetrics().density));
 
         h.ficha.setContentDescription((a.esUrgente() ? ctx.getString(R.string.nui_not_urgente) + ". " : "") + (a.leido ? "" : ctx.getString(R.string.nui_not_nuevo) + ". ")
+                + (a.guardado ? ctx.getString(R.string.nui_not_guardado) + ". " : "")
                 + Anuncio.nombreCategoria(ctx, a.categoria) + ". " + a.titulo);
+        // Marcapáginas: relleno y naranja si está guardado
+        h.btnGuardar.setIconResource(a.guardado ? R.drawable.nui_ic_guardado : R.drawable.nui_ic_guardar);
+        h.btnGuardar.setIconTint(ColorStateList.valueOf(ctx.getColor(a.guardado ? R.color.nui_acento : R.color.sec_texto_suave)));
+        h.btnGuardar.setContentDescription(ctx.getString(a.guardado ? R.string.nui_not_btn_quitar_guardado : R.string.nui_not_btn_guardar));
+        h.btnGuardar.setOnClickListener(v -> alGuardar.alPulsar(a));
         h.ficha.setOnClickListener(v -> listener.alPulsar(a));
     }
 
@@ -121,6 +130,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         final View ficha, vNoLeido;
         final ImageView ivIcono;
         final TextView tvTitulo, tvMeta, tvContenido, tvUrgente, tvLeerMas;
+        final MaterialButton btnGuardar;
 
         Holder(View v) {
             super(v);
@@ -131,6 +141,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
             tvContenido = v.findViewById(R.id.tvContenido);
             tvUrgente = v.findViewById(R.id.tvUrgente);
             tvLeerMas = v.findViewById(R.id.tvLeerMas);
+            btnGuardar = v.findViewById(R.id.btnGuardarAviso);
             vNoLeido = v.findViewById(R.id.vNoLeido);
         }
     }

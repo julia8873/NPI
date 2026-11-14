@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,17 +16,19 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.secciones.actividades.TirarHaciaTi;
 import com.example.nuietsiit.activities.secciones.noticias.AnuncioAdapter;
-import com.example.nuietsiit.activities.secciones.noticias.LectorAvisos;
+import com.example.nuietsiit.activities.secciones.noticias.GestoMano;
 import com.example.nuietsiit.data.AnunciosDB;
+import com.example.nuietsiit.data.AnunciosGuardados;
 import com.example.nuietsiit.data.AnunciosLeidos;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.modelo.Anuncio;
+import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.tutorial.Gesto;
 import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,17 +41,22 @@ import java.util.Set;
  * Pantalla de Noticias SIN SCROLL: carrusel horizontal con una ficha grande por aviso.
  * Mismo aspecto que Asignaturas, Profesorado y Calendario: cabecera unificada, fondo gris claro, tarjetas
  * blancas y el naranja de la app (colores_secciones.xml y estilos_secciones.xml).
- * - Los urgentes van primero, con sello granada.
+ * - Los urgentes van primero, con borde y etiqueta rojos; los no leídos llevan un punto naranja.
  * - Un aviso cuenta como leído si te quedas en él un momento o lo abres entero.
  * - Tocar la tarjeta = aviso completo en una hoja (con su enlace si tiene).
- * - VOZ Y SENSORES (LectorAvisos): el altavoz lee en voz alta los avisos sin leer y el carrusel los va pasando.
- *   Acercarse el móvil a la oreja (sensor de proximidad) los lee por el auricular, como un audio;
- *   ponerlo boca abajo lo calla.
+ * - SENSORES, sin tocar la pantalla:
+ *   · inclinar el móvil (acelerómetro, InclinarParaPasar, como en Actividades): a la izquierda, el siguiente aviso;
+ *     a la derecha, el anterior;
+ *   · pasar la mano por delante (sensor de proximidad, GestoMano): el siguiente aviso (del último, al primero).
+ * - GUARDAR (como en Actividades): inclinar el móvil hacia ti (acelerómetro, TirarHaciaTi) o tocar el marcapáginas
+ *   de la ficha = guardar el aviso para tenerlo a mano en «Guardados» (AnunciosGuardados); si ya estaba, se quita.
+ * - MULTITÁCTIL: barrer hacia abajo con dos dedos = marcar todos como leídos (con "Deshacer"), como el botón.
  */
 public class Noticias extends BaseActivity {
 
     private static final String FILTRO_TODOS = "__todos";
     private static final String FILTRO_NO_LEIDOS = "__noleidos";
+    private static final String FILTRO_GUARDADOS = "__guardados";
     /** Tiempo mirando una tarjeta para que cuente como leída. */
     private static final long MS_PARA_LEIDO = 1500;
 
@@ -65,9 +73,14 @@ public class Noticias extends BaseActivity {
     private Runnable marcarPendiente;
     private int ultimaPagina;
 
-    private LectorAvisos lector;
-    private MaterialButton btnEscuchar;
-    private List<Anuncio> cola = new ArrayList<>(); // los que se están leyendo en voz alta
+    private GestoMano gestoMano;
+    private InclinarParaPasar inclinar;
+    private TirarHaciaTi haciaTi;          // inclinar hacia ti = guardar el aviso (como en Actividades)
+    private String correo;                 // los guardados van por cuenta
+    // barrido con dos dedos
+    private static final float BARRIDO_FRACCION = 0.18f; // de la altura de la pantalla
+    private boolean barriendo, barrido;
+    private float barridoX, barridoY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +100,8 @@ public class Noticias extends BaseActivity {
         tvPagina = findViewById(R.id.tvPagina);
 
         // Carrusel: se ve un trozo de la tarjeta anterior y la siguiente
-        adaptador = new AnuncioAdapter(this::mostrarDetalle);
+        correo = getSharedPreferences("SesionUsuario", MODE_PRIVATE).getString("CORREO", null);
+        adaptador = new AnuncioAdapter(this::mostrarDetalle, this::alternarGuardado);
         vpAnuncios = findViewById(R.id.vpAnuncios);
         vpAnuncios.setAdapter(adaptador);
         vpAnuncios.setOffscreenPageLimit(1);
@@ -112,49 +126,18 @@ public class Noticias extends BaseActivity {
 
         crearPestanas();
 
-        // Leer en voz alta (botón o acercándose el móvil a la oreja)
-        btnEscuchar = findViewById(R.id.btnEscuchar);
-        lector = new LectorAvisos(this, new LectorAvisos.Oyente() {
-            @Override public void alLeer(int indice) {
-                if (indice >= cola.size()) return;
-                Anuncio a = cola.get(indice);
-                int pos = visibles.indexOf(a);
-                if (pos >= 0) vpAnuncios.setCurrentItem(pos, true);
-                marcarLeido(a);
-            }
-
-            @Override public void alTerminar() {
-                pintarBotonEscuchar();
-            }
-
-            @Override public void alAcercarOreja() {
-                empezarLectura();
-            }
-
-            @Override public void alCambiarOreja(boolean cerca) {
-                if (cerca) avisarTutorial(Gesto.OREJA);
-                pintarBotonEscuchar();
-            }
-
-            @Override public void alBocaAbajo() {
-                pintarBotonEscuchar();
-                avisarTutorial(Gesto.BOCA_ABAJO);
-                Snackbar.make(raiz, R.string.nui_not_boca_abajo, Snackbar.LENGTH_SHORT).show();
-            }
-        });
-        btnEscuchar.setOnClickListener(v -> {
-            if (lector.leyendo()) lector.parar();
-            else empezarLectura();
+        // Sensores para pasar avisos sin tocar la pantalla
+        inclinar = new InclinarParaPasar(vpAnuncios, this::alInclinar, () -> visibles.size() > 1);
+        gestoMano = new GestoMano(this, () -> {
+            if (visibles.size() < 2) return;
+            avisarTutorial(Gesto.MANO);
+            int siguiente = vpAnuncios.getCurrentItem() + 1;
+            vpAnuncios.setCurrentItem(siguiente < visibles.size() ? siguiente : 0, true);
         });
 
-        tvMarcarTodo.setOnClickListener(v -> {
-            List<Integer> ids = new ArrayList<>();
-            for (Anuncio a : todos) ids.add(a.id);
-            AnunciosLeidos.marcarVarios(this, ids);
-            for (Anuncio a : todos) a.leido = true;
-            adaptador.notifyDataSetChanged();
-            actualizarContador();
-        });
+        haciaTi = new TirarHaciaTi(this, this::alTirarHaciaTi);
+
+        tvMarcarTodo.setOnClickListener(v -> marcarTodosLeidos());
 
         cargarAnuncios();
     }
@@ -162,19 +145,15 @@ public class Noticias extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        lector.iniciarSensores();
-    }
-
-    @Override
-    protected void onDestroy() {
-        lector.cerrar();
-        super.onDestroy();
+        gestoMano.iniciar();
+        haciaTi.iniciar();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        lector.pararSensores(); // también para la lectura
+        gestoMano.parar();
+        haciaTi.parar();
         if (marcarPendiente != null) reloj.removeCallbacks(marcarPendiente);
     }
 
@@ -185,7 +164,11 @@ public class Noticias extends BaseActivity {
     private void cargarAnuncios() {
         todos = anunciosDB.obtenerAnunciosGenerales(FechasUtil.ahoraBD());
         Set<String> leidos = AnunciosLeidos.leidos(this);
-        for (Anuncio a : todos) a.leido = leidos.contains(String.valueOf(a.id));
+        Set<String> guardados = AnunciosGuardados.guardados(this, correo);
+        for (Anuncio a : todos) {
+            a.leido = leidos.contains(String.valueOf(a.id));
+            a.guardado = guardados.contains(String.valueOf(a.id));
+        }
         aplicarFiltro();
     }
 
@@ -194,6 +177,7 @@ public class Noticias extends BaseActivity {
         ChipGroup chips = findViewById(R.id.pestanasCategorias);
         anadirChip(chips, FILTRO_TODOS, getString(R.string.nui_not_todos));
         anadirChip(chips, FILTRO_NO_LEIDOS, getString(R.string.nui_not_sin_leer_pestana));
+        anadirChip(chips, FILTRO_GUARDADOS, getString(R.string.nui_not_f_guardados));
         for (String[] c : Anuncio.CATEGORIAS) anadirChip(chips, c[0], Anuncio.nombreFiltro(this, c[0]));
         chips.check(chips.getChildAt(0).getId());
         chips.setOnCheckedStateChangeListener((grupo, ids) -> {
@@ -217,6 +201,7 @@ public class Noticias extends BaseActivity {
         for (Anuncio a : todos) {
             if (filtroSeleccionado == null
                     || (FILTRO_NO_LEIDOS.equals(filtroSeleccionado) && !a.leido)
+                    || (FILTRO_GUARDADOS.equals(filtroSeleccionado) && a.guardado)
                     || filtroSeleccionado.equals(a.categoria)) {
                 visibles.add(a);
             }
@@ -224,6 +209,8 @@ public class Noticias extends BaseActivity {
         adaptador.setAnuncios(visibles);
         vpAnuncios.setCurrentItem(0, false);
         ultimaPagina = 0;
+        if (inclinar != null) inclinar.actualizar(); // con un solo aviso no hay a dónde pasar
+        tvVacio.setText(FILTRO_GUARDADOS.equals(filtroSeleccionado) ? R.string.nui_not_vacio_guardados : R.string.nui_not_vacio);
         tvVacio.setVisibility(visibles.isEmpty() ? View.VISIBLE : View.GONE);
         actualizarContador();
         actualizarPagina();
@@ -268,6 +255,137 @@ public class Noticias extends BaseActivity {
         reloj.postDelayed(marcarPendiente, MS_PARA_LEIDO);
     }
 
+    /** Botón "Marcar leídos" o barrer con dos dedos: todos leídos de una vez, con "Deshacer". */
+    private void marcarTodosLeidos() {
+        List<Integer> ids = new ArrayList<>();
+        for (Anuncio a : todos) if (!a.leido) ids.add(a.id);
+        if (ids.isEmpty()) { // no había nada que marcar: se dice, para que se vea que el gesto ha contado
+            Snackbar.make(raiz, R.string.nui_not_ya_todos_leidos, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        AnunciosLeidos.marcarVarios(this, ids);
+        for (Anuncio a : todos) a.leido = true;
+        adaptador.notifyDataSetChanged();
+        actualizarContador();
+        Snackbar.make(raiz, getResources().getQuantityString(R.plurals.nui_not_marcados, ids.size(), ids.size()), 5000)
+                .setActionTextColor(getColor(R.color.nui_acento))
+                .setAction(R.string.deshacer, x -> {
+                    AnunciosLeidos.desmarcarVarios(this, ids);
+                    for (Anuncio a : todos) if (ids.contains(a.id)) a.leido = false;
+                    adaptador.notifyDataSetChanged();
+                    actualizarContador();
+                })
+                .show();
+    }
+
+    // -------------------------------------------------
+    //              BARRER CON DOS DEDOS
+    // -------------------------------------------------
+
+    /**
+     * Dos dedos que bajan juntos más de BARRIDO_FRACCION de la pantalla (y casi en vertical) = marcar todos como
+     * leídos, como quien barre el tablón. Se mira aquí, antes que el carrusel, para que valga en toda la pantalla;
+     * en cuanto cuenta, el carrusel recibe un "cancelar" y deja de moverse.
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent e) {
+        switch (e.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                barriendo = false;
+                barrido = false;
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (e.getPointerCount() == 2 && !barrido) {
+                    barriendo = true;
+                    barridoX = media(e, true);
+                    barridoY = media(e, false);
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (barriendo && !barrido && e.getPointerCount() >= 2) {
+                    float dy = media(e, false) - barridoY, dx = Math.abs(media(e, true) - barridoX);
+                    if (dy > getResources().getDisplayMetrics().heightPixels * BARRIDO_FRACCION && dx < dy * 0.6f) {
+                        barrido = true;
+                        MotionEvent cancelar = MotionEvent.obtain(e);
+                        cancelar.setAction(MotionEvent.ACTION_CANCEL);
+                        super.dispatchTouchEvent(cancelar);
+                        cancelar.recycle();
+                        marcarTodosLeidos();
+                        return true;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                if (e.getPointerCount() <= 2) barriendo = false;
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                barriendo = false;
+                if (barrido) {
+                    barrido = false;
+                    return true;
+                }
+                break;
+        }
+        if (barrido) return true; // el resto del gesto ya no llega al carrusel
+        return super.dispatchTouchEvent(e);
+    }
+
+    /** Media de la X (o la Y) de los dedos que hay en pantalla. */
+    private static float media(MotionEvent e, boolean x) {
+        float suma = 0;
+        for (int i = 0; i < e.getPointerCount(); i++) suma += x ? e.getX(i) : e.getY(i);
+        return suma / e.getPointerCount();
+    }
+
+    // -------------------------------------------------
+    //              GUARDAR (como en Actividades)
+    // -------------------------------------------------
+
+    /** Inclinar el móvil hacia ti: guarda (o quita) el aviso que se está viendo. En el tutorial, solo se practica. */
+    private void alTirarHaciaTi() {
+        if (visibles.isEmpty() || !hasWindowFocus()) return;
+        if (hayTutorialActivo()) {
+            avisarTutorial(Gesto.HACIA_TI);
+            levantarFicha();
+            Snackbar.make(raiz, R.string.nui_not_practica_guardar, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        alternarGuardado(visibles.get(vpAnuncios.getCurrentItem()));
+    }
+
+    /** El aviso sube un poco hacia ti y vuelve (se ve que el gesto ha contado). */
+    private void levantarFicha() {
+        float dp = getResources().getDisplayMetrics().density;
+        vpAnuncios.animate().translationY(-24 * dp).setDuration(140)
+                .withEndAction(() -> vpAnuncios.animate().translationY(0).setDuration(160).start()).start();
+    }
+
+    /** Marcapáginas o inclinar hacia ti: guarda el aviso o, si ya estaba, lo quita (con "Deshacer"). */
+    private void alternarGuardado(Anuncio a) {
+        boolean guardar = !a.guardado;
+        ponerGuardado(a, guardar);
+        if (guardar) levantarFicha();
+        Snackbar.make(raiz, getString(guardar ? R.string.nui_not_aviso_guardado_fmt : R.string.nui_not_aviso_quitado_fmt, a.titulo), 5000)
+                .setActionTextColor(getColor(R.color.nui_acento))
+                .setAction(R.string.deshacer, x -> ponerGuardado(a, !guardar))
+                .show();
+    }
+
+    private void ponerGuardado(Anuncio a, boolean si) {
+        AnunciosGuardados.poner(this, correo, a.id, si);
+        a.guardado = si;
+        if (FILTRO_GUARDADOS.equals(filtroSeleccionado)) {
+            // en «Guardados», el que se quita desaparece (y el que se recupera con "Deshacer" vuelve)
+            int antes = vpAnuncios.getCurrentItem();
+            aplicarFiltro();
+            if (!visibles.isEmpty()) vpAnuncios.setCurrentItem(Math.min(antes, visibles.size() - 1), false);
+        } else {
+            int pos = visibles.indexOf(a);
+            if (pos >= 0) adaptador.notifyItemChanged(pos);
+        }
+    }
+
     private void marcarLeido(Anuncio a) {
         if (a.leido) return;
         AnunciosLeidos.marcar(this, a.id);
@@ -278,33 +396,13 @@ public class Noticias extends BaseActivity {
     }
 
     // -------------------------------------------------
-    //              LEER EN VOZ ALTA
+    //              INCLINAR
     // -------------------------------------------------
 
-    /** Lee los avisos sin leer de lo que se está viendo; si están todos leídos, todos desde el actual. */
-    private void empezarLectura() {
-        if (!lector.disponible()) {
-            Snackbar.make(raiz, R.string.nui_not_sin_voz, Snackbar.LENGTH_LONG).show();
-            return;
-        }
-        cola = new ArrayList<>();
-        for (Anuncio a : visibles) if (!a.leido) cola.add(a);
-        if (cola.isEmpty()) cola.addAll(visibles.subList(vpAnuncios.getCurrentItem(), visibles.size()));
-        if (cola.isEmpty()) return;
-
-        List<String> textos = new ArrayList<>();
-        for (Anuncio a : cola) {
-            textos.add((a.esUrgente() ? getString(R.string.nui_not_urgente) + ". " : "") + Anuncio.nombreCategoria(this, a.categoria) + ". "
-                    + a.titulo + ". " + a.contenido);
-        }
-        lector.leer(textos);
-        pintarBotonEscuchar();
-    }
-
-    private void pintarBotonEscuchar() {
-        boolean leyendo = lector.leyendo();
-        btnEscuchar.setIconResource(leyendo ? R.drawable.nui_ic_parar : R.drawable.nui_ic_altavoz);
-        btnEscuchar.setContentDescription(getString(leyendo ? R.string.nui_not_desc_parar : R.string.nui_not_desc_escuchar));
+    /** Inclinar a la izquierda = siguiente aviso (como "pasar" en Actividades); a la derecha = el anterior. */
+    private void alInclinar(int direccion) {
+        int destino = vpAnuncios.getCurrentItem() + (direccion < 0 ? 1 : -1);
+        if (destino >= 0 && destino < visibles.size()) vpAnuncios.setCurrentItem(destino, true);
     }
 
     // -------------------------------------------------
@@ -356,17 +454,17 @@ public class Noticias extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "noticias", 4)
+        return new Tutorial(this, "noticias", 8)
                 .info(R.id.pestanasCategorias, getString(R.string.nui_tut_not_pestanas))
                 .gesto(R.id.vpAnuncios, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_not_deslizar))
                 .soloSi(() -> visibles.size() > 1 && vpAnuncios.getCurrentItem() < visibles.size() - 1)
-                // Voz y sensores: se prueban de verdad, como los pasos de sensor de Izaro
-                .tocar(R.id.btnEscuchar, getString(R.string.nui_tut_not_altavoz))
-                .soloSi(() -> lector.disponible() && !visibles.isEmpty())
-                .sensor(Gesto.BOCA_ABAJO, getString(R.string.nui_tut_not_boca_abajo))
-                .soloSi(() -> lector.leyendo())
-                .sensor(Gesto.OREJA, getString(R.string.nui_tut_not_oreja))
-                .soloSi(() -> lector.disponible() && lector.hayProximidad() && !visibles.isEmpty())
+                // Sensores: se prueban de verdad, como los pasos de sensor de Izaro
+                .sensor(Gesto.INCLINAR, getString(R.string.nui_tut_not_inclinar))
+                .soloSi(() -> visibles.size() > 1 && inclinar.escuchando())
+                .sensor(Gesto.HACIA_TI, getString(R.string.nui_tut_not_hacia_ti))
+                .soloSi(() -> !visibles.isEmpty() && haciaTi.disponible())
+                .sensor(Gesto.MANO, getString(R.string.nui_tut_not_mano))
+                .soloSi(() -> visibles.size() > 1 && gestoMano.disponible())
                 .info(R.id.tvMarcarTodo, getString(R.string.nui_tut_not_marcar))
                 .soloSiSeVe()
                 // el último: al tocar se abre el aviso entero encima

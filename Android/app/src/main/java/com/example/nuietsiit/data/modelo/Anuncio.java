@@ -29,6 +29,7 @@ public class Anuncio {
     public LocalDateTime caducidad; // puede ser null
     public String enlace;           // puede ser null
 
+    public boolean guardado;   // en el móvil y por cuenta (AnunciosGuardados), no en la BD
     public boolean leido;      // se guarda en el móvil (AnunciosLeidos), no en la BD
 
     public boolean esUrgente() {

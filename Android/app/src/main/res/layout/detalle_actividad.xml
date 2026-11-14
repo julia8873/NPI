@@ -111,6 +111,33 @@
             android:text="@string/nui_act_btn_desapuntarme"
             android:visibility="gone" />
 
+        <!-- Guardar para luego (= inclinar el móvil hacia ti) y QR para un amigo (= girarle el móvil) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardar"
+                style="@style/Widget.Seccion.Boton.Secundario"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nui_act_btn_guardar"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEnsenarQr"
+                style="@style/Widget.Seccion.Boton.Secundario"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/nui_act_btn_ensenar_qr"
+                android:textSize="13sp" />
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

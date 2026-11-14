@@ -23,8 +23,11 @@ import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.secciones.actividades.CapturaVertical;
 import com.example.nuietsiit.activities.secciones.actividades.HojaComunidades;
+import com.example.nuietsiit.activities.secciones.actividades.QrParaEnsenar;
+import com.example.nuietsiit.activities.secciones.actividades.TirarHaciaTi;
 import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.ActividadesDB;
+import com.example.nuietsiit.data.ActividadesGuardadas;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.data.modelo.Actividad;
@@ -44,7 +47,9 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Pantalla de Actividades SIN SCROLL: un "mazo" con una ficha grande cada vez.
@@ -54,7 +59,12 @@ import java.util.List;
  * - Deslizar a la izquierda (o "Paso") = paso, siguiente.
  * - SENSOR (acelerómetro): inclinar el móvil a la derecha = me apunto, a la izquierda = paso.
  *   Usa InclinarParaPasar, el mismo gesto que pasar páginas en Secretaría y Biblioteca.
- * - Flecha = volver a la anterior. Tocar la ficha = detalle completo (apuntarse, calendario, llévame, más info).
+ * - SENSOR (acelerómetro, TirarHaciaTi): inclinarlo hacia ti = guardar para luego, sin apuntarse (pestaña
+ *   «Guardadas», ActividadesGuardadas); si ya estaba guardada, la quita.
+ * - Deslizar la ficha hacia arriba = darle la vuelta: por detrás, un QR grande (QrParaEnsenar) para que un amigo la
+ *   escanee con su app y se apunte. También con el botón «Enseñar QR» del detalle.
+ * - Flecha = volver a la anterior. Tocar la ficha = detalle completo (apuntarse, guardar, QR, calendario, llévame).
+ * - Durante el tutorial los gestos se practican sin apuntarse ni guardar nada de verdad.
  * - Sin sesión iniciada se pueden ver, pero no apuntarse.
  * - CÁMARA: "Escanear" lee el QR de un cartel de actividad (zxing, como el escáner de Biblioteca)
  *   y abre esa actividad para apuntarse. El QR lleva "NUIETSIIT:ACTIVIDAD:" + el título sin tildes en
@@ -65,6 +75,7 @@ public class Actividades extends BaseActivity {
 
     private static final String FILTRO_TODAS = "__todas";       // pestaña "Todas"
     private static final String FILTRO_APUNTADO = "__apuntado"; // pestaña "Mis actividades"
+    private static final String FILTRO_GUARDADAS = "__guardadas"; // pestaña "Guardadas" (inclinar hacia ti)
     private static final int MS_DESHACER = 5000;
     /** ECTS que se pueden reconocer por actividades universitarias en un grado (tope del contador). */
     private static final double CREDITOS_RECONOCIBLES = 6;
@@ -83,6 +94,10 @@ public class Actividades extends BaseActivity {
     private ChipGroup pestanasTipos;
     private TextView tvVacio, tvContador, selloSi, selloNo;
     private InclinarParaPasar inclinar;
+    private TirarHaciaTi haciaTi;          // inclinar hacia ti = guardar para luego
+    private QrParaEnsenar qrEnsenar;
+    private Set<String> guardadas = new HashSet<>();
+
     /** La carta está saliendo volando: hasta que acabe no se acepta otra decisión (doble toque, botón + inclinar…). */
     private boolean decidiendo;
 
@@ -125,6 +140,9 @@ public class Actividades extends BaseActivity {
         // Botonera y gesto de arrastrar la carta
         findViewById(R.id.btnPasar).setOnClickListener(v -> decidir(-1));
         findViewById(R.id.btnApuntar).setOnClickListener(v -> decidir(+1));
+        findViewById(R.id.btnGuardarCarta).setOnClickListener(v -> {
+            if (!decidiendo && posicion < mazo.size()) alternarGuardada();
+        });
         findViewById(R.id.btnAnterior).setOnClickListener(v -> anterior());
         findViewById(R.id.btnReiniciar).setOnClickListener(v -> { posicion = 0; mostrarCarta(); });
         carta.setOnTouchListener(new ArrastrarCarta());
@@ -133,6 +151,10 @@ public class Actividades extends BaseActivity {
 
         // Sensor: inclinar el móvil hace lo mismo que los botones (+1 derecha = me apunto, -1 izquierda = paso)
         inclinar = new InclinarParaPasar(carta, this::alInclinar, () -> posicion < mazo.size());
+        // Sensor: inclinarlo hacia ti = guardar para luego (acelerómetro)
+        haciaTi = new TirarHaciaTi(this, this::alTirarHaciaTi);
+        // Deslizar la ficha hacia arriba = darle la vuelta: por detrás, el QR para pasársela a un amigo
+        qrEnsenar = new QrParaEnsenar(this);
 
         crearPestanas();
         cargarActividades();
@@ -147,6 +169,14 @@ public class Actividades extends BaseActivity {
             correoUsuario = correo;
             cargarActividades();
         }
+        haciaTi.iniciar();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        haciaTi.parar();
+        qrEnsenar.quitar();
     }
 
     /** Correo del usuario con sesión iniciada, o null si no hay sesión. */
@@ -164,6 +194,7 @@ public class Actividades extends BaseActivity {
 
     private void cargarActividades() {
         todas = actividadesDB.listarActividadesConDetalles(correoUsuario, FechasUtil.hoyBD());
+        guardadas = ActividadesGuardadas.guardadas(this, correoUsuario);
         aplicarFiltro();
     }
 
@@ -171,6 +202,7 @@ public class Actividades extends BaseActivity {
     private void crearPestanas() {
         anadirChip(FILTRO_TODAS, getString(R.string.chip_todas));
         anadirChip(FILTRO_APUNTADO, getString(R.string.nui_act_f_mis));
+        anadirChip(FILTRO_GUARDADAS, getString(R.string.nui_act_f_guardadas));
         for (String[] t : Actividad.TIPOS) anadirChip(t[0], Actividad.nombreFiltro(this, t[0]));
         marcarFiltro(FILTRO_TODAS);
         pestanasTipos.setOnCheckedStateChangeListener((grupo, ids) -> {
@@ -202,6 +234,7 @@ public class Actividades extends BaseActivity {
         for (Actividad a : todas) {
             if (filtroSeleccionado == null
                     || (FILTRO_APUNTADO.equals(filtroSeleccionado) && a.inscrito)
+                    || (FILTRO_GUARDADAS.equals(filtroSeleccionado) && guardadas.contains(String.valueOf(a.id)))
                     || filtroSeleccionado.equals(a.tipo)) {
                 mazo.add(a);
             }
@@ -218,6 +251,9 @@ public class Actividades extends BaseActivity {
     private void mostrarCarta() {
         actualizarCreditos();
         carta.setTranslationX(0);
+        carta.setTranslationY(0);
+        carta.setRotationX(0);
+        carta.setAlpha(1f);
         carta.setRotation(0);
         selloSi.setAlpha(0);
         selloNo.setAlpha(0);
@@ -227,6 +263,7 @@ public class Actividades extends BaseActivity {
         vacio.setVisibility(hayCarta ? View.GONE : View.VISIBLE);
         findViewById(R.id.btnPasar).setEnabled(hayCarta);
         findViewById(R.id.btnApuntar).setEnabled(hayCarta);
+        findViewById(R.id.btnGuardarCarta).setEnabled(hayCarta);
         findViewById(R.id.btnAnterior).setEnabled(posicion > 0);
         findViewById(R.id.btnAnterior).setAlpha(posicion > 0 ? 1f : 0.4f);
 
@@ -237,6 +274,8 @@ public class Actividades extends BaseActivity {
             tvContador.setText("");
             if (visteTodas) {
                 tvVacio.setText(R.string.nui_act_vacio_todas);
+            } else if (FILTRO_GUARDADAS.equals(filtroSeleccionado)) {
+                tvVacio.setText(R.string.nui_act_vacio_guardadas);
             } else if (!FILTRO_APUNTADO.equals(filtroSeleccionado)) {
                 tvVacio.setText(R.string.nui_act_vacio_tipo);
             } else if (correoUsuario == null) {
@@ -266,13 +305,21 @@ public class Actividades extends BaseActivity {
         } else {
             tvExtra.setVisibility(View.GONE);
         }
-        // Estado de inscripción bien visible: verde si estás apuntado, gris si no (sin sesión no se enseña)
+        // Estado bien visible: verde si estás apuntado, naranja si la tienes guardada, gris si no
+        // (sin sesión solo se enseña si está guardada)
+        boolean guardada = guardadas.contains(String.valueOf(a.id));
         TextView tvInscrito = findViewById(R.id.tvInscritoCarta);
-        tvInscrito.setVisibility(correoUsuario != null ? View.VISIBLE : View.GONE);
-        tvInscrito.setText(a.inscrito ? R.string.nui_act_sello_apuntado : R.string.nui_act_estado_no);
-        tvInscrito.setTextColor(getColor(a.inscrito ? R.color.sec_ok : R.color.sec_texto_suave));
-        tvInscrito.setBackgroundTintList(ColorStateList.valueOf(getColor(a.inscrito ? R.color.sec_ok_tinte : R.color.sec_borde)));
+        tvInscrito.setVisibility(correoUsuario != null || guardada ? View.VISIBLE : View.GONE);
+        tvInscrito.setText(a.inscrito ? R.string.nui_act_sello_apuntado
+                : guardada ? R.string.nui_act_estado_guardada : R.string.nui_act_estado_no);
+        tvInscrito.setTextColor(getColor(a.inscrito ? R.color.sec_ok : guardada ? R.color.nui_acento : R.color.sec_texto_suave));
+        tvInscrito.setBackgroundTintList(ColorStateList.valueOf(getColor(
+                a.inscrito ? R.color.sec_ok_tinte : guardada ? R.color.nui_tinte : R.color.sec_borde)));
         ((TextView) findViewById(R.id.btnApuntar)).setText(a.inscrito ? R.string.nui_act_btn_ya_apuntado : R.string.nui_act_btn_apunto);
+        // Botón de guardar: marcapáginas relleno si ya está guardada
+        MaterialButton btnGuardarCarta = findViewById(R.id.btnGuardarCarta);
+        btnGuardarCarta.setIconResource(guardada ? R.drawable.nui_ic_guardado : R.drawable.nui_ic_guardar);
+        btnGuardarCarta.setContentDescription(getString(guardada ? R.string.nui_act_btn_quitar_guardada : R.string.nui_act_btn_guardar));
         tvContador.setText((posicion + 1) + " / " + mazo.size());
         carta.setContentDescription(Actividad.nombreTipo(this, a.tipo) + ". " + a.titulo + ". "
                 + FechasUtil.cuando(this, a.inicio) + (a.inscrito ? getString(R.string.nui_act_desc_ya_apuntado) : ""));
@@ -299,6 +346,12 @@ public class Actividades extends BaseActivity {
     private void decidir(int direccion) {
         if (decidiendo || posicion >= mazo.size()) return;
         Actividad a = mazo.get(posicion);
+        // En el tutorial se practica el gesto, pero no te apunta de verdad: la carta vuelve a su sitio
+        if (direccion > 0 && hayTutorialActivo()) {
+            volverAlCentro();
+            avisar(getString(R.string.nui_act_practica_apuntar));
+            return;
+        }
         if (direccion > 0 && !puedeApuntarse(a)) {
             volverAlCentro();
             return;
@@ -324,11 +377,123 @@ public class Actividades extends BaseActivity {
 
     /** Inclinar el móvil: enseña el sello un momento y decide, como si se hubiera arrastrado la carta. */
     private void alInclinar(int direccion) {
-        if (decidiendo || posicion >= mazo.size()) return;
+        if (decidiendo || posicion >= mazo.size() || qrEnsenar.visible()) return; // con el QR fuera, no se decide
         TextView sello = direccion > 0 ? selloSi : selloNo;
         sello.setAlpha(1f);
         carta.animate().rotation(direccion * 8f).setDuration(120)
-                .withEndAction(() -> decidir(direccion)).start();
+                .withEndAction(() -> {
+                    if (qrEnsenar.visible()) volverAlCentro();
+                    else decidir(direccion);
+                }).start();
+    }
+
+    /**
+     * Inclinar el móvil hacia ti: guarda la actividad para luego (sin apuntarte) y pasa a la siguiente, como
+     * quien se guarda un cartel; si ya estaba guardada, la quita. Las guardadas están en la pestaña «Guardadas».
+     */
+    private void alTirarHaciaTi() {
+        if (decidiendo || posicion >= mazo.size() || qrEnsenar.visible() || !hasWindowFocus()) return;
+        // En el tutorial se practica el gesto, pero no guarda nada: la carta se mueve y vuelve
+        if (hayTutorialActivo()) {
+            avisarTutorial(Gesto.HACIA_TI);
+            carta.animate().translationY(-carta.getHeight() * 0.15f).setDuration(150)
+                    .withEndAction(() -> carta.animate().translationY(0).setDuration(150).start()).start();
+            avisar(getString(R.string.nui_act_practica_guardar));
+            return;
+        }
+        avisarTutorial(Gesto.HACIA_TI);
+        alternarGuardada();
+    }
+
+    /** Guarda la actividad de la carta para luego (y pasa a la siguiente) o, si ya estaba, la quita. */
+    private void alternarGuardada() {
+        Actividad a = mazo.get(posicion);
+        boolean yaEstaba = guardadas.contains(String.valueOf(a.id));
+        ponerGuardada(a, !yaEstaba);
+        if (yaEstaba) {
+            if (FILTRO_GUARDADAS.equals(filtroSeleccionado)) quitarDelMazo(a);
+            else mostrarCarta();
+            Snackbar.make(raiz, getString(R.string.nui_act_aviso_quitada_fmt, a.titulo), MS_DESHACER)
+                    .setAnchorView(botonera)
+                    .setActionTextColor(getColor(R.color.nui_acento))
+                    .setAction(R.string.deshacer, x -> { ponerGuardada(a, true); aplicarFiltroEn(a); })
+                    .show();
+            return;
+        }
+        // La carta sube hacia ti y aparece la siguiente
+        decidiendo = true;
+        int esta = posicion;
+        carta.animate().translationY(-raiz.getHeight() * 0.6f).scaleX(0.6f).scaleY(0.6f).alpha(0f)
+                .setDuration(260)
+                .withEndAction(() -> {
+                    decidiendo = false;
+                    carta.setScaleX(1f);
+                    carta.setScaleY(1f);
+                    if (posicion == esta) posicion++;
+                    mostrarCarta();
+                })
+                .start();
+        Snackbar.make(raiz, getString(R.string.nui_act_aviso_guardada_fmt, a.titulo), MS_DESHACER)
+                .setAnchorView(botonera)
+                .setActionTextColor(getColor(R.color.nui_acento))
+                .setAction(R.string.deshacer, x -> { ponerGuardada(a, false); aplicarFiltroEn(a); })
+                .show();
+    }
+
+    private void ponerGuardada(Actividad a, boolean si) {
+        ActividadesGuardadas.poner(this, correoUsuario, a.id, si);
+        guardadas = ActividadesGuardadas.guardadas(this, correoUsuario);
+    }
+
+    /** Vuelve a hacer el mazo del filtro actual y se pone en esa actividad (para "Deshacer"). */
+    private void aplicarFiltroEn(Actividad a) {
+        aplicarFiltro();
+        int i = mazo.indexOf(a);
+        if (i >= 0) {
+            posicion = i;
+            mostrarCarta();
+        }
+    }
+
+    /** En «Guardadas», la que se quita desaparece del mazo y se queda en la misma posición. */
+    private void quitarDelMazo(Actividad a) {
+        int antes = posicion;
+        aplicarFiltro();
+        posicion = Math.min(antes, mazo.size());
+        mostrarCarta();
+    }
+
+    /**
+     * Deslizar la ficha hacia arriba = DARLE LA VUELTA A LA FICHA (giro en 3D): por detrás está el QR grande de la
+     * actividad, con el mismo texto que los carteles, para pasársela a un amigo: lo escanea con su app
+     * (Actividades → Escanear) y le sale para apuntarse. Tocando el QR, la ficha se vuelve a dar la vuelta.
+     */
+    private void voltearFicha() {
+        if (posicion >= mazo.size() || decidiendo || qrEnsenar.visible()) {
+            volverAlCentro();
+            return;
+        }
+        Actividad a = mazo.get(posicion);
+        avisarTutorial(Gesto.LANZAR);
+        decidiendo = true;
+        selloSi.setAlpha(0);
+        selloNo.setAlpha(0);
+        carta.setCameraDistance(8000 * getResources().getDisplayMetrics().density);
+        carta.animate().translationX(0).translationY(0).rotation(0).rotationX(90f).setDuration(180)
+                .withEndAction(() -> {
+                    decidiendo = false;
+                    mostrarQr(a, true);
+                }).start();
+    }
+
+    /** volteando: viene de darle la vuelta a la ficha (al cerrar el QR, la ficha vuelve a darse la vuelta). */
+    private void mostrarQr(Actividad a, boolean volteando) {
+        String original = a.tituloEs != null ? a.tituloEs : a.titulo; // como los carteles, por el título en español
+        boolean ok = qrEnsenar.mostrar(PREFIJO_QR + claveQR(original), a.titulo, volteando, volteando ? () -> {
+            carta.setRotationX(-90f);
+            carta.animate().rotationX(0f).setDuration(180).start();
+        } : null);
+        if (!ok) carta.animate().rotationX(0f).setDuration(180).start(); // no se pudo hacer el QR: la ficha vuelve
     }
 
     private void anterior() {
@@ -340,7 +505,7 @@ public class Actividades extends BaseActivity {
     }
 
     private void volverAlCentro() {
-        carta.animate().translationX(0).rotation(0).setDuration(200).start();
+        carta.animate().translationX(0).translationY(0).rotation(0).setDuration(200).start();
         selloSi.animate().alpha(0).setDuration(200).start();
         selloNo.animate().alpha(0).setDuration(200).start();
     }
@@ -350,7 +515,7 @@ public class Actividades extends BaseActivity {
      * Si se suelta pasado un tercio de la pantalla, cuenta como decisión; si apenas se ha movido, es un toque.
      */
     private class ArrastrarCarta implements View.OnTouchListener {
-        private float xInicial;
+        private float xInicial, yInicial;
         private final int umbralToque = ViewConfiguration.get(Actividades.this).getScaledTouchSlop();
 
         @SuppressLint("ClickableViewAccessibility") // el toque se gestiona aquí (abre el detalle)
@@ -360,9 +525,19 @@ public class Actividades extends BaseActivity {
                 case MotionEvent.ACTION_DOWN:
                     if (decidiendo) return false; // aún sale volando la anterior
                     xInicial = e.getRawX();
+                    yInicial = e.getRawY();
                     return true;
                 case MotionEvent.ACTION_MOVE: {
-                    float dX = e.getRawX() - xInicial;
+                    float dX = e.getRawX() - xInicial, dY = e.getRawY() - yInicial;
+                    if (dY < 0 && -dY > Math.abs(dX)) { // hacia arriba: la ficha sube un poco (se va a dar la vuelta)
+                        carta.setTranslationX(0);
+                        carta.setRotation(0);
+                        carta.setTranslationY(dY * 0.3f);
+                        selloSi.setAlpha(0);
+                        selloNo.setAlpha(0);
+                        return true;
+                    }
+                    carta.setTranslationY(0);
                     float ancho = raiz.getWidth();
                     carta.setTranslationX(dX);
                     carta.setRotation(15f * dX / ancho);
@@ -371,8 +546,12 @@ public class Actividades extends BaseActivity {
                     return true;
                 }
                 case MotionEvent.ACTION_UP: {
-                    float dX = e.getRawX() - xInicial;
-                    if (Math.abs(dX) < umbralToque) {
+                    float dX = e.getRawX() - xInicial, dY = e.getRawY() - yInicial;
+                    if (dY < -raiz.getHeight() * 0.12f && -dY > Math.abs(dX)) {
+                        voltearFicha(); // deslizar hacia arriba = darle la vuelta (QR)
+                        return true;
+                    }
+                    if (Math.abs(dX) < umbralToque && Math.abs(dY) < umbralToque) {
                         volverAlCentro();
                         if (posicion < mazo.size()) mostrarDetalle(mazo.get(posicion));
                     } else if (Math.abs(dX) > raiz.getWidth() * 0.3f) {
@@ -597,6 +776,18 @@ public class Actividades extends BaseActivity {
         }
 
         v.findViewById(R.id.btnCalendario).setOnClickListener(x -> anadirACalendario(a));
+        // Lo mismo que los gestos, con botones (para quien no pueda o no quiera mover el móvil)
+        MaterialButton btnGuardar = v.findViewById(R.id.btnGuardar);
+        boolean guardada = guardadas.contains(String.valueOf(a.id));
+        btnGuardar.setText(guardada ? R.string.nui_act_btn_quitar_guardada : R.string.nui_act_btn_guardar);
+        btnGuardar.setOnClickListener(x -> {
+            hoja.dismiss();
+            ponerGuardada(a, !guardada);
+            aplicarFiltroEn(a);
+            if (!mazo.contains(a)) mostrarCarta();
+            avisar(getString(guardada ? R.string.nui_act_aviso_quitada_fmt : R.string.nui_act_aviso_guardada_fmt, a.titulo));
+        });
+        v.findViewById(R.id.btnEnsenarQr).setOnClickListener(x -> { hoja.dismiss(); mostrarQr(a, false); });
         v.findViewById(R.id.btnLlevame).setOnClickListener(x -> { hoja.dismiss(); llevarme(a); });
 
         View btnMasInfo = v.findViewById(R.id.btnMasInfo);
@@ -666,12 +857,16 @@ public class Actividades extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "actividades", 6)
+        return new Tutorial(this, "actividades", 9)
                 .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_pestanas))
                 .gesto(R.id.carta, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_act_deslizar))
                 .soloSi(() -> posicion < mazo.size() - 1)
                 .sensor(Gesto.INCLINAR, getString(R.string.nui_tut_act_inclinar))
                 .soloSi(() -> posicion < mazo.size() - 1 && inclinar != null && inclinar.escuchando())
+                .sensor(Gesto.HACIA_TI, getString(R.string.nui_tut_act_hacia_ti))
+                .soloSi(() -> posicion < mazo.size() - 1 && haciaTi.disponible())
+                .gesto(R.id.carta, Gesto.LANZAR, getString(R.string.nui_tut_act_ensenar))
+                .soloSi(() -> posicion < mazo.size())
                 .info(R.id.pestanasTipos, getString(R.string.nui_tut_act_creditos))
                 .soloSi(() -> correoUsuario != null)
                 .info(R.id.btnAnterior, getString(R.string.nui_tut_act_anterior))
