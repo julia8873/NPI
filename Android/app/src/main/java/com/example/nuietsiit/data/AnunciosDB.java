@@ -165,6 +165,10 @@ public class AnunciosDB {
                 a.id = c.getInt(c.getColumnIndexOrThrow("idAnuncioGeneral"));
                 a.titulo = c.getString(c.getColumnIndexOrThrow("titulo"));
                 a.contenido = c.getString(c.getColumnIndexOrThrow("contenido"));
+                // en inglés, el aviso traducido (TRADUCCION)
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                a.titulo = TraduccionesActividades.traducir(db, "ANUNCIO_GENERAL", a.id, "titulo", a.titulo);
+                a.contenido = TraduccionesActividades.traducir(db, "ANUNCIO_GENERAL", a.id, "contenido", a.contenido);
                 a.categoria = c.getString(c.getColumnIndexOrThrow("categoria"));
                 a.prioridad = c.getString(c.getColumnIndexOrThrow("prioridad"));
                 a.publicacion = FechasUtil.parsear(c.getString(c.getColumnIndexOrThrow("fechaPublicacion")));

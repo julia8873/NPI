@@ -18,8 +18,12 @@ public final class FotosRutaExterior {
     /** Ruta de la tabla dentro de assets. */
     public static final String ASSET = "rutas_exteriores/fotos_ruta.json";
 
-    /** Distancia a la que un punto cuenta como alcanzado. */
-    static final double ALCANZADO_M = 15;
+    /**
+     * Metros que hay que dejar atrás un punto para pasar a la foto del siguiente. Antes bastaba con estar
+     * a 15 m: con puntos cerca (en la rotonda hay giros cada 20-50 m) la foto y su "gira a la derecha"
+     * cambiaban antes de llegar al giro y la de la salida no se llegaba a ver (Miguel, probando la ruta).
+     */
+    static final double PASADO_M = 8;
     /** Margen para casar los extremos de un tramo del plan con los de la tabla. */
     private static final double TOLERANCIA_TRAMO_M = 25;
 
@@ -91,15 +95,15 @@ public final class FotosRutaExterior {
     }
 
     /**
-     * Índice del primer punto aún no alcanzado: ni a ≤ 15 m ni ya pasado sobre la línea que forman los puntos.
-     * Si ya se han pasado todos, el último; -1 si la lista está vacía.
+     * Índice del primer punto que aún no se ha dejado atrás (PASADO_M) sobre la línea que forman los puntos:
+     * en la salida, la foto de la salida; en un giro, la foto de ese giro hasta haberlo hecho; entre dos
+     * puntos, la del siguiente. Si ya se han pasado todos, el último; -1 si la lista está vacía.
      */
     public static int siguiente(List<PuntoFoto> lista, Punto posicion) {
         if (lista.isEmpty()) return -1;
         double avance = avanceSobreLinea(lista, posicion);
         for (int i = 0; i < lista.size(); i++) {
-            PuntoFoto p = lista.get(i);
-            if (p.metros > avance && p.punto.distanciaA(posicion) > ALCANZADO_M) return i;
+            if (lista.get(i).metros + PASADO_M > avance) return i;
         }
         return lista.size() - 1;
     }

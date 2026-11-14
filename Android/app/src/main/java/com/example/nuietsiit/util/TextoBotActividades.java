@@ -78,7 +78,7 @@ public final class TextoBotActividades {
 
         sb.append("\n[CÓMO SE USAN ACTIVIDADES Y NOTICIAS EN LA APP]\n")
                 .append("- Apuntarse a una actividad: en Actividades, deslizando la tarjeta a la derecha, con el botón «Me apunto», ")
-                .append("inclinando el móvil a la derecha o tocando el micrófono y diciendo «me apunto». Para pasar, a la izquierda.\n")
+                .append("o inclinando el móvil a la derecha. Para pasar, a la izquierda.\n")
                 .append("- Tocando la tarjeta se ve el detalle: añadir al calendario, «Llévame» (el mapa te lleva al sitio) y más información.\n")
                 .append("- El botón «Escanear» lee el QR de los carteles de actividades de la escuela.\n")
                 .append("- El botón «Grupos» enseña las comunidades de chat del grado y de la escuela.\n")

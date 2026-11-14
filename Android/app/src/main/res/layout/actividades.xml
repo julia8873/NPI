@@ -392,7 +392,7 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Botonera: volver, pasar, apuntarse y micrófono -->
+        <!-- Botonera: volver, pasar y apuntarse -->
         <LinearLayout
             android:id="@+id/botonera"
             android:layout_width="match_parent"
@@ -431,20 +431,6 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="@string/nui_act_btn_apunto" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnVoz"
-                style="@style/Widget.Seccion.Boton.Texto"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="4dp"
-                android:contentDescription="@string/nui_act_desc_voz"
-                android:insetLeft="0dp"
-                android:insetRight="0dp"
-                android:padding="0dp"
-                app:icon="@drawable/nui_ic_microfono"
-                app:iconGravity="textStart"
-                app:iconPadding="0dp" />
         </LinearLayout>
 
         <LinearLayout

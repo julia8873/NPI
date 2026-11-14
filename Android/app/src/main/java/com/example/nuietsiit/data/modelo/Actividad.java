@@ -31,7 +31,8 @@ public class Actividad {
 
     // Columnas de tabla
     public int id;
-    public String titulo;
+    public String titulo;           // en el idioma de la app (traducido si hace falta)
+    public String tituloEs;         // título original en español: es la clave de los QR de los carteles
     public String descripcion;
     public String tipo;
     public LocalDateTime inicio;

@@ -2,6 +2,7 @@ package com.example.nuietsiit.activities.secciones.noticias;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
@@ -65,6 +67,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         h.tvTitulo.setText(a.titulo);
         h.tvMeta.setText(Anuncio.nombreCategoria(ctx, a.categoria) + " · " + FechasUtil.hace(ctx, a.publicacion));
         h.tvContenido.setText(a.contenido);
+        ajustarPista(h, a);
 
         // Urgentes: etiqueta roja. No leídos: puntito naranja
         h.tvUrgente.setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
@@ -79,6 +82,36 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
         h.ficha.setOnClickListener(v -> listener.alPulsar(a));
     }
 
+    /**
+     * La pista de abajo solo invita a tocar si hay algo más que ver: si el texto no cabe entero en la
+     * tarjeta (se corta con "…") pone "Toca para leerlo entero"; si cabe pero tiene enlace, "Toca para
+     * abrir el enlace"; y si ya se ve todo, no pone nada (en una tablet casi siempre cabe).
+     */
+    private void ajustarPista(Holder h, Anuncio a) {
+        TextView tv = h.tvContenido;
+        tv.setMaxLines(Integer.MAX_VALUE);
+        tv.setTag(a);
+        h.tvLeerMas.setVisibility(View.INVISIBLE);
+        // se mira justo antes de dibujar, cuando ya se sabe cuánto mide la tarjeta
+        OneShotPreDrawListener.add(tv, () -> {
+            if (tv.getTag() != a) return; // la página ya muestra otro aviso
+            Layout layout = tv.getLayout();
+            int alto = tv.getHeight() - tv.getPaddingTop() - tv.getPaddingBottom();
+            boolean cortado = false;
+            if (layout != null && alto > 0 && layout.getHeight() > alto) {
+                // caben las líneas que no se salen: con maxLines el final lleva "…" en vez de cortarse a medias
+                int caben = 0;
+                while (caben < layout.getLineCount() && layout.getLineBottom(caben) <= alto) caben++;
+                tv.setMaxLines(Math.max(1, caben));
+                cortado = true;
+            }
+            boolean hayEnlace = a.enlace != null && !a.enlace.isEmpty();
+            if (cortado) h.tvLeerMas.setText(R.string.nui_not_toca_leer);
+            else if (hayEnlace) h.tvLeerMas.setText(R.string.nui_not_toca_enlace);
+            h.tvLeerMas.setVisibility(cortado || hayEnlace ? View.VISIBLE : View.INVISIBLE);
+        });
+    }
+
     @Override
     public int getItemCount() {
         return anuncios.size();
@@ -87,7 +120,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     static class Holder extends RecyclerView.ViewHolder {
         final View ficha, vNoLeido;
         final ImageView ivIcono;
-        final TextView tvTitulo, tvMeta, tvContenido, tvUrgente;
+        final TextView tvTitulo, tvMeta, tvContenido, tvUrgente, tvLeerMas;
 
         Holder(View v) {
             super(v);
@@ -97,6 +130,7 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
             tvMeta = v.findViewById(R.id.tvMeta);
             tvContenido = v.findViewById(R.id.tvContenido);
             tvUrgente = v.findViewById(R.id.tvUrgente);
+            tvLeerMas = v.findViewById(R.id.tvLeerMas);
             vNoLeido = v.findViewById(R.id.vNoLeido);
         }
     }
