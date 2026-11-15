@@ -1544,7 +1544,6 @@
     <string name="nui_act_desc_anterior">Back to the previous one</string>
     <string name="nui_act_btn_paso">Skip</string>
     <string name="nui_act_btn_apunto">I\'m in</string>
-    <string name="nui_act_desc_voz">Give a voice command</string>
     <string name="nui_act_desc_escanear">Scan a poster\'s QR code</string>
     <string name="nui_act_escanear">Scan</string>
     <string name="nui_act_desc_grupos">Chat communities</string>
@@ -1584,7 +1583,6 @@
     <string name="nui_tut_not_pestanas">Filter the notices: unread, deadlines, grants, transport…</string>
     <string name="nui_tut_not_deslizar">Swipe left for the next notice. If you stay on one for a moment, it counts as read</string>
     <string name="nui_tut_not_inclinar">You can also tilt the phone: left for the next notice, right to go back</string>
-    <string name="nui_tut_not_mano">Without touching the screen: wave your hand over the top of the phone to go to the next notice</string>
     <string name="nui_tut_not_marcar">Caught up on everything? Mark them all as read at once with the button or by swiping down with two fingers</string>
     <plurals name="nui_not_marcados">
         <item quantity="one">%d notice marked as read</item>

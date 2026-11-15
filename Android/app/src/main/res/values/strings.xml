@@ -1543,7 +1543,6 @@
     <string name="nui_act_desc_anterior">Volver a la anterior</string>
     <string name="nui_act_btn_paso">Paso</string>
     <string name="nui_act_btn_apunto">Me apunto</string>
-    <string name="nui_act_desc_voz">Dar una orden por voz</string>
     <string name="nui_act_desc_escanear">Escanear el QR de un cartel</string>
     <string name="nui_act_escanear">Escanear</string>
     <string name="nui_act_desc_grupos">Comunidades de chat</string>
@@ -1583,7 +1582,6 @@
     <string name="nui_tut_not_pestanas">Filtra los avisos: los que no has leído, plazos, becas, transporte…</string>
     <string name="nui_tut_not_deslizar">Desliza a la izquierda para pasar al siguiente aviso. Si te quedas un momento en uno, cuenta como leído</string>
     <string name="nui_tut_not_inclinar">También puedes inclinar el móvil: a la izquierda pasas al siguiente aviso, a la derecha vuelves al anterior</string>
-    <string name="nui_tut_not_mano">Sin tocar la pantalla: pasa la mano por delante de la parte de arriba del móvil y pasas al siguiente aviso</string>
     <string name="nui_tut_not_marcar">¿Ya te has enterado de todo? Márcalos todos como leídos de una vez con el botón o barriendo hacia abajo con dos dedos</string>
     <plurals name="nui_not_marcados">
         <item quantity="one">%d aviso marcado como leído</item>

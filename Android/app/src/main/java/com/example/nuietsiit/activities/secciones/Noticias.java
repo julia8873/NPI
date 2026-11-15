@@ -18,7 +18,6 @@ import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.actividades.TirarHaciaTi;
 import com.example.nuietsiit.activities.secciones.noticias.AnuncioAdapter;
-import com.example.nuietsiit.activities.secciones.noticias.GestoMano;
 import com.example.nuietsiit.data.AnunciosDB;
 import com.example.nuietsiit.data.AnunciosGuardados;
 import com.example.nuietsiit.data.AnunciosLeidos;
@@ -44,10 +43,8 @@ import java.util.Set;
  * - Los urgentes van primero, con borde y etiqueta rojos; los no leídos llevan un punto naranja.
  * - Un aviso cuenta como leído si te quedas en él un momento o lo abres entero.
  * - Tocar la tarjeta = aviso completo en una hoja (con su enlace si tiene).
- * - SENSORES, sin tocar la pantalla:
- *   · inclinar el móvil (acelerómetro, InclinarParaPasar, como en Actividades): a la izquierda, el siguiente aviso;
- *     a la derecha, el anterior;
- *   · pasar la mano por delante (sensor de proximidad, GestoMano): el siguiente aviso (del último, al primero).
+ * - SENSOR (acelerómetro, InclinarParaPasar, como en Actividades): inclinar el móvil a la izquierda = el siguiente
+ *   aviso; a la derecha = el anterior.
  * - GUARDAR (como en Actividades): inclinar el móvil hacia ti (acelerómetro, TirarHaciaTi) o tocar el marcapáginas
  *   de la ficha = guardar el aviso para tenerlo a mano en «Guardados» (AnunciosGuardados); si ya estaba, se quita.
  * - MULTITÁCTIL: barrer hacia abajo con dos dedos = marcar todos como leídos (con "Deshacer"), como el botón.
@@ -73,7 +70,6 @@ public class Noticias extends BaseActivity {
     private Runnable marcarPendiente;
     private int ultimaPagina;
 
-    private GestoMano gestoMano;
     private InclinarParaPasar inclinar;
     private TirarHaciaTi haciaTi;          // inclinar hacia ti = guardar el aviso (como en Actividades)
     private String correo;                 // los guardados van por cuenta
@@ -126,14 +122,8 @@ public class Noticias extends BaseActivity {
 
         crearPestanas();
 
-        // Sensores para pasar avisos sin tocar la pantalla
+        // Sensor: inclinar para pasar avisos sin tocar la pantalla
         inclinar = new InclinarParaPasar(vpAnuncios, this::alInclinar, () -> visibles.size() > 1);
-        gestoMano = new GestoMano(this, () -> {
-            if (visibles.size() < 2) return;
-            avisarTutorial(Gesto.MANO);
-            int siguiente = vpAnuncios.getCurrentItem() + 1;
-            vpAnuncios.setCurrentItem(siguiente < visibles.size() ? siguiente : 0, true);
-        });
 
         haciaTi = new TirarHaciaTi(this, this::alTirarHaciaTi);
 
@@ -145,14 +135,12 @@ public class Noticias extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        gestoMano.iniciar();
         haciaTi.iniciar();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        gestoMano.parar();
         haciaTi.parar();
         if (marcarPendiente != null) reloj.removeCallbacks(marcarPendiente);
     }
@@ -454,7 +442,7 @@ public class Noticias extends BaseActivity {
     /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
     @Override
     protected Tutorial crearTutorial() {
-        return new Tutorial(this, "noticias", 8)
+        return new Tutorial(this, "noticias", 9)
                 .info(R.id.pestanasCategorias, getString(R.string.nui_tut_not_pestanas))
                 .gesto(R.id.vpAnuncios, Gesto.DESLIZAR_IZQ, getString(R.string.nui_tut_not_deslizar))
                 .soloSi(() -> visibles.size() > 1 && vpAnuncios.getCurrentItem() < visibles.size() - 1)
@@ -463,8 +451,6 @@ public class Noticias extends BaseActivity {
                 .soloSi(() -> visibles.size() > 1 && inclinar.escuchando())
                 .sensor(Gesto.HACIA_TI, getString(R.string.nui_tut_not_hacia_ti))
                 .soloSi(() -> !visibles.isEmpty() && haciaTi.disponible())
-                .sensor(Gesto.MANO, getString(R.string.nui_tut_not_mano))
-                .soloSi(() -> visibles.size() > 1 && gestoMano.disponible())
                 .info(R.id.tvMarcarTodo, getString(R.string.nui_tut_not_marcar))
                 .soloSiSeVe()
                 // el último: al tocar se abre el aviso entero encima

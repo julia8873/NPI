@@ -513,6 +513,7 @@ public class Actividades extends BaseActivity {
     /**
      * Arrastrar la carta con el dedo: se mueve e inclina, y se van viendo los sellos ME APUNTO / PASO.
      * Si se suelta pasado un tercio de la pantalla, cuenta como decisión; si apenas se ha movido, es un toque.
+     * Hacia arriba (más del 12 % del alto, y más hacia arriba que hacia los lados) = darle la vuelta: el QR.
      */
     private class ArrastrarCarta implements View.OnTouchListener {
         private float xInicial, yInicial;
