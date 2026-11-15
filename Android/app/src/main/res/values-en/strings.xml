@@ -1,6 +1,6 @@
 <resources>
     <!-- General -->
-    <string name="app_name">NUI ETSIIT</string>
+    <string name="app_name">ETSIIT Go</string>
     <string name="volver">Back</string>
     <string name="volver_menu_principal">Back to main menu</string>
     <string name="chat">Chat</string>
@@ -15,7 +15,7 @@
     <string name="eliminar">Delete</string>
     <string name="cerrar">Close</string>
 
-    <string name="titulo_app">NUI ETSIIT</string>
+    <string name="titulo_app">ETSIIT Go</string>
     <string name="inclinacion_indicador_desc">Tilt indicator. Tap to enable or disable.</string>
     <string name="novedades_etsiit">ETSIIT News</string>
     <string name="tag_hoy">TODAY</string>
