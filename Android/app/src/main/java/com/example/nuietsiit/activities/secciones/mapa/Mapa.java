@@ -1661,11 +1661,11 @@ public class Mapa extends BaseActivity {
                 : String.format(Locale.getDefault(), "a unos %d m", (int) metrosALaEtsiit);
         new AlertDialog.Builder(this)
                 .setTitle("Ubicación GPS")
-                .setMessage("Según tu GPS estás " + distancia + " de la ETSIIT.\n\n"
-                        + "Si ya estás dentro del edificio, pulsa «Estoy dentro» para escanear un código QR.")
-                .setPositiveButton("Estoy dentro (escaneo QR)", (d, w) -> pedirEscaneoQR(true))
-                .setNeutralButton("En la entrada", (d, w) -> fijarOrigen(RegistroPuntosQR.entrada()))
-                .setNegativeButton("Elegir a mano", (d, w) -> mostrarMenuManual())
+                .setMessage("Según tu GPS estás " + distancia + " de la ETSIIT.")
+                .setPositiveButton("Elegir a mano", (d, w) -> mostrarMenuManual())
+                .setNegativeButton("Cancelar", (d, w) -> {
+                    if (origenActual == null) destinoRuta = null;
+                })
                 .show();
     }
 
