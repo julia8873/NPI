@@ -298,7 +298,6 @@
     <string name="simular">▶ Simular</string>
     <string name="foto_camino_desc">Foto del camino. Toca para verla en grande</string>
     <string name="direccion_seguir">Dirección a seguir</string>
-    <string name="voz_guia">Voz de la guía</string>
     <string name="mascota">Mascota</string>
     <string name="como_funciona">Cómo funciona</string>
     <string name="saludo_mascota_mapa">¡Hola! Dime a dónde vas y te llevo paso a paso, con fotos del camino. También puedes tocar un edificio en el mapa.</string>
@@ -1363,8 +1362,6 @@
     <string name="mapa_guia_ve_mas_rapido">ve más rápido</string>
     <string name="mapa_guia_coge_bus_de"> · 👉 coge el bus de las %1$s</string>
     <string name="mapa_guia_ve_andando"> · 👉 ve andando</string>
-    <string name="mapa_guia_silenciar_voz">Silenciar la voz</string>
-    <string name="mapa_guia_activar_voz">Activar la voz</string>
     <string name="mapa_guia_confirmar_titulo">¿Terminar la guía?</string>
     <string name="mapa_guia_confirmar_msg">Dejaré de avisarte del bus y de la llegada.</string>
     <string name="mapa_guia_seguir">Seguir</string>
@@ -1381,6 +1378,7 @@
     <string name="mapa_panel_mientras_pulsar_mapa">Mientras, puedes mantener pulsado el mapa o elegir un lugar.</string>
     <string name="mapa_panel_segun_horario">Según tu horario: %1$s → %2$s</string>
     <string name="mapa_panel_hoy_no_mas_clases">Hoy no tienes más clases: te llevo a la %1$s</string>
+    <string name="mapa_panel_ya_estas_te_llevo">Ya estás en %1$s: te llevo a %2$s</string>
     <string name="mapa_panel_todo_a_pie">🚶 Todo a pie · %1$d m · sal cuando quieras</string>
     <string name="mapa_panel_sal_ya">¡Sal ya! (%1$s)</string>
     <string name="mapa_panel_sal_a_las_en_min">Sal a las %1$s (en %2$d min)</string>
@@ -1393,7 +1391,7 @@
     <string name="mapa_panel_punto_elegido">el punto elegido</string>
     <string name="mapa_panel_tu_ubicacion">tu ubicación</string>
     <string name="mapa_panel_como_llegar_titulo">Cómo llegar</string>
-    <string name="mapa_panel_como_llegar_ayuda">📍 Desde: por defecto sales de tu ubicación (GPS). Si te mueves, la ruta se recalcula sola.\n\n👆 Mantén pulsado cualquier punto del mapa para salir desde ahí, o elige un lugar en «Desde».\n\n🎓 Hasta: «Automático» te lleva al edificio de tu próxima clase según tu horario.\n\n🚌 Si compensa, te propone el bus 9 con la hora a la que tienes que salir. En «Otros buses» puedes elegir uno antes o después.\n\n📷 Toca un paso de la lista para ver una foto del sitio.\n\n▶ «Empezar guía» te acompaña paso a paso: flecha, cuenta atrás y vibración al salir, al llegar el bus y al bajarte.\n\n📱 Durante la guía, levanta el móvil en vertical para ver la foto del camino en grande con la flecha; bájalo para volver al mapa. Ponlo boca abajo para silenciar la voz.\n\nArrastra el panel hacia arriba para ver todo y hacia abajo para ver el mapa.</string>
+    <string name="mapa_panel_como_llegar_ayuda">📍 Desde: por defecto sales de tu ubicación (GPS). Si te mueves, la ruta se recalcula sola.\n\n👆 Mantén pulsado cualquier punto del mapa para salir desde ahí, o elige un lugar en «Desde».\n\n🎓 Hasta: «Automático» te lleva al edificio de tu próxima clase según tu horario. Nunca te propone el sitio del que sales: si ya estás donde toca la clase, te lleva de vuelta a casa.\n\n🚌 Si compensa, te propone el bus 9 con la hora a la que tienes que salir. En «Otros buses» puedes elegir uno antes o después.\n\n📷 Toca un paso de la lista para ver una foto del sitio.\n\n▶ «Empezar guía» te acompaña paso a paso: flecha, cuenta atrás y vibración al salir, al llegar el bus y al bajarte.\n\n📱 Durante la guía, levanta el móvil en vertical para ver la foto del camino en grande con la flecha; bájalo para volver al mapa.\n\nArrastra el panel hacia arriba para ver todo y hacia abajo para ver el mapa.</string>
     <string name="mapa_panel_entendido">Entendido</string>
     <string name="mapa_panel_chip_bus">🚌 %1$s · %2$s → %3$s</string>
     <string name="mapa_panel_chip_pie">🚶 A pie → %1$s</string>

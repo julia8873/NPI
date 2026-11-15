@@ -117,6 +117,12 @@ public final class PanelRutaExterior {
     private final Map<String, Bitmap> miniaturas = new HashMap<>();
     /** El origen lo puso la app (no había GPS): en cuanto haya posición se cambia a "Mi ubicación". */
     private boolean desdeProvisional;
+    /** Último "Desde" elegido: si se elige como origen el que era el destino, se intercambian. */
+    private String ultimoDesde;
+    /** Lugar de la red desde el que se sale (elegido o donde está el GPS); null si no es ninguno. */
+    private RedTransporte.Lugar lugarOrigen;
+    /** A menos de esto de un lugar, se considera que se sale de él (para no proponerlo de destino). */
+    private static final double CERCA_DE_LUGAR_M = 60;
 
     private final Runnable esperarGps = new Runnable() {
         @Override public void run() {
@@ -231,6 +237,13 @@ public final class PanelRutaExterior {
         chipsDesde.setOnCheckedStateChangeListener((g, ids) -> {
             if (pintandoChips) return;
             desdeProvisional = false;
+            // Si ahora sales de donde ibas, se intercambian: el destino pasa a ser el origen de antes
+            String desde = tagMarcado(chipsDesde), hasta = tagMarcado(chipsHasta);
+            if (desde != null && desde.equals(hasta)) {
+                pintandoChips = true;
+                marcar(chipsHasta, ultimoDesde != null && red.lugar(ultimoDesde) != null ? ultimoDesde : HASTA_AUTO);
+                pintandoChips = false;
+            }
             recalcular();
         });
         chipsHasta.setOnCheckedStateChangeListener((g, ids) -> { if (!pintandoChips) recalcular(); });
@@ -425,9 +438,12 @@ public final class PanelRutaExterior {
 
     private void recalcular() {
         handler.removeCallbacks(esperarGps);
-        RedTransporte.Lugar destino = destinoElegido();
         Punto origen = origenElegido();
         if (origen == null) return; // esperando al GPS
+        ultimoDesde = tagMarcado(chipsDesde);
+        lugarOrigen = lugarDeSalida(origen);
+        ocultarDestinoIgualAlOrigen();
+        RedTransporte.Lugar destino = destinoElegido();
 
         destinoActual = destino;
         pintarTitulo(destino);
@@ -465,7 +481,11 @@ public final class PanelRutaExterior {
         return red.lugar(tag).punto;
     }
 
-    /** Destino según el chip marcado; "Automático" = edificio de la clase en curso o la siguiente de hoy. */
+    /**
+     * Destino según el chip marcado; "Automático" = edificio de la clase en curso o la siguiente de hoy.
+     * Nunca propone el sitio del que sales: si la clase es donde ya estás (o sales de la escuela sin más
+     * clases), te lleva a casa (la residencia); si sales de casa, a la escuela.
+     */
     private RedTransporte.Lugar destinoElegido() {
         String tag = tagMarcado(chipsHasta);
         if (tag != null && !HASTA_AUTO.equals(tag)) {
@@ -475,10 +495,50 @@ public final class PanelRutaExterior {
         ProximaClase clase = ProximaClase.de(act, correo, reloj.get());
         RedTransporte.Lugar lugar = red.lugar(clase != null ? clase.idEdificio : ProximaClase.ETSIIT);
         tvPista.setVisibility(View.VISIBLE);
+        if (lugarOrigen != null && lugar != null && lugarOrigen.id.equals(lugar.id)) {
+            // Ya estás donde toca la clase (o en la escuela sin más clases): de vuelta a casa; desde casa, a la escuela
+            RedTransporte.Lugar casa = casa();
+            lugar = casa != null && !casa.id.equals(lugarOrigen.id) ? casa : red.lugar(ProximaClase.ETSIIT);
+            tvPista.setText(act.getString(R.string.mapa_panel_ya_estas_te_llevo, lugarOrigen.corto, lugar.corto));
+            return lugar;
+        }
         tvPista.setText(clase != null
                 ? act.getString(R.string.mapa_panel_segun_horario, clase.texto(act), lugar.corto)
                 : act.getString(R.string.mapa_panel_hoy_no_mas_clases, lugar.corto));
         return lugar;
+    }
+
+    /** La residencia de ejemplo (el lugar marcado como "ejemplo" en la red): "casa". */
+    private RedTransporte.Lugar casa() {
+        for (RedTransporte.Lugar l : red.lugares) if (l.ejemplo) return l;
+        return null;
+    }
+
+    /** Lugar del que se sale: el elegido en "Desde" o aquel en el que está (o junto al que está) el punto. */
+    private RedTransporte.Lugar lugarDeSalida(Punto origen) {
+        String tag = tagMarcado(chipsDesde);
+        RedTransporte.Lugar elegido = tag != null ? red.lugar(tag) : null;
+        if (elegido != null) return elegido;
+        for (RedTransporte.Lugar l : red.lugares) {
+            if (l.contiene(origen) || l.punto.distanciaA(origen) < CERCA_DE_LUGAR_M) return l;
+        }
+        return null;
+    }
+
+    /**
+     * En "Hasta" no sale el sitio del que sales (no tiene sentido ir de la residencia a la residencia).
+     * Si estaba elegido, pasa a "Automático".
+     */
+    private void ocultarDestinoIgualAlOrigen() {
+        pintandoChips = true;
+        for (int i = 0; i < chipsHasta.getChildCount(); i++) {
+            View c = chipsHasta.getChildAt(i);
+            Object tag = c.getTag();
+            boolean esElOrigen = lugarOrigen != null && lugarOrigen.id.equals(tag);
+            c.setVisibility(esElOrigen ? View.GONE : View.VISIBLE);
+            if (esElOrigen && c.getId() == chipsHasta.getCheckedChipId()) marcar(chipsHasta, HASTA_AUTO);
+        }
+        pintandoChips = false;
     }
 
     private LocalDateTime ahora() {

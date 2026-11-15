@@ -299,7 +299,6 @@
     <string name="simular">▶ Simulate</string>
     <string name="foto_camino_desc">Route photo. Tap to view full size</string>
     <string name="direccion_seguir">Direction to follow</string>
-    <string name="voz_guia">Voice guide</string>
     <string name="mascota">Mascot</string>
     <string name="como_funciona">How it works</string>
     <string name="saludo_mascota_mapa">Hi! Tell me where you are going and I will guide you step by step, with pictures along the way. You can also tap a building on the map.</string>
@@ -1364,8 +1363,6 @@
     <string name="mapa_guia_ve_mas_rapido">walk faster</string>
     <string name="mapa_guia_coge_bus_de"> · 👉 take the %1$s bus</string>
     <string name="mapa_guia_ve_andando"> · 👉 go on foot</string>
-    <string name="mapa_guia_silenciar_voz">Mute voice</string>
-    <string name="mapa_guia_activar_voz">Enable voice</string>
     <string name="mapa_guia_confirmar_titulo">End guidance?</string>
     <string name="mapa_guia_confirmar_msg">I will stop notifying you about the bus and arrival.</string>
     <string name="mapa_guia_seguir">Continue</string>
@@ -1382,6 +1379,7 @@
     <string name="mapa_panel_mientras_pulsar_mapa">Meanwhile, you can long press the map or pick a location.</string>
     <string name="mapa_panel_segun_horario">According to your schedule: %1$s → %2$s</string>
     <string name="mapa_panel_hoy_no_mas_clases">No more classes today: taking you to %1$s</string>
+    <string name="mapa_panel_ya_estas_te_llevo">You\'re already at %1$s: taking you to %2$s</string>
     <string name="mapa_panel_todo_a_pie">🚶 All on foot · %1$d m · leave whenever you want</string>
     <string name="mapa_panel_sal_ya">Leave now! (%1$s)</string>
     <string name="mapa_panel_sal_a_las_en_min">Leave at %1$s (in %2$d min)</string>
@@ -1394,7 +1392,7 @@
     <string name="mapa_panel_punto_elegido">the selected point</string>
     <string name="mapa_panel_tu_ubicacion">your location</string>
     <string name="mapa_panel_como_llegar_titulo">How to get there</string>
-    <string name="mapa_panel_como_llegar_ayuda">📍 From: by default you start from your location (GPS). If you move, the route recalculates automatically.\n\n👆 Long press any point on the map to start from there, or select a location under \"From\".\n\n🎓 To: \"Automatic\" takes you to the building of your next class according to your schedule.\n\n🚌 If convenient, it suggests bus 9 with the departure time. Under \"Other buses\" you can pick an earlier or later one.\n\n📷 Tap a step in the list to see a photo of the location.\n\n▶ \"Start guide\" guides you step by step: arrow, countdown, and vibration on departure, bus arrival, and getting off.\n\n📱 During guidance, hold the phone vertically to see a large photo of the path with the arrow; lower it to return to the map. Place it face down to mute the voice.\n\nDrag the panel up to see everything and down to view the map.</string>
+    <string name="mapa_panel_como_llegar_ayuda">📍 From: by default you start from your location (GPS). If you move, the route recalculates automatically.\n\n👆 Long press any point on the map to start from there, or select a location under \"From\".\n\n🎓 To: \"Automatic\" takes you to the building of your next class according to your schedule. It never suggests the place you are leaving from: if you are already where the class is, it takes you back home.\n\n🚌 If convenient, it suggests bus 9 with the departure time. Under \"Other buses\" you can pick an earlier or later one.\n\n📷 Tap a step in the list to see a photo of the location.\n\n▶ \"Start guide\" guides you step by step: arrow, countdown, and vibration on departure, bus arrival, and getting off.\n\n📱 During guidance, hold the phone vertically to see a large photo of the path with the arrow; lower it to return to the map.\n\nDrag the panel up to see everything and down to view the map.</string>
     <string name="mapa_panel_entendido">Understood</string>
     <string name="mapa_panel_chip_bus">🚌 %1$s · %2$s → %3$s</string>
     <string name="mapa_panel_chip_pie">🚶 On foot → %1$s</string>

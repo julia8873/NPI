@@ -191,23 +191,6 @@
             app:strokeWidth="1dp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGuiaVoz"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="56dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/nui_suave"
-            android:contentDescription="@string/voz_guia"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:padding="0dp"
-            android:text="🔊"
-            android:textSize="18sp"
-            app:cornerRadius="14dp"
-            app:strokeColor="#FFE3D1"
-            app:strokeWidth="1dp" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuiaTerminar"
             android:layout_width="0dp"
             android:layout_height="48dp"

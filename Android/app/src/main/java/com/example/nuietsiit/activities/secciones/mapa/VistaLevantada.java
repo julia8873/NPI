@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 /**
  * Gesto de la guía exterior "levanta el móvil para ver el camino": con el móvil en vertical la foto
  * del sitio ocupa toda la pantalla con la flecha grande (realidad aumentada ligera); al bajarlo,
- * vuelve el mapa. Boca abajo avisa aparte (la guía lo usa para silenciar la voz).
+ * vuelve el mapa.
  * La vista se pone encima de todo (android.R.id.content) y copia lo que enseña la guía.
  */
 public final class VistaLevantada implements SensorEventListener {

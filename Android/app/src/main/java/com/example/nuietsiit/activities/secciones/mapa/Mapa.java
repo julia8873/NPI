@@ -387,7 +387,7 @@ public class Mapa extends BaseActivity {
             alLlegarAEdificio(idLugar, hora, true);
             return;
         }
-        guiaRutaExterior.decir(getString(R.string.mapa_has_llegado_sigue_hasta, destino.interior));
+        guiaRutaExterior.mostrarAviso(getString(R.string.mapa_has_llegado_sigue_hasta, destino.interior));
         LlegadaEdificio.seguirHasta(this, getString(R.string.edificio_etsiit), m.getTitulo(),
                 () -> rutaInteriorDesdeEntrada(destino.interior));
     }

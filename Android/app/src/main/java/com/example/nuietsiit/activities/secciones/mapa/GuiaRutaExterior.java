@@ -88,9 +88,8 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
     private final View cardFoto;
     private final LinearLayout llPuntos;
     private final int altoFoto, altoPlegada;
-    private final MaterialButton btnSimular, btnTerminar, btnVoz;
+    private final MaterialButton btnSimular, btnTerminar;
     private final Marker marcaSimulada;
-    private final VozGuia voz;
     private final VistaLevantada levantada;
     private PlanificadorRuta planificador;
 
@@ -156,7 +155,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         tvContador = raiz.findViewById(R.id.tvGuiaContador);
         tvPaso = raiz.findViewById(R.id.tvGuiaPaso);
         tvPuntualidad = raiz.findViewById(R.id.tvGuiaPuntualidad);
-        btnVoz = raiz.findViewById(R.id.btnGuiaVoz);
         llPuntos = raiz.findViewById(R.id.llGuiaPuntos);
         btnSimular = raiz.findViewById(R.id.btnGuiaSimular);
         btnTerminar = raiz.findViewById(R.id.btnGuiaTerminar);
@@ -165,14 +163,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         btnTerminar.setOnClickListener(v -> terminar());
         gestosFoto();
 
-        voz = new VozGuia(act);
-        pintarVoz();
-        btnVoz.setOnClickListener(v -> {
-            voz.activar(!voz.activa());
-            pintarVoz();
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (voz.activa()) voz.decir(tvInstruccion.getText().toString());
-        });
         levantada = new VistaLevantada(act, this::alCambiarPostura);
         tvPuntualidad.setOnClickListener(v -> {
             if (mejorPlan != null) empezar(mejorPlan, viaje);
@@ -207,8 +197,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             @Override public void onResume(@NonNull LifecycleOwner o) { if (activa() && !llegado) reanudar(); }
 
             @Override public void onPause(@NonNull LifecycleOwner o) { if (activa()) pausar(); }
-
-            @Override public void onDestroy(@NonNull LifecycleOwner o) { voz.cerrar(); }
         });
     }
 
@@ -261,9 +249,13 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         this.planificador = planificador;
     }
 
-    /** Lo dice la voz de la guía si está encendida (p. ej. el mapa al llegar: "sigue hasta el aula"). */
-    public void decir(String texto) {
-        voz.avisar(texto);
+    /** Aviso en la guía (p. ej. el mapa al llegar: "sigue hasta el aula"): sale arriba un momento y vibra. */
+    public void mostrarAviso(String texto) {
+        tvAviso.setText(texto);
+        tvAviso.setVisibility(View.VISIBLE);
+        handler.removeCallbacks(quitarAviso);
+        handler.postDelayed(quitarAviso, AVISO_MS);
+        tvAviso.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
     }
 
     /** Se llama una vez al llegar, con el id del lugar de destino y la hora (simulada o real). */
@@ -279,7 +271,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         mapa.getOverlays().remove(marcaSimulada);
         mapa.invalidate();
         handler.removeCallbacks(quitarAviso);
-        voz.callar();
         atras.setEnabled(false);
         act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         panel.modoGuia(null);
@@ -467,7 +458,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             fotos = tramo != null ? FotoLugar.delTramo(act, tramo)
                     : FotoLugar.deLugar(act, seguimiento.plan().destino.id);
             indiceAuto = -1;
-            if (puntosTramo.isEmpty()) voz.decir(instruccionRuta);
             if (!fotos.isEmpty()) {
                 ponerFoto(0, false);
             } else {
@@ -497,10 +487,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         levantada.copiar(fotos.isEmpty() ? null : fotos.get(indiceFoto), tvInstruccion, tvMetros);
         if (vibrar && vibrador != null && vibrador.hasVibrator()) {
             vibrador.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE));
-        }
-        // La voz lee la foto nueva cuando avanza sola (o la primera del tramo), no al deslizar a mano
-        if (!puntosTramo.isEmpty() && i == indiceAuto) {
-            voz.decir(FotoLugar.textoDe(act, clave));
         }
     }
 
@@ -561,19 +547,13 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         levantada.girar(ivFlecha);
     }
 
-    /** Levantado: la vista copia la guía al momento. Boca abajo: silencia la voz (como el botón 🔇). */
+    /** Levantado: la vista copia la guía al momento. Al bajarlo, se pliega la foto y se ve el mapa. */
     private void alCambiarPostura(Postura.Tipo postura) {
         if (postura == Postura.Tipo.LEVANTADO) {
             levantada.copiar(fotos.isEmpty() ? null : fotos.get(indiceFoto), tvInstruccion, tvMetros);
             levantada.girar(ivFlecha);
         } else if (postura == Postura.Tipo.NORMAL && !plegada) {
             plegar(true); // al bajar el móvil se vuelve a ver el mapa (Miguel)
-        } else if (postura == Postura.Tipo.BOCA_ABAJO && voz.activa()) {
-            voz.activar(false);
-            pintarVoz();
-            if (vibrador != null && vibrador.hasVibrator()) {
-                vibrador.vibrate(VibrationEffect.createWaveform(new long[]{0, 60, 80, 60}, -1));
-            }
         }
     }
 
@@ -583,7 +563,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
         handler.removeCallbacks(quitarAviso);
         handler.postDelayed(quitarAviso, AVISO_MS);
         tvAviso.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        voz.avisar(ev.texto);
         if (vibrador != null && vibrador.hasVibrator()) {
             vibrador.vibrate(VibrationEffect.createWaveform(patron(ev.tipo), -1));
         }
@@ -614,7 +593,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
             tvPuntualidad.setVisibility(View.GONE);
             return;
         }
-        if (puntualidad != null && puntualidad.nivel != nueva.nivel) voz.avisar(nueva.texto(act));
         puntualidad = nueva;
 
         boolean antesDelBus = e.etapa == SeguimientoRuta.Etapa.POR_SALIR
@@ -665,11 +643,6 @@ public final class GuiaRutaExterior implements Brujula.Listener, LocationListene
     }
 
     // ---------- Utilidades ----------
-
-    private void pintarVoz() {
-        btnVoz.setText(voz.activa() ? "🔊" : "🔇");
-        btnVoz.setContentDescription(voz.activa() ? act.getString(R.string.mapa_guia_silenciar_voz) : act.getString(R.string.mapa_guia_activar_voz));
-    }
 
     private void confirmarTerminar() {
         if (llegado) {
