@@ -613,7 +613,6 @@ public class Mapa extends BaseActivity {
                     "aula_0_7", "Aula 0.7", "planta0", 0.60f, 0.45f, UbicacionUsuario.Metodo.HORARIO);
             fijarOrigen(u);
             cargarPlanoDrawable("planta0");
-            Toast.makeText(this, "🍽️ Ruta contextual activa: Aula 0.7 ➔ Comedor", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1039,7 +1038,6 @@ public class Mapa extends BaseActivity {
                 chipGroupPlantas.check(R.id.chipBaja);
             }
             resaltarMarcador(encontrado);
-            Toast.makeText(this, "🎯 Punto encontrado: " + encontrado.getTitulo(), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "⚠️ Solo se permite buscar entre los puntos registrados del mapa", Toast.LENGTH_LONG).show();
         }
@@ -1398,8 +1396,6 @@ public class Mapa extends BaseActivity {
         UbicacionUsuario puertaClase = (sesion != null) ? puertaDeClase(sesion) : null;
 
         if (puertaClase != null) {
-            Toast.makeText(this, "Según tu horario ahora tienes " + sesion.nombreAsignatura
-                    + " en el " + sesion.aula, Toast.LENGTH_LONG).show();
             fijarOrigen(puertaClase);
         } else {
             ubicarConGps();
@@ -1658,7 +1654,6 @@ public class Mapa extends BaseActivity {
                         c.set(Calendar.MINUTE, 0);
                         ahoraSimulado = c;
                     }
-                    Toast.makeText(this, "Horario: " + opciones[which], Toast.LENGTH_SHORT).show();
                 })
                 .show();
     }
@@ -1698,8 +1693,6 @@ public class Mapa extends BaseActivity {
 
         actualizarPosicionMarcadores();
         actualizarPanelRuta();
-        if (avisar) Toast.makeText(this, "Te hemos ubicado: " + u.nombre + " (" + u.descripcionMetodo() + ")",
-                Toast.LENGTH_LONG).show();
     }
 
     private View crearPuntoCircular(int color, int dp) {
