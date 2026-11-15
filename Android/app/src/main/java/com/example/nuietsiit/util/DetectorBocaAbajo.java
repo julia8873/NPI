@@ -29,8 +29,8 @@ public class DetectorBocaAbajo implements SensorEventListener {
     private static final float ALFA = 0.8f;
     private static final float UMBRAL_BOCA_ABAJO_Z = -8.0f; // Eje Z negativo = boca abajo
     private static final float UMBRAL_FLAT_XY = 3.5f;        // Plano horizontal
-    private static final float UMBRAL_LUX_OSCURIDAD = 5.0f;  // Menos de 5 lux = oscuridad (bolsillo / boca abajo)
-    private static final long TIEMPO_ESTABLE_MS = 800;      // Tiempo continuo para confirmar
+    private static final float UMBRAL_LUX_OSCURIDAD = 1.5f;  // Menos de 1.5 lux (oscuridad real de bolsillo/bolso)
+    private static final long TIEMPO_ESTABLE_MS = 1500;     // 1.5 segundos continuos para confirmar
     private static final long ENFRIAMIENTO_MS = 5000;       // Enfriamiento entre avisos
 
     private final Context context;
