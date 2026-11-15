@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -639,28 +640,62 @@ public class Mapa extends BaseActivity {
     private void crearVistasMarcadores() {
         if (containerPlanoConMarcadores == null) return;
 
-        int sizePx = (int) (16 * getResources().getDisplayMetrics().density);
+        // Limpiar vistas anteriores si existieran
+        for (Marcador m : listaMarcadores) {
+            if (m.getVistaIcono() != null) containerPlanoConMarcadores.removeView(m.getVistaIcono());
+            if (m.getVistaEtiqueta() != null) containerPlanoConMarcadores.removeView(m.getVistaEtiqueta());
+        }
+
+        float d = getResources().getDisplayMetrics().density;
+        int sizePx = (int) (16 * d);
 
         for (Marcador m : listaMarcadores) {
+            // 1. Punto circular naranja
             View puntoInteres = new View(this);
-
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(sizePx, sizePx);
             puntoInteres.setLayoutParams(params);
 
-            // Estilo del marcador circular
             GradientDrawable indicador = new GradientDrawable();
             indicador.setShape(GradientDrawable.OVAL);
             indicador.setColor(Color.parseColor("#FF8C42"));
-            indicador.setStroke((int) (2 * getResources().getDisplayMetrics().density), Color.WHITE);
+            indicador.setStroke((int) (2 * d), Color.WHITE);
             puntoInteres.setBackground(indicador);
-
             puntoInteres.setVisibility(View.GONE);
 
             // EVENTO DE CLIC: Muestra la burbuja flotante pequeña
             puntoInteres.setOnClickListener(v -> mostrarBurbujaInfo(v, m));
 
+            // 2. Etiqueta con el nombre del sitio (visible al hacer suficiente zoom)
+            TextView tvEtiqueta = new TextView(this);
+            FrameLayout.LayoutParams lpEtiqueta = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            tvEtiqueta.setLayoutParams(lpEtiqueta);
+            tvEtiqueta.setText(m.getTitulo());
+            tvEtiqueta.setTextSize(10.5f);
+            tvEtiqueta.setTypeface(null, Typeface.BOLD);
+            tvEtiqueta.setTextColor(Color.parseColor("#1F1F1F"));
+            tvEtiqueta.setSingleLine(true);
+            tvEtiqueta.setIncludeFontPadding(false);
+
+            GradientDrawable fondoEtiqueta = new GradientDrawable();
+            fondoEtiqueta.setColor(Color.WHITE);
+            fondoEtiqueta.setCornerRadius(4 * d);
+            fondoEtiqueta.setStroke((int) Math.max(1, d), Color.parseColor("#FFD6B2"));
+            tvEtiqueta.setBackground(fondoEtiqueta);
+            tvEtiqueta.setPadding((int) (4 * d), (int) (1 * d), (int) (4 * d), (int) (1 * d));
+            tvEtiqueta.setElevation(2 * d);
+            tvEtiqueta.setVisibility(View.GONE);
+
+            // Al tocar la etiqueta también se abre la información del punto
+            tvEtiqueta.setOnClickListener(v -> mostrarBurbujaInfo(puntoInteres, m));
+
             m.setVistaIcono(puntoInteres);
+            m.setVistaEtiqueta(tvEtiqueta);
+
             containerPlanoConMarcadores.addView(puntoInteres);
+            containerPlanoConMarcadores.addView(tvEtiqueta);
         }
     }
 
@@ -675,23 +710,74 @@ public class Mapa extends BaseActivity {
         }
     }
 
+    private boolean haySuficienteZoomPlano() {
+        if (ivPlanoEdificio == null || ivPlanoEdificio.getDrawable() == null) return false;
+        int viewWidth = ivPlanoEdificio.getWidth();
+        int viewHeight = ivPlanoEdificio.getHeight();
+        int imgWidth = ivPlanoEdificio.getDrawable().getIntrinsicWidth();
+        int imgHeight = ivPlanoEdificio.getDrawable().getIntrinsicHeight();
+        if (viewWidth == 0 || viewHeight == 0 || imgWidth == 0 || imgHeight == 0) return false;
+
+        float minScale = Math.min((float) viewWidth / imgWidth, (float) viewHeight / imgHeight);
+        if (minScale <= 0) return false;
+
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float currentScale = values[Matrix.MSCALE_X];
+
+        // Se considera suficiente zoom si se amplía un 50% o más respecto al plano encajado completo
+        return (currentScale / minScale) >= 1.5f;
+    }
+
     private void posicionarMarcador(Marcador m) {
         View icono = m.getVistaIcono();
+        TextView etiqueta = m.getVistaEtiqueta();
         if (icono == null) return;
 
-        if (m.getPlanta().equalsIgnoreCase(plantaActual)) {
+        boolean enEstaPlanta = m.getPlanta().equalsIgnoreCase(plantaActual);
+
+        if (enEstaPlanta) {
             icono.setVisibility(View.VISIBLE);
 
             float[] pts = {m.getXOriginal(), m.getYOriginal()};
             matrix.mapPoints(pts);
 
-            // Centrar el círculo justo sobre la coordenada X e Y de la imagen
+            float d = getResources().getDisplayMetrics().density;
             float ancho = icono.getWidth() > 0 ? icono.getWidth() : icono.getLayoutParams().width;
             float alto = icono.getHeight() > 0 ? icono.getHeight() : icono.getLayoutParams().height;
             icono.setX(pts[0] - (ancho / 2f));
             icono.setY(pts[1] - (alto / 2f));
+
+            if (etiqueta != null) {
+                if (haySuficienteZoomPlano()) {
+                    etiqueta.setVisibility(View.VISIBLE);
+
+                    etiqueta.measure(
+                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                    );
+                    int anchoEtiqueta = etiqueta.getMeasuredWidth();
+                    int altoEtiqueta = etiqueta.getMeasuredHeight();
+
+                    // Colocar a la derecha del punto naranja (+4dp de margen)
+                    float posX = pts[0] + (ancho / 2f) + (4 * d);
+                    int containerWidth = containerPlanoConMarcadores != null ? containerPlanoConMarcadores.getWidth() : 0;
+                    if (containerWidth > 0 && (posX + anchoEtiqueta) > (containerWidth - (8 * d))) {
+                        // Si no cabe por la derecha, situar a la izquierda del punto naranja
+                        posX = pts[0] - (ancho / 2f) - anchoEtiqueta - (4 * d);
+                    }
+
+                    etiqueta.setX(posX);
+                    etiqueta.setY(pts[1] - (altoEtiqueta / 2f));
+                } else {
+                    etiqueta.setVisibility(View.GONE);
+                }
+            }
         } else {
             icono.setVisibility(View.GONE);
+            if (etiqueta != null) {
+                etiqueta.setVisibility(View.GONE);
+            }
         }
     }
 
