@@ -249,7 +249,7 @@ class ManoGuia {
             case HACIA_TI: // la parte de arriba se acerca a uno
                 mover = ObjectAnimator.ofFloat(movil, View.ROTATION_X, 0, -55, -55, -55, 0).setDuration(1800);
                 break;
-            default: // ESCANEAR y MANO: acercar y alejar (el móvil o la mano)
+            default: // ESCANEAR: acercar y alejar el móvil
                 AnimatorSet s = new AnimatorSet();
                 s.playTogether(ObjectAnimator.ofFloat(movil, View.SCALE_X, 1f, 1.25f, 1f, 1.25f, 1f),
                         ObjectAnimator.ofFloat(movil, View.SCALE_Y, 1f, 1.25f, 1f, 1.25f, 1f));

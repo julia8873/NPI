@@ -6,11 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) -->
+    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) y de los carteles de actividades (Actividades) -->
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Notificaciones de avisos urgentes y actividades -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Noticias: leer los avisos por el auricular al acercar el móvil a la oreja y apagar la pantalla (Miguel) -->
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />

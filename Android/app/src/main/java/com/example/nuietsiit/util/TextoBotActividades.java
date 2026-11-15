@@ -93,8 +93,7 @@ public final class TextoBotActividades {
                 .append("con su app (Actividades → Escanear) y le sale para apuntarse. También con el botón «Enseñar QR» del detalle.\n")
                 .append("- El botón «Grupos» enseña las comunidades de chat del grado y de la escuela.\n")
                 .append("- Media hora antes de cada actividad a la que estás apuntado llega una notificación con el botón «Llévame».\n")
-                .append("- En Noticias se pasa de aviso deslizando, inclinando el móvil (izquierda: siguiente; derecha: anterior) ")
-                .append("o pasando la mano por delante de la parte de arriba del móvil, sin tocar la pantalla.\n")
+                .append("- En Noticias se pasa de aviso deslizando o inclinando el móvil (izquierda: siguiente; derecha: anterior).\n")
                 .append("- En Noticias, barriendo hacia abajo con dos dedos se marcan todos los avisos como leídos.\n")
                 .append("- En Noticias, inclinando el móvil hacia uno mismo o tocando el marcapáginas, el aviso se guarda (pestaña «Guardados»).\n");
         return sb.toString();
