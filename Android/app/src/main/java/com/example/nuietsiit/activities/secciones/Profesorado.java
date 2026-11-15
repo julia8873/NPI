@@ -13,6 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
@@ -20,6 +24,10 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.profesorado.BuscadorProfesores;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.TutoriasDB;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
+
+import java.util.Locale;
 
 public class Profesorado extends BaseActivity {
 
@@ -57,6 +65,16 @@ public class Profesorado extends BaseActivity {
     }
 
     @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "profesorado", 1)
+                .tocar(R.id.btnLogin, getString(R.string.prof_tut_login))
+                .soloSi(() -> correoUsuario == null || correoUsuario.isEmpty())
+                .info(R.id.cardTutorias, getString(R.string.prof_tut_tutorias))
+                .soloSi(() -> correoUsuario != null && !correoUsuario.isEmpty())
+                .tocar(R.id.btnBuscarProfesorado, getString(R.string.prof_tut_buscar));
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
@@ -75,9 +93,13 @@ public class Profesorado extends BaseActivity {
             }
         });
 
-        btnLogin.setOnClickListener(v -> startActivity(new Intent(Profesorado.this, Login.class)));
+        btnLogin.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
+            startActivity(new Intent(Profesorado.this, Login.class));
+        });
 
         btnBuscarProfesorado.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
             Intent intent = new Intent(Profesorado.this, BuscadorProfesores.class);
             startActivity(intent);
         });
@@ -113,8 +135,9 @@ public class Profesorado extends BaseActivity {
             } while (cursor.moveToNext());
             cursor.close();
         } else {
+            if (cursor != null) cursor.close();
             TextView tvVacio = new TextView(this);
-            tvVacio.setText("No tienes ninguna tutoría reservada por el momento.");
+            tvVacio.setText(R.string.prof_sin_tutorias_reservadas);
             tvVacio.setTextSize(14f);
             tvVacio.setTextColor(Color.GRAY);
             tvVacio.setPadding(0, 24, 0, 0);
@@ -123,6 +146,8 @@ public class Profesorado extends BaseActivity {
     }
 
     private View crearTarjetaReserva(int idReserva, String nombreProfesor, String fecha, String horario, String modalidad, String estado) {
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
         tarjeta.setBackgroundColor(Color.WHITE);
@@ -142,25 +167,37 @@ public class Profesorado extends BaseActivity {
         tvProfesor.setTextColor(Color.BLACK);
 
         TextView tvDetalles = new TextView(this);
-        tvDetalles.setText("Fecha: " + fecha + " (" + horario + ")\nModalidad: " + modalidad.toUpperCase());
+        tvDetalles.setText(getString(
+                R.string.prof_reserva_detalles_fmt,
+                fecha,
+                horario,
+                modalidad != null ? modalidad.toUpperCase(localeActivo) : ""
+        ));
         tvDetalles.setTextSize(13f);
         tvDetalles.setTextColor(Color.DKGRAY);
         tvDetalles.setPadding(0, 8, 0, 8);
 
         TextView tvEstado = new TextView(this);
-        tvEstado.setText("Estado: " + estado.toUpperCase());
-        tvEstado.setTextSize(13f);
+        String estadoTexto;
         if ("confirmada".equalsIgnoreCase(estado)) {
+            estadoTexto = getString(R.string.prof_estado_confirmada);
             tvEstado.setTextColor(Color.parseColor("#388E3C")); // Verde
         } else if ("cancelada".equalsIgnoreCase(estado)) {
+            estadoTexto = getString(R.string.prof_estado_cancelada);
             tvEstado.setTextColor(Color.RED);
-        } else {
+        } else if ("pendiente".equalsIgnoreCase(estado)) {
+            estadoTexto = getString(R.string.prof_estado_pendiente);
             tvEstado.setTextColor(Color.parseColor("#F57C00")); // Naranja
+        } else {
+            estadoTexto = estado != null ? estado.toUpperCase(localeActivo) : "";
+            tvEstado.setTextColor(Color.parseColor("#F57C00"));
         }
+        tvEstado.setText(getString(R.string.prof_reserva_estado_fmt, estadoTexto));
+        tvEstado.setTextSize(13f);
         tvEstado.setTypeface(null, Typeface.BOLD);
 
         Button btnCancelar = new Button(this);
-        btnCancelar.setText("Cancelar reserva");
+        btnCancelar.setText(R.string.prof_btn_cancelar_reserva);
         btnCancelar.setTextSize(12f);
         btnCancelar.setBackgroundColor(Color.parseColor("#E53935"));
         btnCancelar.setTextColor(Color.WHITE);
@@ -176,7 +213,7 @@ public class Profesorado extends BaseActivity {
         } else {
             btnCancelar.setOnClickListener(v -> {
                 tutoriasDB.actualizarEstadoReserva(idReserva, "cancelada");
-                Toast.makeText(this, "Reserva cancelada correctamente", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.prof_toast_reserva_cancelada, Toast.LENGTH_SHORT).show();
                 cargarTutoriasEstudiante();
             });
         }
@@ -188,4 +225,6 @@ public class Profesorado extends BaseActivity {
 
         return tarjeta;
     }
+
+
 }

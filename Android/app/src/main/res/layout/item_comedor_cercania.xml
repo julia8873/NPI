@@ -29,7 +29,7 @@
                 android:id="@+id/tvNombreComedorItem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Comedor ETSIIT"
+                android:text="@string/comedor_default"
                 android:textColor="#1F2937"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -39,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Calle del comedor"
+                android:text="@string/direccion_default"
                 android:textColor="#6B7280"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -52,7 +52,7 @@
             android:paddingHorizontal="10dp"
             android:paddingVertical="5dp"
             android:background="@drawable/boton_redondeado"
-            android:text="120 m"
+            android:text="@string/distancia_default"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />

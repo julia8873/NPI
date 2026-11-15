@@ -1,7 +1,6 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
@@ -10,27 +9,24 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Paso;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.InclinarParaPasar;
 import com.example.nuietsiit.util.DetectorInclinacion;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.List;
 
-public class PasosTramite extends BaseActivity {
-
-    private static final String PREFS = "secretaria";
-    private static final String PREF_INCLINAR = "inclinarPasos";
-    private static final int NARANJA = 0xFFFF8C42;
-    private static final int GRIS = 0xFFCCCCCC;
+public class PasosTramite extends PantallaSecretaria {
 
     private ViewPager2 vpPasos;
     private LinearLayout llPuntos;
@@ -47,29 +43,45 @@ public class PasosTramite extends BaseActivity {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        CabeceraNui.preparar(barra);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         SecretariaDB db = new SecretariaDB(DBHelper.getInstance(this));
         Tramite tramite = db.getTramite(getIntent().getIntExtra("idProcedimiento", -1));
         List<Paso> pasos = tramite != null ? db.getPasos(tramite.id) : null;
         if (pasos == null || pasos.isEmpty()) {
-            Toast.makeText(this, "Este trámite no tiene pasos", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pasos_sin_pasos, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        getSupportActionBar().setTitle(tramite.nombre);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.pasos_titulo);
+            getSupportActionBar().setSubtitle(tramite.nombre);
+        }
         numPasos = pasos.size();
 
-        String textoFinal = tramite.sePuedeSolicitar() ? "Solicitar ahora" : "Pedir cita";
+        String textoFinal = getString(tramite.sePuedeSolicitar()
+                ? R.string.pasos_btn_solicitar_ahora
+                : R.string.pasos_btn_pedir_cita);
         View.OnClickListener accionFinal = tramite.sePuedeSolicitar()
                 ? v -> startActivity(new Intent(this, SolicitudTramite.class)
-                        .putExtra("idProcedimiento", tramite.id)
-                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO")))
                 : v -> startActivity(new Intent(this, CitaPrevia.class)
-                        .putExtra("idProcedimiento", tramite.id)
-                        .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
+                .putExtra("idProcedimiento", tramite.id)
+                .putExtra("CORREO", getIntent().getStringExtra("CORREO")));
         vpPasos = findViewById(R.id.vpPasos);
         vpPasos.setAdapter(new PasoAdapter(pasos, textoFinal, accionFinal));
+        // se pasa una ficha del fichero: la que se va se inclina y baja un poco
+        float baja = getResources().getDimension(R.dimen.nui_espacio_l);
+        vpPasos.setPageTransformer((pagina, posicion) -> {
+            float p = Math.max(-1f, Math.min(1f, posicion));
+            pagina.setRotation(-4f * p);
+            pagina.setTranslationY(Math.abs(p) * baja);
+            pagina.setAlpha(1f - 0.3f * Math.abs(p));
+        });
 
         llPuntos = findViewById(R.id.llPuntos);
         crearPuntos();
@@ -85,6 +97,7 @@ public class PasosTramite extends BaseActivity {
                 // la primera llamada es la página inicial: no vibra
                 if (paginaActual != -1 && paginaActual != position) {
                     vpPasos.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                    if (position > paginaActual) avisarTutorial(Gesto.DESLIZAR_IZQ);
                 }
                 paginaActual = position;
                 actualizarIndicadores(position);
@@ -101,26 +114,53 @@ public class PasosTramite extends BaseActivity {
 
     private void configurarInclinacion() {
         swInclinar = findViewById(R.id.swInclinar);
-        detector = new DetectorInclinacion(this, direccion ->
-                irA(vpPasos.getCurrentItem() + (direccion == DetectorInclinacion.DERECHA ? 1 : -1)));
+        detector = new DetectorInclinacion(this, direccion -> {
+            boolean activado = swInclinar.isChecked();
+            if (hayTutorialActivo()) avisarTutorial(Gesto.INCLINAR);
+            else if (!activado) { // solo estaba escuchando para el tutorial
+                detector.parar();
+                return;
+            }
+            irA(vpPasos.getCurrentItem() + (direccion == DetectorInclinacion.DERECHA ? 1 : -1));
+        });
         if (!detector.disponible()) {
             swInclinar.setVisibility(View.GONE);
             return;
         }
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         // el estado sale de las preferencias (saveEnabled=false), así no salta el listener al rotar
         swInclinar.setSaveEnabled(false);
-        swInclinar.setChecked(prefs.getBoolean(PREF_INCLINAR, false));
+        swInclinar.setChecked(InclinarParaPasar.activado(this)); // la misma preferencia que pasar hojas y fichas
         swInclinar.setOnCheckedChangeListener((b, activado) -> {
-            prefs.edit().putBoolean(PREF_INCLINAR, activado).apply();
+            InclinarParaPasar.setActivado(this, activado);
             if (activado) {
                 detector.iniciar();
-                Toast.makeText(this, "Inclina a la derecha para avanzar y a la izquierda para volver",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.pasos_toast_inclinar, Toast.LENGTH_LONG).show();
             } else {
                 detector.parar();
             }
         });
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        if (numPasos == 0) return null; // se está cerrando: el trámite no tiene pasos
+        Tutorial t = new Tutorial(this, "pasos_tramite", 2)
+                .alEmpezar(() -> irA(0));
+        if (numPasos > 1) {
+            t.gesto(R.id.vpPasos, Gesto.DESLIZAR_IZQ, getString(R.string.pasos_tut_deslizar))
+                    .tocar(R.id.btnSiguiente, getString(R.string.pasos_tut_flecha))
+                    .soloSi(() -> btnSiguiente.isEnabled());
+        }
+        if (detector.disponible() && numPasos > 1) {
+            t.alEmpezar(() -> { // en el tutorial se escucha aunque el interruptor esté apagado
+                        irA(0);
+                        detector.iniciar();
+                    })
+                    .alTerminar(() -> { if (!swInclinar.isChecked()) detector.parar(); })
+                    .sensor(Gesto.INCLINAR, getString(R.string.pasos_tut_inclinar))
+                    .info(R.id.swInclinar, getString(R.string.pasos_tut_interruptor));
+        }
+        return t;
     }
 
     private void irA(int pagina) {
@@ -128,11 +168,12 @@ public class PasosTramite extends BaseActivity {
     }
 
     private void crearPuntos() {
-        int tam = (int) (10 * getResources().getDisplayMetrics().density);
+        // puntos de página
+        int tam = getResources().getDimensionPixelSize(R.dimen.nui_espacio_s);
         for (int i = 0; i < numPasos; i++) {
             View punto = new View(this);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(tam, tam);
-            lp.setMargins(tam / 2, 0, tam / 2, 0);
+            lp.setMargins(tam / 2, tam / 2, tam / 2, tam / 2);
             punto.setLayoutParams(lp);
             GradientDrawable circulo = new GradientDrawable();
             circulo.setShape(GradientDrawable.OVAL);
@@ -143,7 +184,11 @@ public class PasosTramite extends BaseActivity {
 
     private void actualizarIndicadores(int pagina) {
         for (int i = 0; i < numPasos; i++) {
-            ((GradientDrawable) llPuntos.getChildAt(i).getBackground()).setColor(i == pagina ? NARANJA : GRIS);
+            View punto = llPuntos.getChildAt(i);
+            ((GradientDrawable) punto.getBackground()).setColor(getColor(i == pagina ? R.color.nui_resaltado
+                    : i < pagina ? R.color.nui_oro : R.color.nui_papel_sombra));
+            float escala = i == pagina ? 1.4f : 1f;
+            punto.animate().scaleX(escala).scaleY(escala).setDuration(150).start();
         }
         btnAnterior.setEnabled(pagina > 0);
         btnSiguiente.setEnabled(pagina < numPasos - 1);

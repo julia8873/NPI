@@ -4,6 +4,35 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <item name="android:windowBackground">#FFFFFF</item>
         <item name="android:colorBackground">#FFFFFF</item>
+        <!-- NUI:INICIO paleta del grupo (naranja #FF8C42 sobre blanco), fuente y widgets por defecto de Material3 -->
+        <item name="colorPrimary">@color/nui_resaltado</item>
+        <item name="colorOnPrimary">@color/nui_sobre_resaltado</item>
+        <item name="colorPrimaryContainer">@color/nui_resaltado_tinte</item>
+        <item name="colorOnPrimaryContainer">@color/nui_tinta</item>
+        <item name="colorSecondary">@color/nui_resaltado</item>
+        <item name="colorOnSecondary">@color/nui_superficie</item>
+        <item name="colorSecondaryContainer">@color/nui_tinte</item>
+        <item name="colorOnSecondaryContainer">@color/nui_tinta</item>
+        <item name="colorError">@color/nui_error</item>
+        <item name="colorSurface">@color/nui_superficie</item>
+        <item name="colorOnSurface">@color/nui_tinta</item>
+        <item name="colorSurfaceVariant">@color/nui_suave</item>
+        <item name="colorOnSurfaceVariant">@color/nui_apagado</item>
+        <item name="colorSurfaceContainerLow">@color/nui_superficie</item>
+        <item name="colorSurfaceContainer">@color/nui_superficie</item>
+        <item name="colorOutline">@color/nui_papel_sombra</item>
+        <item name="colorOutlineVariant">@color/nui_linea</item>
+        <item name="colorControlHighlight">@color/nui_resalte</item>
+        <item name="android:colorControlHighlight">@color/nui_resalte</item>
+        <item name="colorControlActivated">@color/nui_resaltado</item>
+        <item name="android:colorControlActivated">@color/nui_resaltado</item>
+        <item name="colorAccent">@color/nui_resaltado</item>
+        <item name="android:textColorHighlight">@color/nui_resalte_texto</item>
+        <item name="android:statusBarColor">@color/nui_superficie</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- colores planos: sin el tinte de M3 en superficies elevadas (hojas, diálogos) -->
+        <item name="elevationOverlayEnabled">false</item>
+        <!-- NUI:FIN -->
     </style>
 
     <style name="Theme.NUIETSIIT" parent="Base.Theme.NUIETSIIT" />

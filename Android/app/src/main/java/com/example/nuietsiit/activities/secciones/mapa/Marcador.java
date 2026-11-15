@@ -8,6 +8,7 @@ public class Marcador {
     private float xOriginal; // Coordenada X en los píxeles de la imagen original
     private float yOriginal; // Coordenada Y en los píxeles de la imagen original
     private View vistaIcono; // Referencia al ImageView generado dinámicamente
+    private android.widget.TextView vistaEtiqueta; // Etiqueta con el nombre del sitio al hacer zoom
 
     public Marcador(String titulo, String planta, float xOriginal, float yOriginal) {
         this.titulo = titulo;
@@ -18,9 +19,23 @@ public class Marcador {
 
     // Getters y Setters
     public String getTitulo() { return titulo; }
+
+    /** Devuelve el título limpio sin emojis ni caracteres raros al principio (ej: "Aula 0.5") */
+    public String getTituloLimpio() {
+        if (titulo == null) return "";
+        return titulo.replaceAll("^[^A-Za-z0-9.]+", "").trim();
+    }
+
     public String getPlanta() { return planta; }
     public float getXOriginal() { return xOriginal; }
     public float getYOriginal() { return yOriginal; }
     public View getVistaIcono() { return vistaIcono; }
     public void setVistaIcono(View vistaIcono) { this.vistaIcono = vistaIcono; }
+    public android.widget.TextView getVistaEtiqueta() { return vistaEtiqueta; }
+    public void setVistaEtiqueta(android.widget.TextView vistaEtiqueta) { this.vistaEtiqueta = vistaEtiqueta; }
+
+    @Override
+    public String toString() {
+        return getTituloLimpio();
+    }
 }

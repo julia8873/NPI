@@ -1,6 +1,7 @@
 package com.example.nuietsiit.activities.secciones.profesorado;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -8,8 +9,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,25 +18,36 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
+import com.example.nuietsiit.activities.secciones.asignaturas.DetectorGiroRuleta;
 import com.example.nuietsiit.activities.secciones.asignaturas.RuletaCursosView;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.UsuariosDB;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
+import com.google.android.material.card.MaterialCardView;
+
+import java.util.Locale;
 
 public class BuscadorProfesores extends BaseActivity {
 
-    private ScrollView scrollGrados;
+    private LinearLayout scrollGrados;
     private LinearLayout layoutRuletaCursos;
     private ScrollView scrollResultados;
     private LinearLayout contenedorBotonesGrados;
     private LinearLayout contenedorResultados;
     private TextView tvTituloGradoSeleccionado;
     private TextView tvTituloResultados;
-    private TextView btnVolver;
+    private View btnVolver;
     private EditText etBuscadorRapido;
     private RuletaCursosView ruletaCursosView;
+    private DetectorGiroRuleta detectorGiro;
+    private float anguloGiroAcumuladoTutorial = 0f;
 
     private DBHelper BD;
     private UsuariosDB usuariosDB;
@@ -46,7 +58,9 @@ public class BuscadorProfesores extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.buscador_profesores);
+        aplicarMargenesSistema();
 
         BD = DBHelper.getInstance(this);
         usuariosDB = new UsuariosDB(BD);
@@ -62,8 +76,17 @@ public class BuscadorProfesores extends BaseActivity {
         etBuscadorRapido = findViewById(R.id.etBuscadorRapido);
         ruletaCursosView = findViewById(R.id.ruletaCursosView);
 
-        ruletaCursosView.setOnCursoSelectedListener(curso -> {
-            mostrarResultadosPorRuleta(curso);
+        ruletaCursosView.setOnCursoSelectedListener(this::mostrarResultadosPorRuleta);
+
+        detectorGiro = new DetectorGiroRuleta(this, delta -> {
+            if (layoutRuletaCursos.getVisibility() == View.VISIBLE) {
+                ruletaCursosView.rotarPorSensor(delta);
+                anguloGiroAcumuladoTutorial += Math.abs(delta);
+                if (anguloGiroAcumuladoTutorial >= 15.0f) {
+                    avisarTutorial(Gesto.GIRAR);
+                    anguloGiroAcumuladoTutorial = 0f;
+                }
+            }
         });
 
         etBuscadorRapido.addTextChangedListener(new TextWatcher() {
@@ -73,6 +96,7 @@ public class BuscadorProfesores extends BaseActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.toString().trim().length() > 0) {
+                    avisarTutorial(Gesto.ESCRIBIR);
                     mostrarResultadosPorTexto(s.toString().trim());
                 } else {
                     restaurarVistaInicial();
@@ -93,6 +117,31 @@ public class BuscadorProfesores extends BaseActivity {
         });
 
         cargarGrados();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "buscador_profesores", 2)
+                .tocar(R.id.scrollGrados, getString(R.string.prof_tut_grados))
+                .gesto(R.id.ruletaCursosView, Gesto.TOCAR, getString(R.string.prof_tut_ruleta_dedo))
+                .sensor(Gesto.GIRAR, getString(R.string.prof_tut_ruleta_volante))
+                .gesto(R.id.etBuscadorRapido, Gesto.ESCRIBIR, getString(R.string.prof_tut_buscar_nombre));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (detectorGiro != null) {
+            detectorGiro.iniciar();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (detectorGiro != null) {
+            detectorGiro.parar();
+        }
     }
 
     private void manejarRetroceso() {
@@ -118,39 +167,64 @@ public class BuscadorProfesores extends BaseActivity {
         Cursor cursor = db.rawQuery("SELECT idGrado, nombreGrado FROM GRADO WHERE idGrado > 0", null);
 
         if (cursor.moveToFirst()) {
+            int total = cursor.getCount();
+            int index = 0;
             do {
                 int idGrado = cursor.getInt(0);
                 String nombreGrado = cursor.getString(1);
+                boolean esUltimo = (index == total - 1);
 
-                View tarjeta = crearTarjetaGrado(idGrado, nombreGrado);
+                View tarjeta = crearTarjetaGrado(idGrado, nombreGrado, esUltimo);
                 contenedorBotonesGrados.addView(tarjeta);
-
+                index++;
             } while (cursor.moveToNext());
         }
         cursor.close();
     }
 
-    private View crearTarjetaGrado(int idGrado, String nombreGrado) {
+    private View crearTarjetaGrado(int idGrado, String nombreGrado, boolean esUltimo) {
+        float density = getResources().getDisplayMetrics().density;
+
+        MaterialCardView card = new MaterialCardView(this);
+        card.setRadius(14 * density);
+        card.setCardElevation(2 * density);
+        card.setStrokeWidth((int) density);
+        card.setStrokeColor(Color.parseColor("#FFE0B2"));
+
+        LinearLayout.LayoutParams paramsCard = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f // Cada grado ocupa exactamente la misma fracción del alto sin scroll
+        );
+        paramsCard.setMargins(0, 0, 0, esUltimo ? 0 : (int) (10 * density));
+        card.setLayoutParams(paramsCard);
+
         LinearLayout tarjeta = new LinearLayout(this);
         tarjeta.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout.LayoutParams paramsTarjeta = new LinearLayout.LayoutParams(
+        tarjeta.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        paramsTarjeta.setMargins(0, 0, 0, 80);
-        tarjeta.setLayoutParams(paramsTarjeta);
+                LinearLayout.LayoutParams.MATCH_PARENT
+        ));
 
-        Button btnGrado = new Button(this);
-        btnGrado.setText(nombreGrado);
-        btnGrado.setAllCaps(false);
-        btnGrado.setTextSize(16f);
-        btnGrado.setBackgroundColor(Color.parseColor("#FF9800"));
-        btnGrado.setTextColor(Color.WHITE);
+        // Cabecera compacta del grado
+        TextView tvGrado = new TextView(this);
+        tvGrado.setText(nombreGrado);
+        tvGrado.setTextSize(14f);
+        tvGrado.setTypeface(null, Typeface.BOLD);
+        tvGrado.setGravity(Gravity.CENTER);
+        tvGrado.setMaxLines(1);
+        tvGrado.setBackgroundColor(Color.parseColor("#FF9800"));
+        tvGrado.setTextColor(Color.WHITE);
+        int padV = (int) (7 * density);
+        int padH = (int) (10 * density);
+        tvGrado.setPadding(padH, padV, padH, padV);
 
+        // Imagen adaptable que llena el resto de la tarjeta
         ImageView ivPortada = new ImageView(this);
         LinearLayout.LayoutParams paramsImg = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 450
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f
         );
         ivPortada.setLayoutParams(paramsImg);
         ivPortada.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -163,17 +237,17 @@ public class BuscadorProfesores extends BaseActivity {
             ivPortada.setBackgroundColor(Color.parseColor("#EEEEEE"));
         }
 
-        tarjeta.addView(btnGrado);
+        tarjeta.addView(tvGrado);
         tarjeta.addView(ivPortada);
+        card.addView(tarjeta);
 
-        View.OnClickListener clickListener = v -> prepararRuletaParaGrado(idGrado, nombreGrado);
-        btnGrado.setOnClickListener(clickListener);
-        ivPortada.setOnClickListener(clickListener);
+        card.setOnClickListener(v -> prepararRuletaParaGrado(idGrado, nombreGrado));
 
-        return tarjeta;
+        return card;
     }
 
     private void prepararRuletaParaGrado(int idGrado, String nombreGrado) {
+        avisarTutorial(Gesto.TOCAR);
         idGradoActual = idGrado;
         nombreGradoActual = nombreGrado;
 
@@ -195,7 +269,7 @@ public class BuscadorProfesores extends BaseActivity {
         );
 
         int numCursosFallback = 4;
-        if (nombreGrado != null && (nombreGrado.toLowerCase().contains("doble") || nombreGrado.toLowerCase().contains("dgiim"))) {
+        if (nombreGrado != null && (nombreGrado.toLowerCase(Locale.ROOT).contains("doble") || nombreGrado.toLowerCase(Locale.ROOT).contains("dgiim"))) {
             numCursosFallback = 5;
         }
 
@@ -213,7 +287,7 @@ public class BuscadorProfesores extends BaseActivity {
     private void mostrarResultadosPorRuleta(int curso) {
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Profesorado de " + curso + "º Curso");
+        tvTituloResultados.setText(getString(R.string.prof_titulo_curso_fmt, curso));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = usuariosDB.obtenerProfesoresPorGradoYCurso(idGradoActual, curso);
@@ -223,7 +297,7 @@ public class BuscadorProfesores extends BaseActivity {
                 String correo = cursor.getString(0);
                 String nombre = cursor.getString(1);
                 String asignatura = cursor.getString(3);
-                View tarjeta = crearTarjetaProfesor(correo, nombre, "Imparte: " + asignatura);
+                View tarjeta = crearTarjetaProfesor(correo, nombre, getString(R.string.prof_imparte_fmt, asignatura));
                 contenedorResultados.addView(tarjeta);
             } while (cursor.moveToNext());
             cursor.close();
@@ -237,7 +311,7 @@ public class BuscadorProfesores extends BaseActivity {
         scrollGrados.setVisibility(View.GONE);
         layoutRuletaCursos.setVisibility(View.GONE);
         scrollResultados.setVisibility(View.VISIBLE);
-        tvTituloResultados.setText("Resultados para: '" + texto + "'");
+        tvTituloResultados.setText(getString(R.string.prof_resultados_texto_fmt, texto));
 
         contenedorResultados.removeAllViews();
         Cursor cursor = usuariosDB.buscarProfesoresPorTexto(texto);
@@ -294,10 +368,21 @@ public class BuscadorProfesores extends BaseActivity {
 
     private void mostrarMensajeSinResultados() {
         TextView tvVacio = new TextView(this);
-        tvVacio.setText("No se ha encontrado profesorado en la base de datos.");
+        tvVacio.setText(R.string.prof_sin_resultados);
         tvVacio.setTextSize(16f);
         tvVacio.setTextColor(Color.GRAY);
         tvVacio.setPadding(20, 40, 20, 20);
         contenedorResultados.addView(tvVacio);
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

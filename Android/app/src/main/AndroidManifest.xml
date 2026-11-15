@@ -6,12 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) -->
+    <!-- Escanear los códigos QR de ubicación dentro de la ETSIIT (Mapa) y de los carteles de actividades (Actividades) -->
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Notificaciones de avisos urgentes y actividades -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Vibración al enviar una solicitud en Secretaría (Izaro) -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <application
         android:allowBackup="true"
@@ -40,31 +41,56 @@
             android:name=".activities.auth.SignUp"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".activities.main.AjustesCuenta" />
-        <activity android:name=".activities.secciones.Noticias" />
-        <activity android:name=".activities.secciones.mapa.Mapa" />
+        <!-- En tablets Android 16 no respeta el vertical: al girar no se recrea (no se pierden la ficha ni el QR) -->
+        <activity
+            android:name=".activities.secciones.Noticias"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
+        <!-- Al girar el móvil no se recrea: se mantienen la guía, el panel de ruta y el viaje -->
+        <activity
+            android:name=".activities.secciones.mapa.Mapa"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden" />
         <!-- Visor de ruta: foto según hacia dónde mire el usuario (brújula) -->
         <activity
             android:name=".activities.secciones.mapa.VisorRuta"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.secciones.Actividades" />
+        <activity
+            android:name=".activities.secciones.Actividades"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.Asignaturas" />
         <activity android:name=".activities.secciones.Profesorado" />
         <activity android:name=".activities.secciones.Secretaria" />
-        <activity android:name=".activities.secciones.asignaturas.BuscadorAsignaturas" />
+        <activity
+            android:name=".activities.secciones.asignaturas.BuscadorAsignaturas"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.asignaturas.DetalleAsignatura" />
-        <activity android:name=".activities.secciones.profesorado.BuscadorProfesores" />
+        <activity
+            android:name=".activities.secciones.profesorado.BuscadorProfesores"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.profesorado.DetalleProfesor" />
         <activity android:name=".activities.secciones.secretaria.DetalleTramite" />
         <activity
             android:name=".activities.secciones.secretaria.PasosTramite"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.secciones.secretaria.SolicitudTramite" />
+        <activity
+            android:name=".activities.secciones.secretaria.SolicitudTramite"
+            android:screenOrientation="portrait" />
         <activity android:name=".activities.secciones.secretaria.CitaPrevia" />
         <activity android:name=".activities.secciones.secretaria.Justificante" />
         <activity android:name=".activities.secciones.secretaria.MisGestiones" />
+        <activity android:name=".activities.secciones.secretaria.QueNecesitas" />
         <activity android:name=".activities.secciones.Comedores" />
         <activity android:name=".activities.secciones.Biblioteca" />
-        <activity android:name=".activities.secciones.Calendario" />
+        <activity android:name=".activities.secciones.biblioteca.DetalleLibro" />
+        <activity android:name=".activities.secciones.biblioteca.ApuntarLibros" />
+        <activity
+            android:name=".activities.secciones.biblioteca.ModoEstudio"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.secciones.chat.ChatActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".activities.secciones.calendario.Calendario" />
+
 
         <!-- Secretaría: la app de cámara guarda la foto del documento en getFilesDir()/secretaria/ -->
         <provider
@@ -76,6 +102,21 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/rutas_archivos" />
         </provider>
+        <!-- Alarma de "sal ya para llegar a clase" (Miguel) -->
+        <receiver
+            android:name=".util.AvisoSalidaClase$Receptor"
+            android:exported="false" />
+        <!-- Escáner de QR de los carteles de Actividades, en vertical (Miguel) -->
+        <activity
+            android:name=".activities.secciones.actividades.CapturaVertical"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <!-- Recordatorio de actividad con "Llévame" (Miguel) -->
+        <receiver
+            android:name=".util.RecordatorioActividad$Receptor"
+            android:exported="false" />
     </application>
 
 </manifest>

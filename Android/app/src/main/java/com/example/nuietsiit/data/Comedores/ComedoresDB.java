@@ -231,7 +231,7 @@ public class ComedoresDB {
      */
     public void asegurarMenusSimulacion() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        TablasComedores.poblarDiasSimulacion(db);
+        TablasComedores.poblar(db);
     }
 
     /**

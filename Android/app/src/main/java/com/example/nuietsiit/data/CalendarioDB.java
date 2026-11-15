@@ -9,8 +9,10 @@ import com.example.nuietsiit.data.modelo.EventoCalendario;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Acceso a datos para el Calendario de Actividades, Exámenes y Entregas.
@@ -89,6 +91,76 @@ public class CalendarioDB {
         return lista;
     }
 
+    public Set<String> obtenerTodasLasFechasConEventos(String correoUsuario) {
+        Set<String> fechas = new HashSet<>();
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+            // 1. EVENTO_CALENDARIO
+            String selection = "1=1";
+            List<String> selectionArgs = new ArrayList<>();
+            if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                selection = "(correoUsuario = ? OR correoUsuario = '' OR correoUsuario IS NULL)";
+                selectionArgs.add(correoUsuario.toLowerCase());
+            }
+            Cursor c1 = db.query("EVENTO_CALENDARIO", new String[]{"DISTINCT fecha"}, selection,
+                    selectionArgs.toArray(new String[0]), null, null, null);
+            if (c1 != null) {
+                while (c1.moveToNext()) {
+                    String f = c1.getString(0);
+                    if (f != null && !f.isEmpty()) {
+                        if (f.length() >= 10) f = f.substring(0, 10);
+                        fechas.add(f);
+                    }
+                }
+                c1.close();
+            }
+
+            // 2. ACTIVIDAD (Solo las actividades a las que el usuario esté apuntado)
+            if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                Cursor c2 = db.rawQuery(
+                        "SELECT DISTINCT A.fechaInicio FROM ACTIVIDAD A " +
+                        "JOIN INSCRIPCION_ACTIVIDAD IA ON A.idActividad = IA.idActividad " +
+                        "WHERE A.fechaInicio IS NOT NULL AND A.fechaInicio != '' " +
+                        "AND LOWER(IA.correoEstudiante) = ?",
+                        new String[]{correoUsuario.toLowerCase()});
+                if (c2 != null) {
+                    while (c2.moveToNext()) {
+                        String f = c2.getString(0);
+                        if (f != null && !f.isEmpty()) {
+                            if (f.length() >= 10) f = f.substring(0, 10);
+                            fechas.add(f);
+                        }
+                    }
+                    c2.close();
+                }
+            }
+
+            // 3. CITA
+            String queryCitas = "SELECT DISTINCT fecha FROM CITA WHERE fecha IS NOT NULL AND fecha != ''";
+            List<String> argsCitas = new ArrayList<>();
+            if (correoUsuario != null && !correoUsuario.isEmpty()) {
+                queryCitas += " AND LOWER(correoUsuario) = ?";
+                argsCitas.add(correoUsuario.toLowerCase());
+            }
+            Cursor c3 = db.rawQuery(queryCitas, argsCitas.toArray(new String[0]));
+            if (c3 != null) {
+                while (c3.moveToNext()) {
+                    String f = c3.getString(0);
+                    if (f != null && !f.isEmpty()) {
+                        if (f.length() >= 10) f = f.substring(0, 10);
+                        fechas.add(f);
+                    }
+                }
+                c3.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fechas;
+    }
+
     public boolean hayEventos() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM EVENTO_CALENDARIO", null);
@@ -126,5 +198,9 @@ public class CalendarioDB {
             String en7dias = sdf.format(cal.getTime());
             insertarEvento("", "Entrega de Memoria de Proyecto", "Entrega", en7dias, "18:00", "Secretaría de la ETSIIT");
         }
+    }
+
+    public Set<String> obtenerFechasConEventos(String correoUsuario) {
+        return obtenerTodasLasFechasConEventos(correoUsuario);
     }
 }

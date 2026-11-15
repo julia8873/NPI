@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TARJETA base: blanca, borde melocotón, radio 16dp (estilo general de la app). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/nui_papel" />
+    <stroke android:width="@dimen/nui_borde" android:color="@color/nui_papel_sombra" />
+    <corners android:radius="@dimen/nui_radio_papel" />
+</shape>

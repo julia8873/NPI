@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Escanear estantería: la cámara a pantalla completa; arriba la barra y abajo la leyenda -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/nui_tinta">
+
+    <com.journeyapps.barcodescanner.BarcodeView
+        android:id="@+id/camara"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:zxing_preview_scaling_strategy="centerCrop"
+        app:zxing_use_texture_view="true" />
+
+    <!-- Etiquetas sobre la cámara; TalkBack las lee según aparecen -->
+    <FrameLayout
+        android:id="@+id/capaEtiquetas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:accessibilityLiveRegion="polite" />
+
+    <LinearLayout
+        android:id="@+id/cabecera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#F8FAFC"
+            app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/panelInferior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <!-- Leyenda: papel apoyado sobre el zócalo -->
+        <LinearLayout
+            style="@style/Widget.Nui.Papel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_m"
+            android:layout_marginBottom="@dimen/nui_espacio_m"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvPista"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/nui_espacio_s"
+                android:text="@string/pasa_camara_codigo_barras"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:accessibilityHeading="true"
+                android:text="@string/como_vibra"
+                android:textAppearance="@style/TextAppearance.Nui.Etiqueta"
+                android:textColor="@color/nui_apagado" />
+
+            <!-- La vibración, dibujada: el punto es un toque corto y la raya uno largo.
+                 Cada estado con el color de su etiqueta (ver SenalLibro). -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xs"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/leyenda_disponible"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                    android:textColor="@color/nui_arrayan" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/leyenda_asignatura"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                    android:textColor="@color/nui_acento_profundo" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/leyenda_sin_ejemplares"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                    android:textColor="@color/nui_granada" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <!-- Franja inferior (el código le suma la barra de navegación) -->
+        <View
+            android:id="@+id/zocalo"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="#F8FAFC"
+            android:importantForAccessibility="no" />
+    </LinearLayout>
+
+    <!-- Sin permiso: un papel en mitad de la ventana -->
+    <LinearLayout
+        android:id="@+id/panelPermiso"
+        style="@style/Widget.Nui.Papel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="@dimen/nui_espacio_xl"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="@dimen/nui_icono_objeto"
+            android:layout_height="@dimen/nui_icono_objeto"
+            android:background="@drawable/nui_tesela"
+            android:backgroundTint="@color/nui_cobalto_tinte"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/nui_espacio_m"
+            android:src="@drawable/nui_ic_camara"
+            app:tint="@color/nui_cobalto" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:gravity="center"
+            android:text="@string/necesita_camara_estanteria"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPermiso"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/nui_espacio_m"
+            android:text="@string/permitir_la_camara" />
+    </LinearLayout>
+</FrameLayout>

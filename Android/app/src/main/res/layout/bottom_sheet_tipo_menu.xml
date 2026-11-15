@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🍽️ Tipo de Menú"
+        android:text="@string/tipo_menu_titulo"
         android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -54,7 +54,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Menú"
+            android:text="@string/menu_normal"
             android:textColor="#000000"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -66,7 +66,7 @@
             android:background="@drawable/badge_opcion_activa"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="✓ Activo"
+            android:text="@string/activo"
             android:textColor="@android:color/white"
             android:textSize="11sp"
             android:textStyle="bold" />
@@ -98,7 +98,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Menú Vegetariano"
+            android:text="@string/menu_vegetariano"
             android:textColor="#000000"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -110,7 +110,7 @@
             android:background="@drawable/badge_opcion_activa"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="✓ Activo"
+            android:text="@string/activo"
             android:textColor="@android:color/white"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -122,7 +122,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="💡 También puedes alternar rápidamente inclinando el móvil hacia atrás."
+        android:text="@string/alternar_inclinando"
         android:textColor="#888888"
         android:textSize="11.5sp"
         android:textStyle="italic" />

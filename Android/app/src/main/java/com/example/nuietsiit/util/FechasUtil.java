@@ -1,5 +1,10 @@
 package com.example.nuietsiit.util;
 
+import android.content.Context;
+import android.text.format.DateFormat;
+
+import com.example.nuietsiit.R;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,8 +23,7 @@ public final class FechasUtil {
 
     private FechasUtil() {}
 
-    private static final Locale ES = Locale.forLanguageTag("es-ES");
-    private static final DateTimeFormatter FORMATO_BD = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter FORMATO_BD = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
 
     // 'YYYY-MM-DD HH:MM' o 'YYYY-MM-DD' -> LocalDateTime (null si viene vacío o mal formado)
     public static LocalDateTime parsear(String texto) {
@@ -57,49 +61,54 @@ public final class FechasUtil {
 
     // "12:00"
     public static String hora(LocalDateTime fecha) {
-        return fecha.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return fecha.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()));
     }
 
-    // "jueves 22 de octubre"
+    // "jueves 22 de octubre" / "Thursday, October 22"
     public static String diaLargo(LocalDateTime fecha) {
-        return fecha.format(DateTimeFormatter.ofPattern("EEEE d 'de' MMMM", ES));
+        Locale loc = Locale.getDefault();
+        String patron = DateFormat.getBestDateTimePattern(loc, "EEEEdMMMM");
+        return fecha.format(DateTimeFormatter.ofPattern(patron, loc));
     }
 
-    // "22 oct"
+    // "22 oct" / "Oct 22"
     public static String diaCorto(LocalDate fecha) {
-        return fecha.format(DateTimeFormatter.ofPattern("d MMM", ES)).replace(".", "");
+        Locale loc = Locale.getDefault();
+        String patron = DateFormat.getBestDateTimePattern(loc, "dMMM");
+        return fecha.format(DateTimeFormatter.ofPattern(patron, loc)).replace(".", "");
     }
 
     // "OCT"
     public static String mesCorto(LocalDateTime fecha) {
-        return fecha.format(DateTimeFormatter.ofPattern("MMM", ES)).replace(".", "").toUpperCase(ES);
+        Locale loc = Locale.getDefault();
+        return fecha.format(DateTimeFormatter.ofPattern("MMM", loc)).replace(".", "").toUpperCase(loc);
     }
 
     // "Hoy", "Mañana", "Jueves" (si es esta semana) o "22 oct"
-    public static String cuando(LocalDateTime fecha) {
+    public static String cuando(Context ctx, LocalDateTime fecha) {
         long dias = diasHasta(fecha.toLocalDate());
-        if (dias == 0) return "Hoy";
-        if (dias == 1) return "Mañana";
+        if (dias == 0) return ctx.getString(R.string.fecha_hoy);
+        if (dias == 1) return ctx.getString(R.string.fecha_manana);
         if (dias > 1 && dias < 7) {
-            return capitalizar(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, ES));
+            return capitalizar(fecha.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()));
         }
         return diaCorto(fecha.toLocalDate());
     }
 
     // "ahora mismo", "hace 5 min", "hace 3 h", "ayer", "hace 4 días" o "22 oct"
-    public static String hace(LocalDateTime fecha) {
+    public static String hace(Context ctx, LocalDateTime fecha) {
         Duration d = Duration.between(fecha, LocalDateTime.now());
-        if (d.toMinutes() < 1) return "ahora mismo";
-        if (d.toMinutes() < 60) return "hace " + d.toMinutes() + " min";
-        if (d.toHours() < 24) return "hace " + d.toHours() + " h";
+        if (d.toMinutes() < 1) return ctx.getString(R.string.fecha_ahora_mismo);
+        if (d.toMinutes() < 60) return ctx.getString(R.string.fecha_hace_min_fmt, d.toMinutes());
+        if (d.toHours() < 24) return ctx.getString(R.string.fecha_hace_horas_fmt, d.toHours());
         long dias = d.toDays();
-        if (dias == 1) return "ayer";
-        if (dias < 7) return "hace " + dias + " días";
+        if (dias == 1) return ctx.getString(R.string.fecha_ayer);
+        if (dias < 7) return ctx.getResources().getQuantityString(R.plurals.fecha_hace_dias_fmt, (int) dias, (int) dias);
         return diaCorto(fecha.toLocalDate());
     }
 
     public static String capitalizar(String s) {
         if (s == null || s.isEmpty()) return s;
-        return s.substring(0, 1).toUpperCase(ES) + s.substring(1);
+        return s.substring(0, 1).toUpperCase(Locale.getDefault()) + s.substring(1);
     }
 }

@@ -30,6 +30,8 @@ public final class RegistroPuntosQR {
         qr("p3_hall",         "Hall de la planta 3",         "planta3", 0.50f, 0.50f);
         qr("p4_hall",         "Hall de la planta 4",         "planta4", 0.50f, 0.50f);
         qr("p5_hall",         "Hall de la planta 5",         "planta5", 0.50f, 0.50f);
+        // QR de prueba para Aula 0.5 (planta baja)
+        PUNTOS_QR.add(UbicacionUsuario.enPixeles("aula_0_5", "Aula 0.5", "planta0", 4650f, 2450f, UbicacionUsuario.Metodo.QR));
     }
 
     private RegistroPuntosQR() {}
@@ -52,8 +54,16 @@ public final class RegistroPuntosQR {
     public static UbicacionUsuario desdeContenido(String contenido) {
         if (contenido == null) return null;
         String c = contenido.trim();
-        if (!c.regionMatches(true, 0, PREFIJO, 0, PREFIJO.length())) return null;
-        String id = c.substring(PREFIJO.length()).trim().toLowerCase(Locale.ROOT);
+        String id = c.toLowerCase(Locale.ROOT);
+        if (id.startsWith(PREFIJO.toLowerCase(Locale.ROOT))) {
+            id = id.substring(PREFIJO.length()).trim();
+        }
+
+        // Aliases de prueba (ej. "QRaula05", "Aula 0.5", etc.)
+        if (id.equals("NPI-ETSIIT:aula_0_5") || id.equals("aula_0_5") || id.equals("aula 0.5") || id.equals("aula05")) {
+            id = "aula_0_5";
+        }
+
         for (UbicacionUsuario p : PUNTOS_QR) {
             if (p.idPunto.equals(id)) return p;
         }

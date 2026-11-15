@@ -9,7 +9,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Título del examen o entrega">
+        android:hint="@string/titulo_examen_entrega_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etTituloEvento"
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Tipo de evento:"
+        android:text="@string/tipo_evento"
         android:textColor="#64748B"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Hora (ej. 10:30 o 23:59)">
+        android:hint="@string/hora_ej_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etHoraEvento"
@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Descripción o asignatura">
+        android:hint="@string/descripcion_asignatura_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDescripcionEvento"

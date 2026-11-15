@@ -1,11 +1,7 @@
 package com.example.nuietsiit.activities.secciones.secretaria;
 
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,21 +10,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
 import com.example.nuietsiit.data.modelo.Cita;
 import com.example.nuietsiit.data.modelo.Solicitud;
+import com.example.nuietsiit.ui.CabeceraNui;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.util.RecienteUtil;
 import com.example.nuietsiit.util.SesionUtil;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -37,19 +35,20 @@ import java.util.List;
 
 /**
  * Mis citas y solicitudes con su estado. Pestañas "Citas" y "Solicitudes".
- * Citas: deslizar a la izquierda = cancelar (con "Deshacer"). Tocar cualquiera = justificante.
+ * Citas: rasgar el resguardo por la línea perforada = cancelar (con "Deshacer" y su tiempo). Tocar cualquiera = justificante.
  */
-public class MisGestiones extends BaseActivity {
+public class MisGestiones extends PantallaSecretaria {
 
     private static final int PAGINA_CITAS = 0;
     private static final int PAGINA_SOLICITUDES = 1;
+    static final int DURACION_DESHACER = 8000; // ms
 
     private SecretariaDB db;
     private String correoUsuario;
 
     private final View[] paginas = new View[2]; // se rellenan al crear cada página (PaginasAdapter)
     private GestionAdapter citasAdapter, solicitudesAdapter;
-    private ItemTouchHelper deslizarParaCancelar;
+    private InclinarParaPasar inclinar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,29 +57,50 @@ public class MisGestiones extends BaseActivity {
 
         MaterialToolbar barra = findViewById(R.id.toolbar);
         setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Mis gestiones");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        CabeceraNui.preparar(barra);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.gestiones_titulo);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         db = new SecretariaDB(DBHelper.getInstance(this));
         correoUsuario = SesionUtil.correo(getIntent());
+        RecienteUtil.guardar(
+                this,
+                MisGestiones.class,
+                getString(R.string.gestiones_titulo),
+                getString(R.string.gestiones_reciente_subtitulo),
+                null,
+                null,
+                5
+        );
 
-        citasAdapter = new GestionAdapter(this::abrirJustificante);
-        solicitudesAdapter = new GestionAdapter(this::abrirJustificante);
-        deslizarParaCancelar = new ItemTouchHelper(new DeslizarParaCancelar());
+        citasAdapter = new GestionAdapter(this::abrirJustificante, this::cancelarCita);
+        solicitudesAdapter = new GestionAdapter(this::abrirJustificante, null);
 
         ViewPager2 vp = findViewById(R.id.vpGestiones);
         vp.setAdapter(new PaginasAdapter());
         vp.setOffscreenPageLimit(1);
-        // el deslizamiento horizontal se reserva para cancelar citas; las pestañas se cambian tocándolas
+        // el arrastre horizontal se reserva para rasgar resguardos; las pestañas se cambian tocándolas
         vp.setUserInputEnabled(false);
         TabLayout tabs = findViewById(R.id.tabs);
         new TabLayoutMediator(tabs, vp,
-                (tab, pos) -> tab.setText(pos == PAGINA_CITAS ? "Citas" : "Solicitudes")).attach();
+                (tab, pos) -> tab.setText(pos == PAGINA_CITAS
+                        ? R.string.gestiones_tab_citas
+                        : R.string.gestiones_tab_solicitudes)).attach();
+        // como el arrastre es para rasgar, de pestaña también se cambia inclinando el móvil (como los pasos)
+        inclinar = new InclinarParaPasar(vp, sentido -> {
+            int nueva = vp.getCurrentItem() + sentido;
+            if (nueva < 0 || nueva >= paginas.length) return;
+            vp.setCurrentItem(nueva, true);
+            vp.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        }, () -> true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (!hayTutorialActivo()) DatosPractica.borrar(this, db); // las de práctica que quedaron (justificante, app cerrada)
         // al volver (p. ej. del justificante) se recalculan estados y citas pasadas
         cargarCitas();
         cargarSolicitudes();
@@ -91,7 +111,6 @@ public class MisGestiones extends BaseActivity {
         RecyclerView rv = vista.findViewById(R.id.rvGestiones);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(pagina == PAGINA_CITAS ? citasAdapter : solicitudesAdapter);
-        if (pagina == PAGINA_CITAS) deslizarParaCancelar.attachToRecyclerView(rv);
         paginas[pagina] = vista;
         actualizarVacio(pagina);
         return vista;
@@ -102,6 +121,42 @@ public class MisGestiones extends BaseActivity {
         for (Cita c : db.getCitas(correoUsuario)) lista.add(GestionAdapter.Gestion.deCita(c));
         citasAdapter.setGestiones(lista);
         actualizarVacio(PAGINA_CITAS);
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "mis_gestiones", 2)
+                .alEmpezar(() -> {
+                    // sin nada que rasgar o enseñar no se puede practicar: se ponen una cita y una solicitud de mentira
+                    if (!citasAdapter.hayCancelables()) DatosPractica.crearCita(this, db, correoUsuario);
+                    if (solicitudesAdapter.getItemCount() == 0) DatosPractica.crearSolicitud(this, db, correoUsuario);
+                    cargarCitas();
+                    cargarSolicitudes();
+                    ((ViewPager2) findViewById(R.id.vpGestiones)).setCurrentItem(PAGINA_CITAS, false);
+                })
+                .alTerminar(() -> {
+                    // si ahora está abierto el justificante de la de práctica, se quita al volver (onResume)
+                    if (isFinishing() || getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                        quitarPractica();
+                    }
+                })
+                .info(0, getString(R.string.gestiones_tut_practica_info))
+                .soloSi(() -> DatosPractica.hay(this))
+                .gesto(R.id.resguardo, Gesto.DESLIZAR_DER, getString(R.string.gestiones_tut_rasgar))
+                .conPista(v -> ((ResguardoRasgable) v).ensenarTijeras())
+                .soloSiSeVe()
+                .tocar(R.id.tabs, getString(R.string.gestiones_tut_tabs))
+                .sensor(Gesto.INCLINAR, getString(R.string.gestiones_tut_inclinar))
+                .soloSi(() -> inclinar.escuchando())
+                .tocar(R.id.ficha, getString(R.string.gestiones_tut_ficha)).soloSiSeVe();
+    }
+
+    private void quitarPractica() {
+        if (!DatosPractica.hay(this)) return;
+        DatosPractica.borrar(this, db);
+        if (isFinishing()) return;
+        cargarCitas();
+        cargarSolicitudes();
     }
 
     private void cargarSolicitudes() {
@@ -116,8 +171,8 @@ public class MisGestiones extends BaseActivity {
         boolean vacia = (pagina == PAGINA_CITAS ? citasAdapter : solicitudesAdapter).getItemCount() == 0;
         TextView tvVacio = paginas[pagina].findViewById(R.id.tvVacio);
         tvVacio.setText(pagina == PAGINA_CITAS
-                ? "No tienes citas.\nPídela con «📅 Pedir cita» en Secretaría."
-                : "Todavía no has enviado ninguna solicitud.");
+                ? R.string.gestiones_vacio_citas
+                : R.string.gestiones_vacio_solicitudes);
         tvVacio.setVisibility(vacia ? View.VISIBLE : View.GONE);
     }
 
@@ -128,87 +183,40 @@ public class MisGestiones extends BaseActivity {
     }
 
     private void cancelarCita(int posicion, View vista) {
+        if (hayTutorialActivo()) { // en la práctica no se cancela de verdad: el resguardo vuelve entero
+            avisarTutorial(Gesto.DESLIZAR_DER);
+            citasAdapter.notifyItemChanged(posicion);
+            return;
+        }
         GestionAdapter.Gestion g = citasAdapter.get(posicion);
         // la lista pudo quedarse abierta hasta pasada la hora de la cita
         Cita cita = db.getCita(g.id);
         if (cita == null || !cita.esFutura()) {
-            Toast.makeText(this, "Esta cita ya ha pasado y no se puede cancelar", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.gestiones_toast_cita_pasada, Toast.LENGTH_SHORT).show();
             cargarCitas();
             return;
         }
         if (!db.cancelarCita(g.id)) {
-            citasAdapter.notifyItemChanged(posicion); // vuelve a su sitio
+            citasAdapter.notifyItemChanged(posicion); // el resguardo vuelve entero
             return;
         }
-        vista.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         citasAdapter.quitar(posicion);
         actualizarVacio(PAGINA_CITAS);
-        Snackbar.make(findViewById(R.id.vpGestiones),
-                        "Cita " + g.codigo + " cancelada. Si la añadiste a tu calendario, bórrala también.",
-                        Snackbar.LENGTH_LONG)
-                .setAction("Deshacer", v -> deshacerCancelacion(g.id))
-                .show();
+        AvisoDeshacer.mostrar(
+                findViewById(R.id.vpGestiones),
+                getString(R.string.just_aviso_cancelada_etiqueta),
+                getString(R.string.just_aviso_cancelada_texto_fmt, g.codigo),
+                DURACION_DESHACER,
+                () -> deshacerCancelacion(g.id)
+        );
     }
 
-    // mismas comprobaciones que al pedir cita: futura, franja libre y sin otra cita para ese motivo
     private void deshacerCancelacion(int idCita) {
-        Cita cita = db.getCita(idCita);
-        boolean recuperable = cita != null && cita.esFutura()
-                && !db.getHorasOcupadas(cita.fecha).contains(cita.hora)
-                && db.getCitaActiva(correoUsuario, cita.idProcedimiento) == null;
-        if (!recuperable || !db.reactivarCita(idCita)) {
-            Toast.makeText(this, "Ya no se puede recuperar la cita", Toast.LENGTH_SHORT).show();
+        if (!db.recuperarCita(correoUsuario, idCita)) {
+            Toast.makeText(this, R.string.just_toast_no_recuperable, Toast.LENGTH_SHORT).show();
             return;
         }
         cargarCitas();
-    }
-
-    /** Deslizar una cita activa y futura a la izquierda la cancela; fondo rojo con 🗑 debajo. */
-    private class DeslizarParaCancelar extends ItemTouchHelper.SimpleCallback {
-        private final Paint fondo = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint texto = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final float densidad = getResources().getDisplayMetrics().density;
-
-        DeslizarParaCancelar() {
-            super(0, ItemTouchHelper.LEFT);
-            fondo.setColor(0xFFD32F2F);
-            texto.setColor(0xFFFFFFFF);
-            texto.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, getResources().getDisplayMetrics()));
-            texto.setFakeBoldText(true);
-            texto.setTextAlign(Paint.Align.RIGHT);
-        }
-
-        @Override
-        public int getSwipeDirs(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh) {
-            int pos = vh.getAdapterPosition();
-            if (pos == RecyclerView.NO_POSITION || !citasAdapter.get(pos).cancelable) return 0;
-            return super.getSwipeDirs(rv, vh);
-        }
-
-        @Override
-        public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                              @NonNull RecyclerView.ViewHolder destino) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder vh, int direccion) {
-            int pos = vh.getAdapterPosition();
-            if (pos != RecyclerView.NO_POSITION) cancelarCita(pos, vh.itemView);
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh,
-                                float dX, float dY, int estado, boolean activo) {
-            if (estado == ItemTouchHelper.ACTION_STATE_SWIPE && dX < 0) {
-                View v = vh.itemView;
-                float radio = 20 * densidad; // mismo radio que la tarjeta
-                c.drawRoundRect(new RectF(v.getLeft(), v.getTop(), v.getRight(), v.getBottom()), radio, radio, fondo);
-                float y = (v.getTop() + v.getBottom()) / 2f - (texto.descent() + texto.ascent()) / 2f;
-                c.drawText("🗑 Cancelar", v.getRight() - 24 * densidad, y, texto);
-            }
-            super.onChildDraw(c, rv, vh, dX, dY, estado, activo);
-        }
     }
 
     /** Página 0 = citas, 1 = solicitudes; cada posición tiene su propio tipo de vista. */

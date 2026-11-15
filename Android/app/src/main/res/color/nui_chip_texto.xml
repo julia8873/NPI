@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texto de chip: siempre tinta (nunca blanco sobre naranja). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/nui_tinta" />
+</selector>

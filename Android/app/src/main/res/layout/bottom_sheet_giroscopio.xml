@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🧭 Control por Inclinación"
+        android:text="@string/control_inclinacion"
         android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Elige si deseas seleccionar las secciones inclinando el teléfono o solo de forma táctil."
+        android:text="@string/control_inclinacion_desc"
         android:textColor="#666666"
         android:textSize="13sp" />
 
@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Activado"
+                android:text="@string/activado"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -76,7 +76,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Navegar inclinando el teléfono hacia los lados y arriba/abajo"
+                android:text="@string/inclinacion_activa_desc"
                 android:textColor="#666666"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -88,7 +88,7 @@
             android:background="@drawable/badge_opcion_activa"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="✓ Activo"
+            android:text="@string/activo"
             android:textColor="@android:color/white"
             android:textSize="11sp"
             android:textStyle="bold" />
@@ -125,7 +125,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Desactivado"
+                android:text="@string/desactivado"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -134,7 +134,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Navegar únicamente tocando las tarjetas en pantalla"
+                android:text="@string/inclinacion_desact_desc"
                 android:textColor="#666666"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -146,7 +146,7 @@
             android:background="@drawable/badge_opcion_activa"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
-            android:text="✓ Activo"
+            android:text="@string/activo"
             android:textColor="@android:color/white"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -154,4 +154,3 @@
     </LinearLayout>
 
 </LinearLayout>
-

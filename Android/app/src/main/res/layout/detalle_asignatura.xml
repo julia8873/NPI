@@ -1,130 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootAsignaturas"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF"
-    android:padding="20dp">
+    android:background="#F8FAFC"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
-    <!-- Título superior y botón de volver -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp">
-
-        <TextView
-            android:id="@+id/btnVolverDetalle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="← Volver"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#FF9800"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_centerVertical="true"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Ficha Asignatura"
-            android:textSize="20sp"
-            android:textColor="#000000"
-            android:textStyle="bold" />
-    </RelativeLayout>
-
-    <!-- Información principal -->
-    <TextView
-        android:id="@+id/tvNombreAsignatura"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Nombre de la Asignatura"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:textColor="#333333"
-        android:layout_marginBottom="8dp"/>
-
-    <TextView
-        android:id="@+id/tvCodigoAsignatura"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Código: N/A"
-        android:textSize="16sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="24dp"/>
-
-    <!-- Bloque de datos académicos -->
+    <!-- CABECERA UNIFICADA: Botón volver · Título · Chat · Perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:background="#F5F5F5"
-        android:padding="16dp"
-        android:layout_marginBottom="32dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp">
 
-        <LinearLayout
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_circulo_blanco_volver"
+            android:contentDescription="@string/volver_menu_principal"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/nui_tinta" />
+
+        <TextView
+            android:id="@+id/tvTituloSeccion"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Créditos ECTS"
-                android:textSize="14sp"
-                android:textColor="#666666"/>
-            <TextView
-                android:id="@+id/tvCreditos"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#FF9800"/>
-        </LinearLayout>
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#CCCCCC"
-            android:layout_marginHorizontal="8dp"/>
+            android:letterSpacing="-0.02"
+            android:maxLines="1"
+            android:text="@string/ficha_asignatura"
+            android:textColor="@color/nui_tinta"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:id="@+id/cardMascotaAyudante"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/bg_nui_chat"
+            android:clickable="true"
+            android:contentDescription="@string/abrir_asistente"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="14dp">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_nui_bot"
+                app:tint="@android:color/white" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cuatrimestre"
-                android:textSize="14sp"
-                android:textColor="#666666"/>
-            <TextView
-                android:id="@+id/tvCuatrimestre"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#FF9800"/>
+                android:layout_marginStart="6dp"
+                android:text="@string/chat"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivIcono"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_nui_circulo_suave"
+            android:clickable="true"
+            android:contentDescription="@string/perfil"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_nui_usuario"
+            app:tint="@color/nui_tinta" />
     </LinearLayout>
 
-    <!-- Botón externo a la Guía Docente -->
-    <Button
-        android:id="@+id/btnGuiaDocente"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Ver Guía Docente"
-        android:textAllCaps="false"
-        android:textSize="18sp"
-        android:backgroundTint="#FF9800"
-        android:textColor="#FFFFFF" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Información principal -->
+            <TextView
+                android:id="@+id/tvNombreAsignatura"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/nombre_asignatura_default"
+                android:textColor="#333333"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCodigoAsignatura"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:text="@string/codigo_default"
+                android:textColor="#666666"
+                android:textSize="15sp" />
+
+            <!-- Bloque de datos académicos -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="#F5F5F5"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/creditos_ects"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvCreditos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textColor="#FF9800"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="#CCCCCC" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cuatrimestre"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvCuatrimestre"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textColor="#FF9800"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Bloque de Horarios de Impartición -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="@string/horarios_clase_titulo"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorHorarios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
+            </LinearLayout>
+
+            <!-- Bloque de Profesorado -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="@string/profesorado_impartidor_titulo"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/contenedorProfesorado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
+            </LinearLayout>
+
+            <!-- Botón externo a la Guía Docente -->
+            <Button
+                android:id="@+id/btnGuiaDocente"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:backgroundTint="#FF9800"
+                android:text="@string/ver_guia_docente"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

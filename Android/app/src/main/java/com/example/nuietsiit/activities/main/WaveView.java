@@ -26,7 +26,7 @@ public class WaveView extends View {
 
     private void init() {
         wavePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wavePaint.setColor(Color.parseColor("#FF8C42")); // Color Azul de la ola
+        wavePaint.setColor(Color.parseColor("#FF8C42")); // Color de la ola
         wavePaint.setStyle(Paint.Style.FILL);
 
         wavePath = new Path();
@@ -52,8 +52,8 @@ public class WaveView extends View {
         int height = getHeight();
 
         // Calculamos para que en el punto máximo (progress = 1.0) sobrepase ligeramente la pantalla
-        // y asegure cubrir el 100% hasta arriba del todo
-        float currentWaveHeight = height * (1 - (progress * 1.15f));
+        // y asegure cubrir el 100% hasta arriba
+        float currentWaveHeight = height * (1f - (progress * 1.15f));
 
         float waveFrequency = 1.5f; // Cantidad de crestas
         float waveAmplitude = 60f;  // Altura de la cresta en px
@@ -71,6 +71,7 @@ public class WaveView extends View {
 
         canvas.drawPath(wavePath, wavePaint);
     }
+
     // Animación 1: SOLO SUBE (se ejecuta en la pantalla que sacudes)
     public void startWaveUp(Runnable onCovered) {
         ValueAnimator fillAnimator = ValueAnimator.ofFloat(0f, 1f);

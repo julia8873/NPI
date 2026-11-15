@@ -1,47 +1,86 @@
 package com.example.nuietsiit.activities.secciones;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.view.OneShotPreDrawListener;
 
 import com.example.nuietsiit.R;
-import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.secciones.secretaria.CitaPrevia;
 import com.example.nuietsiit.activities.secciones.secretaria.DetalleTramite;
+import com.example.nuietsiit.activities.secciones.secretaria.FicheroPaginado;
+import com.example.nuietsiit.activities.secciones.secretaria.Justificante;
 import com.example.nuietsiit.activities.secciones.secretaria.MisGestiones;
+import com.example.nuietsiit.activities.secciones.secretaria.PantallaSecretaria;
+import com.example.nuietsiit.activities.secciones.secretaria.QueNecesitas;
 import com.example.nuietsiit.activities.secciones.secretaria.TramiteAdapter;
 import com.example.nuietsiit.data.DBHelper;
 import com.example.nuietsiit.data.SecretariaDB;
+import com.example.nuietsiit.data.modelo.Cita;
+import com.example.nuietsiit.data.modelo.Solicitud;
 import com.example.nuietsiit.data.modelo.Tramite;
+import com.example.nuietsiit.ui.InclinarParaPasar;
+import com.example.nuietsiit.ui.PestanasPapel;
 import com.example.nuietsiit.util.BuscadorTolerante;
+import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.SesionUtil;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class Secretaria extends BaseActivity {
+public class Secretaria extends PantallaSecretaria {
 
     private static final String ESTADO_CATEGORIA = "categoria";
+    private static final String ESTADO_CATALOGO = "catalogo";
+    private static final int MAX_SOLICITUDES = 3;
+    private static final int MAX_PLAZOS = 2;
 
     private SecretariaDB secretariaDB;
     private String correoUsuario;
     private String categoriaSeleccionada; // null = todas
 
     private EditText etBuscar;
-    private ChipGroup chipsCategorias;
+    private PestanasPapel pestanasCategorias;
+    private FicheroPaginado fichero;
+    private InclinarParaPasar inclinar;
     private TextView tvMostrandoPara, tvVacio;
     private Chip chipSugerencia;
-    private Button btnMisGestiones;
+    private TextView tvMisGestiones;
+    private ViewGroup contenedorLoTuyo, grupoCatalogo, grupoMostrador;
+    private TextView tvVerTodos;
+    private boolean animarEntrada;
+    private boolean tecladoPendiente; // abrir el teclado cuando la ventana recupere el foco
+
+    // "Buscarlo yo" en las preguntas guiadas → abre aquí el catálogo con el buscador
+    private final ActivityResultLauncher<Intent> lanzadorQueNecesitas = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), r -> {
+                if (r.getData() != null && r.getData().getBooleanExtra(QueNecesitas.EXTRA_VER_CATALOGO, false)) {
+                    abrirBuscador();
+                }
+            });
     private TramiteAdapter adaptador;
     private BuscadorTolerante.Indice<Tramite> indice;
 
@@ -50,84 +89,316 @@ public class Secretaria extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.secretaria);
 
-        // Botón atrás en la barra superior
-        MaterialToolbar barra = findViewById(R.id.toolbar);
-        setSupportActionBar(barra);
-        getSupportActionBar().setTitle("Secretaría");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // cabecera unificada (btnVolver, título, chat, perfil): la conecta BaseActivity
 
         correoUsuario = SesionUtil.correo(getIntent());
         secretariaDB = new SecretariaDB(DBHelper.getInstance(this));
+        boolean catalogoVisible = false;
         if (savedInstanceState != null) {
             categoriaSeleccionada = savedInstanceState.getString(ESTADO_CATEGORIA);
+            catalogoVisible = savedInstanceState.getBoolean(ESTADO_CATALOGO);
         }
+        animarEntrada = savedInstanceState == null;
 
         etBuscar = findViewById(R.id.etBuscar);
-        chipsCategorias = findViewById(R.id.chipsCategorias);
+        pestanasCategorias = findViewById(R.id.pestanasCategorias);
         tvMostrandoPara = findViewById(R.id.tvMostrandoPara);
         tvVacio = findViewById(R.id.tvVacio);
         chipSugerencia = findViewById(R.id.chipSugerencia);
-        btnMisGestiones = findViewById(R.id.btnMisGestiones);
+        tvMisGestiones = findViewById(R.id.tvMisGestiones);
+        contenedorLoTuyo = findViewById(R.id.contenedorLoTuyo);
+        grupoCatalogo = findViewById(R.id.grupoCatalogo);
+        grupoMostrador = findViewById(R.id.grupoMostrador);
+        tvVerTodos = findViewById(R.id.tvVerTodos);
 
         adaptador = new TramiteAdapter(this::abrirDetalle);
-        RecyclerView rv = findViewById(R.id.rvTramites);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adaptador);
+        fichero = findViewById(R.id.fichero);
+        View grupoPaginas = findViewById(R.id.grupoPaginas);
+        TextView tvPagina = findViewById(R.id.tvPagina);
+        fichero.setAdaptador(adaptador, (pagina, paginas) -> {
+            int n = adaptador.getItemCount();
+            String cuantos = getResources().getQuantityString(R.plurals.sec_cuantos_tramites, n, n);
+            boolean varias = paginas > 1;
+            tvPagina.setText(varias
+                    ? getString(R.string.sec_pagina_varias_fmt, cuantos, pagina + 1, paginas)
+                    : cuantos);
+            View atras = findViewById(R.id.btnFichasAtras), adelante = findViewById(R.id.btnFichasAdelante);
+            atras.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
+            adelante.setVisibility(varias ? View.VISIBLE : View.INVISIBLE);
+            atras.setAlpha(pagina > 0 ? 1f : 0.3f);
+            adelante.setAlpha(pagina < paginas - 1 ? 1f : 0.3f);
+            grupoPaginas.setVisibility(View.VISIBLE);
+            if (inclinar != null) inclinar.actualizar();
+        });
+        // inclinar el móvil pasa las fichas, como en los pasos de un trámite
+        inclinar = new InclinarParaPasar(fichero, fichero::pasar, () -> fichero.getPaginas() > 1);
+        findViewById(R.id.btnFichasAtras).setOnClickListener(v -> fichero.pasar(-1));
+        findViewById(R.id.btnFichasAdelante).setOnClickListener(v -> fichero.pasar(1));
 
-        crearChipsCategorias();
+        crearPestanas();
 
         etBuscar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
             @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) { aplicarFiltro(); }
+            @Override public void afterTextChanged(Editable s) {
+                aplicarFiltro();
+                if (s.length() >= 3) avisarTutorial(Gesto.ESCRIBIR);
+            }
         });
         chipSugerencia.setOnClickListener(v -> etBuscar.setText(chipSugerencia.getTag().toString()));
 
         findViewById(R.id.btnPedirCita).setOnClickListener(v -> startActivity(
                 new Intent(this, CitaPrevia.class).putExtra("CORREO", correoUsuario)));
-        btnMisGestiones.setOnClickListener(v -> startActivity(
+        findViewById(R.id.btnMisGestiones).setOnClickListener(v -> startActivity(
                 new Intent(this, MisGestiones.class).putExtra("CORREO", correoUsuario)));
 
+        tvVerTodos.setOnClickListener(v -> mostrarCatalogo(grupoCatalogo.getVisibility() != View.VISIBLE));
+        findViewById(R.id.btnQueNecesitas).setOnClickListener(v -> lanzadorQueNecesitas.launch(
+                new Intent(this, QueNecesitas.class).putExtra("CORREO", correoUsuario)));
+        mostrarCatalogo(catalogoVisible);
+
         cargarCategoria();
+    }
+
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "secretaria", 2)
+                .alEmpezar(() -> { // empieza con el catálogo cerrado y sin búsqueda
+                    etBuscar.setText("");
+                    mostrarCatalogo(false);
+                })
+                .info(R.id.contenedorLoTuyo, getString(R.string.sec_tut_lo_tuyo))
+                .soloSi(() -> contenedorLoTuyo.getChildCount() > 0)
+                .info(R.id.btnQueNecesitas, getString(R.string.sec_tut_que_necesitas))
+                .info(R.id.btnPedirCita, getString(R.string.sec_tut_pedir_cita))
+                .info(R.id.btnMisGestiones, getString(R.string.sec_tut_mis_gestiones))
+                .tocar(R.id.tvVerTodos, getString(R.string.sec_tut_ver_todos))
+                .tocar(R.id.pestanasCategorias, getString(R.string.sec_tut_pestanas))
+                .gesto(R.id.fichero, Gesto.DESLIZAR_IZQ, getString(R.string.sec_tut_deslizar))
+                .soloSi(() -> fichero.getPaginas() > 1)
+                .sensor(Gesto.INCLINAR, getString(R.string.sec_tut_inclinar))
+                .soloSi(() -> inclinar.escuchando())
+                .gesto(R.id.etBuscar, Gesto.ESCRIBIR, getString(R.string.sec_tut_buscar))
+                .tocar(R.id.chipSugerencia, getString(R.string.sec_tut_sugerencia)).soloSiSeVe()
+                .tocar(R.id.itemTramite, getString(R.string.sec_tut_item_tramite));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         actualizarContadorGestiones();
+        mostrarLoTuyo(); // el estado de citas y solicitudes cambia al volver de otras pantallas
     }
 
     @Override
     protected void onSaveInstanceState(Bundle salida) {
         super.onSaveInstanceState(salida);
         salida.putString(ESTADO_CATEGORIA, categoriaSeleccionada);
+        salida.putBoolean(ESTADO_CATALOGO, grupoCatalogo.getVisibility() == View.VISIBLE);
     }
 
-    private void crearChipsCategorias() {
-        anadirChip(1000, null, "Todas");
-        for (int i = 0; i < Tramite.CATEGORIAS.length; i++) {
-            anadirChip(1001 + i, Tramite.CATEGORIAS[i][0], Tramite.CATEGORIAS[i][1]);
+    private void mostrarCatalogo(boolean visible) {
+        // el cajón se abre deslizando, no aparece de golpe
+        if (visible != (grupoCatalogo.getVisibility() == View.VISIBLE) && grupoCatalogo.isLaidOut()) {
+            TransitionManager.beginDelayedTransition((ViewGroup) grupoCatalogo.getParent(),
+                    new AutoTransition().setDuration(220));
         }
-        chipsCategorias.setOnCheckedStateChangeListener((grupo, ids) -> {
-            if (ids.isEmpty()) return;
-            categoriaSeleccionada = (String) grupo.findViewById(ids.get(0)).getTag();
+        boolean cerrando = !visible && grupoCatalogo.getVisibility() == View.VISIBLE;
+        // el catálogo ocupa el sitio de «lo tuyo» y del mostrador: así nunca hace falta scroll
+        grupoCatalogo.setVisibility(visible ? View.VISIBLE : View.GONE);
+        contenedorLoTuyo.setVisibility(visible ? View.GONE : View.VISIBLE);
+        grupoMostrador.setVisibility(visible ? View.GONE : View.VISIBLE);
+        tvVerTodos.setText(visible ? R.string.sec_catalogo_cerrar : R.string.sec_catalogo_abrir);
+        if (inclinar != null) inclinar.actualizar(); // solo se escucha con el catálogo abierto
+        if (cerrando) mostrarLoTuyo(); // con el catálogo abierto no se pudo medir qué tarjetas caben
+    }
+
+    private void abrirBuscador() {
+        mostrarCatalogo(true);
+        etBuscar.requestFocus();
+        tecladoPendiente = true; // al volver de otra Activity la ventana aún no tiene el foco
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean tieneFoco) {
+        super.onWindowFocusChanged(tieneFoco);
+        if (tieneFoco && tecladoPendiente) {
+            tecladoPendiente = false;
+            getSystemService(InputMethodManager.class).showSoftInput(etBuscar, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    // ------------------------------------------------------------
+    //   Lo tuyo: cita próxima, solicitudes en curso y plazos abiertos
+    // ------------------------------------------------------------
+
+    private void mostrarLoTuyo() {
+        contenedorLoTuyo.removeAllViews();
+
+        Cita cita = proximaCita();
+        if (cita != null) {
+            LocalDateTime cuando = cita.fechaHora();
+            boolean hoy = FechasUtil.diasHasta(cuando.toLocalDate()) == 0;
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_cita, R.color.nui_cobalto_tinte, R.color.nui_cobalto,
+                    getString(R.string.sec_tarjeta_cita_etiqueta),
+                    getString(R.string.sec_tarjeta_cita_titulo_fmt, FechasUtil.cuando(this, cuando), FechasUtil.hora(cuando)),
+                    cita.motivo(),
+                    getString(R.string.sec_tarjeta_cita_accion),
+                    v -> startActivity(new Intent(this, Justificante.class)
+                            .putExtra("idCita", cita.id).putExtra("CORREO", correoUsuario)));
+            if (hoy) resaltar(tarjeta);
+        }
+
+        Set<Integer> tramitesEnCurso = new HashSet<>();
+        int nSolicitudes = 0;
+        for (Solicitud s : secretariaDB.getSolicitudes(correoUsuario)) {
+            if (nSolicitudes == MAX_SOLICITUDES) break;
+            String estado = s.estado();
+            LocalDateTime envio = LocalDateTime.parse(s.fechaEnvio);
+            boolean resuelta = Solicitud.RESUELTA.equals(estado);
+            // las resueltas solo se recuerdan el primer día
+            if (resuelta && Duration.between(envio, LocalDateTime.now()).toHours() >= 24) continue;
+            if (!resuelta) tramitesEnCurso.add(s.idProcedimiento);
+
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_sobre,
+                    resuelta ? R.color.nui_arrayan_tinte : R.color.nui_granada_tinte,
+                    resuelta ? R.color.nui_arrayan : R.color.nui_granada,
+                    getString(R.string.sec_tarjeta_solicitud_etiqueta),
+                    s.nombreTramite,
+                    getString(R.string.sec_tarjeta_solicitud_detalle_fmt, FechasUtil.hace(this, envio)),
+                    null,
+                    v -> startActivity(new Intent(this, Justificante.class)
+                            .putExtra("idSolicitud", s.id).putExtra("CORREO", correoUsuario)));
+            TextView sello = tarjeta.findViewById(R.id.tvSello);
+            sello.setText(estado);
+            sello.setVisibility(View.VISIBLE);
+            nSolicitudes++;
+        }
+
+        for (Tramite t : plazosAbiertos(tramitesEnCurso)) {
+            long dias = FechasUtil.diasHasta(LocalDate.parse(t.plazoFin));
+            String queda = dias == 0
+                    ? getString(R.string.sec_plazo_ultimo_dia)
+                    : getResources().getQuantityString(R.plurals.sec_plazo_dias_restantes, (int) dias, (int) dias);
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_reloj_arena, R.color.nui_resaltado_tinte, R.color.nui_acento_profundo,
+                    getString(R.string.sec_tarjeta_plazo_etiqueta),
+                    t.nombre,
+                    getString(R.string.sec_tarjeta_plazo_detalle_fmt, queda, FechasUtil.diaCorto(LocalDate.parse(t.plazoFin))),
+                    null,
+                    v -> abrirDetalle(t));
+            if (dias <= 3) resaltar(tarjeta);
+        }
+
+        if (contenedorLoTuyo.getChildCount() == 0) {
+            View tarjeta = anadirTarjeta(R.drawable.nui_ic_hoja, R.color.nui_arrayan_tinte, R.color.nui_arrayan,
+                    getString(R.string.sec_tarjeta_todo_orden_etiqueta),
+                    getString(R.string.sec_tarjeta_todo_orden_titulo),
+                    getString(R.string.sec_tarjeta_todo_orden_detalle),
+                    getString(R.string.sec_tarjeta_todo_orden_accion),
+                    null);
+            tarjeta.setClickable(false);
+            tarjeta.findViewById(R.id.tvChevron).setVisibility(View.GONE);
+        }
+
+        // antes de pintarlas se quitan las que no caben; después entran animadas
+        OneShotPreDrawListener.add(contenedorLoTuyo, () -> {
+            recortarLoTuyo();
+            if (animarEntrada) {
+                animarEntrada = false;
+                animarTarjetas();
+            }
+        });
+    }
+
+    // sin scroll: si en el hueco no caben todas las tarjetas, se quitan las últimas (lo menos urgente).
+    // Las solicitudes siguen en «Mis gestiones» y los plazos en el catálogo
+    private void recortarLoTuyo() {
+        int alto = contenedorLoTuyo.getHeight() - contenedorLoTuyo.getPaddingBottom();
+        // con el catálogo abierto no se ve: ya se recortará al cerrarlo
+        if (contenedorLoTuyo.getVisibility() != View.VISIBLE || alto <= 0) return;
+        for (int i = contenedorLoTuyo.getChildCount() - 1; i > 0; i--) {
+            if (contenedorLoTuyo.getChildAt(i).getBottom() <= alto) break;
+            contenedorLoTuyo.removeViewAt(i);
+        }
+    }
+
+    // la primera cita activa que aún no ha pasado (getCitas pone las futuras arriba)
+    private Cita proximaCita() {
+        List<Cita> citas = secretariaDB.getCitas(correoUsuario);
+        return !citas.isEmpty() && citas.get(0).esFutura() ? citas.get(0) : null;
+    }
+
+    // trámites online con el plazo abierto, los que antes acaban primero (sin los que ya tienes en curso)
+    private List<Tramite> plazosAbiertos(Set<Integer> excluir) {
+        List<Tramite> abiertos = new ArrayList<>();
+        for (Tramite t : secretariaDB.getTramites(null)) {
+            if (t.tienePlazo() && t.sePuedeSolicitar() && !excluir.contains(t.id)) abiertos.add(t);
+        }
+        abiertos.sort(Comparator.comparing(t -> t.plazoFin));
+        return abiertos.size() > MAX_PLAZOS ? abiertos.subList(0, MAX_PLAZOS) : abiertos;
+    }
+
+    // icono dibujado sobre una tesela del color del tipo de papel
+    private View anadirTarjeta(int icono, int tinte, int color, String etiqueta, String titulo, String detalle,
+                               String accion, View.OnClickListener alTocar) {
+        View tarjeta = LayoutInflater.from(this)
+                .inflate(R.layout.item_tarjeta_lo_tuyo, contenedorLoTuyo, false);
+        ImageView ivIcono = tarjeta.findViewById(R.id.ivIcono);
+        ivIcono.setImageResource(icono);
+        ivIcono.setImageTintList(ColorStateList.valueOf(getColor(color)));
+        ivIcono.setBackgroundTintList(ColorStateList.valueOf(getColor(tinte)));
+        ivIcono.setVisibility(View.VISIBLE);
+        tarjeta.findViewById(R.id.tvIcono).setVisibility(View.GONE);
+        ((TextView) tarjeta.findViewById(R.id.tvEtiqueta)).setText(etiqueta);
+        ((TextView) tarjeta.findViewById(R.id.tvTitulo)).setText(titulo);
+        ((TextView) tarjeta.findViewById(R.id.tvDetalle)).setText(detalle);
+        TextView tvAccion = tarjeta.findViewById(R.id.tvAccion);
+        tvAccion.setText(accion); // solo para enseñar un gesto; que se puede tocar ya lo dice el ›
+        tvAccion.setVisibility(accion != null ? View.VISIBLE : View.GONE);
+        tarjeta.setOnClickListener(alTocar);
+        contenedorLoTuyo.addView(tarjeta);
+        return tarjeta;
+    }
+
+    // lo urgente (cita hoy, plazo que se acaba): papel naranja (nui_papel_estado seleccionado)
+    private void resaltar(View tarjeta) {
+        tarjeta.setSelected(true);
+    }
+
+    // entran de abajo una tras otra, para que se vea que son "lo tuyo" de ahora
+    private void animarTarjetas() {
+        float desplazamiento = 24 * getResources().getDisplayMetrics().density;
+        for (int i = 0; i < contenedorLoTuyo.getChildCount(); i++) {
+            View v = contenedorLoTuyo.getChildAt(i);
+            v.setAlpha(0f);
+            v.setTranslationY(desplazamiento);
+            v.animate().alpha(1f).translationY(0f).setStartDelay(80L * i).setDuration(260).start();
+        }
+    }
+
+    // dos filas del mismo ancho: los nombres cortos arriba y los largos abajo, para que todos se lean enteros
+    private void crearPestanas() {
+        pestanasCategorias.nuevaFila();
+        pestanasCategorias.anadir(null, getString(R.string.sec_pestana_todas), null, R.drawable.nui_ic_todas, R.color.nui_resaltado);
+        anadirPestana("matricula", R.drawable.nui_ic_matricula);
+        anadirPestana("titulos", R.drawable.nui_ic_titulo);
+        anadirPestana("otro", R.drawable.nui_ic_consulta);
+        pestanasCategorias.nuevaFila();
+        anadirPestana("reconocimiento_creditos", R.drawable.nui_ic_creditos);
+        anadirPestana("convocatorias", R.drawable.nui_ic_examen);
+        anadirPestana("certificados", R.drawable.nui_ic_sobre);
+        pestanasCategorias.marcar(categoriaSeleccionada);
+        pestanasCategorias.setOnElegir(clave -> {
+            categoriaSeleccionada = (String) clave;
             cargarCategoria();
         });
     }
 
-    private void anadirChip(int id, String clave, String etiqueta) {
-        Chip chip = new Chip(this, null, com.google.android.material.R.attr.chipStyle);
-        chip.setId(id); // ids fijos para que sobrevivan a la rotación
-        chip.setText(etiqueta);
-        chip.setTag(clave);
-        chip.setCheckable(true);
-        chip.setChipBackgroundColorResource(R.color.chip_fondo);
-        chip.setTextColor(getColorStateList(R.color.chip_texto));
-        chip.setCheckedIconVisible(false);
-        chipsCategorias.addView(chip);
-        if (clave == null ? categoriaSeleccionada == null : clave.equals(categoriaSeleccionada)) {
-            chip.setChecked(true);
-        }
+    private void anadirPestana(String clave, int icono) {
+        String nombre = clave;
+        for (String[] c : Tramite.CATEGORIAS) if (c[0].equals(clave)) nombre = c[1];
+        if (clave.equals("reconocimiento_creditos")) nombre = getString(R.string.sec_pestana_creditos); // «Reconocimiento de créditos» no cabe
+        pestanasCategorias.anadir(clave, nombre, null, icono, Tramite.colorCategoria(clave));
     }
 
     private void cargarCategoria() {
@@ -143,11 +414,11 @@ public class Secretaria extends BaseActivity {
 
         tvMostrandoPara.setVisibility(r.mostrandoPara != null ? View.VISIBLE : View.GONE);
         if (r.mostrandoPara != null) {
-            tvMostrandoPara.setText("Mostrando resultados para «" + r.mostrandoPara + "»");
+            tvMostrandoPara.setText(getString(R.string.sec_mostrando_para_fmt, r.mostrandoPara));
         }
         chipSugerencia.setVisibility(r.sugerencia != null ? View.VISIBLE : View.GONE);
         if (r.sugerencia != null) {
-            chipSugerencia.setText("¿Quisiste decir «" + r.sugerencia + "»?");
+            chipSugerencia.setText(getString(R.string.sec_sugerencia_fmt, r.sugerencia));
             chipSugerencia.setTag(r.sugerencia);
         }
         tvVacio.setVisibility(r.elementos.isEmpty() ? View.VISIBLE : View.GONE);
@@ -155,7 +426,9 @@ public class Secretaria extends BaseActivity {
 
     private void actualizarContadorGestiones() {
         int n = secretariaDB.contarCitasActivas(correoUsuario);
-        btnMisGestiones.setText(n > 0 ? "📂 Mis gestiones (" + n + ")" : "📂 Mis gestiones");
+        tvMisGestiones.setText(n > 0
+                ? getString(R.string.sec_mis_gestiones_contador_fmt, n)
+                : getString(R.string.sec_mis_gestiones));
     }
 
     private void abrirDetalle(Tramite tramite) {

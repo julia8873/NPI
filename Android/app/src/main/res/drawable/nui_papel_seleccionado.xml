@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta elegida/activa: tinte naranja y borde naranja. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/nui_resaltado_tinte" />
+    <stroke android:width="2dp" android:color="@color/nui_resaltado" />
+    <corners android:radius="@dimen/nui_radio_papel" />
+</shape>

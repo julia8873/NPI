@@ -3,37 +3,33 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF">
+    android:background="@color/sec_tarjeta">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💬 Comunidades de chat"
-            android:textColor="#000000"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:text="@string/nui_com_titulo"
+            android:textAppearance="@style/TextAppearance.Seccion.Titulo" />
 
         <TextView
             android:id="@+id/tvSubtituloComunidades"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="#666666"
-            android:textSize="13sp" />
+            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Pulsa un grupo para ver cómo es antes de unirte"
-            android:textColor="#999999"
-            android:textSize="12sp" />
+            android:text="@string/nui_com_instrucciones"
+            android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
 
         <!-- Aquí se añaden las tarjetas por código -->
         <LinearLayout

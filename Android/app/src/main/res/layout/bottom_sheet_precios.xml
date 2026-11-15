@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="💰 Precios del Menú"
+        android:text="@string/precios_del_menu"
         android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Tarifas universitarias oficiales (en comedor)"
+        android:text="@string/tarifas_oficiales"
         android:textColor="#777777"
         android:textSize="13sp" />
 
@@ -48,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="👨‍🏫 Profesores:"
+            android:text="@string/profesores_precio"
             android:textColor="#333333"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -56,7 +56,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5 euros"
+            android:text="@string/cinco_euros"
             android:textColor="#FF8C42"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -74,7 +74,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🎓 Estudiantes:"
+            android:text="@string/estudiantes_precio"
             android:textColor="#333333"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -82,7 +82,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4 euros"
+            android:text="@string/cuatro_euros"
             android:textColor="#FF8C42"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -100,7 +100,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🌱 Veganos:"
+            android:text="@string/veganos_precio"
             android:textColor="#333333"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -108,11 +108,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+1 euro más"
+            android:text="@string/mas_un_euro"
             android:textColor="#2E7D32"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>
-

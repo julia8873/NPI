@@ -42,4 +42,14 @@ public class Libro {
     public boolean disponible() {
         return ejemplaresDisponibles > 0;
     }
+
+    // texto sobre el que busca BuscadorTolerante (equivale a la columna textoBusqueda)
+    public String textoBusqueda() {
+        return titulo + " " + autores + " " + (editorial != null ? editorial : "") + " " + isbn;
+    }
+
+    // "978-0-262-03384-8" -> "9780262033848" (si no, BuscadorTolerante lo trocearía); otras consultas no cambian
+    public static String consultaSinSeparadoresIsbn(String consulta) {
+        return consulta.matches("[0-9 -]+") ? consulta.replaceAll("[ -]", "") : consulta;
+    }
 }

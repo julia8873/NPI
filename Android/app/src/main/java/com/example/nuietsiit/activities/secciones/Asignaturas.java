@@ -1,5 +1,6 @@
 package com.example.nuietsiit.activities.secciones;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -15,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
@@ -24,9 +24,15 @@ import com.example.nuietsiit.activities.main.AjustesCuenta;
 import com.example.nuietsiit.activities.secciones.asignaturas.BuscadorAsignaturas;
 import com.example.nuietsiit.activities.secciones.asignaturas.DetalleAsignatura;
 import com.example.nuietsiit.data.DBHelper;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 
-import java.util.HashMap;
-import java.util.Map;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Asignaturas extends BaseActivity {
 
@@ -40,15 +46,35 @@ public class Asignaturas extends BaseActivity {
     private String correoUsuario;
     private DBHelper BD;
 
-    // --- NUEVA CLASE AUXILIAR ---
-    // Nos permite guardar el texto formateado y el código de la asignatura juntos
-    private static class CeldaHorarioInfo {
-        String textoMostrar;
+    private static class SesionHorarioInfo {
         String codigoAsignatura;
+        String nombreAsignatura;
+        int diaSemana;
+        String horaInicio;
+        String horaFin;
+        String grupo;
+        String tipoSesion;
 
-        CeldaHorarioInfo(String textoMostrar, String codigoAsignatura) {
-            this.textoMostrar = textoMostrar;
-            this.codigoAsignatura = codigoAsignatura;
+        SesionHorarioInfo(String codigo, String nombre, int dia, String ini, String fin, String grupo, String tipo) {
+            this.codigoAsignatura = codigo;
+            this.nombreAsignatura = nombre;
+            this.diaSemana = dia;
+            this.horaInicio = ini;
+            this.horaFin = fin;
+            this.grupo = grupo;
+            this.tipoSesion = tipo;
+        }
+
+        boolean ocupaSlot(int dia, String slotInicio) {
+            if (this.diaSemana != dia) return false;
+            return horaInicio.compareTo(slotInicio) <= 0 && horaFin.compareTo(slotInicio) > 0;
+        }
+
+        String textoCelda(Context ctx) {
+            String nombreAbreviado = nombreAsignatura.length() > 15
+                    ? nombreAsignatura.substring(0, 15) + "..."
+                    : nombreAsignatura;
+            return ctx.getString(R.string.asig_celda_horario_fmt, nombreAbreviado, horaInicio, horaFin, tipoSesion, grupo);
         }
     }
 
@@ -56,6 +82,7 @@ public class Asignaturas extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.asignaturas);
+        aplicarMargenesSistema();
 
         BD = DBHelper.getInstance(this);
 
@@ -73,6 +100,16 @@ public class Asignaturas extends BaseActivity {
         configurarBotones();
     }
 
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "asignaturas", 1)
+                .tocar(R.id.btnLogin, getString(R.string.asig_tut_login))
+                .soloSi(() -> correoUsuario == null || correoUsuario.isEmpty())
+                .info(R.id.cardHorario, getString(R.string.asig_tut_horario))
+                .soloSi(() -> correoUsuario != null && !correoUsuario.isEmpty())
+                .tocar(R.id.btnVerMasAsignaturas, getString(R.string.asig_tut_explorar));
+    }
+
     private void configurarBotones() {
         ivIcono.setOnClickListener(v -> {
             if (correoUsuario == null || correoUsuario.isEmpty()) {
@@ -84,9 +121,13 @@ public class Asignaturas extends BaseActivity {
             }
         });
 
-        btnLogin.setOnClickListener(v -> startActivity(new Intent(Asignaturas.this, Login.class)));
+        btnLogin.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
+            startActivity(new Intent(Asignaturas.this, Login.class));
+        });
 
         btnVerMasAsignaturas.setOnClickListener(v -> {
+            avisarTutorial(Gesto.TOCAR);
             Intent intent = new Intent(Asignaturas.this, BuscadorAsignaturas.class);
             startActivity(intent);
         });
@@ -106,17 +147,15 @@ public class Asignaturas extends BaseActivity {
     private void cargarHorarioEstudiante() {
         tablaHorario.removeAllViews();
 
-        // 1. Obtener las clases con su info completa (texto + código)
-        Map<String, CeldaHorarioInfo> clasesHorario = obtenerClasesDesdeBD();
+        List<SesionHorarioInfo> sesiones = obtenerSesionesDesdeBD();
 
         // 2. Crear cabecera
-        String[] dias = {"Hora", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes"};
+        String[] dias = getResources().getStringArray(R.array.asig_cabecera_horario);
         TableRow rowCabecera = new TableRow(this);
         rowCabecera.setBackgroundColor(Color.parseColor("#E0E0E0"));
 
-        for (String dia : dias) {
-            // Cabeceras: no son clicables, por lo que pasamos null en codigoAsignatura
-            TextView tv = crearCelda(dia, true, dia.equals("Hora"), null);
+        for (int i = 0; i < dias.length; i++) {
+            TextView tv = crearCelda(dias[i], true, i == 0, null);
             rowCabecera.addView(tv);
         }
         tablaHorario.addView(rowCabecera);
@@ -135,20 +174,21 @@ public class Asignaturas extends BaseActivity {
             TableRow row = new TableRow(this);
             row.setPadding(0, 12, 0, 12);
 
-            // Franja horaria (Tampoco es clicable)
             String franja = horasInicio[i] + "\n" + horasFin[i];
             row.addView(crearCelda(franja, true, true, null));
 
-            // Celdas de los días
             for (int dia = 1; dia <= 5; dia++) {
-                String claveBusqueda = dia + "_" + horasInicio[i];
-                CeldaHorarioInfo info = clasesHorario.get(claveBusqueda);
+                SesionHorarioInfo encontrada = null;
+                for (SesionHorarioInfo s : sesiones) {
+                    if (s.ocupaSlot(dia, horasInicio[i])) {
+                        encontrada = s;
+                        break;
+                    }
+                }
 
-                if (info != null) {
-                    // Hay clase: le pasamos el texto y el código para que sea clicable
-                    row.addView(crearCelda(info.textoMostrar, false, false, info.codigoAsignatura));
+                if (encontrada != null) {
+                    row.addView(crearCelda(encontrada.textoCelda(this), false, false, encontrada.codigoAsignatura));
                 } else {
-                    // Hueco libre
                     row.addView(crearCelda("---", false, false, null));
                 }
             }
@@ -156,19 +196,15 @@ public class Asignaturas extends BaseActivity {
         }
     }
 
-    /**
-     - Consulta cruzada a la BD para obtener el horario del estudiante actual.
-     - MODIFICADA: Añadido el grupo a la condición JOIN y se extrae el código.
-     */
-    private Map<String, CeldaHorarioInfo> obtenerClasesDesdeBD() {
-        Map<String, CeldaHorarioInfo> mapaClases = new HashMap<>();
+    private List<SesionHorarioInfo> obtenerSesionesDesdeBD() {
+        List<SesionHorarioInfo> lista = new ArrayList<>();
         SQLiteDatabase db = BD.getReadableDatabase();
 
-        String query = "SELECT A.codigoAsignatura, A.nombreAsignatura, S.diaSemana, S.horaInicio, S.grupo, S.tipoSesion " +
+        String query = "SELECT A.codigoAsignatura, A.nombreAsignatura, S.diaSemana, S.horaInicio, S.horaFin, S.grupo, S.tipoSesion " +
                 "FROM MATRICULA M " +
                 "INNER JOIN ASIGNATURA A ON M.codigoAsignatura = A.codigoAsignatura " +
                 "INNER JOIN SESION_CLASE S ON M.codigoAsignatura = S.codigoAsignatura " +
-                "AND M.grupo = S.grupo " + // ¡CRÍTICO! Para que no salgan las horas de otros grupos
+                "AND M.grupo = S.grupo " +
                 "WHERE M.correoEstudiante = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{correoUsuario});
@@ -179,27 +215,17 @@ public class Asignaturas extends BaseActivity {
                 String nombreAsignatura = cursor.getString(1);
                 int diaSemana = cursor.getInt(2);
                 String horaInicio = cursor.getString(3);
-                String grupo = cursor.getString(4);
-                String tipo = cursor.getString(5);
+                String horaFin = cursor.getString(4);
+                String grupo = cursor.getString(5);
+                String tipo = cursor.getString(6);
 
-                String nombreAbreviado = nombreAsignatura.length() > 15
-                        ? nombreAsignatura.substring(0, 15) + "..."
-                        : nombreAsignatura;
-
-                String contenidoCelda = nombreAbreviado + "\n(" + tipo + " " + grupo + ")";
-                String clave = diaSemana + "_" + horaInicio;
-
-                mapaClases.put(clave, new CeldaHorarioInfo(contenidoCelda, codigoAsignatura));
-
+                lista.add(new SesionHorarioInfo(codigoAsignatura, nombreAsignatura, diaSemana, horaInicio, horaFin, grupo, tipo));
             } while (cursor.moveToNext());
         }
         cursor.close();
-        return mapaClases;
+        return lista;
     }
 
-    /**
-     - Crea la celda. Si codigoAsignatura NO es nulo, la hace clicable y lanza el Intent.
-     */
     private TextView crearCelda(String texto, boolean esCabecera, boolean esColumnaHora, String codigoAsignatura) {
         TextView tv = new TextView(this);
         tv.setText(texto);
@@ -217,11 +243,9 @@ public class Asignaturas extends BaseActivity {
             tv.setTextColor(Color.BLACK);
         } else {
             tv.setTextColor(Color.DKGRAY);
-            // Si la celda tiene una asignatura (no es "---"), la resaltamos visualmente un poco
             if (codigoAsignatura != null) {
-                tv.setBackgroundColor(Color.parseColor("#FFF3E0")); // Naranja muy clarito
+                tv.setBackgroundColor(Color.parseColor("#FFF3E0"));
 
-                // Hacerla clicable
                 tv.setOnClickListener(v -> {
                     Intent intent = new Intent(Asignaturas.this, DetalleAsignatura.class);
                     intent.putExtra("CODIGO_ASIGNATURA", codigoAsignatura);
@@ -232,5 +256,16 @@ public class Asignaturas extends BaseActivity {
             }
         }
         return tv;
+    }
+
+    private void aplicarMargenesSistema() {
+        View root = findViewById(R.id.rootAsignaturas);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+                v.setPadding(v.getPaddingLeft(), statusBarInsets.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
     }
 }

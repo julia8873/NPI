@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tarjeta de una comunidad: icono redondo del color de la plataforma + nombre + descripción -->
+<!-- Una comunidad: tarjeta blanca con el icono en el color de la plataforma, nombre, descripción y estado -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Seccion.Tarjeta"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="5dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="#FFFFFF"
     app:cardCornerRadius="16dp"
-    app:cardElevation="1dp"
-    app:strokeColor="#EEEEEE"
-    app:strokeWidth="1dp">
+    app:cardElevation="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
+        android:minHeight="48dp"
         android:orientation="horizontal"
         android:padding="12dp">
 
-        <TextView
-            android:id="@+id/tvIconoComunidad"
+        <ImageView
+            android:id="@+id/ivIconoComunidad"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:background="@drawable/punto_naranja"
-            android:gravity="center"
-            android:textSize="20sp" />
+            android:background="@drawable/sec_circulo"
+            android:importantForAccessibility="no"
+            android:padding="11dp"
+            android:src="@drawable/nui_ic_movil" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -39,7 +39,7 @@
                 android:id="@+id/tvNombreComunidad"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#000000"
+                android:textColor="@color/sec_texto"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -49,8 +49,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="#666666"
-                android:textSize="12sp" />
+                android:textAppearance="@style/TextAppearance.Seccion.Secundario" />
         </LinearLayout>
 
         <TextView

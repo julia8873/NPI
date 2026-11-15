@@ -27,8 +27,8 @@ public class NivelInclinacionView extends View {
     private final int colorApagado;
     private final float dp;
 
-    private float objX, objY;      // posición objetivo (-1..1)
-    private float curX, curY;      // posición dibujada (suavizada)
+    private float objX, objY;      // Posición objetivo (-1..1)
+    private float curX, curY;      // Posición dibujada (suavizada)
     private boolean listo;
     private float escalaListo;     // 0..1 animada
     private int filaSel = 1, colSel = 1;
@@ -80,30 +80,32 @@ public class NivelInclinacionView extends View {
         float cy = getHeight() / 2f;
         float trazo = (listo ? 2.5f : 1.5f) * dp;
         float r = Math.min(getWidth(), getHeight()) / 2f - trazo;
+
         float rBolaBase = r * 0.34f;
         float maxDesp = r - rBolaBase - 3f * dp;
 
-        // suavizado hacia el objetivo
+        // Suavizado hacia el objetivo
         float tx = listo ? 0f : objX;
         float ty = listo ? 0f : objY;
         curX += (tx - curX) * 0.3f;
         curY += (ty - curY) * 0.3f;
         escalaListo += ((listo ? 1f : 0f) - escalaListo) * 0.2f;
 
-        // halo suave cuando está listo
+        // Halo suave cuando está listo
         if (escalaListo > 0.02f) {
             halo.setAlpha((int) (46 * escalaListo));
             canvas.drawCircle(cx, cy, r, halo);
         }
 
-        // aro
+        // Aro
         aro.setStrokeWidth(trazo);
         aro.setColor(listo ? colorAcento : colorApagado);
         aro.setAlpha(listo ? 255 : 110);
         canvas.drawCircle(cx, cy, r, aro);
 
-        // 9 zonas
+        // 9 Zonas de referencia
         float paso = 0.75f * maxDesp;
+
         for (int f = 0; f < 3; f++) {
             for (int c = 0; c < 3; c++) {
                 boolean sel = f == filaSel && c == colSel;
@@ -113,7 +115,7 @@ public class NivelInclinacionView extends View {
             }
         }
 
-        // bola
+        // Bola indicadora
         float rBola = rBolaBase * (1f + 0.45f * escalaListo);
         canvas.drawCircle(cx + curX * maxDesp, cy + curY * maxDesp, rBola, bola);
 

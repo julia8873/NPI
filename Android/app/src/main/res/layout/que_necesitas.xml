@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ¿Qué necesitas?: la rosa de los vientos te orienta en tres pasos hasta tu trámite -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#F8FAFC"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
+
+    <!-- Rosa (gira con cada respuesta) + progreso: "Paso 1 de 3" -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_m"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/ivRosa"
+            android:layout_width="@dimen/nui_icono_objeto"
+            android:layout_height="@dimen/nui_icono_objeto"
+            android:importantForAccessibility="no"
+            android:src="@drawable/nui_rosa_vientos" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/nui_espacio_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvPaso"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Nui.Etiqueta" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progreso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xs"
+                android:max="3"
+                app:indicatorColor="@color/nui_resaltado"
+                app:trackColor="@color/nui_papel_sombra"
+                app:trackCornerRadius="4dp"
+                app:trackThickness="@dimen/nui_espacio_s" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvPregunta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_l"
+        android:layout_marginBottom="@dimen/nui_espacio_l"
+        android:accessibilityHeading="true"
+        android:textAppearance="@style/TextAppearance.Nui.Titular" />
+
+    <com.example.nuietsiit.ui.HojasPaginadas
+        android:id="@+id/hojas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/contenedorOpciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/nui_espacio_l" />
+    </com.example.nuietsiit.ui.HojasPaginadas>
+
+    <!-- Solo en el resultado -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnIrTramite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginTop="@dimen/nui_espacio_s"
+        android:layout_marginBottom="@dimen/nui_espacio_s"
+        android:backgroundTint="#FF8C42"
+        android:minHeight="56dp"
+        android:text="@string/ver_que_necesito_y_empezar"
+        android:textColor="#FFFFFF"
+        app:cornerRadius="12dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAnterior"
+        style="@style/Widget.Nui.Boton.Texto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/nui_espacio_l"
+        android:layout_marginBottom="@dimen/nui_espacio_s"
+        android:text="@string/volver_pregunta_anterior"
+        android:textColor="@color/nui_apagado" />
+
+</LinearLayout>

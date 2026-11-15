@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Medidas propias de la Biblioteca -->
+    <dimen name="biblio_libro_grande_ancho">160dp</dimen>   <!-- libro ojeado y libro del detalle (3:4) -->
+    <dimen name="biblio_libro_grande_alto">213dp</dimen>
+    <dimen name="biblio_tarjeta_ojear">280dp</dimen>
+    <dimen name="biblio_chip_explorar_max">150dp</dimen>
+    <dimen name="biblio_flotante_alto">56dp</dimen>
+    <dimen name="biblio_elevacion_ojear">8dp</dimen>
+    <dimen name="biblio_filete">2dp</dimen>                 <!-- filete de oro sobre el zócalo -->
+    <dimen name="biblio_marca_vertical">2dp</dimen>
+    <dimen name="biblio_nombre_dato">96dp</dimen>
+    <dimen name="biblio_punta_etiqueta">12dp</dimen>
+
+    <!-- Modo estudio: el anillo que se llena y la pantalla negra mientras se estudia -->
+    <dimen name="biblio_anillo_estudio">240dp</dimen>
+    <dimen name="biblio_movil_estudio">72dp</dimen>
+    <dimen name="biblio_anillo_aviso">48dp</dimen>
+    <dimen name="biblio_aviso_abajo">@dimen/nui_espacio_s</dimen>
+    <dimen name="biblio_aviso_arriba">104dp</dimen>            <!-- bajo la barra del visor de la ruta -->
+    <dimen name="biblio_tiempo_estudio">48sp</dimen>
+    <dimen name="biblio_tiempo_estudiando">72sp</dimen>
+    <color name="biblio_estudio_texto">#FF8C8C8C</color>        <!-- tenue sobre negro: no deslumbra -->
+    <color name="biblio_estudio_texto_suave">#FF555555</color>
+
+    <style name="TituloExplorar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/nui_espacio_l</item>
+        <item name="android:layout_marginBottom">@dimen/nui_espacio_xs</item>
+        <item name="android:accessibilityHeading">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.Nui.Etiqueta</item>
+    </style>
+
+    <!-- Fila "dato: valor" de las fichas del detalle de un libro -->
+    <style name="DatoLibro">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/nui_espacio_s</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:baselineAligned">true</item>
+    </style>
+    <style name="NombreDatoLibro">
+        <item name="android:layout_width">@dimen/biblio_nombre_dato</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.Nui.Etiqueta</item>
+        <item name="android:textColor">@color/nui_apagado</item>
+    </style>
+</resources>

@@ -1,5 +1,12 @@
 package com.example.nuietsiit.data.modelo;
 
+import android.content.Context;
+
+import androidx.annotation.ColorRes;
+import androidx.annotation.DrawableRes;
+
+import com.example.nuietsiit.R;
+
 import com.example.nuietsiit.util.FechasUtil;
 import com.example.nuietsiit.util.TextoUtil;
 
@@ -24,7 +31,8 @@ public class Actividad {
 
     // Columnas de tabla
     public int id;
-    public String titulo;
+    public String titulo;           // en el idioma de la app (traducido si hace falta)
+    public String tituloEs;         // título original en español: es la clave de los QR de los carteles
     public String descripcion;
     public String tipo;
     public LocalDateTime inicio;
@@ -68,9 +76,22 @@ public class Actividad {
         if (hoy.isAfter(plazoFin)) return "Inscripción cerrada";
         if (completa()) return "Plazas agotadas";
         long dias = FechasUtil.diasHasta(plazoFin);
-        if (dias == 0) return "⏳ ¡Hoy es el último día para inscribirte!";
-        if (dias <= 3) return "⏳ Quedan " + dias + (dias == 1 ? " día" : " días") + " para inscribirte";
+        if (dias == 0) return "¡Hoy es el último día para inscribirte!";
+        if (dias <= 3) return "Quedan " + dias + (dias == 1 ? " día" : " días") + " para inscribirte";
         return "Inscripción abierta hasta el " + FechasUtil.diaCorto(plazoFin);
+    }
+
+    /** Estado de inscripción en el idioma de la app (pantallas). */
+    public String estadoInscripcion(Context ctx) {
+        if (!esAbiertaUGR()) return "";
+        LocalDate hoy = LocalDate.now();
+        if (hoy.isBefore(plazoInicio)) return ctx.getString(R.string.nui_insc_desde_fmt, FechasUtil.diaCorto(plazoInicio));
+        if (hoy.isAfter(plazoFin)) return ctx.getString(R.string.nui_insc_cerrada);
+        if (completa()) return ctx.getString(R.string.nui_act_btn_agotadas);
+        long dias = FechasUtil.diasHasta(plazoFin);
+        if (dias == 0) return ctx.getString(R.string.nui_insc_hoy);
+        if (dias <= 3) return ctx.getResources().getQuantityString(R.plurals.nui_insc_quedan, (int) dias, (int) dias);
+        return ctx.getString(R.string.nui_insc_abierta_hasta_fmt, FechasUtil.diaCorto(plazoFin));
     }
 
     // Pone el texto de creditos bonito
@@ -87,13 +108,26 @@ public class Actividad {
 
     // -------------------- Aspecto según el tipo --------------------
 
-    public static String emoji(String tipo) {
+
+    /** Nombre del tipo en el idioma de la app (pantallas). */
+    public static String nombreTipo(Context ctx, String tipo) {
         switch (tipo) {
-            case "charla": return "🎤";
-            case "bibliomaker": return "🛠️";
-            case "abiertaugr": return "🎓";
-            case "dia_etsiit": return "🎉";
-            default: return "✨";
+            case "charla": return ctx.getString(R.string.nui_tipo_charla);
+            case "bibliomaker": return ctx.getString(R.string.nui_tipo_bibliomaker);
+            case "abiertaugr": return ctx.getString(R.string.nui_tipo_abiertaugr);
+            case "dia_etsiit": return ctx.getString(R.string.nui_tipo_dia_etsiit);
+            default: return ctx.getString(R.string.nui_tipo_otro);
+        }
+    }
+
+    /** Texto de la pestaña de filtro del tipo, en el idioma de la app. */
+    public static String nombreFiltro(Context ctx, String tipo) {
+        switch (tipo) {
+            case "charla": return ctx.getString(R.string.nui_tipo_f_charla);
+            case "bibliomaker": return ctx.getString(R.string.nui_tipo_f_bibliomaker);
+            case "abiertaugr": return ctx.getString(R.string.nui_tipo_f_abiertaugr);
+            case "dia_etsiit": return ctx.getString(R.string.nui_tipo_f_dia_etsiit);
+            default: return ctx.getString(R.string.nui_tipo_f_otro);
         }
     }
 
@@ -107,13 +141,52 @@ public class Actividad {
         }
     }
 
-    public static int color(String tipo) {
+    /**
+     * Sitio de la ETSIIT donde se hace, con el mismo nombre que un marcador del mapa interior
+     * (para el botón "Llévame"). null = la escuela en general.
+     */
+    public String sitioEnMapa() {
+        if (lugar != null) return lugar;
         switch (tipo) {
-            case "charla": return 0xFF8E24AA;      // morado
-            case "bibliomaker": return 0xFF2E7D32; // verde
-            case "abiertaugr": return 0xFF1565C0;  // azul
-            case "dia_etsiit": return 0xFFFF8C42;  // naranja de la app
-            default: return 0xFF546E7A;            // gris azulado
+            case "bibliomaker": return "Biblioteca";   // el Bibliomaker está en la biblioteca
+            case "charla": return "Aula 0.4";
+            case "abiertaugr": return "Aula 2.1";
+            default: return null;                      // Día de la ETSIIT, torneos…: toda la escuela
+        }
+    }
+
+    // Colores e iconos de cada tipo (colores_secciones.xml)
+
+    @ColorRes
+    public static int colorRes(String tipo) {
+        switch (tipo) {
+            case "charla": return R.color.sec_tipo_charla;
+            case "bibliomaker": return R.color.sec_tipo_bibliomaker;
+            case "abiertaugr": return R.color.sec_tipo_abiertaugr;
+            case "dia_etsiit": return R.color.nui_acento;
+            default: return R.color.sec_tipo_otro;
+        }
+    }
+
+    @ColorRes
+    public static int tinteRes(String tipo) {
+        switch (tipo) {
+            case "charla": return R.color.sec_tipo_charla_tinte;
+            case "bibliomaker": return R.color.sec_tipo_bibliomaker_tinte;
+            case "abiertaugr": return R.color.sec_tipo_abiertaugr_tinte;
+            case "dia_etsiit": return R.color.nui_tinte;
+            default: return R.color.sec_tipo_otro_tinte;
+        }
+    }
+
+    @DrawableRes
+    public static int iconoRes(String tipo) {
+        switch (tipo) {
+            case "charla": return R.drawable.nui_ic_consulta;
+            case "bibliomaker": return R.drawable.nui_ic_hoja;
+            case "abiertaugr": return R.drawable.nui_ic_creditos;
+            case "dia_etsiit": return R.drawable.nui_ic_dia_etsiit;
+            default: return R.drawable.ic_nui_actividades;
         }
     }
 }

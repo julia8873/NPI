@@ -26,6 +26,19 @@ public final class TablasAcademico {
         asignatura(db, "VC", "Visión por Computador", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
         asignatura(db, "EDI", "Ecuaciones Diferenciales I", 1, 6.0, "https://grados.ugr.es/matematicas/pages/infoacademica/guias");
         asignatura(db, "AF", "Análisis de Fourier", 1, 6.0, "https://grados.ugr.es/matematicas/pages/infoacademica/guias");
+        // Bibliografía de Biblioteca (TablasBiblioteca)
+        asignatura(db, "MP", "Metodología de la Programación", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "ED", "Estructuras de Datos", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "EC", "Estructura de Computadores", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "SO", "Sistemas Operativos", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "ALG", "Algorítmica", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "FBD", "Fundamentos de Bases de Datos", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "FIS", "Fundamentos de Ingeniería del Software", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "IA", "Inteligencia Artificial", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "FR", "Fundamentos de Redes", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "MC", "Modelos de Computación", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "AA", "Aprendizaje Automático", 2, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
+        asignatura(db, "SPSI", "Seguridad y Protección de Sistemas Informáticos", 1, 6.0, "https://grados.ugr.es/informatica/pages/infoacademica/guias");
 
         // -------------------------------------------------
         // 2. ASIGNACIÓN A GRADOS (idGrado 1 = GII, idGrado 2 = DGIIM)
@@ -40,9 +53,28 @@ public final class TablasAcademico {
         asignaturaGrado(db, "AF", 2, 5, "obligatoria");
 
         // NPI, PL, VC: 4º curso de GII
-        asignaturaGrado(db, "NPI", 1, 4, "optativa");
-        asignaturaGrado(db, "PL", 1, 4, "obligatoria");
+        asignaturaGrado(db, "NPI", 1, 4, "optativa", "Computación y Sistemas Inteligentes");
+        asignaturaGrado(db, "PL", 1, 4, "obligatoria", "Computación y Sistemas Inteligentes");
         asignaturaGrado(db, "VC", 1, 4, "optativa");
+
+        // Bibliografía de Biblioteca; rama (especialidad) solo en las de especialidad
+        asignaturaGrado(db, "MP", 1, 1, "obligatoria");
+        asignaturaGrado(db, "ED", 1, 2, "obligatoria");
+        asignaturaGrado(db, "EC", 1, 2, "obligatoria");
+        asignaturaGrado(db, "SO", 1, 2, "obligatoria");
+        asignaturaGrado(db, "ALG", 1, 2, "obligatoria");
+        asignaturaGrado(db, "FBD", 1, 2, "obligatoria");
+        asignaturaGrado(db, "FIS", 1, 2, "obligatoria");
+        asignaturaGrado(db, "IA", 1, 2, "obligatoria");
+        asignaturaGrado(db, "FR", 1, 3, "obligatoria");
+        asignaturaGrado(db, "MC", 1, 3, "obligatoria");
+        asignaturaGrado(db, "MP", 2, 1, "obligatoria");
+        asignaturaGrado(db, "ED", 2, 2, "obligatoria");
+        asignaturaGrado(db, "ALG", 2, 3, "obligatoria");
+        asignaturaGrado(db, "SO", 2, 3, "obligatoria");
+        asignaturaGrado(db, "FBD", 2, 4, "obligatoria");
+        asignaturaGrado(db, "AA", 1, 3, "optativa", "Computación y Sistemas Inteligentes");
+        asignaturaGrado(db, "SPSI", 1, 4, "optativa", "Tecnologías de la Información");
 
         // -------------------------------------------------
         // 3. MATRÍCULAS DEL USUARIO INVITADO
@@ -50,6 +82,7 @@ public final class TablasAcademico {
         // Matriculamos al invitado en NPI y PL en el Grupo A
         matricula(db, correoInvitado, "NPI", cursoAcademico, "A");
         matricula(db, correoInvitado, "PL", cursoAcademico, "A");
+        matricula(db, correoInvitado, "VC", cursoAcademico, "A");
 
         // -------------------------------------------------
         // 4. ESPACIOS Y EDIFICIO (Despachos y Aulas)
@@ -98,6 +131,7 @@ public final class TablasAcademico {
         // NPI: Lunes de 08:30 a 10:30 (Teoría) y Miércoles de 10:30 a 12:30 (Prácticas)
         sesionClase(db, "NPI", 1, "08:30", "10:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
         sesionClase(db, "NPI", 3, "10:30", "12:30", "A", "practicas", "juan.perez@ugr.es", cursoAcademico);
+        sesionClase(db, "NPI", 7, "13:00", "15:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
 
         // PL: Lunes de 10:30 a 12:30 (Teoría) y Jueves de 08:30 a 10:30 (Prácticas)
         sesionClase(db, "PL", 1, "10:30", "12:30", "A", "teoria", "maria.garcia@ugr.es", cursoAcademico);
@@ -106,6 +140,7 @@ public final class TablasAcademico {
         // FP, VC, EDI, AF
         sesionClase(db, "FP", 2, "08:30", "10:30", "A", "teoria", "juan.perez@ugr.es", cursoAcademico);
         sesionClase(db, "VC", 2, "10:30", "12:30", "A", "teoria", "maria.garcia@ugr.es", cursoAcademico);
+        sesionClase(db, "VC", 4, "10:30", "12:30", "A", "practicas", "maria.garcia@ugr.es", cursoAcademico);
         sesionClase(db, "EDI", 3, "08:30", "10:30", "A", "teoria", "carlos.rodriguez@ugr.es", cursoAcademico);
         sesionClase(db, "AF", 5, "08:30", "10:30", "A", "teoria", "ana.martinez@ugr.es", cursoAcademico);
 
@@ -142,11 +177,16 @@ public final class TablasAcademico {
     }
 
     private static void asignaturaGrado(SQLiteDatabase db, String codigo, int idGrado, int curso, String tipo) {
+        asignaturaGrado(db, codigo, idGrado, curso, tipo, null);
+    }
+
+    private static void asignaturaGrado(SQLiteDatabase db, String codigo, int idGrado, int curso, String tipo, String rama) {
         ContentValues cv = new ContentValues();
         cv.put("codigoAsignatura", codigo);
         cv.put("idGrado", idGrado);
         cv.put("curso", curso);
         cv.put("tipo", tipo);
+        cv.put("rama", rama);
         db.insert("ASIGNATURA_GRADO", null, cv);
     }
 

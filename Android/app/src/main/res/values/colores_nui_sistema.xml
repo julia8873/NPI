@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Colores de Biblioteca y Secretaría, redirigidos a la paleta general del grupo
+    (colores_nui.xml + naranja #FF8C42). Los nombres se mantienen para no tocar layouts ni Java.
+    La app no tiene modo oscuro: values-night/ hereda estos valores.
+-->
+<resources>
+    <!-- Tarjetas: blancas con borde melocotón -->
+    <color name="nui_papel">#FFFFFF</color>
+    <color name="nui_papel_sombra">#FFE3D1</color>
+
+    <!-- Naranja oscuro: texto/iconos naranjas sobre fondo claro, estado pulsado -->
+    <color name="nui_acento_profundo">#E06A1F</color>
+
+    <!-- Estados -->
+    <color name="nui_granada">#D32F2F</color>         <!-- error / borrar -->
+    <color name="nui_granada_tinte">#FDECEC</color>
+    <color name="nui_cobalto">@color/nui_tinta</color> <!-- información / enlaces -->
+    <color name="nui_cobalto_tinte">#E2E8F0</color>
+    <color name="nui_arrayan">#2E7D32</color>         <!-- éxito / completado -->
+    <color name="nui_arrayan_tinte">#E8F5E9</color>
+
+    <!-- Antiguos colores de "sala": ahora grises y naranja suave -->
+    <color name="nui_yeseria">@color/nui_suave</color>
+    <color name="nui_yeseria_texto">@color/nui_apagado</color>
+    <color name="nui_oro">#E2E8F0</color>
+    <color name="nui_madera">#FFB37A</color>
+    <color name="nui_oro_claro">#FFE3D1</color>
+    <color name="nui_sombra_libro">#00000000</color>
+    <color name="nui_madera_oscura">#A0501A</color>  <!-- texto sobre la carpeta (melocotón): naranja oscuro legible -->
+
+    <!-- Semánticos (alias: usar estos en lógica de estado) -->
+    <color name="nui_ok">@color/nui_arrayan</color>
+    <color name="nui_info">#1976D2</color>
+    <color name="nui_aviso">@color/nui_acento_profundo</color>
+    <color name="nui_error">@color/nui_granada</color>
+
+    <!-- Transparencias -->
+    <color name="nui_velo">#99000000</color>
+    <color name="nui_transparente">#00000000</color>
+
+    <!-- Resaltado al tocar (ripple) y selección de texto: naranja translúcido -->
+    <color name="nui_resalte">#29FF8C42</color>
+    <color name="nui_resalte_texto">#52FF8C42</color>
+
+    <!-- Colores por tema (Secretaría). Un solo color fuerte por tarjeta. -->
+    <color name="nui_tema_matricula">@color/nui_resaltado</color>
+    <color name="nui_tema_matricula_tinte">@color/nui_resaltado_tinte</color>
+    <color name="nui_tema_examenes">@color/nui_granada</color>
+    <color name="nui_tema_examenes_tinte">@color/nui_granada_tinte</color>
+    <color name="nui_tema_creditos">#1976D2</color>
+    <color name="nui_tema_creditos_tinte">#E3F2FD</color>
+    <color name="nui_tema_titulos">@color/nui_arrayan</color>
+    <color name="nui_tema_titulos_tinte">@color/nui_arrayan_tinte</color>
+    <color name="nui_tema_certificados">#7B1FA2</color>
+    <color name="nui_tema_certificados_tinte">#F3E5F5</color>
+    <color name="nui_tema_otros">@color/nui_apagado</color>
+
+    <!-- Resaltado principal: naranja del grupo. Texto encima: blanco. -->
+    <color name="nui_resaltado">#FF8C42</color>
+    <color name="nui_resaltado_tinte">@color/nui_tinte</color>
+    <color name="nui_sobre_resaltado">@color/nui_superficie</color>
+</resources>

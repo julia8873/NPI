@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,19 +26,25 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.activities.BaseActivity;
 import com.example.nuietsiit.activities.auth.Login;
 import com.example.nuietsiit.activities.main.AjustesCuenta;
-import com.example.nuietsiit.data.Comedores.ComedoresDB;
+import com.example.nuietsiit.activities.secciones.chat.ChatActivity;
+import com.example.nuietsiit.activities.secciones.mapa.Mapa;
 import com.example.nuietsiit.data.Comedores.Comedor;
+import com.example.nuietsiit.data.Comedores.ComedoresDB;
 import com.example.nuietsiit.data.Comedores.MenuInfo;
 import com.example.nuietsiit.data.UsuariosDB;
 import com.example.nuietsiit.util.DetectorInclinacion;
 import com.example.nuietsiit.util.DetectorInclinacionFrontal;
+import com.example.nuietsiit.util.tutorial.Gesto;
+import com.example.nuietsiit.util.tutorial.Tutorial;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.text.SimpleDateFormat;
@@ -59,12 +64,12 @@ public class Comedores extends BaseActivity {
 
     // Componentes de la interfaz de usuario
     private TextView tvMensajeComedorCercano;
-    private TextView tvUbicacionActual;
+    private TextView tvTagComedorCercano;
     private TextView tvDia, tvPrimerPlato, tvSegundoPlato, tvPostre;
     private ImageView ivIcono;
     private View cardMenu;
     private ImageButton btnDiaAnterior, btnDiaSiguiente;
-    private Button btnHorario, btnPrecios, btnTipoMenu, btnComedores;
+    private Button btnHorario, btnPrecios, btnTipoMenu;
     private TextView btnDiaL, btnDiaM, btnDiaX, btnDiaJ, btnDiaV;
 
     // Estado del modo de menú (normal vs vegetariano)
@@ -95,7 +100,6 @@ public class Comedores extends BaseActivity {
                 if ((fineGranted != null && fineGranted) || (coarseGranted != null && coarseGranted)) {
                     obtenerUbicacionYProcesar();
                 } else {
-                    tvUbicacionActual.setText("📍 Permiso de ubicación no concedido.");
                     aplicarUbicacionPorDefecto(37.197050, -3.624260);
                 }
             });
@@ -112,19 +116,13 @@ public class Comedores extends BaseActivity {
         // Asegurar que los menús guardados de la simulación (normales y vegetarianos) estén presentes
         comedoresDB.asegurarMenusSimulacion();
 
-        // Determinar modo de menú vegetariano/normal por defecto según el perfil del usuario
-        determinarModoVegetarianoInicial();
-
-        // Simulación: Iniciar en el martes 3 de noviembre de 2026
+        // Iniciar con la fecha actual del sistema
         calendarioSeleccionado = Calendar.getInstance();
-        calendarioSeleccionado.set(Calendar.YEAR, 2026);
-        calendarioSeleccionado.set(Calendar.MONTH, Calendar.NOVEMBER);
-        calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, 3);
         limpiarHora(calendarioSeleccionado);
 
         // Enlazar vistas del layout XML
         tvMensajeComedorCercano = findViewById(R.id.tvMensajeComedoreCercano);
-        tvUbicacionActual = findViewById(R.id.tvUbicacionActual);
+        tvTagComedorCercano = findViewById(R.id.tvTagComedorCercano);
         tvDia = findViewById(R.id.tvDia);
         tvPrimerPlato = findViewById(R.id.tvPrimerPlato);
         tvSegundoPlato = findViewById(R.id.tvSegundoPlato);
@@ -132,11 +130,23 @@ public class Comedores extends BaseActivity {
         ivIcono = findViewById(R.id.ivIcono);
         cardMenu = findViewById(R.id.cardMenu);
 
+        View btnVolver = findViewById(R.id.btnVolver);
+        if (btnVolver != null) {
+            btnVolver.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                finish();
+            });
+        }
+
+        aplicarMargenesSistema();
+
         // Botones superiores: Horario, Precios y Alternar Vegetariano/Normal
         btnHorario = findViewById(R.id.btnHorario);
         btnPrecios = findViewById(R.id.btnPrecios);
         btnTipoMenu = findViewById(R.id.btnTipoMenu);
-        btnComedores = findViewById(R.id.btnComedores);
+
+        // Determinar modo de menú vegetariano/normal por defecto según el perfil del usuario
+        determinarModoVegetarianoInicial();
 
         // Botones inferiores de días de la semana (Lunes a Viernes)
         btnDiaL = findViewById(R.id.btnDiaL);
@@ -144,6 +154,20 @@ public class Comedores extends BaseActivity {
         btnDiaX = findViewById(R.id.btnDiaX);
         btnDiaJ = findViewById(R.id.btnDiaJ);
         btnDiaV = findViewById(R.id.btnDiaV);
+
+        TextView tvTituloSeleccionDia = findViewById(R.id.tvTituloSeleccionDia);
+        if (tvTituloSeleccionDia != null) {
+            SimpleDateFormat sdfSemana = new SimpleDateFormat("dd/MM/yyyy", Locale.ROOT);
+            Calendar inicio = (Calendar) calendarioSeleccionado.clone();
+            inicio.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            Calendar fin = (Calendar) calendarioSeleccionado.clone();
+            fin.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+            tvTituloSeleccionDia.setText(getString(
+                    R.string.com_semana_fmt,
+                    sdfSemana.format(inicio.getTime()),
+                    sdfSemana.format(fin.getTime())
+            ));
+        }
 
         btnHorario.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
@@ -160,18 +184,46 @@ public class Comedores extends BaseActivity {
             mostrarBottomSheetTipoMenu();
         });
 
-        btnComedores.setOnClickListener(v -> {
-            getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            mostrarBottomSheetComedores();
-        });
+        View btnVerEnMapa = findViewById(R.id.btnVerEnMapa);
+        if (btnVerEnMapa != null) {
+            btnVerEnMapa.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                Intent intent = new Intent(Comedores.this, Mapa.class);
+                startActivity(intent);
+            });
+        }
+
+        View cardMascotaAyudante = findViewById(R.id.cardMascotaAyudante);
+        if (cardMascotaAyudante != null) {
+            cardMascotaAyudante.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                Intent intent = new Intent(this, ChatActivity.class);
+                String correo = obtenerCorreoUsuarioActual();
+                if (correo != null) intent.putExtra("CORREO", correo);
+                startActivity(intent);
+            });
+        }
+
+        View cardComedorCercano = findViewById(R.id.cardComedorCercano);
+        if (cardComedorCercano != null) {
+            cardComedorCercano.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarBottomSheetComedores();
+            });
+        }
+        if (tvMensajeComedorCercano != null) {
+            tvMensajeComedorCercano.setOnClickListener(v -> {
+                getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+                mostrarBottomSheetComedores();
+            });
+        }
 
         // Configurar selección directa mediante los botones de los días
-        btnDiaL.setOnClickListener(v ->
-                Toast.makeText(this, "Lunes no disponible en el período de simulación", Toast.LENGTH_SHORT).show());
-        btnDiaM.setOnClickListener(v -> seleccionarDiaDirecto(3));
-        btnDiaX.setOnClickListener(v -> seleccionarDiaDirecto(4));
-        btnDiaJ.setOnClickListener(v -> seleccionarDiaDirecto(5));
-        btnDiaV.setOnClickListener(v -> seleccionarDiaDirecto(6));
+        btnDiaL.setOnClickListener(v -> seleccionarDiaSemana(Calendar.MONDAY));
+        btnDiaM.setOnClickListener(v -> seleccionarDiaSemana(Calendar.TUESDAY));
+        btnDiaX.setOnClickListener(v -> seleccionarDiaSemana(Calendar.WEDNESDAY));
+        btnDiaJ.setOnClickListener(v -> seleccionarDiaSemana(Calendar.THURSDAY));
+        btnDiaV.setOnClickListener(v -> seleccionarDiaSemana(Calendar.FRIDAY));
 
         // Flechas laterales para navegación entre días
         btnDiaAnterior = findViewById(R.id.btnDiaAnterior);
@@ -201,7 +253,7 @@ public class Comedores extends BaseActivity {
         });
 
         // Detector de inclinación hacia atrás: alterna entre menú normal y vegetariano
-        detectorInclinacionAtras = new DetectorInclinacionFrontal(this, () -> alternarTipoMenu());
+        detectorInclinacionAtras = new DetectorInclinacionFrontal(this, this::alternarTipoMenu);
 
         // Detector de inclinación lateral: derecha = día siguiente, izquierda = día anterior
         detectorInclinacionDias = new DetectorInclinacion(this, direccion -> {
@@ -281,14 +333,32 @@ public class Comedores extends BaseActivity {
      * Si el perfil tiene activada la preferencia vegetariana, menú vegetariano por defecto.
      */
     private void determinarModoVegetarianoInicial() {
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        boolean prefVegetariano = prefs.getBoolean("ES_VEGETARIANO", false);
         String correo = obtenerCorreoUsuarioActual();
         if (correo != null && !correo.isEmpty()) {
             UsuariosDB usuariosDB = new UsuariosDB(this);
-            esModoVegetariano = usuariosDB.esUsuarioVegetariano(correo);
+            esModoVegetariano = usuariosDB.esUsuarioVegetariano(correo) || prefVegetariano;
         } else {
-            esModoVegetariano = false;
+            esModoVegetariano = prefVegetariano;
         }
         actualizarBotonTipoMenu();
+    }
+
+    private void guardarPreferenciaVegetariano(boolean esVegetariano) {
+        getSharedPreferences("SesionUsuario", MODE_PRIVATE)
+                .edit()
+                .putBoolean("ES_VEGETARIANO", esVegetariano)
+                .apply();
+        String correo = obtenerCorreoUsuarioActual();
+        if (correo != null && !correo.isEmpty()) {
+            try {
+                UsuariosDB usuariosDB = new UsuariosDB(this);
+                usuariosDB.actualizarPreferenciaVegetariano(correo, esVegetariano);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -297,15 +367,14 @@ public class Comedores extends BaseActivity {
     private void alternarTipoMenu() {
         getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
         esModoVegetariano = !esModoVegetariano;
+        guardarPreferenciaVegetariano(esModoVegetariano);
         actualizarBotonTipoMenu();
         actualizarVistasDialogoTipoMenu();
+        avisarTutorial(Gesto.INCLINAR);
 
         if (comedorSeleccionado != null) {
             mostrarComedorPrincipal(comedorSeleccionado);
         }
-
-        String mensaje = esModoVegetariano ? "🌱 Mostrando Menú Vegetariano" : "🥩 Mostrando Menú";
-        Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -327,14 +396,11 @@ public class Comedores extends BaseActivity {
 
         btnOpcionMenuNormalDialog.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (esModoVegetariano) {
-                esModoVegetariano = false;
-                actualizarBotonTipoMenu();
-                actualizarVistasDialogoTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
-                Toast.makeText(this, "🥩 Mostrando Menú", Toast.LENGTH_SHORT).show();
+            esModoVegetariano = false;
+            guardarPreferenciaVegetariano(false);
+            actualizarBotonTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
@@ -343,14 +409,11 @@ public class Comedores extends BaseActivity {
 
         btnOpcionMenuVegetarianoDialog.setOnClickListener(v -> {
             getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (!esModoVegetariano) {
-                esModoVegetariano = true;
-                actualizarBotonTipoMenu();
-                actualizarVistasDialogoTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
-                Toast.makeText(this, "🌱 Mostrando Menú Vegetariano", Toast.LENGTH_SHORT).show();
+            esModoVegetariano = true;
+            guardarPreferenciaVegetariano(true);
+            actualizarBotonTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
             if (dialogTipoMenu != null) {
                 dialogTipoMenu.dismiss();
@@ -374,29 +437,25 @@ public class Comedores extends BaseActivity {
      * la opción activa cambie inmediatamente en pantalla.
      */
     private void actualizarVistasDialogoTipoMenu() {
-        if (dialogTipoMenu != null && dialogTipoMenu.isShowing()
-                && btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
+        if (btnOpcionMenuNormalDialog != null && btnOpcionMenuVegetarianoDialog != null
                 && badgeMenuNormalDialog != null && badgeMenuVegetarianoDialog != null) {
 
-            if (esModoVegetariano) {
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuVegetarianoDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuNormalDialog.setVisibility(View.GONE);
+            View vActiva = esModoVegetariano ? btnOpcionMenuVegetarianoDialog : btnOpcionMenuNormalDialog;
+            View vInactiva = esModoVegetariano ? btnOpcionMenuNormalDialog : btnOpcionMenuVegetarianoDialog;
+            View bActiva = esModoVegetariano ? badgeMenuVegetarianoDialog : badgeMenuNormalDialog;
+            View bInactiva = esModoVegetariano ? badgeMenuNormalDialog : badgeMenuVegetarianoDialog;
 
-                btnOpcionMenuVegetarianoDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuVegetarianoDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            } else {
-                btnOpcionMenuNormalDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
-                badgeMenuNormalDialog.setVisibility(View.VISIBLE);
-                btnOpcionMenuVegetarianoDialog.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
-                badgeMenuVegetarianoDialog.setVisibility(View.GONE);
+            vActiva.setBackgroundResource(R.drawable.fondo_opcion_menu_activa);
+            bActiva.setVisibility(View.VISIBLE);
+            vInactiva.setBackgroundResource(R.drawable.fondo_opcion_menu_inactiva);
+            bInactiva.setVisibility(View.GONE);
 
-                btnOpcionMenuNormalDialog.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() ->
-                        btnOpcionMenuNormalDialog.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start()
-                ).start();
-            }
+            final View targetView = vActiva;
+            targetView.animate().scaleX(1.03f).scaleY(1.03f).setDuration(120).withEndAction(() -> {
+                if (targetView.isAttachedToWindow()) {
+                    targetView.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
+                }
+            }).start();
         }
     }
 
@@ -406,10 +465,10 @@ public class Comedores extends BaseActivity {
     private void actualizarBotonTipoMenu() {
         if (btnTipoMenu == null) return;
         if (esModoVegetariano) {
-            btnTipoMenu.setText("🌱 Menú Vegetariano ▾");
+            btnTipoMenu.setText(R.string.com_btn_menu_vegetariano);
             btnTipoMenu.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2E7D32")));
         } else {
-            btnTipoMenu.setText("🥩 Menú ▾");
+            btnTipoMenu.setText(R.string.com_btn_menu_normal);
             btnTipoMenu.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF8C42")));
         }
     }
@@ -417,72 +476,122 @@ public class Comedores extends BaseActivity {
     /**
      * Selecciona directamente un día de la semana a través de su botón (Lunes a Viernes).
      */
-    private void seleccionarDiaDirecto(int diaMes) {
-        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-        if (calendarioSeleccionado != null) {
-            calendarioSeleccionado.set(Calendar.DAY_OF_MONTH, diaMes);
-            if (comedorSeleccionado != null) {
-                mostrarComedorPrincipal(comedorSeleccionado);
-            }
-            actualizarVisibilidadBotonesNavegacion();
-            actualizarIndicadoresDias();
+    private void seleccionarDiaSemana(int targetDayOfWeek) {
+        Calendar temp = (Calendar) calendarioSeleccionado.clone();
+        temp.set(Calendar.DAY_OF_WEEK, targetDayOfWeek);
+        limpiarHora(temp);
+
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+
+        if (temp.before(hoy)) {
+            Toast.makeText(this, R.string.com_toast_dia_pasado, Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        Calendar max = obtenerFechaMaximaSemana();
+        if (temp.after(max)) {
+            Toast.makeText(this, R.string.com_toast_fuera_semana, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+        calendarioSeleccionado = temp;
+        if (comedorSeleccionado != null) {
+            mostrarComedorPrincipal(comedorSeleccionado);
+        }
+        actualizarVisibilidadBotonesNavegacion();
+        actualizarIndicadoresDias();
     }
 
     /**
-     * Actualiza el estilo visual de los botones de días de la semana según el día seleccionado.
+     * Actualiza el estilo visual de los botones de días de la semana según el día seleccionado y si ya han pasado.
      */
     private void actualizarIndicadoresDias() {
         if (calendarioSeleccionado == null) return;
-        int diaActual = calendarioSeleccionado.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = calendarioSeleccionado.get(Calendar.DAY_OF_WEEK);
 
-        configurarEstiloBotonDia(btnDiaM, diaActual == 3);
-        configurarEstiloBotonDia(btnDiaX, diaActual == 4);
-        configurarEstiloBotonDia(btnDiaJ, diaActual == 5);
-        configurarEstiloBotonDia(btnDiaV, diaActual == 6);
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+
+        Calendar lunes = (Calendar) calendarioSeleccionado.clone();
+        lunes.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        limpiarHora(lunes);
+
+        Calendar martes = (Calendar) calendarioSeleccionado.clone();
+        martes.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
+        limpiarHora(martes);
+
+        Calendar miercoles = (Calendar) calendarioSeleccionado.clone();
+        miercoles.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
+        limpiarHora(miercoles);
+
+        Calendar jueves = (Calendar) calendarioSeleccionado.clone();
+        jueves.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
+        limpiarHora(jueves);
+
+        Calendar viernes = (Calendar) calendarioSeleccionado.clone();
+        viernes.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+        limpiarHora(viernes);
+
+        configurarEstiloBotonDia(btnDiaL, dayOfWeek == Calendar.MONDAY, lunes.before(hoy));
+        configurarEstiloBotonDia(btnDiaM, dayOfWeek == Calendar.TUESDAY, martes.before(hoy));
+        configurarEstiloBotonDia(btnDiaX, dayOfWeek == Calendar.WEDNESDAY, miercoles.before(hoy));
+        configurarEstiloBotonDia(btnDiaJ, dayOfWeek == Calendar.THURSDAY, jueves.before(hoy));
+        configurarEstiloBotonDia(btnDiaV, dayOfWeek == Calendar.FRIDAY, viernes.before(hoy));
     }
 
-    private void configurarEstiloBotonDia(TextView btn, boolean seleccionado) {
+    private void configurarEstiloBotonDia(TextView btn, boolean seleccionado, boolean deshabilitado) {
         if (btn == null) return;
-        if (seleccionado) {
-            btn.setBackgroundResource(R.drawable.circulo_dia_seleccionado);
-            btn.setTextColor(Color.WHITE);
+        if (deshabilitado) {
+            btn.setBackgroundResource(R.drawable.circulo_dia_deshabilitado);
+            btn.setTextColor(Color.parseColor("#AAAAAA"));
+            btn.setEnabled(false);
+            btn.setOnClickListener(v -> Toast.makeText(this, R.string.com_toast_este_dia_pasado, Toast.LENGTH_SHORT).show());
         } else {
-            btn.setBackgroundResource(R.drawable.circulo_dia_disponible);
-            btn.setTextColor(Color.parseColor("#FF8C42"));
+            btn.setEnabled(true);
+            // Restaurar listener de selección
+            if (btn == btnDiaL) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.MONDAY));
+            else if (btn == btnDiaM) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.TUESDAY));
+            else if (btn == btnDiaX) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.WEDNESDAY));
+            else if (btn == btnDiaJ) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.THURSDAY));
+            else if (btn == btnDiaV) btn.setOnClickListener(v -> seleccionarDiaSemana(Calendar.FRIDAY));
+
+            if (seleccionado) {
+                btn.setBackgroundResource(R.drawable.circulo_dia_seleccionado);
+                btn.setTextColor(Color.WHITE);
+            } else {
+                btn.setBackgroundResource(R.drawable.circulo_dia_disponible);
+                btn.setTextColor(Color.parseColor("#FF8C42"));
+            }
         }
     }
 
-    /**
-     * Devuelve la fecha mínima permitida de la semana simulada (Martes 3 de noviembre de 2026).
-     */
-    private Calendar obtenerFechaMinima() {
-        Calendar min = Calendar.getInstance();
-        min.set(Calendar.YEAR, 2026);
-        min.set(Calendar.MONTH, Calendar.NOVEMBER);
-        min.set(Calendar.DAY_OF_MONTH, 3);
+    private Calendar obtenerFechaMinimaSemana() {
+        Calendar min = (Calendar) calendarioSeleccionado.clone();
+        min.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         limpiarHora(min);
+        Calendar hoy = Calendar.getInstance();
+        limpiarHora(hoy);
+        if (min.before(hoy)) {
+            min = (Calendar) hoy.clone(); // No permitir días pasados de esta semana
+        }
         return min;
     }
 
-    /**
-     * Devuelve la fecha máxima permitida de la semana simulada (Viernes 6 de noviembre de 2026).
-     */
-    private Calendar obtenerFechaMaxima() {
-        Calendar max = Calendar.getInstance();
-        max.set(Calendar.YEAR, 2026);
-        max.set(Calendar.MONTH, Calendar.NOVEMBER);
-        max.set(Calendar.DAY_OF_MONTH, 6);
+    private Calendar obtenerFechaMaximaSemana() {
+        Calendar max = (Calendar) calendarioSeleccionado.clone();
+        max.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
         limpiarHora(max);
         return max;
     }
 
     /**
-     * Comprueba si existe un menú disponible para el día anterior dentro del rango permitido.
+     * Comprueba si existe un menú disponible para el día anterior dentro del rango permitido (no días pasados).
      */
     private boolean hayMenuDiaAnterior() {
         if (calendarioSeleccionado == null) return false;
-        Calendar min = obtenerFechaMinima();
+        Calendar min = obtenerFechaMinimaSemana();
         Calendar temp = (Calendar) calendarioSeleccionado.clone();
         limpiarHora(temp);
         temp.add(Calendar.DAY_OF_YEAR, -1);
@@ -490,11 +599,11 @@ public class Comedores extends BaseActivity {
     }
 
     /**
-     * Comprueba si existe un menú disponible para el día siguiente hasta final de semana (viernes).
+     * Comprueba si existe un menú disponible para el día siguiente sin salir de la semana actual.
      */
     private boolean hayMenuDiaSiguiente() {
         if (calendarioSeleccionado == null) return false;
-        Calendar max = obtenerFechaMaxima();
+        Calendar max = obtenerFechaMaximaSemana();
         Calendar temp = (Calendar) calendarioSeleccionado.clone();
         limpiarHora(temp);
         temp.add(Calendar.DAY_OF_YEAR, 1);
@@ -530,9 +639,10 @@ public class Comedores extends BaseActivity {
 
         tvComedor.setText(comedorSeleccionado.getNombreComedor());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("d 'de' MMMM", Locale.forLanguageTag("es"));
+        Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+        SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.com_patron_dia_mes), localeActivo);
         String fechaFormateada = sdf.format(calendarioSeleccionado.getTime());
-        tvDia.setText("📅 " + fechaFormateada);
+        tvDia.setText(getString(R.string.com_horario_dia_fmt, fechaFormateada));
 
         String horario = comedoresDB.obtenerHorarioParaFecha(comedorSeleccionado.getIdComedor(), calendarioSeleccionado);
         tvDetalle.setText(horario);
@@ -578,7 +688,7 @@ public class Comedores extends BaseActivity {
             textoNombre.append(i + 1).append(". ").append(comedor.getNombreComedor());
 
             if (i == 0) {
-                textoNombre.append(" (Más cercano)");
+                textoNombre.append(getString(R.string.com_item_mas_cercano));
             }
 
             if (comedorSeleccionado != null && comedor.getIdComedor() == comedorSeleccionado.getIdComedor()) {
@@ -593,7 +703,6 @@ public class Comedores extends BaseActivity {
                 comedorSeleccionado = comedor;
                 mostrarComedorPrincipal(comedor);
                 dialog.dismiss();
-                Toast.makeText(Comedores.this, "Mostrando: " + comedor.getNombreComedor(), Toast.LENGTH_SHORT).show();
             });
 
             llBsListaComedores.addView(itemView);
@@ -613,16 +722,20 @@ public class Comedores extends BaseActivity {
         }
 
         // Si el usuario regresa de AjustesCuenta tras cambiar su preferencia, actualizar el menú
+        SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+        boolean preferenciaVeg = prefs.getBoolean("ES_VEGETARIANO", false);
         String correo = obtenerCorreoUsuarioActual();
         if (correo != null && !correo.isEmpty()) {
             UsuariosDB usuariosDB = new UsuariosDB(this);
-            boolean preferenciaVeg = usuariosDB.esUsuarioVegetariano(correo);
-            if (preferenciaVeg != esModoVegetariano) {
-                esModoVegetariano = preferenciaVeg;
-                actualizarBotonTipoMenu();
-                if (comedorSeleccionado != null) {
-                    mostrarComedorPrincipal(comedorSeleccionado);
-                }
+            if (usuariosDB.esUsuarioVegetariano(correo)) {
+                preferenciaVeg = true;
+            }
+        }
+        if (preferenciaVeg != esModoVegetariano) {
+            esModoVegetariano = preferenciaVeg;
+            actualizarBotonTipoMenu();
+            if (comedorSeleccionado != null) {
+                mostrarComedorPrincipal(comedorSeleccionado);
             }
         }
     }
@@ -683,7 +796,6 @@ public class Comedores extends BaseActivity {
         if (ultimaUbicacion != null) {
             procesarUbicacionUsuario(ultimaUbicacion);
         } else {
-            tvUbicacionActual.setText("📍 Esperando señal GPS...");
             aplicarUbicacionPorDefecto(37.197050, -3.624260);
         }
     }
@@ -733,9 +845,6 @@ public class Comedores extends BaseActivity {
         double userLat = location.getLatitude();
         double userLon = location.getLongitude();
 
-        tvUbicacionActual.setText(String.format(Locale.getDefault(),
-                "📍 Lat: %.4f, Lon: %.4f", userLat, userLon));
-
         calcularDistanciasYOrdenar(userLat, userLon);
     }
 
@@ -775,9 +884,11 @@ public class Comedores extends BaseActivity {
     private void mostrarComedorPrincipal(Comedor comedor) {
         boolean esElMasCercano = !listaComedores.isEmpty() && listaComedores.get(0).getIdComedor() == comedor.getIdComedor();
         if (esElMasCercano) {
-            tvMensajeComedorCercano.setText("¡Tu comedor más cercano!\n" + comedor.getNombreComedor());
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText(R.string.com_tag_mas_cercano);
+            tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         } else {
-            tvMensajeComedorCercano.setText("Comedor seleccionado:\n" + comedor.getNombreComedor());
+            if (tvTagComedorCercano != null) tvTagComedorCercano.setText(R.string.com_tag_seleccionado);
+            tvMensajeComedorCercano.setText(comedor.getNombreComedor());
         }
 
         if (calendarioSeleccionado == null) {
@@ -798,12 +909,13 @@ public class Comedores extends BaseActivity {
                 cardMenu.setVisibility(View.VISIBLE);
             }
 
-            // Mostrar solo el día y mes (ej: "3 de noviembre") sin el día de la semana ni texto extra
-            SimpleDateFormat sdf = new SimpleDateFormat("d 'de' MMMM", Locale.forLanguageTag("es"));
+            // Mostrar el día y mes (ej: "3 de noviembre" / "November 3")
+            Locale localeActivo = getResources().getConfiguration().getLocales().get(0);
+            SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.com_patron_dia_mes), localeActivo);
             String fechaFormateada = sdf.format(calendarioSeleccionado.getTime());
             tvDia.setText(fechaFormateada);
 
-            SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat sdfDb = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
             String fechaStr = sdfDb.format(calendarioSeleccionado.getTime());
 
             MenuInfo menuInfo = comedoresDB.obtenerMenuParaComedorYFecha(comedor.getIdComedor(), fechaStr, esModoVegetariano);
@@ -812,32 +924,14 @@ public class Comedores extends BaseActivity {
             tvSegundoPlato.setVisibility(View.VISIBLE);
             tvPostre.setVisibility(View.VISIBLE);
 
-            tvPrimerPlato.setText("Primer plato: " + menuInfo.getPrimerPlato());
-            tvSegundoPlato.setText("Segundo plato: " + menuInfo.getSegundoPlato());
-            tvPostre.setText("Postre: " + menuInfo.getPostre());
+            tvPrimerPlato.setText(menuInfo.getPrimerPlato());
+            tvSegundoPlato.setText(menuInfo.getSegundoPlato());
+            tvPostre.setText(menuInfo.getPostre());
 
-            int iconSize = (int) (getResources().getDisplayMetrics().density * 24);
-
-            Drawable dPrimero = ContextCompat.getDrawable(this, R.drawable.primer_plato);
-            if (dPrimero != null) {
-                dPrimero.setBounds(0, 0, iconSize, iconSize);
-                tvPrimerPlato.setCompoundDrawablesRelative(dPrimero, null, null, null);
-                tvPrimerPlato.setCompoundDrawablePadding(12);
-            }
-
-            Drawable dSegundo = ContextCompat.getDrawable(this, R.drawable.segundo_plato);
-            if (dSegundo != null) {
-                dSegundo.setBounds(0, 0, iconSize, iconSize);
-                tvSegundoPlato.setCompoundDrawablesRelative(dSegundo, null, null, null);
-                tvSegundoPlato.setCompoundDrawablePadding(12);
-            }
-
-            Drawable dPostre = ContextCompat.getDrawable(this, R.drawable.postre);
-            if (dPostre != null) {
-                dPostre.setBounds(0, 0, iconSize, iconSize);
-                tvPostre.setCompoundDrawablesRelative(dPostre, null, null, null);
-                tvPostre.setCompoundDrawablePadding(12);
-            }
+            // Los iconos y títulos están ahora integrados en la cabecera de cada sección en el XML
+            tvPrimerPlato.setCompoundDrawablesRelative(null, null, null, null);
+            tvSegundoPlato.setCompoundDrawablesRelative(null, null, null, null);
+            tvPostre.setCompoundDrawablesRelative(null, null, null, null);
         }
 
         // Actualizar visibilidad de flechas y el indicador del día de la semana
@@ -857,6 +951,7 @@ public class Comedores extends BaseActivity {
             }
             actualizarVisibilidadBotonesNavegacion();
             actualizarIndicadoresDias();
+            avisarTutorial(Gesto.DESLIZAR_IZQ);
         }
     }
 
@@ -871,6 +966,7 @@ public class Comedores extends BaseActivity {
             }
             actualizarVisibilidadBotonesNavegacion();
             actualizarIndicadoresDias();
+            avisarTutorial(Gesto.DESLIZAR_IZQ);
         }
     }
 
@@ -893,5 +989,35 @@ public class Comedores extends BaseActivity {
         if (detectorInclinacionDias != null) {
             detectorInclinacionDias.parar();
         }
+    }
+
+    /** Deja el contenido fuera de la barra de estado y de navegación (pantalla de borde a borde). */
+    private void aplicarMargenesSistema() {
+        View scroll = findViewById(R.id.scrollComedores);
+        if (scroll != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(scroll, (v, insets) -> {
+                Insets barras = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(barras.left, barras.top, barras.right, barras.bottom);
+                return insets;
+            });
+            ViewCompat.requestApplyInsets(scroll);
+        }
+    }
+
+    // -------------------------------------------------
+    //              TUTORIAL
+    // -------------------------------------------------
+
+    /** Lo enseña BaseActivity la primera vez; el botón "?" de la barra lo repite. */
+    @Override
+    protected Tutorial crearTutorial() {
+        return new Tutorial(this, "comedores", 2)
+                .info(R.id.cardComedorCercano, getString(R.string.tut_com_cercano))
+                .gesto(R.id.cardMenu, Gesto.DESLIZAR_IZQ, getString(R.string.tut_com_menu_deslizar))
+                .info(R.id.btnTipoMenu, getString(R.string.tut_com_tipo_menu))
+                .info(R.id.btnHorario, getString(R.string.tut_com_horario))
+                .info(R.id.btnPrecios, getString(R.string.tut_com_precios))
+                .info(R.id.btnVerEnMapa, getString(R.string.tut_com_mapa));
     }
 }

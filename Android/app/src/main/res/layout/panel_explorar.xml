@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:background="#F8FAFC"
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingTop="@dimen/nui_espacio_xl"
+        android:paddingBottom="@dimen/nui_espacio_s"
+        android:text="@string/titulo_explorar_biblioteca"
+        android:textColor="@color/nui_tinta"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+
+    <!-- Sin scroll: si no cabe todo, hojas que se pasan deslizando o inclinando -->
+    <com.example.nuietsiit.ui.HojasPaginadas
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/nui_espacio_l"
+            android:paddingBottom="@dimen/nui_espacio_l">
+
+            <TextView
+                style="@style/TituloExplorar"
+                android:text="@string/explorar_grado" />
+
+            <com.example.nuietsiit.ui.PestanasPapel
+                android:id="@+id/chipsGrado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/TituloExplorar"
+                android:text="@string/explorar_curso" />
+
+            <com.example.nuietsiit.ui.PestanasPapel
+                android:id="@+id/chipsCurso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/TituloExplorar"
+                android:text="@string/explorar_rama" />
+
+            <com.example.nuietsiit.ui.PestanasPapel
+                android:id="@+id/chipsRama"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/TituloExplorar"
+                android:text="@string/explorar_planta" />
+
+            <com.example.nuietsiit.ui.PestanasPapel
+                android:id="@+id/chipsPlanta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/TituloExplorar"
+                android:text="@string/explorar_asignatura" />
+
+            <com.example.nuietsiit.ui.PestanasPapel
+                android:id="@+id/listaAsignaturas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </com.example.nuietsiit.ui.HojasPaginadas>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:background="#F8FAFC"
+        android:padding="@dimen/nui_espacio_m">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLimpiar"
+            style="@style/Widget.Nui.Boton.Texto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/nui_espacio_s"
+            android:text="@string/btn_limpiar" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerLibros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>

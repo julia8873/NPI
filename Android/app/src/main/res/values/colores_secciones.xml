@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colores de Actividades, Noticias y Comunidades: los mismos que usan Asignaturas, Profesorado y Calendario
+     (fondo gris claro, tarjetas blancas, textos pizarra y el naranja de la app). -->
+<resources>
+    <color name="sec_fondo">#F8FAFC</color>
+    <color name="sec_tarjeta">#FFFFFF</color>
+    <color name="sec_borde">#E2E8F0</color>
+    <color name="sec_texto">#0F172A</color>
+    <color name="sec_texto_cuerpo">#334155</color>
+    <color name="sec_texto_suave">#64748B</color>
+    <color name="sec_ok">#2E7D32</color>
+    <color name="sec_ok_tinte">#E8F5E9</color>
+    <color name="sec_error">#D32F2F</color>
+    <color name="sec_error_tinte">#FFEBEE</color>
+    <color name="sec_info">#1565C0</color>
+
+    <!-- Tipos de actividad -->
+    <color name="sec_tipo_charla">#8E24AA</color>
+    <color name="sec_tipo_charla_tinte">#F3E5F5</color>
+    <color name="sec_tipo_bibliomaker">#2E7D32</color>
+    <color name="sec_tipo_bibliomaker_tinte">#E8F5E9</color>
+    <color name="sec_tipo_abiertaugr">#1565C0</color>
+    <color name="sec_tipo_abiertaugr_tinte">#E3F2FD</color>
+    <color name="sec_tipo_otro">#546E7A</color>
+    <color name="sec_tipo_otro_tinte">#ECEFF1</color>
+
+    <!-- Plataformas de chat (sus colores de marca) -->
+    <color name="sec_whatsapp">#25D366</color>
+    <color name="sec_whatsapp_tinte">#E8F8EE</color>
+    <color name="sec_telegram">#229ED9</color>
+    <color name="sec_telegram_tinte">#E5F4FB</color>
+    <color name="sec_discord">#5865F2</color>
+    <color name="sec_discord_tinte">#ECEEFE</color>
+</resources>

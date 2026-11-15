@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Cómo se hace un trámite: fichas que se pasan (deslizar, botones o inclinar el móvil) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#F8FAFC"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
-        app:titleTextColor="#000000" />
+        android:background="#F8FAFC"
+        app:titleTextAppearance="@style/TextAppearance.Nui.Titular" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vpPasos"
@@ -25,6 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:importantForAccessibility="no"
         android:orientation="horizontal" />
 
     <LinearLayout
@@ -32,34 +34,33 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp">
+        android:paddingHorizontal="@dimen/nui_espacio_l"
+        android:paddingVertical="@dimen/nui_espacio_s">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAnterior"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Paso anterior"
-            android:text="◀"
-            android:textColor="#FF8C42" />
+            android:contentDescription="@string/paso_anterior"
+            android:text="◀" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swInclinar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="@dimen/nui_espacio_m"
             android:layout_weight="1"
-            android:text="Inclinar para pasar"
-            android:textColor="#000000" />
+            android:text="@string/inclinar_para_pasar"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSiguiente"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Nui.Boton.Secundario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Paso siguiente"
-            android:text="▶"
-            android:textColor="#FF8C42" />
+            android:contentDescription="@string/paso_siguiente"
+            android:text="▶" />
     </LinearLayout>
+
 </LinearLayout>

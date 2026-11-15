@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ETIQUETA (tag/chip pequeño): categorías, estados, filtros. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/nui_resaltado_tinte" />
+    <corners android:radius="@dimen/nui_radio_boton" />
+</shape>

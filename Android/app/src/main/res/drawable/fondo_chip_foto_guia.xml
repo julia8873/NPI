@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pastilla oscura del contador "3/8" encima de la foto de la guía -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#73000000" />
+    <corners android:radius="14dp" />
+</shape>

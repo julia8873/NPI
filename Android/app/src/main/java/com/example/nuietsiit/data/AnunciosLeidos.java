@@ -37,4 +37,11 @@ public final class AnunciosLeidos {
         for (int id : ids) s.add(String.valueOf(id));
         prefs(c).edit().putStringSet(CLAVE, s).apply();
     }
+
+    /** Vuelven a no leídos (el "Deshacer" de marcarlos todos). */
+    public static void desmarcarVarios(Context c, Iterable<Integer> ids) {
+        Set<String> s = leidos(c);
+        for (int id : ids) s.remove(String.valueOf(id));
+        prefs(c).edit().putStringSet(CLAVE, s).apply();
+    }
 }

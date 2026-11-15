@@ -1,37 +1,44 @@
 package com.example.nuietsiit.activities.secciones.noticias;
 
-import android.graphics.Typeface;
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Anuncio;
 import com.example.nuietsiit.util.FechasUtil;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Pinta cada anuncio con el diseño de item_anuncio.xml */
+/**
+ * Páginas del carrusel de Noticias (pagina_anuncio.xml), una tarjeta por anuncio:
+ * icono de la categoría, puntito si no está leído y etiqueta y borde rojos si es urgente.
+ */
 public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> {
 
     public interface OnAnuncioClick {
         void alPulsar(Anuncio anuncio);
     }
 
-    private static final int NARANJA = 0xFFFF8C42;
-    private static final int ROJO = 0xFFD32F2F;
-
     private List<Anuncio> anuncios = new ArrayList<>();
-    private final OnAnuncioClick listener;
+    private final OnAnuncioClick listener, alGuardar;
 
-    public AnuncioAdapter(OnAnuncioClick listener) {
+    /** alGuardar: el marcapáginas de la ficha (guardar o quitar de guardados). */
+    public AnuncioAdapter(OnAnuncioClick listener, OnAnuncioClick alGuardar) {
         this.listener = listener;
+        this.alGuardar = alGuardar;
     }
 
     public void setAnuncios(List<Anuncio> nuevos) {
@@ -46,31 +53,72 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_anuncio, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.pagina_anuncio, parent, false);
         return new Holder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int posicion) {
         Anuncio a = anuncios.get(posicion);
-        float densidad = h.itemView.getResources().getDisplayMetrics().density;
+        Context ctx = h.itemView.getContext();
 
-        h.tvEmoji.setText(Anuncio.emoji(a.categoria));
+        // Icono de la categoría en un círculo de su color
+        h.ivIcono.setImageResource(Anuncio.iconoRes(a.categoria));
+        h.ivIcono.setImageTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.colorRes(a.categoria))));
+        h.ivIcono.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(Anuncio.tinteRes(a.categoria))));
+
         h.tvTitulo.setText(a.titulo);
-        h.tvMeta.setText(Anuncio.nombreCategoria(a.categoria) + " · " + FechasUtil.hace(a.publicacion));
+        h.tvMeta.setText(Anuncio.nombreCategoria(ctx, a.categoria) + " · " + FechasUtil.hace(ctx, a.publicacion));
         h.tvContenido.setText(a.contenido);
+        ajustarPista(h, a);
 
-        // Urgentes: borde rojo más grueso y etiqueta
+        // Urgentes: etiqueta roja. No leídos: puntito naranja
         h.tvUrgente.setVisibility(a.esUrgente() ? View.VISIBLE : View.GONE);
-        h.card.setStrokeColor(a.esUrgente() ? ROJO : NARANJA);
-        h.card.setStrokeWidth(Math.round((a.esUrgente() ? 2 : 1) * densidad));
+        h.vNoLeido.setVisibility(a.leido ? View.INVISIBLE : View.VISIBLE);
+        // Urgentes: además, borde rojo más grueso
+        MaterialCardView tarjeta = (MaterialCardView) h.ficha;
+        tarjeta.setStrokeColor(ctx.getColor(a.esUrgente() ? R.color.sec_error : R.color.sec_borde));
+        tarjeta.setStrokeWidth(Math.round((a.esUrgente() ? 2 : 1) * ctx.getResources().getDisplayMetrics().density));
 
-        // No leídos: título en negrita + puntito naranja. Leídos: algo más apagados
-        h.tvTitulo.setTypeface(null, a.leido ? Typeface.NORMAL : Typeface.BOLD);
-        h.vNoLeido.setVisibility(a.leido ? View.GONE : View.VISIBLE);
-        h.itemView.setAlpha(a.leido ? 0.7f : 1f);
+        h.ficha.setContentDescription((a.esUrgente() ? ctx.getString(R.string.nui_not_urgente) + ". " : "") + (a.leido ? "" : ctx.getString(R.string.nui_not_nuevo) + ". ")
+                + (a.guardado ? ctx.getString(R.string.nui_not_guardado) + ". " : "")
+                + Anuncio.nombreCategoria(ctx, a.categoria) + ". " + a.titulo);
+        // Marcapáginas: relleno y naranja si está guardado
+        h.btnGuardar.setIconResource(a.guardado ? R.drawable.nui_ic_guardado : R.drawable.nui_ic_guardar);
+        h.btnGuardar.setIconTint(ColorStateList.valueOf(ctx.getColor(a.guardado ? R.color.nui_acento : R.color.sec_texto_suave)));
+        h.btnGuardar.setContentDescription(ctx.getString(a.guardado ? R.string.nui_not_btn_quitar_guardado : R.string.nui_not_btn_guardar));
+        h.btnGuardar.setOnClickListener(v -> alGuardar.alPulsar(a));
+        h.ficha.setOnClickListener(v -> listener.alPulsar(a));
+    }
 
-        h.itemView.setOnClickListener(v -> listener.alPulsar(a));
+    /**
+     * La pista de abajo solo invita a tocar si hay algo más que ver: si el texto no cabe entero en la
+     * tarjeta (se corta con "…") pone "Toca para leerlo entero"; si cabe pero tiene enlace, "Toca para
+     * abrir el enlace"; y si ya se ve todo, no pone nada (en una tablet casi siempre cabe).
+     */
+    private void ajustarPista(Holder h, Anuncio a) {
+        TextView tv = h.tvContenido;
+        tv.setMaxLines(Integer.MAX_VALUE);
+        tv.setTag(a);
+        h.tvLeerMas.setVisibility(View.INVISIBLE);
+        // se mira justo antes de dibujar, cuando ya se sabe cuánto mide la tarjeta
+        OneShotPreDrawListener.add(tv, () -> {
+            if (tv.getTag() != a) return; // la página ya muestra otro aviso
+            Layout layout = tv.getLayout();
+            int alto = tv.getHeight() - tv.getPaddingTop() - tv.getPaddingBottom();
+            boolean cortado = false;
+            if (layout != null && alto > 0 && layout.getHeight() > alto) {
+                // caben las líneas que no se salen: con maxLines el final lleva "…" en vez de cortarse a medias
+                int caben = 0;
+                while (caben < layout.getLineCount() && layout.getLineBottom(caben) <= alto) caben++;
+                tv.setMaxLines(Math.max(1, caben));
+                cortado = true;
+            }
+            boolean hayEnlace = a.enlace != null && !a.enlace.isEmpty();
+            if (cortado) h.tvLeerMas.setText(R.string.nui_not_toca_leer);
+            else if (hayEnlace) h.tvLeerMas.setText(R.string.nui_not_toca_enlace);
+            h.tvLeerMas.setVisibility(cortado || hayEnlace ? View.VISIBLE : View.INVISIBLE);
+        });
     }
 
     @Override
@@ -79,18 +127,21 @@ public class AnuncioAdapter extends RecyclerView.Adapter<AnuncioAdapter.Holder> 
     }
 
     static class Holder extends RecyclerView.ViewHolder {
-        final MaterialCardView card;
-        final TextView tvEmoji, tvTitulo, tvMeta, tvContenido, tvUrgente;
-        final View vNoLeido;
+        final View ficha, vNoLeido;
+        final ImageView ivIcono;
+        final TextView tvTitulo, tvMeta, tvContenido, tvUrgente, tvLeerMas;
+        final MaterialButton btnGuardar;
 
         Holder(View v) {
             super(v);
-            card = (MaterialCardView) v;
-            tvEmoji = v.findViewById(R.id.tvEmoji);
+            ficha = v.findViewById(R.id.fichaAnuncio);
+            ivIcono = v.findViewById(R.id.ivIcono);
             tvTitulo = v.findViewById(R.id.tvTitulo);
             tvMeta = v.findViewById(R.id.tvMeta);
             tvContenido = v.findViewById(R.id.tvContenido);
             tvUrgente = v.findViewById(R.id.tvUrgente);
+            tvLeerMas = v.findViewById(R.id.tvLeerMas);
+            btnGuardar = v.findViewById(R.id.btnGuardarAviso);
             vNoLeido = v.findViewById(R.id.vNoLeido);
         }
     }

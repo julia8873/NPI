@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FICHA: tarjeta blanca con borde para libros, trámites... cualquier "registro". -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/nui_superficie" />
+    <stroke android:width="@dimen/nui_borde" android:color="@color/nui_papel_sombra" />
+    <corners android:radius="@dimen/nui_radio_ficha" />
+</shape>

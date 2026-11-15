@@ -1,6 +1,359 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/rootAsignaturas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F8FAFC"
+        android:orientation="vertical">
+
+        <!-- CABECERA UNIFICADA (igual que profesorado.xml): volver · título · chat · perfil -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <ImageButton
+                android:id="@+id/btnVolver"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_circulo_blanco_volver"
+                android:contentDescription="Volver al menú principal"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/nui_tinta" />
+
+            <TextView
+                android:id="@+id/tvTituloSeccion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="-0.02"
+                android:maxLines="1"
+                android:text="@string/titulo_biblioteca"
+                android:textColor="@color/nui_tinta"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/cardMascotaAyudante"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bg_nui_chat"
+                android:clickable="true"
+                android:contentDescription="Abrir asistente"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="14dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_nui_bot"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="Chat"
+                    android:textColor="@android:color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivIcono"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_nui_circulo_suave"
+                android:clickable="true"
+                android:contentDescription="Perfil"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_nui_usuario"
+                app:tint="@color/nui_tinta" />
+        </LinearLayout>
+
+        <!-- Buscador: campo blanco redondeado -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            app:boxBackgroundColor="#FFFFFF"
+            app:boxCornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxStrokeColor="#FF8C42"
+            app:hintEnabled="false"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="@color/nui_apagado">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etBuscar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_buscador_libros"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo"
+                android:textColorHint="@color/nui_apagado" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Vistas de la estantería: pestañas de papel, todas a la vista (Biblioteca.crearPestanasVista) -->
+        <com.example.nuietsiit.ui.PestanasPapel
+            android:id="@+id/pestanasVista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:layout_marginBottom="@dimen/nui_espacio_xs" />
+
+        <TextView
+            android:id="@+id/tvMostrandoPara"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+            android:visibility="gone" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSugerencia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/nui_espacio_l"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/nui_espacio_l">
+
+            <TextView
+                android:id="@+id/tvContador"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/nui_espacio_s"
+                android:layout_weight="1"
+                android:accessibilityLiveRegion="polite"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDisponibles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:text="@string/solo_disponibles" />
+        </LinearLayout>
+
+        <!-- Estantería: tarjeta blanca; las baldas las pinta BaldaDecoration -->
+        <FrameLayout
+            android:id="@+id/marcoBalda"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="@dimen/nui_espacio_xs"
+            android:layout_marginBottom="16dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLibros"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/nui_estanteria"
+                android:clipToPadding="false"
+                android:paddingHorizontal="@dimen/nui_espacio_xs" />
+
+            <TextView
+                android:id="@+id/tvVacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xxl"
+                android:gravity="center"
+                android:text="@string/no_hay_libros_baldas"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                android:visibility="gone" />
+
+            <!-- Modo estudio: dejar el móvil sobre la mesa = Pomodoro + No molestar -->
+            <LinearLayout
+                android:id="@+id/btnModoEstudio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="@dimen/nui_espacio_m"
+                android:background="@drawable/nui_flotante_cobalto"
+                android:clickable="true"
+                android:contentDescription="@string/modo_estudio_desc"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/biblio_flotante_alto"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/nui_espacio_m"
+                android:paddingEnd="@dimen/nui_espacio_l">
+
+                <ImageView
+                    android:layout_width="@dimen/nui_icono"
+                    android:layout_height="@dimen/nui_icono"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/nui_ic_reloj_arena"
+                    app:tint="#FF8C42" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/nui_espacio_xs"
+                    android:importantForAccessibility="no"
+                    android:text="@string/estudiar"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                    android:textColor="@color/nui_tinta" />
+            </LinearLayout>
+
+            <!-- Flotante principal: naranja -->
+            <LinearLayout
+                android:id="@+id/btnApuntar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="@dimen/nui_espacio_m"
+                android:background="@drawable/nui_flotante"
+                android:clickable="true"
+                android:elevation="2dp"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:minHeight="@dimen/biblio_flotante_alto"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/nui_espacio_l"
+                android:paddingEnd="@dimen/nui_espacio_xl">
+
+                <ImageView
+                    android:layout_width="@dimen/nui_icono"
+                    android:layout_height="@dimen/nui_icono"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/nui_ic_escaner"
+                    app:tint="@color/nui_sobre_resaltado" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/nui_espacio_s"
+                    android:text="@string/escanear"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte"
+                    android:textColor="@color/nui_sobre_resaltado" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Ojear: el libro sacado de la balda mientras se mantiene el dedo -->
+    <FrameLayout
+        android:id="@+id/panelOjear"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/nui_velo"
+        android:clipChildren="false"
+        android:elevation="@dimen/biblio_elevacion_ojear"
+        android:visibility="gone">
+
+        <!-- sin recortar: la tarjeta girada, escalada o subida sobresale de este contenedor -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/tarjetaOjear"
+                style="@style/Widget.Nui.Papel"
+                android:layout_width="@dimen/biblio_tarjeta_ojear"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:elevation="2dp">
+
+                <ImageView
+                    android:id="@+id/ivPortadaOjear"
+                    android:layout_width="@dimen/biblio_libro_grande_ancho"
+                    android:layout_height="@dimen/biblio_libro_grande_alto"
+                    android:background="@drawable/nui_libro"
+                    android:importantForAccessibility="no"
+                    android:paddingStart="@dimen/nui_borde_sello"
+                    android:paddingTop="@dimen/nui_borde_sello"
+                    android:paddingEnd="@dimen/nui_libro_canto"
+                    android:paddingBottom="@dimen/nui_libro_canto"
+                    android:scaleType="centerCrop"
+                    android:transitionName="portadaOjear" />
+
+                <TextView
+                    android:id="@+id/tvTituloOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_m"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Titular.M" />
+
+                <TextView
+                    android:id="@+id/tvAutoresOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario" />
+
+                <TextView
+                    android:id="@+id/tvDisponibilidadOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_s"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Fuerte" />
+
+                <TextView
+                    android:id="@+id/tvUbicacionOjear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/nui_espacio_xs"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.Nui.Codigo" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nui_espacio_xl"
+                android:background="@drawable/nui_flotante_cobalto"
+                android:paddingHorizontal="@dimen/nui_espacio_m"
+                android:paddingVertical="@dimen/nui_espacio_xs"
+                android:text="@string/suelta_para_devolverlo"
+                android:textAppearance="@style/TextAppearance.Nui.Cuerpo.Secundario"
+                android:textColor="@color/nui_tinta" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

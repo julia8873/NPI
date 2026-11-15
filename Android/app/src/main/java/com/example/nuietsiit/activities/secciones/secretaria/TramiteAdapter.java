@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nuietsiit.R;
 import com.example.nuietsiit.data.modelo.Tramite;
-import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +44,7 @@ public class TramiteAdapter extends RecyclerView.Adapter<TramiteAdapter.Holder> 
         Tramite t = tramites.get(position);
         h.tvNombre.setText(t.nombre);
         h.tvCategoria.setText(t.etiquetaCategoria());
+        h.tvCategoria.setTextColor(h.itemView.getContext().getColor(t.colorCategoria()));
         h.chipPlazo.setVisibility(t.plazoAbierto() ? View.VISIBLE : View.GONE);
         h.itemView.setOnClickListener(v -> listener.alPulsar(t));
     }
@@ -56,7 +56,7 @@ public class TramiteAdapter extends RecyclerView.Adapter<TramiteAdapter.Holder> 
 
     static class Holder extends RecyclerView.ViewHolder {
         final TextView tvNombre, tvCategoria;
-        final Chip chipPlazo;
+        final TextView chipPlazo;
 
         Holder(View v) {
             super(v);
