@@ -19,29 +19,32 @@ import com.example.nuietsiit.activities.secciones.mapa.LocalizadorUsuario;
 import java.util.Calendar;
 
 /**
- * Detecta cuando el móvil se coloca boca abajo sobre una superficie (Z <= -8.0 m/s²).
+ * Detecta cuando el móvil se coloca boca abajo o en la oscuridad (nivel de luz < 5 lux,
+ * como en un bolsillo o sobre la mesa boca abajo).
  * Si el usuario se encuentra en horario de clase, activa el MODO SILENCIO REAL del sistema
- * para todo el teléfono (llamadas, notificaciones, sonidos del sistema).
- * Al levantar el móvil boca arriba, restaura el estado de sonido anterior del sistema.
+ * para todo el teléfono. Al levantar el móvil o sacarlo a la luz, restaura el sonido anterior.
  */
 public class DetectorBocaAbajo implements SensorEventListener {
 
     private static final float ALFA = 0.8f;
     private static final float UMBRAL_BOCA_ABAJO_Z = -8.0f; // Eje Z negativo = boca abajo
     private static final float UMBRAL_FLAT_XY = 3.5f;        // Plano horizontal
-    private static final long TIEMPO_ESTABLE_MS = 800;      // Tiempo continuo boca abajo para confirmar
+    private static final float UMBRAL_LUX_OSCURIDAD = 1.5f;  // Menos de 1.5 lux (oscuridad real de bolsillo/bolso)
+    private static final long TIEMPO_ESTABLE_MS = 1500;     // 1.5 segundos continuos para confirmar
     private static final long ENFRIAMIENTO_MS = 5000;       // Enfriamiento entre avisos
 
     private final Context context;
     private final SensorManager sensorManager;
     private final Sensor acelerometro;
+    private final Sensor luzSensor;
 
     private float zFiltrado;
     private float xFiltrado;
     private float yFiltrado;
+    private float luzActual = 100f; // Por defecto luz ambiente normal
     private boolean primeraLectura;
 
-    private long tiempoInicioBocaAbajo = 0;
+    private long tiempoInicioDisparo = 0;
     private boolean activadoModoSilencio = false;
     private long ultimoDisparo = 0;
 
@@ -53,51 +56,66 @@ public class DetectorBocaAbajo implements SensorEventListener {
         this.context = context.getApplicationContext();
         this.sensorManager = (SensorManager) this.context.getSystemService(Context.SENSOR_SERVICE);
         this.acelerometro = sensorManager != null ? sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) : null;
+        this.luzSensor = sensorManager != null ? sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) : null;
     }
 
     public boolean disponible() {
-        return acelerometro != null;
+        return acelerometro != null || luzSensor != null;
     }
 
     public void iniciar() {
-        if (acelerometro == null || sensorManager == null) return;
+        if (sensorManager == null) return;
         primeraLectura = true;
-        sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_UI);
+        if (acelerometro != null) {
+            sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_UI);
+        }
+        if (luzSensor != null) {
+            sensorManager.registerListener(this, luzSensor, SensorManager.SENSOR_DELAY_UI);
+        }
     }
 
     public void parar() {
-        if (acelerometro != null && sensorManager != null) {
+        if (sensorManager != null) {
             sensorManager.unregisterListener(this);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
 
-        if (primeraLectura) {
-            xFiltrado = x;
-            yFiltrado = y;
-            zFiltrado = z;
-            primeraLectura = false;
-        } else {
-            xFiltrado = ALFA * xFiltrado + (1 - ALFA) * x;
-            yFiltrado = ALFA * yFiltrado + (1 - ALFA) * y;
-            zFiltrado = ALFA * zFiltrado + (1 - ALFA) * z;
+            if (primeraLectura) {
+                xFiltrado = x;
+                yFiltrado = y;
+                zFiltrado = z;
+                primeraLectura = false;
+            } else {
+                xFiltrado = ALFA * xFiltrado + (1 - ALFA) * x;
+                yFiltrado = ALFA * yFiltrado + (1 - ALFA) * y;
+                zFiltrado = ALFA * zFiltrado + (1 - ALFA) * z;
+            }
+        } else if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
+            luzActual = event.values[0];
         }
 
         boolean estaBocaAbajo = (zFiltrado <= UMBRAL_BOCA_ABAJO_Z)
                 && (Math.abs(xFiltrado) <= UMBRAL_FLAT_XY)
                 && (Math.abs(yFiltrado) <= UMBRAL_FLAT_XY);
 
+        boolean estaOscuro = (luzActual < UMBRAL_LUX_OSCURIDAD);
+
+        // Se activa si está boca abajo O si está en completa oscuridad (en el bolsillo / bolso durante clase)
+        boolean condicionActivacion = estaBocaAbajo || estaOscuro;
+
         long ahora = SystemClock.elapsedRealtime();
 
-        if (estaBocaAbajo) {
-            if (tiempoInicioBocaAbajo == 0) {
-                tiempoInicioBocaAbajo = ahora;
-            } else if (!activadoModoSilencio && (ahora - tiempoInicioBocaAbajo >= TIEMPO_ESTABLE_MS)
+        if (condicionActivacion) {
+            if (tiempoInicioDisparo == 0) {
+                tiempoInicioDisparo = ahora;
+            } else if (!activadoModoSilencio && (ahora - tiempoInicioDisparo >= TIEMPO_ESTABLE_MS)
                     && (ahora - ultimoDisparo > ENFRIAMIENTO_MS)) {
 
                 // Comprobar si el usuario está en clase según su horario
@@ -111,26 +129,21 @@ public class DetectorBocaAbajo implements SensorEventListener {
                         activadoModoSilencio = true;
                         ultimoDisparo = ahora;
                     } else {
-                        // Evitar abrir en bucle los ajustes si no tiene permiso
                         ultimoDisparo = ahora;
-                        tiempoInicioBocaAbajo = 0;
+                        tiempoInicioDisparo = 0;
                     }
                 }
             }
         } else {
-            // Si estaba silenciado por este detector y el usuario levanta el móvil (Z > 0)
-            if (activadoModoSilencio && zFiltrado > 2.0f) {
+            // Si estaba silenciado y el usuario levanta el móvil o lo saca a la luz
+            if (activadoModoSilencio && (zFiltrado > 2.0f || luzActual > 20.0f)) {
                 activadoModoSilencio = false;
                 restaurarModoSonidoSistema();
             }
-            tiempoInicioBocaAbajo = 0;
+            tiempoInicioDisparo = 0;
         }
     }
 
-    /**
-     * Silencia por completo llamadas, notificaciones y sistema.
-     * @return true si se pudo silenciar, false si falta permiso de No Molestar.
-     */
     private boolean activarModoSilencioSistema(LocalizadorUsuario.SesionActual sesion) {
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -139,7 +152,6 @@ public class DetectorBocaAbajo implements SensorEventListener {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (notificationManager == null || !notificationManager.isNotificationPolicyAccessGranted()) {
-                // Pedir permiso de Acceso a No Molestar SIN llamar antes a setRingerMode (que lanzaría SecurityException)
                 Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
@@ -147,11 +159,9 @@ public class DetectorBocaAbajo implements SensorEventListener {
                 return false;
             }
 
-            // Guardar estado previo para poder restaurarlo después
             ringerModePrevio = audioManager.getRingerMode();
             interruptionFilterPrevio = notificationManager.getCurrentInterruptionFilter();
 
-            // Silencio total del sistema (corta llamadas, tono y vibración)
             notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
             audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
         } else {

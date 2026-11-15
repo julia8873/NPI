@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NUI ETSIIT</string>
+    <string name="app_name">ETSIIT Go</string>
     <string name="volver">Volver</string>
     <string name="volver_menu_principal">Volver al menú principal</string>
     <string name="chat">Chat</string>
@@ -14,7 +14,7 @@
     <string name="eliminar">Eliminar</string>
     <string name="cerrar">Cerrar</string>
 
-    <string name="titulo_app">NUI ETSIIT</string>
+    <string name="titulo_app">ETSIIT Go</string>
     <string name="inclinacion_indicador_desc">Indicador de inclinación. Toca para activar o desactivar.</string>
     <string name="novedades_etsiit">Novedades ETSIIT</string>
     <string name="tag_hoy">HOY</string>
