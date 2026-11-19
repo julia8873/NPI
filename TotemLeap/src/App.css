@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: #0f172a;
+  color: #f8fafc;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden; /* Evita barras de scroll en modo kiosco */
+}
+
+.totem-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.badge.ok {
+  background-color: #065f46;
+  color: #6ee7b7;
+}
+
+.badge.error {
+  background-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.badge.info {
+  background-color: #1e293b;
+  color: #93c5fd;
+}
+
+.telemetry-card {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.telemetry-card h2 {
+  margin-bottom: 0.75rem;
+  color: #38bdf8;
+}
+
+.interactive-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+}
+
+.totem-button {
+  width: 420px;
+  height: 220px;
+  border-radius: 1.5rem;
+  border: 3px solid #38bdf8;
+  background-color: #1e293b;
+  color: white;
+  font-size: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.totem-button.hovered {
+  background-color: #0284c7;
+  transform: scale(1.05);
+}
+
+.custom-gesture-banner {
+  padding: 1.25rem 2rem;
+  border-radius: 1rem;
+  background-color: #1e293b;
+  border: 2px dashed #64748b;
+  font-size: 1.2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.custom-gesture-banner.active {
+  background-color: #059669;
+  border-color: #34d399;
+  transform: scale(1.05);
+  font-weight: bold;
+}
+
+/* Cursor virtual en pantalla */
+.leap-cursor {
+  position: fixed;
+  top: -25px;
+  left: -25px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgba(56, 189, 248, 0.85);
+  border: 3px solid white;
+  pointer-events: none; /* Fundamental para no bloquear eventos debajo */
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.dwell-ring {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 4px solid #fbbf24;
+}
