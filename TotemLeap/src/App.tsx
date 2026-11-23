@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import './App.css';
+import { useEffect, useRef, useState } from "react";
+import "./App.css";
 
 // Tipos de datos que envía el WebSocket de Leap Motion (v6.json)
 interface LeapHand {
   id: number;
-  type: 'left' | 'right';
+  type: "left" | "right";
   palmPosition: [number, number, number]; // [X, Y, Z] en mm
   palmVelocity: [number, number, number]; // [vX, vY, vZ] en mm/s
   pinchStrength: number; // 0 (abierta) a 1 (pinza cerrada)
-  grabStrength: number;  // 0 (abierta) a 1 (puño cerrado)
+  grabStrength: number; // 0 (abierta) a 1 (puño cerrado)
 }
 
 interface LeapFrame {
@@ -19,7 +19,13 @@ export default function App() {
   // Estados de interfaz (solo se actualizan en eventos discretos)
   const [conectado, setConectado] = useState(false);
   const [manosDetectadas, setManosDetectadas] = useState(0);
-  const [telemetria, setTelemetria] = useState({ x: 0, y: 0, z: 0, pinch: 0, grab: 0 });
+  const [telemetria, setTelemetria] = useState({
+    x: 0,
+    y: 0,
+    z: 0,
+    pinch: 0,
+    grab: 0,
+  });
   const [sobreBoton, setSobreBoton] = useState(false);
   const [progresoDwell, setProgresoDwell] = useState(0); // 0 a 100%
   const [contadorClicks, setContadorClicks] = useState(0);
@@ -30,7 +36,10 @@ export default function App() {
   const botonPruebaRef = useRef<HTMLButtonElement | null>(null);
 
   // Referencias internas para filtros y máquinas de estado de gestos
-  const posSuavizada = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const posSuavizada = useRef({
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  });
   const inicioHoverMs = useRef<number | null>(null);
   const pinzaBloqueada = useRef(false);
   const cooldownGestoCustom = useRef(0);
@@ -41,7 +50,7 @@ export default function App() {
     let timerReconexion: number | undefined;
 
     const conectarLeap = () => {
-      ws = new WebSocket('ws://127.0.0.1:6437/v6.json');
+      ws = new WebSocket("ws://127.0.0.1:6437/v6.json");
 
       ws.onopen = () => {
         setConectado(true);
@@ -88,8 +97,10 @@ export default function App() {
 
         // 2. FILTRO PASO BAJO EXPONENCIAL (anti-temblor)
         const alpha = 0.35;
-        posSuavizada.current.x = alpha * targetX + (1 - alpha) * posSuavizada.current.x;
-        posSuavizada.current.y = alpha * targetY + (1 - alpha) * posSuavizada.current.y;
+        posSuavizada.current.x =
+          alpha * targetX + (1 - alpha) * posSuavizada.current.x;
+        posSuavizada.current.y =
+          alpha * targetY + (1 - alpha) * posSuavizada.current.y;
 
         const cx = posSuavizada.current.x;
         const cy = posSuavizada.current.y;
@@ -103,7 +114,10 @@ export default function App() {
         if (botonPruebaRef.current) {
           const rect = botonPruebaRef.current.getBoundingClientRect();
           const estaEncima =
-            cx >= rect.left && cx <= rect.right && cy >= rect.top && cy <= rect.bottom;
+            cx >= rect.left &&
+            cx <= rect.right &&
+            cy >= rect.top &&
+            cy <= rect.bottom;
 
           setSobreBoton(estaEncima);
 
@@ -178,8 +192,10 @@ export default function App() {
     <div className="totem-container">
       {/* Cabecera de estado del hardware */}
       <header className="status-bar">
-        <span className={`badge ${conectado ? 'ok' : 'error'}`}>
-          {conectado ? '● Leap Motion Conectado' : '○ Esperando servicio Leap (puerto 6437)...'}
+        <span className={`badge ${conectado ? "ok" : "error"}`}>
+          {conectado
+            ? "● Leap Motion Conectado"
+            : "○ Esperando servicio Leap (puerto 6437)..."}
         </span>
         <span className="badge info">Manos detectadas: {manosDetectadas}</span>
       </header>
@@ -188,11 +204,13 @@ export default function App() {
       <section className="telemetry-card">
         <h2>Prueba de Integración Gestual - Tótem ETSIIT</h2>
         <p>
-          Coordenadas 3D (mm): <strong>X: {telemetria.x}</strong> |{' '}
-          <strong>Y: {telemetria.y}</strong> | <strong>Z: {telemetria.z}</strong>
+          Coordenadas 3D (mm): <strong>X: {telemetria.x}</strong> |{" "}
+          <strong>Y: {telemetria.y}</strong> |{" "}
+          <strong>Z: {telemetria.z}</strong>
         </p>
         <p>
-          Pinza: <strong>{telemetria.pinch}</strong> | Puño: <strong>{telemetria.grab}</strong>
+          Pinza: <strong>{telemetria.pinch}</strong> | Puño:{" "}
+          <strong>{telemetria.grab}</strong>
         </p>
       </section>
 
@@ -200,17 +218,19 @@ export default function App() {
       <main className="interactive-zone">
         <button
           ref={botonPruebaRef}
-          className={`totem-button ${sobreBoton ? 'hovered' : ''}`}
+          className={`totem-button ${sobreBoton ? "hovered" : ""}`}
           onClick={() => setContadorClicks((c) => c + 1)}
         >
           <span>Apunta aquí (800 ms) o haz Pinza</span>
           <strong>Activaciones: {contadorClicks}</strong>
         </button>
 
-        <div className={`custom-gesture-banner ${gestoCustomActivo ? 'active' : ''}`}>
+        <div
+          className={`custom-gesture-banner ${gestoCustomActivo ? "active" : ""}`}
+        >
           {gestoCustomActivo
-            ? '¡Gesto personalizado detectado! (Empuje -Z + Puño -> Mostrar QR)'
-            : 'Prueba el gesto personalizado: empuja la mano hacia la pantalla y cierra el puño'}
+            ? "¡Gesto personalizado detectado! (Empuje -Z + Puño -> Mostrar QR)"
+            : "Prueba el gesto personalizado: empuja la mano hacia la pantalla y cierra el puño"}
         </div>
       </main>
 
