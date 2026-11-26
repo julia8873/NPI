@@ -17,6 +17,8 @@ export function TotemHeader() {
     setSimulatorEnabled,
     triggerSimulatedFist,
     triggerSimulatedWave,
+    triggerSimulatedPinch,
+    triggerSimulatedSwipe,
     telemetry,
   } = useLeap();
 
@@ -171,6 +173,27 @@ export function TotemHeader() {
                   onClick={triggerSimulatedWave}
                 >
                   {t.simulator.simulateWave}
+                </button>
+                <button
+                  type="button"
+                  className="sim-action-btn"
+                  onClick={triggerSimulatedPinch}
+                >
+                  {t.simulator.simulatePinch}
+                </button>
+                <button
+                  type="button"
+                  className="sim-action-btn"
+                  onClick={() => triggerSimulatedSwipe("left")}
+                >
+                  {t.simulator.simulateSwipeLeft}
+                </button>
+                <button
+                  type="button"
+                  className="sim-action-btn"
+                  onClick={() => triggerSimulatedSwipe("right")}
+                >
+                  {t.simulator.simulateSwipeRight}
                 </button>
               </div>
             </div>

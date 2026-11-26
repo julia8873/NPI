@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { useAccessibility } from "../context/AccessibilityContext";
 import { SECTION_THEME_MAP } from "../data/sections";
 import { useGestureTarget, useWaveGoodbye } from "../gestures/hooks";
@@ -11,57 +11,14 @@ interface SectionViewProps {
 }
 
 /**
- * Elemento de ejemplo interactivo dentro de una sección.
- * Demuestra cómo reutilizar `useGestureTarget` en vistas internas.
- */
-function SectionSampleCard({
-  id,
-  label,
-  detail,
-  selected,
-  onSelect,
-  fistBadge,
-}: {
-  id: string;
-  label: string;
-  detail: string;
-  selected: boolean;
-  onSelect: () => void;
-  fistBadge: string;
-}) {
-  const { ref, isHovered } = useGestureTarget<HTMLButtonElement>({
-    id,
-    onSelect,
-  });
-
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className={`section-sample-item ${isHovered ? "is-hovered" : ""} ${
-        selected ? "is-selected" : ""
-      }`}
-      onClick={onSelect}
-    >
-      <div className="sample-item-text">
-        <strong>{label}</strong>
-        <span>{detail}</span>
-      </div>
-      {isHovered && <span className="fist-prompt-pill">{fistBadge}</span>}
-    </button>
-  );
-}
-
-/**
- * Contenedor reutilizable para las vistas internas de cada sección.
- * Suscribe el gesto "Adiós (3 veces)" mediante `useWaveGoodbye` para permitir
- * volver al menú principal desde cualquier sección.
+ * Vista de placeholder para cada sección.
+ * Los compañeros de equipo añadirán aquí el contenido real.
+ * Ya incluye el gesto "Adiós ×3" para volver al menú y el botón de regreso.
  */
 export function SectionView({ sectionId, onBack }: SectionViewProps) {
   const { t } = useAccessibility();
   const theme = SECTION_THEME_MAP[sectionId];
   const copy = t.sections[sectionId];
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   // Gesto reutilizable "Adiós ×3" para volver al menú principal
   const { waveProgress } = useWaveGoodbye(onBack);
@@ -83,6 +40,7 @@ export function SectionView({ sectionId, onBack }: SectionViewProps) {
 
   return (
     <main className="section-view" style={style}>
+      {/* Barra superior con botón de regreso e indicador del gesto Adiós ×3 */}
       <div className="section-view-topbar">
         <button
           ref={backRef}
@@ -106,6 +64,7 @@ export function SectionView({ sectionId, onBack }: SectionViewProps) {
         </div>
       </div>
 
+      {/* Cabecera de la sección con icono y título */}
       <div className="section-hero-card">
         <div className="section-icon-badge large">
           <SectionIcon id={sectionId} />
@@ -116,23 +75,10 @@ export function SectionView({ sectionId, onBack }: SectionViewProps) {
         </div>
       </div>
 
-      <div className="section-content-panel">
-        <h2 className="section-content-heading">{copy.previewHeadline}</h2>
-        <p className="section-content-note">{copy.previewNote}</p>
-
-        <div className="section-sample-list">
-          {copy.sampleItems.map((item, idx) => (
-            <SectionSampleCard
-              key={item.label}
-              id={`sample-${sectionId}-${idx}`}
-              label={item.label}
-              detail={item.detail}
-              selected={selectedIdx === idx}
-              onSelect={() => setSelectedIdx(idx)}
-              fistBadge={t.gestures.fistBadge}
-            />
-          ))}
-        </div>
+      {/* Área vacía reservada para el contenido que añadirá el equipo */}
+      <div className="section-placeholder">
+        <div className="placeholder-icon" aria-hidden="true">🚧</div>
+        <p className="placeholder-text">{t.sections[sectionId].placeholderText}</p>
       </div>
     </main>
   );

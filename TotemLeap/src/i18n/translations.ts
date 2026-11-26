@@ -20,12 +20,11 @@ export interface NewsSlide {
   qrValue: string;
 }
 
+/** Textos mínimos de cada sección: título visible en la tarjeta y placeholder temporal. */
 export interface SectionTranslation {
   title: string;
   subtitle: string;
-  previewHeadline: string;
-  previewNote: string;
-  sampleItems: Array<{ label: string; detail: string }>;
+  placeholderText: string;
 }
 
 export interface TranslationDictionary {
@@ -57,6 +56,9 @@ export interface TranslationDictionary {
     hint: string;
     simulateFist: string;
     simulateWave: string;
+    simulatePinch: string;
+    simulateSwipeLeft: string;
+    simulateSwipeRight: string;
   };
   newsSlides: NewsSlide[];
   sections: Record<SectionId, SectionTranslation>;
@@ -80,7 +82,7 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
     gestures: {
       moveHand: "Mueve la mano para elegir",
       closeFist: "Cierra el puño para entrar",
-      waveBack: "Adiós ×3: menú",
+      waveBack: "Adiós para volver al menú",
       fistBadge: "Puño",
       waveDetected: "Volviendo al menú...",
       fistDetected: "Selección activada",
@@ -93,9 +95,12 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       statusDisconnected: "Sin sensor físico",
       handsLabel: "Manos",
       toggleLabel: "Simular mano con ratón",
-      hint: "Atajos: F = Puño · W = Adiós ×3",
+      hint: "Atajos: F = Puño · W = Adiós ×3 · P = Pellizco · ← → = Barrido 2 manos",
       simulateFist: "Simular Puño (F)",
       simulateWave: "Simular Adiós ×3 (W)",
+      simulatePinch: "Simular Pellizco (P)",
+      simulateSwipeLeft: "Barrido ← (flecha izq.)",
+      simulateSwipeRight: "Barrido → (flecha dcha.)",
     },
     newsSlides: [
       {
@@ -127,98 +132,42 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       actividades: {
         title: "Tablón de actividades",
         subtitle: "Eventos, talleres y charlas de hoy",
-        previewHeadline: "Agenda de actividades de la escuela",
-        previewNote:
-          "Usa tu mano para explorar las actividades o haz el gesto Adiós ×3 para volver al menú principal.",
-        sampleItems: [
-          { label: "Taller de Git y CI/CD", detail: "17:00 · Aula 2.4" },
-          { label: "Charla Ciberseguridad UGR", detail: "18:30 · Salón de Actos" },
-          { label: "Club de Robótica ETSIIT", detail: "19:15 · Lab. -1.2" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       biblioteca: {
         title: "Biblioteca",
         subtitle: "Reserva aula de estudio y libros destacados",
-        previewHeadline: "Puestos y salas de trabajo disponibles",
-        previewNote:
-          "Selecciona cualquier elemento cerrando el puño o realiza Adiós ×3 para regresar.",
-        sampleItems: [
-          { label: "Sala de trabajo en grupo A", detail: "Libre de 16:30 a 18:30" },
-          { label: "Puestos individuales planta 1", detail: "24 plazas libres ahora" },
-          { label: "Préstamo de portátiles", detail: "Mostrador principal" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       mapa: {
         title: "Mapa",
         subtitle: "Modelo 3D, plantas y rutas guiadas",
-        previewHeadline: "Orientación y planos del edificio ETSIIT",
-        previewNote:
-          "Elige una planta con el puño o vuelve al menú con Adiós ×3.",
-        sampleItems: [
-          { label: "Planta Baja · Conserjería y Secretaría", detail: "Acceso principal" },
-          { label: "Planta 1 · Aulas teóricas 1.1 – 1.8", detail: "Ala Norte" },
-          { label: "Planta -1 · Laboratorios de Informática", detail: "Ala Sur" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       profesorado: {
         title: "Profesorado",
         subtitle: "Fichas, disponibilidad y tutorías",
-        previewHeadline: "Directorio docente y horarios de tutoría",
-        previewNote:
-          "Desplaza la mano sobre un departamento y cierra el puño para consultar.",
-        sampleItems: [
-          { label: "Dpto. Ciencias de la Computación e IA", detail: "Planta 3 · Despachos 1-14" },
-          { label: "Dpto. Lenguajes y Sistemas Informáticos", detail: "Planta 2 · Despachos 1-18" },
-          { label: "Dpto. Arquitectura y Tecnología de Computadores", detail: "Planta 1 · Ala Oeste" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       asignaturas: {
         title: "Asignaturas",
         subtitle: "Busca por grado y curso",
-        previewHeadline: "Guías docentes y aulas asignadas",
-        previewNote:
-          "Selecciona una titulación cerrando el puño o vuelve con Adiós ×3.",
-        sampleItems: [
-          { label: "Grado en Ingeniería Informática", detail: "1.º a 4.º curso · Menciones" },
-          { label: "Grado en Ing. de Tecnologías de Telecomunicación", detail: "1.º a 4.º curso" },
-          { label: "Doble Grado Informática y Matemáticas", detail: "1.º a 5.º curso" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       secretaria: {
         title: "Secretaría",
         subtitle: "Pide cita y consulta trámites",
-        previewHeadline: "Atención al estudiante y cita previa",
-        previewNote:
-          "Cierra el puño sobre un trámite para ver los detalles o usa Adiós ×3 para volver.",
-        sampleItems: [
-          { label: "Horario de ventanilla", detail: "Lunes a viernes · 09:00 a 14:00" },
-          { label: "Solicitud de certificados académicos", detail: "Cita previa o Sede UGR" },
-          { label: "Entrega de documentación de becas", detail: "Planta baja · Ventanilla 2" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       comedor: {
         title: "Comedor",
         subtitle: "Menú semanal y opción vegetariana",
-        previewHeadline: "Menú Universitario UGR · Hoy",
-        previewNote:
-          "Consulta las opciones del día o realiza Adiós ×3 para regresar.",
-        sampleItems: [
-          { label: "Primer plato", detail: "Crema de calabaza con picatostes" },
-          { label: "Segundo plato", detail: "Pollo asado con patatas / Tofu marinado (Veg)" },
-          { label: "Horario de servicio", detail: "13:00 a 15:30 · Comedor Fuentenueva" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
       faq: {
         title: "Preguntas frecuentes",
         subtitle: "Respuestas rápidas a lo más común",
-        previewHeadline: "Ayuda rápida sobre la ETSIIT",
-        previewNote:
-          "Elige una pregunta frecuente con el puño o haz Adiós ×3 para volver.",
-        sampleItems: [
-          { label: "¿Cómo conectarme a la Wi-Fi eduroam?", detail: "Usa tu correo @correo.ugr.es" },
-          { label: "¿Dónde obtengo la TUI universitaria?", detail: "Punto de atención en Planta Baja" },
-          { label: "¿Cómo reservo un aula de estudio?", detail: "Desde la sección Biblioteca o app UGR" },
-        ],
+        placeholderText: "Contenido en desarrollo por el equipo.",
       },
     },
   },
@@ -239,7 +188,7 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
     gestures: {
       moveHand: "Move hand to choose",
       closeFist: "Close fist to enter",
-      waveBack: "Wave ×3: menu",
+      waveBack: "Wave to return to menu",
       fistBadge: "Fist",
       waveDetected: "Returning to menu...",
       fistDetected: "Selection triggered",
@@ -252,9 +201,12 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       statusDisconnected: "No physical sensor",
       handsLabel: "Hands",
       toggleLabel: "Simulate hand with mouse",
-      hint: "Shortcuts: F = Fist · W = Wave ×3",
+      hint: "Shortcuts: F = Fist · W = Wave ×3 · P = Pinch · ← → = Two-hand swipe",
       simulateFist: "Simulate Fist (F)",
       simulateWave: "Simulate Wave ×3 (W)",
+      simulatePinch: "Simulate Pinch (P)",
+      simulateSwipeLeft: "Swipe ← (left arrow)",
+      simulateSwipeRight: "Swipe → (right arrow)",
     },
     newsSlides: [
       {
@@ -286,98 +238,42 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       actividades: {
         title: "Activity Board",
         subtitle: "Today's events, workshops and talks",
-        previewHeadline: "School activity schedule",
-        previewNote:
-          "Use your hand to browse activities or wave goodbye ×3 to return to the main menu.",
-        sampleItems: [
-          { label: "Git & CI/CD Workshop", detail: "17:00 · Room 2.4" },
-          { label: "UGR Cybersecurity Talk", detail: "18:30 · Main Auditorium" },
-          { label: "ETSIIT Robotics Club", detail: "19:15 · Lab -1.2" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       biblioteca: {
         title: "Library",
         subtitle: "Book study rooms and featured books",
-        previewHeadline: "Available seats and study rooms",
-        previewNote:
-          "Close your fist over any item to select it, or wave ×3 to go back.",
-        sampleItems: [
-          { label: "Group Study Room A", detail: "Available 16:30 – 18:30" },
-          { label: "Individual desks · Floor 1", detail: "24 seats free right now" },
-          { label: "Laptop lending desk", detail: "Main library counter" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       mapa: {
         title: "Campus Map",
         subtitle: "3D model, floors and guided routes",
-        previewHeadline: "ETSIIT building floor plans & navigation",
-        previewNote:
-          "Select a floor by closing your fist, or wave ×3 to return to menu.",
-        sampleItems: [
-          { label: "Ground Floor · Reception & Registrar", detail: "Main entrance" },
-          { label: "Floor 1 · Lecture Rooms 1.1 – 1.8", detail: "North Wing" },
-          { label: "Floor -1 · Computer Science Labs", detail: "South Wing" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       profesorado: {
         title: "Faculty",
         subtitle: "Profiles, availability and office hours",
-        previewHeadline: "Faculty directory & tutoring schedule",
-        previewNote:
-          "Hover over a department and close your fist to view office details.",
-        sampleItems: [
-          { label: "Dept. Computer Science & AI", detail: "Floor 3 · Offices 1-14" },
-          { label: "Dept. Software Engineering", detail: "Floor 2 · Offices 1-18" },
-          { label: "Dept. Computer Architecture", detail: "Floor 1 · West Wing" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       asignaturas: {
         title: "Courses",
         subtitle: "Search by degree and academic year",
-        previewHeadline: "Course syllabi & assigned classrooms",
-        previewNote:
-          "Select a degree by closing your fist or wave ×3 to return.",
-        sampleItems: [
-          { label: "BSc in Computer Engineering", detail: "Years 1–4 · Specializations" },
-          { label: "BSc in Telecommunication Technologies", detail: "Years 1–4" },
-          { label: "Double Degree CS & Mathematics", detail: "Years 1–5" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       secretaria: {
-        title: "Registrar Office",
+        title: "Secretary  Office",
         subtitle: "Book an appointment and check procedures",
-        previewHeadline: "Student services & appointment booking",
-        previewNote:
-          "Close your fist on a procedure for details, or wave ×3 to return.",
-        sampleItems: [
-          { label: "Desk opening hours", detail: "Monday to Friday · 09:00 – 14:00" },
-          { label: "Academic transcript requests", detail: "Appointment or UGR Portal" },
-          { label: "Scholarship documentation", detail: "Ground Floor · Desk 2" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       comedor: {
         title: "Dining Hall",
         subtitle: "Weekly menu and vegetarian option",
-        previewHeadline: "UGR University Dining · Today's Menu",
-        previewNote:
-          "Check today's dishes or wave goodbye ×3 to return to the main menu.",
-        sampleItems: [
-          { label: "Starter", detail: "Roasted pumpkin cream with croutons" },
-          { label: "Main course", detail: "Roast chicken & potatoes / Marinated tofu (Veg)" },
-          { label: "Serving hours", detail: "13:00 – 15:30 · Fuentenueva Dining Hall" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
       faq: {
         title: "FAQ",
         subtitle: "Quick answers to common questions",
-        previewHeadline: "Quick help about ETSIIT",
-        previewNote:
-          "Choose a question with your fist or wave ×3 to go back.",
-        sampleItems: [
-          { label: "How do I connect to eduroam Wi-Fi?", detail: "Sign in with @correo.ugr.es" },
-          { label: "Where do I get my UGR student ID card?", detail: "Ground Floor Help Point" },
-          { label: "How can I book a study room?", detail: "Via Library section or UGR App" },
-        ],
+        placeholderText: "Content under development by the team.",
       },
     },
   },

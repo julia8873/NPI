@@ -604,81 +604,30 @@
   color: #475569;
 }
 
-.section-content-panel {
+/* Área vacía reservada para el contenido real de cada sección */
+.section-placeholder {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: clamp(16px, 2.2vh, 24px);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-}
-
-.section-content-heading {
-  margin: 0;
-  font-size: calc(1.1rem * var(--font-scale));
-  font-weight: 700;
-  color: #181826;
-}
-
-.section-content-note {
-  margin: 0;
-  font-size: calc(0.88rem * var(--font-scale));
-  color: #64748b;
-  line-height: 1.4;
-}
-
-.section-sample-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-
-.section-sample-item {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: 16px;
-  border: 2px solid #e2e8f0;
-  background: #f8fafc;
-  text-align: left;
-  cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  justify-content: center;
+  gap: 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 2px dashed rgba(148, 163, 184, 0.45);
 }
 
-.section-sample-item:hover,
-.section-sample-item.is-hovered {
-  transform: scale(1.025);
-  border-color: var(--border-color);
-  background: #ffffff;
-  box-shadow: 0 8px 20px var(--glow-color);
+.placeholder-icon {
+  font-size: 3.5rem;
+  line-height: 1;
 }
 
-.section-sample-item.is-selected {
-  border-color: var(--border-color);
-  background: var(--card-bg);
-}
-
-.sample-item-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sample-item-text strong {
-  font-size: calc(0.95rem * var(--font-scale));
-  color: #181826;
-}
-
-.sample-item-text span {
-  font-size: calc(0.82rem * var(--font-scale));
-  color: #5b6475;
+.placeholder-text {
+  margin: 0;
+  font-size: calc(1rem * var(--font-scale));
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
 }
 
 /* ---------------- BARRA INFERIOR DE GESTOS ---------------- */

@@ -41,3 +41,23 @@ export type WaveListener = () => void;
 
 /** Callback disparado al cerrar el puño (recibe el id del objetivo bajo el cursor, si existe). */
 export type FistListener = (hoveredTargetId: string | null) => void;
+
+/**
+ * Callback disparado al detectar un pellizco (índice + pulgar).
+ * Recibe el id del objetivo bajo el cursor, si existe.
+ * No está conectado a ninguna acción por defecto; disponible para que el equipo lo use.
+ */
+export type PinchListener = (hoveredTargetId: string | null) => void;
+
+/**
+ * Dirección del barrido detectado con dos manos.
+ * - `"left"`:  ambas manos se desplazan hacia la izquierda  → retroceder página.
+ * - `"right"`: ambas manos se desplazan hacia la derecha     → avanzar página.
+ */
+export type SwipeDirection = "left" | "right";
+
+/**
+ * Callback disparado al detectar un barrido simultáneo con dos manos.
+ * Recibe la dirección del barrido.
+ */
+export type TwoHandSwipeListener = (direction: SwipeDirection) => void;
