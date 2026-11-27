@@ -27,6 +27,35 @@ export interface SectionTranslation {
   placeholderText: string;
 }
 
+export interface GestureTutorialItem {
+  title: string;
+  howTo: string;
+  actionHint: string;
+  shortcut: string;
+}
+
+export interface TutorialTranslation {
+  buttonLabel: string;
+  title: string;
+  subtitle: string;
+  resetProgress: string;
+  completedBadge: string;
+  completedBanner: string;
+  waveInterceptNote: string;
+  swipeCardLabel: string;
+  swipeCards: string[];
+  targetButton: string;
+  targetActivated: string;
+  pinchCounter: string;
+  gestures: {
+    hover: GestureTutorialItem;
+    fist: GestureTutorialItem;
+    pinch: GestureTutorialItem;
+    wave: GestureTutorialItem;
+    swipe: GestureTutorialItem;
+  };
+}
+
 export interface TranslationDictionary {
   brandSubtitle: string;
   accessibility: {
@@ -60,6 +89,7 @@ export interface TranslationDictionary {
     simulateSwipeLeft: string;
     simulateSwipeRight: string;
   };
+  tutorial: TutorialTranslation;
   newsSlides: NewsSlide[];
   sections: Record<SectionId, SectionTranslation>;
 }
@@ -101,6 +131,63 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       simulatePinch: "Simular Pellizco (P)",
       simulateSwipeLeft: "Barrido ← (flecha izq.)",
       simulateSwipeRight: "Barrido → (flecha dcha.)",
+    },
+    tutorial: {
+      buttonLabel: "Probar gestos",
+      title: "Tutorial y Zona de Pruebas",
+      subtitle:
+        "Aprende y verifica todos los gestos de Leap Motion en tiempo real",
+      resetProgress: "Reiniciar pruebas",
+      completedBadge: "Completado",
+      completedBanner: "¡Has completado con éxito los 5 gestos del tótem!",
+      waveInterceptNote:
+        "En esta zona el gesto Adiós ×3 suma progreso aquí sin sacarte al menú.",
+      swipeCardLabel: "Página de prueba",
+      swipeCards: [
+        "Tarjeta 1 · Horarios y Aulas",
+        "Tarjeta 2 · Menú del Comedor",
+        "Tarjeta 3 · Plano 3D ETSIIT",
+      ],
+      targetButton: "Apunta aquí y cierra el puño",
+      targetActivated: "¡Puño detectado!",
+      pinchCounter: "Pellizcos detectados",
+      gestures: {
+        hover: {
+          title: "1. Apuntar con la mano",
+          howTo:
+            "Coloca una mano abierta sobre el sensor y muévela suavemente.",
+          actionHint: "Pasa el cursor naranja por encima de esta tarjeta.",
+          shortcut: "Ratón en modo simulación",
+        },
+        fist: {
+          title: "2. Cerrar puño (Seleccionar)",
+          howTo:
+            "Con el cursor sobre un botón, cierra todos los dedos formando un puño.",
+          actionHint: "Llena la barra de fuerza hasta el 100 % para activar.",
+          shortcut: "Tecla F",
+        },
+        pinch: {
+          title: "3. Pellizco (Índice + Pulgar)",
+          howTo:
+            "Junta las yemas de los dedos índice y pulgar manteniendo el resto relajados.",
+          actionHint: "Realiza un pellizco en cualquier punto de la pantalla.",
+          shortcut: "Tecla P",
+        },
+        wave: {
+          title: "4. Adiós ×3 (Volver atrás)",
+          howTo:
+            "Con la mano abierta, saluda de izquierda a derecha 3 veces seguidas.",
+          actionHint: "Completa las 3 oscilaciones seguidas sin pausar.",
+          shortcut: "Tecla W",
+        },
+        swipe: {
+          title: "5. Barrido con dos manos",
+          howTo:
+            "Sitúa ambas manos abiertas sobre el sensor y deslízalas a la vez a izquierda o derecha.",
+          actionHint: "Cambia de tarjeta en el carrusel inferior.",
+          shortcut: "Flechas ← / →",
+        },
+      },
     },
     newsSlides: [
       {
@@ -207,6 +294,59 @@ export const TRANSLATIONS: Record<Language, TranslationDictionary> = {
       simulatePinch: "Simulate Pinch (P)",
       simulateSwipeLeft: "Swipe ← (left arrow)",
       simulateSwipeRight: "Swipe → (right arrow)",
+    },
+    tutorial: {
+      buttonLabel: "Test gestures",
+      title: "Gesture Tutorial & Sandbox",
+      subtitle: "Learn and test every Leap Motion gesture in real time",
+      resetProgress: "Reset progress",
+      completedBadge: "Completed",
+      completedBanner: "You have successfully tested all 5 kiosk gestures!",
+      waveInterceptNote:
+        "Inside this sandbox, Wave ×3 registers here without exiting to the main menu.",
+      swipeCardLabel: "Sample page",
+      swipeCards: [
+        "Card 1 · Schedules & Rooms",
+        "Card 2 · Dining Hall Menu",
+        "Card 3 · ETSIIT 3D Map",
+      ],
+      targetButton: "Hover here and close fist",
+      targetActivated: "Fist detected!",
+      pinchCounter: "Pinches detected",
+      gestures: {
+        hover: {
+          title: "1. Point with your hand",
+          howTo: "Hold one open hand above the sensor and move it smoothly.",
+          actionHint: "Move the orange cursor over this card.",
+          shortcut: "Mouse in simulation mode",
+        },
+        fist: {
+          title: "2. Close fist (Select)",
+          howTo:
+            "While pointing at a button, curl all fingers into a closed fist.",
+          actionHint: "Fill the grab strength bar to 100% to trigger.",
+          shortcut: "Key F",
+        },
+        pinch: {
+          title: "3. Pinch (Index + Thumb)",
+          howTo: "Bring your index finger and thumb tips together.",
+          actionHint: "Perform a pinch anywhere over the screen.",
+          shortcut: "Key P",
+        },
+        wave: {
+          title: "4. Wave ×3 (Go back)",
+          howTo: "With an open hand, wave side-to-side 3 times in a row.",
+          actionHint: "Complete 3 consecutive swings without pausing.",
+          shortcut: "Key W",
+        },
+        swipe: {
+          title: "5. Two-hand swipe",
+          howTo:
+            "Place both open hands over the sensor and sweep them left or right together.",
+          actionHint: "Switch pages in the carousel below.",
+          shortcut: "Arrows ← / →",
+        },
+      },
     },
     newsSlides: [
       {

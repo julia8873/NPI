@@ -1,7 +1,19 @@
+import type { LeapHand, LeapPointable, SwipeDirection } from "./types";
+
 /** Coordenada 2D en píxeles de pantalla. */
 export interface ScreenPoint {
   x: number;
   y: number;
+}
+
+function distance3D(
+  a: [number, number, number],
+  b: [number, number, number],
+): number {
+  const dx = a[0] - b[0];
+  const dy = a[1] - b[1];
+  const dz = a[2] - b[2];
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 /**
@@ -16,12 +28,10 @@ export function mapLeapToScreen(
   alpha = 0.32,
 ): ScreenPoint {
   const [rawX, rawY] = palmPosition;
-  // Caja de interacción útil de Leap Motion: X en [-180, 180] mm, Y en [100, 390] mm
   const normX = Math.min(1, Math.max(0, (rawX + 180) / 360));
   const normY = Math.min(1, Math.max(0, (rawY - 100) / 290));
 
   const targetX = normX * viewportWidth;
-  // En Leap, el eje Y crece hacia arriba; en pantalla crece hacia abajo (se invierte)
   const targetY = (1 - normY) * viewportHeight;
 
   return {
@@ -31,42 +41,57 @@ export function mapLeapToScreen(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DETECTOR DE PUÑO  ("Cerrar puño" = seleccionar)
+// DETECTOR DE PUÑO COMPLETO  ("Cerrar puño por completo" = seleccionar)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Detector con estado para el gesto de selección "Cerrar puño".
- * Exige que la mano se abra por debajo de `releaseThreshold` antes de volver
- * a cerrarse por encima de `triggerThreshold`, evitando múltiples activaciones
- * mientras se mantiene el puño cerrado.
+ * Exige cierre TOTAL de la mano:
+ *  1. grabStrength >= 0.99
+ *  2. Ningún dedo extendido (extended === false en los 5 dedos)
+ *  3. Distancia media de las puntas de los dedos (índice a meñique) al centro
+ *     de la palma <= maxTipToPalmMm (52 mm), evitando falsos disparos con la mano
+ *     en garra o medio cerrada.
  */
 export class FistDetector {
   private armed = true;
   private cooldownUntil = 0;
-  private readonly triggerThreshold: number;
-  private readonly releaseThreshold: number;
-  private readonly cooldownMs: number;
+  private closedSince: number | null = null;
 
-  constructor(
-    triggerThreshold = 0.78,
-    releaseThreshold = 0.45,
-    cooldownMs = 700,
-  ) {
-    this.triggerThreshold = triggerThreshold;
-    this.releaseThreshold = releaseThreshold;
-    this.cooldownMs = cooldownMs;
-  }
+  private readonly triggerThreshold = 0.99;
+  private readonly releaseThreshold = 0.65;
+  private readonly maxTipToPalmMm = 52;
+  private readonly holdMs = 150;
+  private readonly cooldownMs = 750;
 
-  /**
-   * Evalúa un nuevo valor de `grabStrength` en el instante `now` (ms).
-   * Devuelve si se acaba de disparar el gesto, el progreso normalizado (0..1)
-   * y si el puño está cerrado actualmente.
-   */
   update(
-    grabStrength: number,
+    hand: LeapHand,
+    fingers: LeapPointable[],
     now: number,
   ): { triggered: boolean; progress: number; isClosed: boolean } {
-    const progress = Math.min(
+    const grabStrength = hand.grabStrength;
+
+    // Comprobación geométrica con los dedos de la mano
+    let fingersFullyCurled = true;
+    let tipDistanceFactor = 1;
+
+    if (fingers.length >= 4) {
+      const anyExtended = fingers.some((f) => f.extended);
+      const nonThumbFingers = fingers.filter((f) => f.type !== 0);
+      const avgTipDist =
+        nonThumbFingers.reduce(
+          (acc, f) => acc + distance3D(f.tipPosition, hand.palmPosition),
+          0,
+        ) / Math.max(1, nonThumbFingers.length);
+
+      fingersFullyCurled = !anyExtended && avgTipDist <= this.maxTipToPalmMm;
+      // Factor 0..1 según cuánto se acercan las puntas a la palma (95 mm abierta -> 52 mm cerrada)
+      tipDistanceFactor = Math.min(
+        1,
+        Math.max(0, (95 - avgTipDist) / (95 - this.maxTipToPalmMm)),
+      );
+    }
+
+    const grabFactor = Math.min(
       1,
       Math.max(
         0,
@@ -74,15 +99,28 @@ export class FistDetector {
           (this.triggerThreshold - this.releaseThreshold),
       ),
     );
+    const progress = Math.min(grabFactor, tipDistanceFactor);
 
     if (grabStrength < this.releaseThreshold) {
       this.armed = true;
+      this.closedSince = null;
+    }
+
+    const isClosed =
+      grabStrength >= this.triggerThreshold && fingersFullyCurled;
+    if (!isClosed) {
+      this.closedSince = null;
+      return { triggered: false, progress, isClosed: false };
+    }
+
+    if (this.closedSince === null) {
+      this.closedSince = now;
     }
 
     let triggered = false;
     if (
       this.armed &&
-      grabStrength >= this.triggerThreshold &&
+      now - this.closedSince >= this.holdMs &&
       now >= this.cooldownUntil
     ) {
       this.armed = false;
@@ -90,69 +128,141 @@ export class FistDetector {
       triggered = true;
     }
 
-    return { triggered, progress, isClosed: grabStrength >= this.triggerThreshold };
+    return { triggered, progress: 1, isClosed: true };
   }
 
-  /** Rearma el detector (por ejemplo, cuando deja de detectarse la mano). */
   reset(): void {
     this.armed = true;
+    this.closedSince = null;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DETECTOR DE PELLIZCO  ("Pellizcar" = índice + pulgar juntos)
+// DETECTOR DE PELLIZCO  ("Pellizcar" = solo índice + pulgar juntos)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Detector con estado para el gesto "Pellizco" (pinchStrength).
- * Funciona igual que FistDetector pero sobre el valor `pinchStrength` del frame.
- *
- * Actualmente no está conectado a ninguna acción predeterminada.
- * Los compañeros de equipo pueden usarlo a través del hook `usePinch()`.
+ * Detecta el pellizco real (índice + pulgar juntos con el resto de la mano abierta):
+ *  - Si hay datos de dedos (`pointables`):
+ *      * Al menos 2 de los otros 3 dedos (corazón, anular, meñique) deben estar
+ *        extendidos (`extended === true`), lo que distingue claramente el pellizco
+ *        de un puño cerrado incluso si un dedo se dobla por simpatía.
+ *      * Distancia entre punta del pulgar (type 0) y punta del índice (type 1)
+ *        <= 32 mm (o `pinchStrength >= 0.85`).
+ *  - Si no hay `pointables`, usa respaldo `pinchStrength >= 0.85` y `grabStrength <= 0.72`.
  */
 export class PinchDetector {
   private armed = true;
   private cooldownUntil = 0;
-  private readonly triggerThreshold: number;
-  private readonly releaseThreshold: number;
-  private readonly cooldownMs: number;
+  private pinchSince: number | null = null;
 
-  constructor(
-    triggerThreshold = 0.82,
-    releaseThreshold = 0.50,
-    cooldownMs = 600,
-  ) {
-    this.triggerThreshold = triggerThreshold;
-    this.releaseThreshold = releaseThreshold;
-    this.cooldownMs = cooldownMs;
-  }
+  private readonly triggerThreshold = 0.85;
+  private readonly releaseThreshold = 0.45;
+  private readonly maxThumbIndexMm = 32;
+  private readonly holdMs = 80;
+  private readonly cooldownMs = 550;
 
-  /**
-   * Evalúa un nuevo valor de `pinchStrength` en el instante `now` (ms).
-   * Devuelve si se acaba de disparar el gesto, el progreso normalizado (0..1)
-   * y si el pellizco está activo actualmente.
-   */
   update(
-    pinchStrength: number,
+    hand: LeapHand,
+    fingers: LeapPointable[],
     now: number,
   ): { triggered: boolean; progress: number; isPinching: boolean } {
+    const thumb = fingers.find((f) => f.type === 0);
+    const index = fingers.find((f) => f.type === 1);
+    const otherFingers = fingers.filter((f) => f.type >= 2);
+
+    let otherFingersOpen = true;
+    let pinchMetric = hand.pinchStrength;
+
+    if (thumb && index && otherFingers.length >= 2) {
+      const extendedOthers = otherFingers.filter((f) => f.extended).length;
+      // Al menos 2 de los 3 dedos restantes (corazón, anular, meñique) deben estar abiertos
+      otherFingersOpen = extendedOthers >= 2;
+
+      const tipDist = distance3D(thumb.tipPosition, index.tipPosition);
+      // Convertimos distancia (70 mm abierta -> 26 mm tocándose) a escala 0..1
+      const distStrength = Math.min(1, Math.max(0, (70 - tipDist) / (70 - 26)));
+      pinchMetric = Math.max(hand.pinchStrength, distStrength);
+
+      if (!otherFingersOpen) {
+        this.pinchSince = null;
+        return { triggered: false, progress: 0, isPinching: false };
+      }
+
+      if (tipDist > 52 && hand.pinchStrength < this.releaseThreshold) {
+        this.armed = true;
+        this.pinchSince = null;
+      }
+
+      const isPinching =
+        tipDist <= this.maxThumbIndexMm || pinchMetric >= this.triggerThreshold;
+
+      const progress = Math.min(
+        1,
+        Math.max(
+          0,
+          (pinchMetric - this.releaseThreshold) /
+            (this.triggerThreshold - this.releaseThreshold),
+        ),
+      );
+
+      if (!isPinching) {
+        this.pinchSince = null;
+        return { triggered: false, progress, isPinching: false };
+      }
+
+      if (this.pinchSince === null) {
+        this.pinchSince = now;
+      }
+
+      let triggered = false;
+      if (
+        this.armed &&
+        now - this.pinchSince >= this.holdMs &&
+        now >= this.cooldownUntil
+      ) {
+        this.armed = false;
+        this.cooldownUntil = now + this.cooldownMs;
+        triggered = true;
+      }
+
+      return { triggered, progress: 1, isPinching: true };
+    }
+
+    // Respaldo si el frame no incluye pointables
+    if (hand.grabStrength > 0.72) {
+      this.pinchSince = null;
+      return { triggered: false, progress: 0, isPinching: false };
+    }
+
+    if (hand.pinchStrength < this.releaseThreshold) {
+      this.armed = true;
+      this.pinchSince = null;
+    }
+
     const progress = Math.min(
       1,
       Math.max(
         0,
-        (pinchStrength - this.releaseThreshold) /
+        (hand.pinchStrength - this.releaseThreshold) /
           (this.triggerThreshold - this.releaseThreshold),
       ),
     );
 
-    if (pinchStrength < this.releaseThreshold) {
-      this.armed = true;
+    const isPinching = hand.pinchStrength >= this.triggerThreshold;
+    if (!isPinching) {
+      this.pinchSince = null;
+      return { triggered: false, progress, isPinching: false };
+    }
+
+    if (this.pinchSince === null) {
+      this.pinchSince = now;
     }
 
     let triggered = false;
     if (
       this.armed &&
-      pinchStrength >= this.triggerThreshold &&
+      now - this.pinchSince >= this.holdMs &&
       now >= this.cooldownUntil
     ) {
       this.armed = false;
@@ -160,44 +270,30 @@ export class PinchDetector {
       triggered = true;
     }
 
-    return { triggered, progress, isPinching: pinchStrength >= this.triggerThreshold };
+    return { triggered, progress: 1, isPinching: true };
   }
 
-  /** Rearma el detector (por ejemplo, cuando deja de detectarse la mano). */
   reset(): void {
     this.armed = true;
+    this.pinchSince = null;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DETECTOR DE BARRIDO CON DOS MANOS  ("Deslizar" = retroceder / avanzar página)
+// DETECTOR DE BARRIDO CON DOS MANOS
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { LeapHand, SwipeDirection } from "./types";
-
-/**
- * Detector con estado para el gesto de navegación "Barrido con dos manos".
- * Exige que ambas manos estén presentes y se desplacen en la misma dirección
- * horizontal con suficiente velocidad y con las manos abiertas.
- *
- * - Ambas manos hacia la izquierda  → `direction = "left"`  (retroceder página)
- * - Ambas manos hacia la derecha   → `direction = "right"` (avanzar página)
- */
 export class TwoHandSwipeDetector {
   private cooldownUntil = 0;
   private gestureStartTime: number | null = null;
   private gestureDirection: SwipeDirection | null = null;
 
-  private readonly minVelocityX = 220;    // Velocidad horizontal mínima de cada mano (mm/s)
-  private readonly maxGrabStrength = 0.5; // Ambas manos deben estar abiertas
-  private readonly minDurationMs = 60;    // Duración mínima del barrido (ms)
-  private readonly maxDurationMs = 600;   // Duración máxima antes de cancelar
-  private readonly cooldownMs = 1200;     // Tiempo de espera tras disparar el gesto
+  private readonly minVelocityX = 220;
+  private readonly maxGrabStrength = 0.5;
+  private readonly minDurationMs = 60;
+  private readonly maxDurationMs = 600;
+  private readonly cooldownMs = 1200;
 
-  /**
-   * Evalúa las dos manos del frame actual.
-   * Solo se llama cuando el frame contiene exactamente 2 manos.
-   */
   update(
     hand1: LeapHand,
     hand2: LeapHand,
@@ -212,7 +308,6 @@ export class TwoHandSwipeDetector {
     const grab1 = hand1.grabStrength;
     const grab2 = hand2.grabStrength;
 
-    // Ambas manos deben estar abiertas y moverse con velocidad suficiente
     const hand1Valid =
       Math.abs(vx1) >= this.minVelocityX && grab1 <= this.maxGrabStrength;
     const hand2Valid =
@@ -224,7 +319,6 @@ export class TwoHandSwipeDetector {
       return { triggered: false, direction: null };
     }
 
-    // Ambas manos deben ir en el mismo sentido horizontal
     const dir1: SwipeDirection = vx1 > 0 ? "right" : "left";
     const dir2: SwipeDirection = vx2 > 0 ? "right" : "left";
 
@@ -236,8 +330,10 @@ export class TwoHandSwipeDetector {
 
     const currentDir = dir1;
 
-    if (this.gestureStartTime === null || this.gestureDirection !== currentDir) {
-      // Inicio de un nuevo barrido en esta dirección
+    if (
+      this.gestureStartTime === null ||
+      this.gestureDirection !== currentDir
+    ) {
       this.gestureStartTime = now;
       this.gestureDirection = currentDir;
       return { triggered: false, direction: currentDir };
@@ -246,14 +342,12 @@ export class TwoHandSwipeDetector {
     const elapsed = now - this.gestureStartTime;
 
     if (elapsed > this.maxDurationMs) {
-      // Barrido demasiado lento: cancelar y esperar el siguiente
       this.gestureStartTime = null;
       this.gestureDirection = null;
       return { triggered: false, direction: null };
     }
 
     if (elapsed >= this.minDurationMs) {
-      // ¡Barrido válido detectado!
       this.gestureStartTime = null;
       this.gestureDirection = null;
       this.cooldownUntil = now + this.cooldownMs;
@@ -263,7 +357,6 @@ export class TwoHandSwipeDetector {
     return { triggered: false, direction: currentDir };
   }
 
-  /** Reinicia el estado del detector (cuando el número de manos cambia). */
   reset(): void {
     this.gestureStartTime = null;
     this.gestureDirection = null;
@@ -271,15 +364,9 @@ export class TwoHandSwipeDetector {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DETECTOR DE ADIÓS ×3  ("Wave goodbye" = volver al menú principal)
+// DETECTOR DE ADIÓS ×3
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Detector con estado para el gesto "Adiós (3 veces)" de vuelta al menú principal.
- * Rastrea oscilaciones laterales rápidas en el eje X con la mano abierta.
- * Secuencia: un primer barrido lateral arma el detector; cada cambio de sentido
- * válido suma 1/3 -> 2/3 -> 3/3 y dispara la acción de retorno.
- */
 export class WaveGoodbyeDetector {
   private lastDirection: -1 | 0 | 1 = 0;
   private anchorX: number | null = null;
@@ -288,15 +375,12 @@ export class WaveGoodbyeDetector {
   private cooldownUntil = 0;
 
   private readonly requiredWaves = 3;
-  private readonly minVelocityX = 230; // Velocidad horizontal mínima (mm/s)
-  private readonly minTravelMm = 36;   // Recorrido mínimo entre cambios de sentido (mm)
-  private readonly maxPauseMs = 800;   // Pausa máxima permitida entre sacudidas (ms)
-  private readonly maxGrabStrength = 0.55; // La mano debe permanecer abierta
-  private readonly cooldownMs = 1500;  // Tiempo de espera tras disparar el gesto
+  private readonly minVelocityX = 230;
+  private readonly minTravelMm = 36;
+  private readonly maxPauseMs = 800;
+  private readonly maxGrabStrength = 0.55;
+  private readonly cooldownMs = 1500;
 
-  /**
-   * Procesa la posición y velocidad actual de la palma para detectar el saludo ×3.
-   */
   update(
     palmPosition: [number, number, number],
     palmVelocity: [number, number, number],
@@ -307,12 +391,10 @@ export class WaveGoodbyeDetector {
       return { triggered: false, progress: 0 };
     }
 
-    // Caduca la secuencia parcial si el usuario deja de mover la mano
     if (this.lastSwingTime > 0 && now - this.lastSwingTime > this.maxPauseMs) {
       this.resetSequence();
     }
 
-    // Ignorar si el usuario tiene el puño cerrado
     if (grabStrength > this.maxGrabStrength) {
       return { triggered: false, progress: this.reversals };
     }
@@ -320,8 +402,10 @@ export class WaveGoodbyeDetector {
     const [x] = palmPosition;
     const [vx, vy] = palmVelocity;
 
-    // Exigir movimiento predominantemente horizontal y suficientemente rápido
-    if (Math.abs(vx) < this.minVelocityX || Math.abs(vx) <= Math.abs(vy) * 1.05) {
+    if (
+      Math.abs(vx) < this.minVelocityX ||
+      Math.abs(vx) <= Math.abs(vy) * 1.05
+    ) {
       return { triggered: false, progress: this.reversals };
     }
 
@@ -334,7 +418,6 @@ export class WaveGoodbyeDetector {
       return { triggered: false, progress: 0 };
     }
 
-    // Mientras sigue en el mismo sentido, actualizamos el extremo alcanzado
     if (dir === this.lastDirection) {
       if (
         this.anchorX === null ||
@@ -346,7 +429,6 @@ export class WaveGoodbyeDetector {
       return { triggered: false, progress: this.reversals };
     }
 
-    // Cambio de sentido: comprobamos que el desplazamiento lateral haya sido suficiente
     const travel = this.anchorX !== null ? Math.abs(x - this.anchorX) : 0;
     if (travel >= this.minTravelMm) {
       this.reversals += 1;
@@ -364,7 +446,6 @@ export class WaveGoodbyeDetector {
     return { triggered: false, progress: this.reversals };
   }
 
-  /** Reinicia el conteo de oscilaciones del saludo. */
   resetSequence(): void {
     this.lastDirection = 0;
     this.anchorX = null;

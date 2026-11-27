@@ -207,13 +207,25 @@ export function LeapProvider({ children }: { children: ReactNode }) {
           waveDetectorRef.current.resetSequence();
           swipeDetectorRef.current.reset();
           if (!simulatorEnabled) updateHoveredTarget(null);
-          if (lastFistBucketRef.current !== 0) { lastFistBucketRef.current = 0; setFistProgress(0); }
-          if (lastPinchBucketRef.current !== 0) { lastPinchBucketRef.current = 0; setPinchProgress(0); }
-          if (lastWaveProgressRef.current !== 0) { lastWaveProgressRef.current = 0; setWaveProgress(0); }
+          if (lastFistBucketRef.current !== 0) {
+            lastFistBucketRef.current = 0;
+            setFistProgress(0);
+          }
+          if (lastPinchBucketRef.current !== 0) {
+            lastPinchBucketRef.current = 0;
+            setPinchProgress(0);
+          }
+          if (lastWaveProgressRef.current !== 0) {
+            lastWaveProgressRef.current = 0;
+            setWaveProgress(0);
+          }
           return;
         }
 
         const hand = hands[0];
+        const handFingers = (frame.pointables ?? []).filter(
+          (p) => p.handId === hand.id,
+        );
         const now = performance.now();
 
         // 1. Mueve el cursor virtual suavizado directamente sobre el DOM
@@ -233,7 +245,7 @@ export function LeapProvider({ children }: { children: ReactNode }) {
         updateHoveredTarget(hitId);
 
         // 3. Detección del gesto "Cerrar puño" (mano principal)
-        const fist = fistDetectorRef.current.update(hand.grabStrength, now);
+        const fist = fistDetectorRef.current.update(hand, handFingers, now);
         const fistBucket = Math.round(fist.progress * 20) / 20;
         if (fistBucket !== lastFistBucketRef.current) {
           lastFistBucketRef.current = fistBucket;
@@ -242,13 +254,13 @@ export function LeapProvider({ children }: { children: ReactNode }) {
         if (fist.triggered) fireFistSelection();
 
         // 4. Detección del gesto "Pellizco" (mano principal)
-        const pinch = pinchDetectorRef.current.update(hand.pinchStrength, now);
+        const pinch = pinchDetectorRef.current.update(hand, handFingers, now);
         const pinchBucket = Math.round(pinch.progress * 20) / 20;
         if (pinchBucket !== lastPinchBucketRef.current) {
           lastPinchBucketRef.current = pinchBucket;
           setPinchProgress(pinchBucket);
         }
-        if (pinch.triggered) firePinch();
+        if (pinch.triggered && !fist.isClosed) firePinch();
 
         // 5. Detección del gesto "Adiós ×3" (mano principal)
         const wave = waveDetectorRef.current.update(
@@ -266,7 +278,11 @@ export function LeapProvider({ children }: { children: ReactNode }) {
 
         // 6. Detección del gesto "Barrido con dos manos" (requiere exactamente 2 manos)
         if (count === 2) {
-          const swipe = swipeDetectorRef.current.update(hands[0], hands[1], now);
+          const swipe = swipeDetectorRef.current.update(
+            hands[0],
+            hands[1],
+            now,
+          );
           if (swipe.triggered && swipe.direction) {
             fireTwoHandSwipe(swipe.direction);
           }
@@ -323,11 +339,21 @@ export function LeapProvider({ children }: { children: ReactNode }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
       switch (e.key.toLowerCase()) {
-        case "f": fireFistSelection(); break;
-        case "w": fireWaveGoodbye(); break;
-        case "p": firePinch(); break;
-        case "arrowleft": fireTwoHandSwipe("left"); break;
-        case "arrowright": fireTwoHandSwipe("right"); break;
+        case "f":
+          fireFistSelection();
+          break;
+        case "w":
+          fireWaveGoodbye();
+          break;
+        case "p":
+          firePinch();
+          break;
+        case "arrowleft":
+          fireTwoHandSwipe("left");
+          break;
+        case "arrowright":
+          fireTwoHandSwipe("right");
+          break;
       }
     };
 
@@ -363,31 +389,44 @@ export function LeapProvider({ children }: { children: ReactNode }) {
 
   const subscribeWave = useCallback((listener: WaveListener) => {
     waveListenersRef.current.add(listener);
-    return () => { waveListenersRef.current.delete(listener); };
+    return () => {
+      waveListenersRef.current.delete(listener);
+    };
   }, []);
 
   const subscribeFist = useCallback((listener: FistListener) => {
     fistListenersRef.current.add(listener);
-    return () => { fistListenersRef.current.delete(listener); };
+    return () => {
+      fistListenersRef.current.delete(listener);
+    };
   }, []);
 
   const subscribePinch = useCallback((listener: PinchListener) => {
     pinchListenersRef.current.add(listener);
-    return () => { pinchListenersRef.current.delete(listener); };
+    return () => {
+      pinchListenersRef.current.delete(listener);
+    };
   }, []);
 
   const subscribeSwipe = useCallback((listener: TwoHandSwipeListener) => {
     swipeListenersRef.current.add(listener);
-    return () => { swipeListenersRef.current.delete(listener); };
+    return () => {
+      swipeListenersRef.current.delete(listener);
+    };
   }, []);
 
   // Disparadores del simulador de gestos
-  const triggerSimulatedFist = useCallback(() => fireFistSelection(), [fireFistSelection]);
+  const triggerSimulatedFist = useCallback(
+    () => fireFistSelection(),
+    [fireFistSelection],
+  );
   const triggerSimulatedWave = useCallback(() => {
     // Anima progresión visual 1/3 → 2/3 → 3/3 antes de disparar
     setWaveProgress(1);
     window.setTimeout(() => setWaveProgress(2), 140);
-    window.setTimeout(() => { fireWaveGoodbye(); }, 280);
+    window.setTimeout(() => {
+      fireWaveGoodbye();
+    }, 280);
   }, [fireWaveGoodbye]);
   const triggerSimulatedPinch = useCallback(() => firePinch(), [firePinch]);
   const triggerSimulatedSwipe = useCallback(

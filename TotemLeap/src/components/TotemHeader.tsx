@@ -3,11 +3,19 @@ import { useAccessibility } from "../context/AccessibilityContext";
 import { useGestureTarget, useLeap } from "../gestures/hooks";
 import { GlobeGlyph } from "./SectionIcons";
 
+interface TotemHeaderProps {
+  tutorialOpen?: boolean;
+  onToggleTutorial?: () => void;
+}
+
 /**
  * Cabecera del tótem con marca "ETSIIT Go", reloj/fecha en directo,
- * botones de accesibilidad (idioma y tamaño de letra) e indicador de sensor Leap Motion.
+ * acceso directo al tutorial de gestos, botones de accesibilidad e indicador Leap Motion.
  */
-export function TotemHeader() {
+export function TotemHeader({
+  tutorialOpen = false,
+  onToggleTutorial,
+}: TotemHeaderProps) {
   const { language, toggleLanguage, fontScale, cycleFontScale, t } =
     useAccessibility();
   const {
@@ -30,6 +38,14 @@ export function TotemHeader() {
     const id = window.setInterval(() => setNow(new Date()), 15_000);
     return () => window.clearInterval(id);
   }, []);
+
+  // Botón para abrir/cerrar la zona de prueba y tutorial de gestos
+  const { ref: tutorialBtnRef, isHovered: tutorialBtnHovered } =
+    useGestureTarget<HTMLButtonElement>({
+      id: "header-tutorial-toggle",
+      onSelect: () => onToggleTutorial?.(),
+      priority: 2,
+    });
 
   // Botón de idioma controlable también mediante gesto de mano + puño
   const { ref: langRef, isHovered: langHovered } =
@@ -85,6 +101,21 @@ export function TotemHeader() {
       </div>
 
       <div className="accessibility-controls">
+        {onToggleTutorial && (
+          <button
+            ref={tutorialBtnRef}
+            type="button"
+            className={`pill-btn tutorial-nav-btn ${
+              tutorialOpen ? "active-scale" : ""
+            } ${tutorialBtnHovered ? "gesture-hovered" : ""}`}
+            onClick={onToggleTutorial}
+            title={t.tutorial.buttonLabel}
+          >
+            <span aria-hidden="true">🖐️</span>
+            <span className="pill-label">{t.tutorial.buttonLabel}</span>
+          </button>
+        )}
+
         <button
           ref={langRef}
           type="button"
@@ -100,7 +131,9 @@ export function TotemHeader() {
         <button
           ref={fontRef}
           type="button"
-          className={`pill-btn font-btn ${fontScale !== "normal" ? "active-scale" : ""} ${fontHovered ? "gesture-hovered" : ""}`}
+          className={`pill-btn font-btn ${
+            fontScale !== "normal" ? "active-scale" : ""
+          } ${fontHovered ? "gesture-hovered" : ""}`}
           onClick={cycleFontScale}
           aria-label={`${t.accessibility.fontScaleLabel}: ${t.accessibility.fontScaleNames[fontScale]}`}
           title={`${t.accessibility.fontScaleLabel}: ${t.accessibility.fontScaleNames[fontScale]}`}
@@ -111,7 +144,9 @@ export function TotemHeader() {
         <div className="sensor-popover-anchor">
           <button
             type="button"
-            className={`pill-btn sensor-btn ${connected ? "online" : simulatorEnabled ? "sim" : "waiting"}`}
+            className={`pill-btn sensor-btn ${
+              connected ? "online" : simulatorEnabled ? "sim" : "waiting"
+            }`}
             onClick={() => setPopoverOpen((v) => !v)}
             aria-label={sensorStatusTitle}
             title={sensorStatusTitle}
@@ -121,7 +156,11 @@ export function TotemHeader() {
           </button>
 
           {popoverOpen && (
-            <div className="sensor-popover" role="dialog" aria-label={t.simulator.title}>
+            <div
+              className="sensor-popover"
+              role="dialog"
+              aria-label={t.simulator.title}
+            >
               <div className="sensor-popover-header">
                 <strong>{t.simulator.title}</strong>
                 <button
